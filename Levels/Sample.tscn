@@ -1,0 +1,107 @@
+[gd_scene format=3 uid="uid://c0brwvvpfft4o"]
+
+[ext_resource type="Script" uid="uid://cx4q5mwlwvs2l" path="res://BasicObjects/Scripts/LevelManager.gd" id="1_7o1ua"]
+[ext_resource type="PackedScene" uid="uid://c1n8bx17ts38c" path="res://BasicObjects/MainLine.tscn" id="2_grwp2"]
+[ext_resource type="Script" uid="uid://ckryc6ng3lf68" path="res://BasicObjects/Scripts/AnimationScripts/CameraFollower.gd" id="4_bwcc2"]
+[ext_resource type="PackedScene" uid="uid://osap8508k36g" path="res://BasicObjects/BaseCam.tscn" id="6_gxoah"]
+[ext_resource type="AudioStream" uid="uid://diwywvg4ek4ey" path="res://BasicObjects/Audios/faded.mp3" id="7_iy4dc"]
+[ext_resource type="PackedScene" uid="uid://d18m3cn2r76io" path="res://BasicObjects/GAMEUI.tscn" id="8_qql1h"]
+[ext_resource type="PackedScene" uid="uid://d2e87jtits78b" path="res://BasicObjects/BaseFloor.tscn" id="9_axv2b"]
+
+[sub_resource type="Environment" id="Environment_c2ibq"]
+
+[sub_resource type="Animation" id="Animation_wkp8b"]
+length = 0.001
+
+[sub_resource type="Animation" id="3"]
+length = 130.0
+tracks/0/type = "audio"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Objects/AnimationPlayer/AudioStreamPlayer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"clips": [{
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource("7_iy4dc")
+}],
+"times": PackedFloat32Array(0)
+}
+tracks/0/use_blend = true
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Objects/MainLine")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"values": []
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cm0pq"]
+_data = {
+&"RESET": SubResource("Animation_wkp8b"),
+&"level": SubResource("3")
+}
+
+[node name="LevelHolder" type="Node3D" unique_id=1260646107 node_paths=PackedStringArray("Mainline", "Camera")]
+script = ExtResource("1_7o1ua")
+MainlineColor = Color(0, 1, 0, 1)
+FogColor = Color(0.518, 0.553, 0.608, 1)
+Mainline = NodePath("Objects/MainLine")
+Camera = NodePath("Objects/BaseCam/Camera3D")
+origin_pos = Vector3(0, 1, 0)
+
+[node name="Objects" type="Node3D" parent="." unique_id=447561825]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.078038, 0.6087635, -0.00023269653)
+
+[node name="MainLine" parent="Objects" unique_id=896837636 instance=ExtResource("2_grwp2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.078038, 0.39123648, 0.00023269653)
+speed = 12.0
+color = Color(0, 1, 0, 1)
+animation = NodePath("../AnimationPlayer")
+
+[node name="BaseCam" parent="Objects" unique_id=1165260512 node_paths=PackedStringArray("player_node") instance=ExtResource("6_gxoah")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15607601, 0.21752709, -0.00046539307)
+script = ExtResource("4_bwcc2")
+player_node = NodePath("../MainLine")
+add_position = Vector3(0, 0, 0)
+rotation_offset = Vector3(45, 45, 0)
+distance_from_object = 25.0
+follow_speed = 1.2
+following = true
+
+[node name="Camera3D" parent="Objects/BaseCam" index="0"]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 5, 10, 5)
+environment = SubResource("Environment_c2ibq")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Objects" unique_id=1321622725]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_cm0pq")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Objects/AnimationPlayer" unique_id=1958590775]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Objects" unique_id=1337837080]
+transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0.078038, -0.6087635, 0.00023269653)
+shadow_enabled = true
+
+[node name="gameui" parent="Objects" unique_id=1039381488 node_paths=PackedStringArray("line") instance=ExtResource("8_qql1h")]
+line = NodePath("../MainLine")
+
+[node name="RoadSaveButton" type="Button" parent="Objects" unique_id=1996874525]
+visible = false
+offset_right = 188.0
+offset_bottom = 174.0
+
+[node name="Scene" type="Node3D" parent="." unique_id=1555673932]
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0, 0)
+
+[node name="BaseFloor" parent="Scene" unique_id=1028417897 instance=ExtResource("9_axv2b")]
+
+[connection signal="pressed" from="Objects/RoadSaveButton" to="Objects/MainLine" method="_on_button_pressed"]
+
+[editable path="Objects/BaseCam"]

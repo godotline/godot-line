@@ -1,0 +1,11 @@
+res://Resources/default_env.tres
+res://Main.tscn
+res://BasicObjects/Scripts/addtap.gd
+res://Levels/Sample.tscn
+res://BasicObjects/BaseWall.tscn
+res://BasicObjects/Materials/BaseFloor.tres
+res://BasicObjects/BaseFloor.tscn
+res://BasicObjects/Scripts/MainLine.gd
+res://BasicObjects/MainLine.tscn
+res://BasicObjects/Scripts/AnimationScripts/CameraFollower.gd
+res://BasicObjects/Scripts/State.gd

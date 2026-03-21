@@ -1,0 +1,106 @@
+[gd_scene format=3 uid="uid://bw2k15r21fk7"]
+
+[ext_resource type="ArrayMesh" uid="uid://poc0fs8wr7o4" path="res://Resources/Models/HalfPyramid.obj" id="1_ajvws"]
+[ext_resource type="Script" uid="uid://drgktfa6v6qvm" path="res://BasicObjects/Scripts/jinzita.gd" id="1_oowoy"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oowoy"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ajvws"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ajvws"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_oowoy"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="Animation" id="Animation_woai8"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../Jinzita:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0.009581, -0.24, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(-0.189368, -0.24, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_v6wyn"]
+resource_name = "jinzita"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../Jinzita:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(0.5, 0.499999),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(-10, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(0.5, 0.5),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(10, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_8gmve"]
+_data = {
+&"RESET": SubResource("Animation_woai8"),
+&"jinzita": SubResource("Animation_v6wyn")
+}
+
+[node name="jinzita" type="Node3D"]
+
+[node name="Jinzita" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.009581, -0.24, 0)
+mesh = ExtResource("1_ajvws")
+surface_material_override/0 = SubResource("StandardMaterial3D_oowoy")
+
+[node name="Jinzita2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.999995, 0.00326376, 1.50996e-07, 0.00326376, 0.999995, -2.85326e-10, -1.50996e-07, 2.07489e-10, -1, -0.189368, -0.24, 0)
+mesh = ExtResource("1_ajvws")
+surface_material_override/0 = SubResource("StandardMaterial3D_ajvws")
+
+[node name="Area3D" type="Area3D" parent="."]
+transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 100)
+script = ExtResource("1_oowoy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.25753, 0.0900226)
+shape = SubResource("BoxShape3D_ajvws")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Area3D/CollisionShape3D"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+mesh = SubResource("BoxMesh_oowoy")
+skeleton = NodePath("../..")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Area3D"]
+root_node = NodePath("../../Jinzita2")
+libraries = {
+&"": SubResource("AnimationLibrary_8gmve")
+}
+
+[connection signal="body_entered" from="Area3D" to="Area3D" method="_on_body_entered_jinzita"]

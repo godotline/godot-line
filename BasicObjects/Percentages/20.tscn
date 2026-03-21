@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://7i856pfvyd0q"]
+
+[ext_resource type="FontFile" uid="uid://cr443hqoouujq" path="res://Resources/CaviarDreams-1.ttf" id="1_pr4un"]
+
+[sub_resource type="TextMesh" id="TextMesh_8jd46"]
+text = "20%"
+font = ExtResource("1_pr4un")
+font_size = 20
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1cmso"]
+
+[node name="20" type="MeshInstance3D" unique_id=488919205]
+mesh = SubResource("TextMesh_8jd46")
+skeleton = NodePath("")
+surface_material_override/0 = SubResource("StandardMaterial3D_1cmso")
