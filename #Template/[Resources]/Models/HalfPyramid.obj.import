@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://poc0fs8wr7o4"
+path="res://.godot/imported/HalfPyramid.obj-2c6086aaf159c6e43041e0b2f51a1527.mesh"
+
+[deps]
+
+files=["res://.godot/imported/HalfPyramid.obj-2c6086aaf159c6e43041e0b2f51a1527.mesh"]
+
+source_file="res://#Template/[Resources]/Models/HalfPyramid.obj"
+dest_files=["res://.godot/imported/HalfPyramid.obj-2c6086aaf159c6e43041e0b2f51a1527.mesh", "res://.godot/imported/HalfPyramid.obj-2c6086aaf159c6e43041e0b2f51a1527.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

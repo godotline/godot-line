@@ -1,0 +1,7 @@
+res://Resources/default_env.tres
+res://Seabed/level_1.scn
+res://Main.tscn
+res://#Template/[Scripts]/addtap.gd
+res://#Template/[Scripts]/gameui.gd
+res://#Template/[Scripts]/MainLine.gd
+res://#Template/[Scripts]/CameraTrigger.gd

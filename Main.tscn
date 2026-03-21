@@ -1,20 +1,13 @@
-[gd_scene load_steps=23 format=3 uid="uid://c0brwvvpfft4o"]
+[gd_scene format=3 uid="uid://c0brwvvpfft4o"]
 
-[ext_resource type="PackedScene" uid="uid://c1n8bx17ts38c" path="res://Scenes/MainLine.tscn" id="1"]
-[ext_resource type="Script" uid="uid://cx4q5mwlwvs2l" path="res://Scripts/LevelManager.gd" id="1_lgr22"]
-[ext_resource type="PackedScene" uid="uid://osap8508k36g" path="res://Scenes/BaseCam.tscn" id="3"]
-[ext_resource type="PackedScene" uid="uid://dqwpe34bivb71" path="res://Scenes/RoadMaker.tscn" id="3_trn2v"]
-[ext_resource type="PackedScene" uid="uid://d18m3cn2r76io" path="res://Scenes/GAMEUI.tscn" id="5_fos0i"]
-[ext_resource type="AudioStream" uid="uid://diwywvg4ek4ey" path="res://Resources/faded.mp3" id="5_lgr22"]
-[ext_resource type="PackedScene" uid="uid://d2e87jtits78b" path="res://Scenes/BaseFloor.tscn" id="7_wkp8b"]
-[ext_resource type="PackedScene" uid="uid://cklp581y76u6r" path="res://Scenes/BaseWall.tscn" id="8_wkp8b"]
-[ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://Scripts/LocalPosAnimator.gd" id="9_5vvyt"]
-[ext_resource type="PackedScene" uid="uid://b7yycciy51i3l" path="res://Scenes/Crown.tscn" id="9_20pc6"]
-[ext_resource type="PackedScene" uid="uid://nw5ngxmehxaj" path="res://Scenes/CrownSet.tscn" id="10_5vvyt"]
-[ext_resource type="PackedScene" uid="uid://30rvvwldvcct" path="res://Scenes/trigger.tscn" id="11_20pc6"]
-[ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://Scripts/CameraTrigger.gd" id="13_c2ibq"]
-[ext_resource type="PackedScene" uid="uid://bw2k15r21fk7" path="res://Scenes/jinzita.tscn" id="13_c6i3y"]
-[ext_resource type="PackedScene" uid="uid://cnyojjt0i7ra7" path="res://Scenes/taper.tscn" id="15_j4qnp"]
+[ext_resource type="PackedScene" uid="uid://c1n8bx17ts38c" path="res://#Template/MainLine.tscn" id="1"]
+[ext_resource type="Script" uid="uid://cx4q5mwlwvs2l" path="res://#Template/[Scripts]/LevelManager.gd" id="1_lgr22"]
+[ext_resource type="PackedScene" uid="uid://dqwpe34bivb71" path="res://#Template/RoadMaker.tscn" id="3_trn2v"]
+[ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraFollower.gd" id="4_trn2v"]
+[ext_resource type="PackedScene" uid="uid://d18m3cn2r76io" path="res://#Template/GAMEUI.tscn" id="5_fos0i"]
+[ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_trn2v"]
+[ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="6_lgr22"]
+[ext_resource type="PackedScene" uid="uid://d2e87jtits78b" path="res://#Template/BaseFloor.tscn" id="7_wkp8b"]
 
 [sub_resource type="Environment" id="Environment_c2ibq"]
 
@@ -26,29 +19,18 @@ length = 130.0
 tracks/0/type = "audio"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("AnimationPlayer/AudioStreamPlayer")
+tracks/0/path = NodePath("Object/AnimationPlayer/AudioStreamPlayer")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "clips": [{
 "end_offset": 0.0,
 "start_offset": 0.0,
-"stream": ExtResource("5_lgr22")
+"stream": ExtResource("5_trn2v")
 }],
 "times": PackedFloat32Array(0)
 }
 tracks/0/use_blend = true
-tracks/1/type = "method"
-tracks/1/imported = false
-tracks/1/enabled = false
-tracks/1/path = NodePath("MainLine")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(),
-"transitions": PackedFloat32Array(),
-"values": []
-}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_cm0pq"]
 _data = {
@@ -69,89 +51,53 @@ sky = SubResource("Sky_nj243")
 tonemap_mode = 2
 glow_enabled = true
 
-[node name="Node3D" type="Node3D" node_paths=PackedStringArray("Mainline", "Camera")]
+[node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Mainline")]
 script = ExtResource("1_lgr22")
-FogColor = Color(0.518, 0.553, 0.608, 1)
-Mainline = NodePath("MainLine")
-Camera = NodePath("BaseCam/Camera3D")
+MainlineColor = Color(0, 1, 0, 1)
+Mainline = NodePath("Object/MainLine")
 origin_pos = Vector3(0, 1, 0)
 
-[node name="MainLine" parent="." instance=ExtResource("1")]
+[node name="Object" type="Node3D" parent="." unique_id=1533079692]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.33333334, 0)
+
+[node name="MainLine" parent="Object" unique_id=2020142567 instance=ExtResource("1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-color = Color(1, 1, 1, 1)
+rot = null
+color = Color(0, 1, 0, 1)
+noclip = null
 animation = NodePath("../AnimationPlayer")
 
-[node name="RoadMaker" parent="MainLine" instance=ExtResource("3_trn2v")]
+[node name="RoadMaker" parent="Object/MainLine" unique_id=600784977 instance=ExtResource("3_trn2v")]
 
-[node name="BaseCam" parent="." instance=ExtResource("3")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.234114, 0.8262906, -0.0006980896)
-target = NodePath("../MainLine")
+[node name="BaseCam" type="Node3D" parent="Object" unique_id=364981525]
+transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 20, 30, 20)
+script = ExtResource("4_trn2v")
+player = NodePath("../MainLine")
+add_position = Vector3(20, 30, 20)
+rotation_offset = Vector3(-45, 45, 0)
 
-[node name="Camera3D" parent="BaseCam" index="0"]
-transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 5, 10, 5)
+[node name="Camera3D" type="Camera3D" parent="Object/BaseCam" unique_id=1071878446]
 environment = SubResource("Environment_c2ibq")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_cm0pq")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Object" unique_id=560431425]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_cm0pq")
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="AnimationPlayer"]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Object/AnimationPlayer" unique_id=1995291670]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Object" unique_id=1424889368]
 environment = SubResource("Environment_3dxm6")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Object" unique_id=1791213843]
+transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
 shadow_enabled = true
 
-[node name="gameui" parent="." node_paths=PackedStringArray("line") instance=ExtResource("5_fos0i")]
+[node name="gameui" parent="Object" unique_id=75582180 node_paths=PackedStringArray("line") instance=ExtResource("5_fos0i")]
 line = NodePath("../MainLine")
+crown_no_light = ExtResource("6_lgr22")
 
-[node name="Button" type="Button" parent="."]
-visible = false
-offset_right = 188.0
-offset_bottom = 174.0
+[node name="Scene" type="Node3D" parent="." unique_id=1042175662]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -45)
 
-[node name="BaseFloor" parent="." instance=ExtResource("7_wkp8b")]
-transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, -45, 0, -45)
-
-[node name="BaseWall" parent="." node_paths=PackedStringArray("trigger") instance=ExtResource("8_wkp8b")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.9404726, -2.4144878, 0.94624615, 0)
-script = ExtResource("9_5vvyt")
-start_value = Vector3(-2.4144878, 0.94624615, 0)
-end_offset = Vector3(0, 0, -17.309704)
-trigger = NodePath("../Trigger")
-is_setting_start = true
-
-[node name="BaseWall2" parent="." instance=ExtResource("8_wkp8b")]
-transform = Transform3D(-4.3711385e-08, 0, -5.940472, 0, 1, 0, 0.99999994, 0, -2.5966628e-07, 2.361954, 1, -23.815285)
-
-[node name="Crown" parent="." instance=ExtResource("9_20pc6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.019172668, 0.9729152, -7.6230545)
-
-[node name="CrownSet" parent="." instance=ExtResource("10_5vvyt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.297249, 0.5272551, -3.9938612)
-
-[node name="Trigger" parent="." instance=ExtResource("11_20pc6")]
-transform = Transform3D(4.7083855, 0, 0, 0, 1, 0, 0, 0, 1, 0.009848118, 1, -3.6143246)
-
-[node name="Trigger2" parent="." instance=ExtResource("11_20pc6")]
-transform = Transform3D(4.7083855, 0, 0, 0, 1, 0, 0, 0, 1, 0.009848118, 1, -19.585617)
-script = ExtResource("13_c2ibq")
-end_rot = Vector3(-44.999992, 76.86799, 0)
-end_pos = Vector3(5, 30, 1.737)
-duration = 2.0
-TransitionType = 1
-EaseType = 2
-
-[node name="jinzita" parent="." instance=ExtResource("13_c6i3y")]
-transform = Transform3D(0.42174807, 0, 0.9067129, 0, 1, 0, -0.9067129, 0, 0.42174807, -100.11877, 0.907694, -67.72818)
-
-[node name="taper" parent="." instance=ExtResource("15_j4qnp")]
-transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 0.20245552, 0.5, -21.317204)
-
-[connection signal="pressed" from="Button" to="MainLine" method="_on_button_pressed"]
-[connection signal="on_animation_end" from="BaseWall" to="MainLine" method="turn"]
-
-[editable path="BaseCam"]
+[node name="BaseFloor" parent="Scene" unique_id=755968428 instance=ExtResource("7_wkp8b")]
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0, 0)

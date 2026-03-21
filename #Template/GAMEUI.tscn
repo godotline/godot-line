@@ -1,0 +1,455 @@
+[gd_scene format=3 uid="uid://d18m3cn2r76io"]
+
+[ext_resource type="Script" uid="uid://qco7fgruvgdp" path="res://#Template/[Scripts]/gameui.gd" id="1_kyccr"]
+[ext_resource type="Texture2D" uid="uid://dn07fgcsmm4pc" path="res://#Template/[Resources]/ui/back.png" id="1_ost3h"]
+[ext_resource type="Texture2D" uid="uid://vsp1aqwd74a0" path="res://#Template/[Resources]/ui/play.png" id="3_rien4"]
+[ext_resource type="Texture2D" uid="uid://b6udai32ijoqc" path="res://#Template/[Resources]/ui/Button_side.png" id="4_ll6ia"]
+[ext_resource type="Texture2D" uid="uid://d07il047xnag7" path="res://#Template/[Resources]/ui/Button_inner.png" id="5_ey6o0"]
+[ext_resource type="Texture2D" uid="uid://dud750p63x0t8" path="res://#Template/[Resources]/ui/replay.png" id="6_71rya"]
+[ext_resource type="FontFile" uid="uid://cr443hqoouujq" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="7_oqarj"]
+[ext_resource type="Texture2D" uid="uid://befmu0ljmigye" path="res://#Template/[Resources]/ui/Diamond.png" id="8_rien4"]
+[ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="9_71rya"]
+[ext_resource type="AudioStream" uid="uid://dia5h4q2h4vfu" path="res://#Template/[Resources]/crown_get_1.wav" id="10_oqarj"]
+[ext_resource type="Texture2D" uid="uid://cs75wbe6rg6hv" path="res://#Template/[Resources]/PerfactCrownLight.png" id="11_jn05g"]
+[ext_resource type="AudioStream" uid="uid://x1rxsjisju0g" path="res://#Template/[Resources]/crown_get_2.wav" id="12_jn05g"]
+[ext_resource type="AudioStream" uid="uid://bv4s6ny27ucwv" path="res://#Template/[Resources]/crown_get_3.wav" id="13_pkpr1"]
+
+[sub_resource type="Animation" id="Animation_pkpr1"]
+resource_name = "1crown"
+length = 2.0
+tracks/0/type = "audio"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../AnimationPlayer/AudioStreamPlayer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"clips": [{
+"end_offset": 0.205986,
+"start_offset": 0.0666667,
+"stream": ExtResource("10_oqarj")
+}],
+"times": PackedFloat32Array(0)
+}
+tracks/0/use_blend = true
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:texture")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.251),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("../PerfactCrownNoLight2:texture")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("9_71rya"), ExtResource("9_71rya")]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("../PerfactCrownNoLight3:texture")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("9_71rya"), ExtResource("9_71rya")]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath(".:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_qve72"]
+resource_name = "1crown"
+length = 2.0
+tracks/0/type = "audio"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../AnimationPlayer/AudioStreamPlayer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"clips": [{
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource("12_jn05g")
+}],
+"times": PackedFloat32Array(0)
+}
+tracks/0/use_blend = true
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:texture")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.251),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("../PerfactCrownNoLight2:texture")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.501),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("../PerfactCrownNoLight3:texture")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("9_71rya"), ExtResource("9_71rya")]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath(".:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("../PerfactCrownNoLight2:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0.25, 0.5, 0.75),
+"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_p1ec3"]
+resource_name = "3crown"
+length = 2.0
+tracks/0/type = "audio"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../AnimationPlayer/AudioStreamPlayer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"clips": [{
+"end_offset": 1.17252,
+"start_offset": 0.0666667,
+"stream": ExtResource("13_pkpr1")
+}],
+"times": PackedFloat32Array(0)
+}
+tracks/0/use_blend = true
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:texture")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.251),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("../PerfactCrownNoLight2:texture")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.501),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("../PerfactCrownNoLight3:texture")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.951),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath(".:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("../PerfactCrownNoLight2:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0.25, 0.5, 0.75),
+"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("../PerfactCrownNoLight3:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0.7, 0.95, 1.2),
+"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_ci0m4"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("9_71rya")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("../PerfactCrownNoLight2:texture")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("9_71rya")]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("../PerfactCrownNoLight3:texture")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("9_71rya")]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath(".:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("../PerfactCrownNoLight2:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_qve72"]
+_data = {
+&"1crown": SubResource("Animation_pkpr1"),
+&"2crown": SubResource("Animation_qve72"),
+&"3crown": SubResource("Animation_p1ec3"),
+&"RESET": SubResource("Animation_ci0m4")
+}
+
+[node name="gameui" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_kyccr")
+metadata/_edit_lock_ = true
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.360784)
+metadata/_edit_lock_ = true
+
+[node name="back" type="Button" parent="."]
+layout_mode = 0
+offset_left = 19.0
+offset_top = 530.0
+offset_right = 90.0
+offset_bottom = 629.0
+theme_override_icons/icon = ExtResource("1_ost3h")
+flat = true
+
+[node name="play" type="Button" parent="."]
+layout_mode = 0
+offset_left = 209.0
+offset_top = 477.0
+offset_right = 599.0
+offset_bottom = 605.0
+scale = Vector2(0.8, 0.8)
+theme_override_icons/icon = ExtResource("3_rien4")
+flat = true
+icon_alignment = 1
+
+[node name="ButtonSide" type="Sprite2D" parent="play"]
+position = Vector2(49, 65)
+texture = ExtResource("4_ll6ia")
+
+[node name="ButtonInner" type="Sprite2D" parent="play"]
+position = Vector2(196, 65)
+texture = ExtResource("5_ey6o0")
+
+[node name="ButtonSide2" type="Sprite2D" parent="play"]
+position = Vector2(343, 65)
+rotation = -3.14159
+texture = ExtResource("4_ll6ia")
+
+[node name="replay" type="Button" parent="."]
+layout_mode = 0
+offset_left = 632.0
+offset_top = 477.0
+offset_right = 1022.0
+offset_bottom = 605.0
+scale = Vector2(0.8, 0.8)
+theme_override_icons/icon = ExtResource("6_71rya")
+flat = true
+icon_alignment = 1
+
+[node name="ButtonSide" type="Sprite2D" parent="replay"]
+position = Vector2(49, 65)
+texture = ExtResource("4_ll6ia")
+
+[node name="ButtonInner" type="Sprite2D" parent="replay"]
+position = Vector2(196, 65)
+texture = ExtResource("5_ey6o0")
+
+[node name="ButtonSide2" type="Sprite2D" parent="replay"]
+position = Vector2(343, 65)
+rotation = -3.14159
+texture = ExtResource("4_ll6ia")
+
+[node name="title" type="Label" parent="."]
+layout_mode = 0
+offset_top = 50.0
+offset_right = 1151.0
+offset_bottom = 167.0
+theme_override_fonts/font = ExtResource("7_oqarj")
+theme_override_font_sizes/font_size = 80
+text = "Level Name"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="diamond" type="Label" parent="."]
+layout_mode = 0
+offset_left = 552.0
+offset_top = 346.0
+offset_right = 719.0
+offset_bottom = 418.0
+theme_override_fonts/font = ExtResource("7_oqarj")
+theme_override_font_sizes/font_size = 60
+text = "0/10"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Diamond" type="Sprite2D" parent="."]
+position = Vector2(493, 383)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("8_rien4")
+
+[node name="PerfactCrownNoLight" type="Sprite2D" parent="."]
+position = Vector2(427, 242)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("9_71rya")
+
+[node name="PerfactCrownNoLight2" type="Sprite2D" parent="."]
+position = Vector2(582, 245)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("9_71rya")
+
+[node name="PerfactCrownNoLight3" type="Sprite2D" parent="."]
+position = Vector2(719, 245)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("9_71rya")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../PerfactCrownNoLight")
+libraries = {
+&"": SubResource("AnimationLibrary_qve72")
+}
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="AnimationPlayer"]
+
+[connection signal="pressed" from="back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="play" to="." method="_on_gameplay_pressed"]
+[connection signal="pressed" from="replay" to="." method="_on_gamereplay_pressed"]
