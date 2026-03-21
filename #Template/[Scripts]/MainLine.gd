@@ -19,6 +19,7 @@ signal onturn
 @onready var material:StandardMaterial3D = $MeshInstance3D.get_surface_override_material(0)
 @onready var tree := get_tree()
 @onready var animation_node:AnimationPlayer = get_node(animation) if animation else null
+@onready var land_effect: GPUParticles3D = $LandEffect
 
 var level_manager
 var timeout := 0.1
@@ -27,6 +28,7 @@ var line:MeshInstance3D
 @warning_ignore("shadowed_variable_base_class")
 #var velocity := Vector3.ZERO
 var past_is_on_floor := false
+var past_is_on_floor_effect := false
 var v := Vector3(0,0,0)
 var is_start := false
 var tailScale = 1
@@ -60,35 +62,43 @@ func _physics_process(delta: float) -> void:
 			$".".position.y = y
 
 func _process(_delta: float) -> void:
-	if not Engine.is_editor_hint() and line and is_live:
-		@warning_ignore("shadowed_variable_base_class")
-		var is_on_floor := is_on_floor() or fly
-		if is_on_floor:
-			if past_is_on_floor != is_on_floor: 
-				new_line()
-			var offset = position - past_translation
-			var distance = offset.length()
-			
-			# 设置线段位置为中点
-			line.position = past_translation + offset / 2
-			line.position.y = global_position.y
-			
-			# 设置线段长度（沿Z轴拉伸）
-			line.scale = Vector3(1, 1, distance + tailScale)
+	if Engine.is_editor_hint() or not is_live:
+		return
 
-			# 地面阶段：同步该阶段所有 tail 段的全局 Y，使其跟随主线高度
-			var current_y := global_position.y
-			if abs(current_y - _last_floor_y) > 0.001:
-				for segment in floor_segment_lines:
-					if is_instance_valid(segment):
-						segment.global_position.y = current_y
-				_last_floor_y = current_y
-		else:
-			if past_is_on_floor != is_on_floor:
-				emit_signal("on_sky")
-				# 离地后冻结上一段地面 tail 窗口
-				floor_segment_lines.clear()
-		past_is_on_floor = is_on_floor
+	var is_on_floor_now := is_on_floor() or fly
+	if is_on_floor_now and not past_is_on_floor_effect:
+		_play_land_effect()
+	past_is_on_floor_effect = is_on_floor_now
+
+	if not line:
+		return
+
+	if is_on_floor_now:
+		if past_is_on_floor != is_on_floor_now:
+			new_line()
+		var offset = position - past_translation
+		var distance = offset.length()
+		
+		# 设置线段位置为中点
+		line.position = past_translation + offset / 2
+		line.position.y = global_position.y
+		
+		# 设置线段长度（沿Z轴拉伸）
+		line.scale = Vector3(1, 1, distance + tailScale)
+
+		# 地面阶段：同步该阶段所有 tail 段的全局 Y，使其跟随主线高度
+		var current_y := global_position.y
+		if abs(current_y - _last_floor_y) > 0.001:
+			for segment in floor_segment_lines:
+				if is_instance_valid(segment):
+					segment.global_position.y = current_y
+			_last_floor_y = current_y
+	else:
+		if past_is_on_floor != is_on_floor_now:
+			emit_signal("on_sky")
+			# 离地后冻结上一段地面 tail 窗口
+			floor_segment_lines.clear()
+	past_is_on_floor = is_on_floor_now
 
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
@@ -147,6 +157,11 @@ func new_line():
 	
 	past_translation = position
 	emit_signal("new_line1")
+
+func _play_land_effect() -> void:
+	if is_instance_valid(land_effect):
+		land_effect.restart()
+		land_effect.emitting = true
 
 func turn():
 	if is_on_floor() or fly:

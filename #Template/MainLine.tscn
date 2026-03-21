@@ -43,6 +43,7 @@ scale_curve = SubResource("CurveTexture_iu6d0")
 color_ramp = SubResource("GradientTexture1D_lwrne")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ty8qn"]
+billboard_mode = 1
 
 [sub_resource type="QuadMesh" id="QuadMesh_jntxg"]
 material = SubResource("StandardMaterial3D_ty8qn")
