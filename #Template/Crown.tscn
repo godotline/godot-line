@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b7yycciy51i3l"]
 
 [ext_resource type="ArrayMesh" uid="uid://dmpr4wgxf28ca" path="res://#Template/[Resources]/Models/PerfactCrown.obj" id="1"]
-[ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Crown.gd" id="2"]
+[ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Trigger/Crown.gd" id="2"]
 [ext_resource type="Texture2D" uid="uid://bi33owy3t41ql" path="res://#Template/[Resources]/PCrownT.png" id="3_ctg82"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qoafd"]

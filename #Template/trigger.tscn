@@ -6,14 +6,18 @@
 
 [sub_resource type="BoxMesh" id="BoxMesh_vcq5i"]
 
-[node name="Trigger" type="Area3D"]
+[node name="Trigger" type="Area3D" unique_id=608483111]
 script = ExtResource("1")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1276946581]
 shape = SubResource("BoxShape3D_e2kce")
 debug_color = Color(0, 1, 0, 1)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=969481579]
+visible = false
 mesh = SubResource("BoxMesh_vcq5i")
+
+[node name="Marker3D" type="Marker3D" parent="." unique_id=414536342]
+gizmo_extents = 0.5
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

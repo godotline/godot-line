@@ -5,3 +5,11 @@ res://#Template/[Scripts]/addtap.gd
 res://#Template/[Scripts]/gameui.gd
 res://#Template/[Scripts]/MainLine.gd
 res://#Template/[Scripts]/CameraTrigger.gd
+res://#Template/[Scripts]/CameraFollower.gd
+res://#Template/[Scripts]/Crown.gd
+res://#Template/[Scripts]/State.gd
+res://#Template/trigger.tscn
+res://#Template/[Scripts]/Trigger/CameraTrigger.gd
+res://#Template/[Scripts]/Trigger/Crown.gd
+res://#Template/BaseWall.tscn
+res://#Template/BaseFloor.tscn

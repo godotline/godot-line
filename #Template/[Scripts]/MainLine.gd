@@ -30,6 +30,8 @@ var past_is_on_floor := false
 var v := Vector3(0,0,0)
 var is_start := false
 var tailScale = 1
+var _last_floor_y := 0.0
+var floor_segment_lines: Array[MeshInstance3D] = []
 
 var start_transform = transform
 
@@ -42,6 +44,7 @@ func _ready() -> void:
 		if State.main_line_transform:
 			transform = State.main_line_transform
 			is_turn = State.is_turn
+		_last_floor_y = global_position.y
 
 func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint() and is_live:
@@ -68,11 +71,23 @@ func _process(_delta: float) -> void:
 			
 			# 设置线段位置为中点
 			line.position = past_translation + offset / 2
+			line.position.y = global_position.y
 			
 			# 设置线段长度（沿Z轴拉伸）
 			line.scale = Vector3(1, 1, distance + tailScale)
+
+			# 地面阶段：同步该阶段所有 tail 段的全局 Y，使其跟随主线高度
+			var current_y := global_position.y
+			if abs(current_y - _last_floor_y) > 0.001:
+				for segment in floor_segment_lines:
+					if is_instance_valid(segment):
+						segment.global_position.y = current_y
+				_last_floor_y = current_y
 		else:
-			if past_is_on_floor != is_on_floor: emit_signal("on_sky")
+			if past_is_on_floor != is_on_floor:
+				emit_signal("on_sky")
+				# 离地后冻结上一段地面 tail 窗口
+				floor_segment_lines.clear()
 		past_is_on_floor = is_on_floor
 
 func _input(event: InputEvent) -> void:
@@ -86,9 +101,27 @@ func _input(event: InputEvent) -> void:
 
 func reload() -> void:
 	State.main_line_transform = start_transform
+	State.camera_follower_has_checkpoint = false
+	State.camera_follower_add_position = Vector3.ZERO
+	State.camera_follower_rotation_offset = Vector3.ZERO
+	State.camera_follower_distance = 0.0
+	State.camera_follower_follow_speed = 0.0
 	State.is_turn = $".".is_turn
 	State.anim_time = 0.0
 	tree.reload_current_scene()
+
+func _get_or_create_player_tail_holder() -> Node3D:
+	var root := tree.current_scene
+	if not root:
+		return null
+
+	var tail_holder := root.get_node_or_null("PlayerTailHolder") as Node3D
+	if not tail_holder:
+		tail_holder = Node3D.new()
+		tail_holder.name = "PlayerTailHolder"
+		root.add_child(tail_holder)
+
+	return tail_holder
 
 func new_line():
 	line = MeshInstance3D.new()
@@ -99,14 +132,17 @@ func new_line():
 	line.name = "Line"
 	line.top_level = true
 	
-	# 修改：将线段添加到主场景的tail节点下
-	var tail_node = tree.current_scene.get_node("tail")
-	if tail_node:
-		tail_node.add_child(line)
+	# 将线段添加到场景根节点下的 PlayerTailHolder（不存在则自动创建）
+	var tail_holder := _get_or_create_player_tail_holder()
+	if tail_holder:
+		tail_holder.add_child(line)
 	else:
-		# 如果tail节点不存在，回退到原行为
+		# 回退到场景根节点，避免线段丢失
 		tree.current_scene.add_child(line)
-		print("警告：未找到tail节点，线段已添加到场景根节点")
+		push_warning("PlayerTailHolder 创建失败，线段已添加到场景根节点")
+
+	if is_on_floor() or fly:
+		floor_segment_lines.append(line)
 	
 	past_translation = position
 	emit_signal("new_line1")

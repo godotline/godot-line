@@ -22,14 +22,14 @@ var triggered: bool = false
 var triggered_at_crown: bool = false
 
 func _ready() -> void:
-	body_entered.connect(_on_body_entered)
+	pass
 
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("mainline") or body.name == "MainLine":
 		if not use_time:
 			_trigger()
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if use_time and not triggered:
 		var current_time = 0.0
 		if camera_follower and camera_follower.player_node:

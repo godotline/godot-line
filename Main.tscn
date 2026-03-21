@@ -8,6 +8,8 @@
 [ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_trn2v"]
 [ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="6_lgr22"]
 [ext_resource type="PackedScene" uid="uid://d2e87jtits78b" path="res://#Template/BaseFloor.tscn" id="7_wkp8b"]
+[ext_resource type="PackedScene" uid="uid://cklp581y76u6r" path="res://#Template/BaseWall.tscn" id="8_wkp8b"]
+[ext_resource type="PackedScene" uid="uid://b7yycciy51i3l" path="res://#Template/Crown.tscn" id="9_20pc6"]
 
 [sub_resource type="Environment" id="Environment_c2ibq"]
 
@@ -38,19 +40,6 @@ _data = {
 &"level": SubResource("3")
 }
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cm0pq"]
-sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
-ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
-
-[sub_resource type="Sky" id="Sky_nj243"]
-sky_material = SubResource("ProceduralSkyMaterial_cm0pq")
-
-[sub_resource type="Environment" id="Environment_3dxm6"]
-background_mode = 2
-sky = SubResource("Sky_nj243")
-tonemap_mode = 2
-glow_enabled = true
-
 [node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Mainline")]
 script = ExtResource("1_lgr22")
 MainlineColor = Color(0, 1, 0, 1)
@@ -62,21 +51,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.33333334, 0)
 
 [node name="MainLine" parent="Object" unique_id=2020142567 instance=ExtResource("1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-rot = null
+rot = 90
 color = Color(0, 1, 0, 1)
-noclip = null
 animation = NodePath("../AnimationPlayer")
 
 [node name="RoadMaker" parent="Object/MainLine" unique_id=600784977 instance=ExtResource("3_trn2v")]
 
-[node name="BaseCam" type="Node3D" parent="Object" unique_id=364981525]
-transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 20, 30, 20)
+[node name="CameraFollower" type="Node3D" parent="Object" unique_id=364981525]
+unique_name_in_owner = true
+transform = Transform3D(-0.70710677, 0.4999999, -0.4999999, 0, 0.7071067, 0.7071067, 0.70710665, 0.49999997, -0.49999997, 20, 30, 20)
 script = ExtResource("4_trn2v")
 player = NodePath("../MainLine")
 add_position = Vector3(20, 30, 20)
-rotation_offset = Vector3(-45, 45, 0)
+rotation_offset = Vector3(-45, 225, 0)
 
-[node name="Camera3D" type="Camera3D" parent="Object/BaseCam" unique_id=1071878446]
+[node name="Camera3D" type="Camera3D" parent="Object/CameraFollower" unique_id=1071878446]
 environment = SubResource("Environment_c2ibq")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Object" unique_id=560431425]
@@ -84,9 +73,6 @@ root_node = NodePath("../..")
 libraries/ = SubResource("AnimationLibrary_cm0pq")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Object/AnimationPlayer" unique_id=1995291670]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Object" unique_id=1424889368]
-environment = SubResource("Environment_3dxm6")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Object" unique_id=1791213843]
 transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
@@ -99,5 +85,11 @@ crown_no_light = ExtResource("6_lgr22")
 [node name="Scene" type="Node3D" parent="." unique_id=1042175662]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -45)
 
+[node name="BaseWall" parent="Scene" unique_id=1227730399 instance=ExtResource("8_wkp8b")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.097035, 43.85425, 1, 19.04539)
+
+[node name="Crown" parent="Scene" unique_id=997372516 instance=ExtResource("9_20pc6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.40961, 0.9729152, 25.236828)
+
 [node name="BaseFloor" parent="Scene" unique_id=755968428 instance=ExtResource("7_wkp8b")]
-transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0, 0)
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 84.28502, 0, 86.5099)

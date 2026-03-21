@@ -1,6 +1,11 @@
 extends Node
 
 var main_line_transform 
+var camera_follower_has_checkpoint := false
+var camera_follower_add_position := Vector3.ZERO
+var camera_follower_rotation_offset := Vector3.ZERO
+var camera_follower_distance := 0.0
+var camera_follower_follow_speed := 0.0
 var is_turn := false
 var anim_time := 0.0
 var is_end := false

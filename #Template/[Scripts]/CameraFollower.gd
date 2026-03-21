@@ -24,10 +24,23 @@ var _pos: Vector3
 var _rot: Vector3
 var _dtc: float
 var _spd: float
+var _skip_follow_once := false
 
 func _ready() -> void:
 	if not camera and get_child_count() > 0:
 		camera = get_child(0)
+	if State.camera_follower_has_checkpoint and player_node:
+		add_position = State.camera_follower_add_position
+		rotation_offset = State.camera_follower_rotation_offset
+		distance_from_object = State.camera_follower_distance
+		follow_speed = State.camera_follower_follow_speed
+		rotation_degrees = rotation_offset
+		if camera:
+			camera.position = Vector3(0, 0, -distance_from_object)
+			camera.rotation_degrees = -rotation_offset
+		var base_transform = player_node.position + add_position
+		position = base_transform
+		_skip_follow_once = true
 	# 这里假设有 Crown 系统，在 GDScript 中需要手动连接信号
 
 func _process(delta: float) -> void:
@@ -36,7 +49,11 @@ func _process(delta: float) -> void:
 		if camera:
 			camera.position = Vector3(0, 0, -distance_from_object)
 		var base_transform = player_node.position + add_position
-		position = position.slerp(base_transform, abs(follow_speed * delta))
+		if _skip_follow_once:
+			position = base_transform
+			_skip_follow_once = false
+		else:
+			position = position.slerp(base_transform, abs(follow_speed * delta))
 	
 	# 假设 player 有 Is_Stop 和 Over 属性
 	if player_node and player_node.get("Is_Stop") and player_node.get("Over") and following:
