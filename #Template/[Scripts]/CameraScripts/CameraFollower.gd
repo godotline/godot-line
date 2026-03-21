@@ -25,29 +25,20 @@ var _rot: Vector3
 var _dtc: float
 var _spd: float
 var _skip_follow_once := false
+var _checkpoint_applied := false
 
 func _ready() -> void:
 	if not camera and get_child_count() > 0:
 		camera = get_child(0)
-	if State.camera_follower_has_checkpoint and player_node:
-		add_position = State.camera_follower_add_position
-		rotation_offset = State.camera_follower_rotation_offset
-		distance_from_object = State.camera_follower_distance
-		follow_speed = State.camera_follower_follow_speed
-		rotation_degrees = rotation_offset
-		if camera:
-			camera.position = Vector3(0, 0, -distance_from_object)
-			camera.rotation_degrees = -rotation_offset
-		var base_transform = player_node.position + add_position
-		position = base_transform
-		_skip_follow_once = true
+	if State.camera_follower_has_checkpoint and State.camera_follower_restore_pending:
+		call_deferred("_apply_state_checkpoint")
 	# 这里假设有 Crown 系统，在 GDScript 中需要手动连接信号
 
 func _process(delta: float) -> void:
+	if State.camera_follower_has_checkpoint and State.camera_follower_restore_pending and not _checkpoint_applied:
+		_apply_state_checkpoint()
 	if following and player_node:
 		rotation_degrees = rotation_offset
-		if camera:
-			camera.position = Vector3(0, 0, -distance_from_object)
 		var base_transform = player_node.position + add_position
 		if _skip_follow_once:
 			position = base_transform
@@ -59,6 +50,26 @@ func _process(delta: float) -> void:
 	if player_node and player_node.get("Is_Stop") and player_node.get("Over") and following:
 		following = false
 		kill_tweens()
+
+func _apply_state_checkpoint() -> void:
+	if _checkpoint_applied:
+		return
+	if not State.camera_follower_has_checkpoint or not State.camera_follower_restore_pending:
+		return
+	if player_node == null and player:
+		player_node = get_node_or_null(player) as Node3D
+	if player_node == null:
+		return
+	add_position = State.camera_follower_add_position
+	rotation_offset = State.camera_follower_rotation_offset
+	distance_from_object = State.camera_follower_distance
+	follow_speed = State.camera_follower_follow_speed
+	rotation_degrees = rotation_offset
+	var base_transform = player_node.position + add_position
+	position = base_transform
+	_skip_follow_once = true
+	_checkpoint_applied = true
+	State.camera_follower_restore_pending = false
 
 func kill_tweens() -> void:
 	if do_pos and do_pos.is_running():
@@ -76,9 +87,6 @@ func revive() -> void:
 	distance_from_object = _dtc
 	follow_speed = _spd
 	rotation_degrees = rotation_offset
-	if camera:
-		camera.position = Vector3(0, 0, -distance_from_object)
-		camera.rotation_degrees = -rotation_offset
 	var base_transform = player_node.position + add_position
 	position = base_transform
 

@@ -106,6 +106,7 @@ func reload() -> void:
 	State.camera_follower_rotation_offset = Vector3.ZERO
 	State.camera_follower_distance = 0.0
 	State.camera_follower_follow_speed = 0.0
+	State.camera_follower_restore_pending = false
 	State.is_turn = $".".is_turn
 	State.anim_time = 0.0
 	tree.reload_current_scene()

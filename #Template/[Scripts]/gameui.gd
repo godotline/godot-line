@@ -41,6 +41,7 @@ func _on_back_pressed() -> void:
 	get_tree().quit()
 	State.is_end = false
 	State.is_relive = false
+	State.camera_follower_restore_pending = false
 	State.diamond = 0
 	State.crown = 0
 	State.percent = 0
@@ -51,6 +52,7 @@ func _on_gameplay_pressed() -> void:
 	line.tree.reload_current_scene()
 	if State.crown > 0 :
 		State.is_relive = true
+	State.camera_follower_restore_pending = true
 	State.diamond = 0
 	State.crown = 0
 	State.percent = 0
@@ -61,6 +63,7 @@ func _on_gamereplay_pressed() -> void:
 	line.reload()
 	State.is_end = false
 	State.is_relive = false
+	State.camera_follower_restore_pending = false
 	State.diamond = 0
 	State.crown = 0
 	State.percent = 0
