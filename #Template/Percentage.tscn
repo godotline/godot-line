@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://dn25n4g38waw1"]
+
+[ext_resource type="FontFile" uid="uid://cr443hqoouujq" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="1_11b5s"]
+
+[sub_resource type="TextMesh" id="TextMesh_ortdl"]
+text = "10%"
+font = ExtResource("1_11b5s")
+font_size = 20
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m2g8n"]
+
+[node name="10" type="MeshInstance3D" unique_id=1373098762]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("TextMesh_ortdl")
+surface_material_override/0 = SubResource("StandardMaterial3D_m2g8n")

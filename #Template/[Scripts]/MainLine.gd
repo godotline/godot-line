@@ -161,7 +161,7 @@ func turn():
 			is_turn = not is_turn
 		else:
 			is_start = true
-		v = to_global(Vector3(0,0,-1) * speed) - position
+		v = to_global(Vector3(0,0,1) * speed) - position
 		past_translation = position
 		new_line()
 

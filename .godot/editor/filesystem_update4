@@ -13,3 +13,12 @@ res://#Template/[Scripts]/Trigger/CameraTrigger.gd
 res://#Template/[Scripts]/Trigger/Crown.gd
 res://#Template/BaseWall.tscn
 res://#Template/BaseFloor.tscn
+res://#Template/[Scenes]/Main.tscn
+res://#Template/[Scripts]/Percentage.gd
+res://#Template/Percentage.tscn
+res://#Template/[Material]/BaseWall.tres
+res://#Template/[Material]/BaseFloor.tres
+res://#Template/Percent.tscn
+res://#Template/[Scenes]/Scene.tscn
+res://#Template/[Materials]/BaseWall.tres
+res://#Template/[Materials]/BaseFloor.tres
