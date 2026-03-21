@@ -1,0 +1,93 @@
+[gd_scene format=3 uid="uid://ch3241sy2gp13"]
+
+[ext_resource type="Script" uid="uid://cx4q5mwlwvs2l" path="res://#Template/[Scripts]/LevelManager.gd" id="1_nqw23"]
+[ext_resource type="PackedScene" uid="uid://c1n8bx17ts38c" path="res://#Template/MainLine.tscn" id="2_3nmew"]
+[ext_resource type="PackedScene" uid="uid://dqwpe34bivb71" path="res://#Template/RoadMaker.tscn" id="3_6xmyp"]
+[ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_l86eg"]
+[ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_tl58f"]
+[ext_resource type="PackedScene" uid="uid://d18m3cn2r76io" path="res://#Template/GAMEUI.tscn" id="6_ybvc6"]
+[ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_ha3xc"]
+[ext_resource type="PackedScene" uid="uid://d2e87jtits78b" path="res://#Template/BaseFloor.tscn" id="8_so8qp"]
+[ext_resource type="PackedScene" uid="uid://cklp581y76u6r" path="res://#Template/BaseWall.tscn" id="9_3nmew"]
+[ext_resource type="PackedScene" uid="uid://b7yycciy51i3l" path="res://#Template/Crown.tscn" id="10_6xmyp"]
+
+[sub_resource type="Environment" id="Environment_c2ibq"]
+
+[sub_resource type="Animation" id="Animation_wkp8b"]
+length = 0.001
+
+[sub_resource type="Animation" id="3"]
+length = 130.0
+tracks/0/type = "audio"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Object/AnimationPlayer/AudioStreamPlayer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"clips": [{
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource("5_tl58f")
+}],
+"times": PackedFloat32Array(0)
+}
+tracks/0/use_blend = true
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cm0pq"]
+_data = {
+&"RESET": SubResource("Animation_wkp8b"),
+&"level": SubResource("3")
+}
+
+[node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Mainline")]
+script = ExtResource("1_nqw23")
+MainlineColor = Color(0, 1, 0, 1)
+Mainline = NodePath("Object/MainLine")
+origin_pos = Vector3(0, 1, 0)
+
+[node name="Object" type="Node3D" parent="." unique_id=1533079692]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.33333334, 0)
+
+[node name="MainLine" parent="Object" unique_id=2020142567 instance=ExtResource("2_3nmew")]
+color = Color(0, 1, 0, 1)
+animation = NodePath("../AnimationPlayer")
+
+[node name="RoadMaker" parent="Object/MainLine" unique_id=600784977 instance=ExtResource("3_6xmyp")]
+
+[node name="CameraFollower" type="Node3D" parent="Object" unique_id=364981525]
+unique_name_in_owner = true
+transform = Transform3D(-0.70710677, 0.4999999, -0.4999999, 0, 0.7071067, 0.7071067, 0.70710665, 0.49999997, -0.49999997, -20, 30, -20)
+script = ExtResource("4_l86eg")
+player = NodePath("../MainLine")
+add_position = Vector3(-20, 30, -20)
+rotation_offset = Vector3(-45, 225, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Object/CameraFollower" unique_id=1071878446]
+environment = SubResource("Environment_c2ibq")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Object" unique_id=560431425]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_cm0pq")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Object/AnimationPlayer" unique_id=1995291670]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Object" unique_id=1791213843]
+transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
+shadow_enabled = true
+
+[node name="gameui" parent="Object" unique_id=75582180 node_paths=PackedStringArray("line") instance=ExtResource("6_ybvc6")]
+line = NodePath("../MainLine")
+crown_no_light = ExtResource("7_ha3xc")
+
+[node name="Scene" type="Node3D" parent="." unique_id=1042175662]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -45)
+
+[node name="BaseFloor" parent="Scene" unique_id=755968428 instance=ExtResource("8_so8qp")]
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 45, -1, 45)
+
+[node name="BaseWall" parent="Scene" unique_id=359263919 instance=ExtResource("9_3nmew")]
+transform = Transform3D(7.567409, 0, 0.60203797, 0, 0.99999994, 0, -5.7057652, 0, 0.7984674, 56.519073, 0, 60.48838)
+
+[node name="Crown" parent="Scene" unique_id=1509180437 instance=ExtResource("10_6xmyp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.966736, -0.027085781, 54.529793)
