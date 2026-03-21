@@ -11,18 +11,17 @@ config_version=5
 [animation]
 
 warnings/check_invalid_track_paths=false
-compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
 config/name="GodotLine"
 run/main_scene="uid://c0brwvvpfft4o"
-config/features=PackedStringArray("4.6")
+config/features=PackedStringArray("4.5")
 boot_splash/minimum_display_time=2000
 
 [autoload]
 
-State="*res://BasicObjects/Scripts/State.gd"
+State="*res://Scripts/State.gd"
 Signal_Debugger="*res://addons/SignalVisualizer/Debugger/SignalDebugger.gd"
 
 [debug]
@@ -33,10 +32,6 @@ shapes/collision/shape_color=Color(0, 0.6, 0.69803923, 1)
 
 window/stretch/mode="canvas_items"
 
-[dotnet]
-
-project/assembly_name="GodotLine"
-
 [editor]
 
 movie_writer/movie_file="D:/Code/dl/DLCE/1.avi"
@@ -44,7 +39,7 @@ movie_writer/disable_vsync=true
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/SignalVisualizer/plugin.cfg")
 
 [input]
 
@@ -90,3 +85,4 @@ savetaper={
 
 textures/vram_compression/import_etc2_astc=true
 occlusion_culling/use_occlusion_culling=true
+environment/defaults/default_environment="res://Resources/default_env.tres"

@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://30rvvwldvcct"]
+
+[ext_resource type="Script" uid="uid://yjent50j8m7h" path="res://Scripts/trigger.gd" id="1"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e2kce"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_vcq5i"]
+
+[node name="Trigger" type="Area3D"]
+script = ExtResource("1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_e2kce")
+debug_color = Color(0, 1, 0, 1)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_vcq5i")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

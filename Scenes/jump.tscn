@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bcx8mke3r0h07"]
+
+[ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://Scripts/jump.gd" id="1_6nykd"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2c1sj"]
+
+[node name="jump" type="Area3D"]
+script = ExtResource("1_6nykd")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_2c1sj")
+debug_color = Color(0.683333, 0, 1, 1)
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

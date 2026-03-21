@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/BaseFloor.tscn" id="1_r1lqq"]
+
+[node name="Roads" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5, 0)
+
+[node name="BaseFloor" type="StaticBody3D" parent="." instance=ExtResource("1_r1lqq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_layer = 2
+collision_mask = 0
+
+[node name="@StaticBody3D@3" type="StaticBody3D" parent="." instance=ExtResource("1_r1lqq")]
+transform = Transform3D(3, 0, 0, 0, 1, 0, 0, 0, 3.6, 0, 1, -0.3)
+collision_layer = 2
+collision_mask = 0
