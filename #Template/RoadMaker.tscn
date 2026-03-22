@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dr6kymfjs0usi" path="res://#Template/[Scripts]/RoadMaker.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://d2e87jtits78b" path="res://#Template/BaseFloor.tscn" id="2"]
 
-[node name="RoadMaker" type="Marker3D"]
+[node name="RoadMaker" type="Marker3D" unique_id=183537675]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, 0)
 script = ExtResource("1")
 base_floor = ExtResource("2")

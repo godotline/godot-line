@@ -47,22 +47,20 @@ _data = {
 &"crown": SubResource("Animation_ctg82")
 }
 
-[node name="Crown" type="Area3D"]
+[node name="Crown" type="Area3D" unique_id=1805653336]
 collision_layer = 0
 script = ExtResource("2")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(5, 0, 0, 0, -2.18557e-07, 5, 0, -5, -2.18557e-07, 0, 0, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1455513811]
+transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
 mesh = ExtResource("1")
 surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=18434010]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
 shape = SubResource("2")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_pds1l")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1721480882]
+libraries/ = SubResource("AnimationLibrary_pds1l")
 
 [connection signal="body_entered" from="." to="." method="_on_Crown_body_entered"]

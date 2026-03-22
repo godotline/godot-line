@@ -322,7 +322,7 @@ _data = {
 &"RESET": SubResource("Animation_ci0m4")
 }
 
-[node name="gameui" type="Control"]
+[node name="gameui" type="Control" unique_id=256348809]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -332,7 +332,7 @@ grow_vertical = 2
 script = ExtResource("1_kyccr")
 metadata/_edit_lock_ = true
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=2008919363]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -342,7 +342,7 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.360784)
 metadata/_edit_lock_ = true
 
-[node name="back" type="Button" parent="."]
+[node name="back" type="Button" parent="." unique_id=1581313299]
 layout_mode = 0
 offset_left = 19.0
 offset_top = 530.0
@@ -351,7 +351,7 @@ offset_bottom = 629.0
 theme_override_icons/icon = ExtResource("1_ost3h")
 flat = true
 
-[node name="play" type="Button" parent="."]
+[node name="play" type="Button" parent="." unique_id=1869438121]
 layout_mode = 0
 offset_left = 209.0
 offset_top = 477.0
@@ -362,20 +362,20 @@ theme_override_icons/icon = ExtResource("3_rien4")
 flat = true
 icon_alignment = 1
 
-[node name="ButtonSide" type="Sprite2D" parent="play"]
+[node name="ButtonSide" type="Sprite2D" parent="play" unique_id=1715673482]
 position = Vector2(49, 65)
 texture = ExtResource("4_ll6ia")
 
-[node name="ButtonInner" type="Sprite2D" parent="play"]
+[node name="ButtonInner" type="Sprite2D" parent="play" unique_id=690871823]
 position = Vector2(196, 65)
 texture = ExtResource("5_ey6o0")
 
-[node name="ButtonSide2" type="Sprite2D" parent="play"]
+[node name="ButtonSide2" type="Sprite2D" parent="play" unique_id=1469949046]
 position = Vector2(343, 65)
 rotation = -3.14159
 texture = ExtResource("4_ll6ia")
 
-[node name="replay" type="Button" parent="."]
+[node name="replay" type="Button" parent="." unique_id=1889046404]
 layout_mode = 0
 offset_left = 632.0
 offset_top = 477.0
@@ -386,20 +386,20 @@ theme_override_icons/icon = ExtResource("6_71rya")
 flat = true
 icon_alignment = 1
 
-[node name="ButtonSide" type="Sprite2D" parent="replay"]
+[node name="ButtonSide" type="Sprite2D" parent="replay" unique_id=1247274872]
 position = Vector2(49, 65)
 texture = ExtResource("4_ll6ia")
 
-[node name="ButtonInner" type="Sprite2D" parent="replay"]
+[node name="ButtonInner" type="Sprite2D" parent="replay" unique_id=1150049866]
 position = Vector2(196, 65)
 texture = ExtResource("5_ey6o0")
 
-[node name="ButtonSide2" type="Sprite2D" parent="replay"]
+[node name="ButtonSide2" type="Sprite2D" parent="replay" unique_id=857453340]
 position = Vector2(343, 65)
 rotation = -3.14159
 texture = ExtResource("4_ll6ia")
 
-[node name="title" type="Label" parent="."]
+[node name="title" type="Label" parent="." unique_id=611670578]
 layout_mode = 0
 offset_top = 50.0
 offset_right = 1151.0
@@ -410,7 +410,7 @@ text = "Level Name"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="diamond" type="Label" parent="."]
+[node name="diamond" type="Label" parent="." unique_id=1141371551]
 layout_mode = 0
 offset_left = 552.0
 offset_top = 346.0
@@ -422,33 +422,31 @@ text = "0/10"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Diamond" type="Sprite2D" parent="."]
+[node name="Diamond" type="Sprite2D" parent="." unique_id=1651383760]
 position = Vector2(493, 383)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("8_rien4")
 
-[node name="PerfactCrownNoLight" type="Sprite2D" parent="."]
+[node name="PerfactCrownNoLight" type="Sprite2D" parent="." unique_id=1235566660]
 position = Vector2(427, 242)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("9_71rya")
 
-[node name="PerfactCrownNoLight2" type="Sprite2D" parent="."]
+[node name="PerfactCrownNoLight2" type="Sprite2D" parent="." unique_id=786121659]
 position = Vector2(582, 245)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("9_71rya")
 
-[node name="PerfactCrownNoLight3" type="Sprite2D" parent="."]
+[node name="PerfactCrownNoLight3" type="Sprite2D" parent="." unique_id=264465006]
 position = Vector2(719, 245)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("9_71rya")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=591769431]
 root_node = NodePath("../PerfactCrownNoLight")
-libraries = {
-&"": SubResource("AnimationLibrary_qve72")
-}
+libraries/ = SubResource("AnimationLibrary_qve72")
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="AnimationPlayer"]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="AnimationPlayer" unique_id=1971946730]
 
 [connection signal="pressed" from="back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="play" to="." method="_on_gameplay_pressed"]

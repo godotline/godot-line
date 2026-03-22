@@ -72,35 +72,33 @@ _data = {
 &"jinzita": SubResource("Animation_v6wyn")
 }
 
-[node name="jinzita" type="Node3D"]
+[node name="jinzita" type="Node3D" unique_id=1497290031]
 
-[node name="Jinzita" type="MeshInstance3D" parent="."]
+[node name="Jinzita" type="MeshInstance3D" parent="." unique_id=920015160]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.009581, -0.24, 0)
 mesh = ExtResource("1_ajvws")
 surface_material_override/0 = SubResource("StandardMaterial3D_oowoy")
 
-[node name="Jinzita2" type="MeshInstance3D" parent="."]
+[node name="Jinzita2" type="MeshInstance3D" parent="." unique_id=971480060]
 transform = Transform3D(-0.999995, 0.00326376, 1.50996e-07, 0.00326376, 0.999995, -2.85326e-10, -1.50996e-07, 2.07489e-10, -1, -0.189368, -0.24, 0)
 mesh = ExtResource("1_ajvws")
 surface_material_override/0 = SubResource("StandardMaterial3D_ajvws")
 
-[node name="Area3D" type="Area3D" parent="."]
+[node name="Area3D" type="Area3D" parent="." unique_id=668439081]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 100)
 script = ExtResource("1_oowoy")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=527989510]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.25753, 0.0900226)
 shape = SubResource("BoxShape3D_ajvws")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Area3D/CollisionShape3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Area3D/CollisionShape3D" unique_id=1799104668]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 mesh = SubResource("BoxMesh_oowoy")
 skeleton = NodePath("../..")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Area3D"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Area3D" unique_id=399391729]
 root_node = NodePath("../../Jinzita2")
-libraries = {
-&"": SubResource("AnimationLibrary_8gmve")
-}
+libraries/ = SubResource("AnimationLibrary_8gmve")
 
 [connection signal="body_entered" from="Area3D" to="Area3D" method="_on_body_entered_jinzita"]
