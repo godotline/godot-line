@@ -1,8 +1,8 @@
-[gd_scene format=3 uid="uid://nw5ngxmehxaj"]
+[gd_scene format=3]
 
-[ext_resource type="Texture2D" uid="uid://x66ygieiwjpf" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="1_u2avh"]
-[ext_resource type="Script" uid="uid://cujf2dlxaqntb" path="res://#Template/[Scripts]/get_crown.gd" id="2_debt5"]
-[ext_resource type="Texture2D" uid="uid://d3w0a5cs7y31v" path="res://#Template/[Resources]/BlackCrown_Light.png" id="3_gblg4"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="1_u2avh"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/get_crown.gd" id="2_debt5"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/BlackCrown_Light.png" id="3_gblg4"]
 
 [sub_resource type="Animation" id="Animation_yvy48"]
 length = 0.001

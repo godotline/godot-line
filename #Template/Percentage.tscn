@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://dn25n4g38waw1"]
+[gd_scene format=3]
 
-[ext_resource type="FontFile" uid="uid://cr443hqoouujq" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="1_11b5s"]
+[ext_resource type="FontFile" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="1_11b5s"]
 
 [sub_resource type="TextMesh" id="TextMesh_ortdl"]
 text = "10%"

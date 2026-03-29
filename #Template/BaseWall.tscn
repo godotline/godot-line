@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://cklp581y76u6r"]
+[gd_scene format=3]
 
-[ext_resource type="Material" uid="uid://58blut2y03f2" path="res://#Template/[Materials]/BaseWall.tres" id="1_wgiw0"]
+[ext_resource type="Material" path="res://#Template/[Materials]/BaseWall.tres" id="1_wgiw0"]
 
 [sub_resource type="BoxShape3D" id="1"]
 margin = 0.001

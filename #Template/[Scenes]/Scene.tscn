@@ -1,13 +1,13 @@
-[gd_scene format=3 uid="uid://c0brwvvpfft4o"]
+[gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://cx4q5mwlwvs2l" path="res://#Template/[Scripts]/LevelManager.gd" id="1_dha8j"]
-[ext_resource type="PackedScene" uid="uid://c1n8bx17ts38c" path="res://#Template/MainLine.tscn" id="2_ots34"]
-[ext_resource type="PackedScene" uid="uid://dqwpe34bivb71" path="res://#Template/RoadMaker.tscn" id="3_h4xkc"]
-[ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
-[ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_lu6ew"]
-[ext_resource type="PackedScene" uid="uid://d18m3cn2r76io" path="res://#Template/GAMEUI.tscn" id="6_hddbq"]
-[ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_qbl1a"]
-[ext_resource type="PackedScene" uid="uid://d2e87jtits78b" path="res://#Template/BaseFloor.tscn" id="8_vnc86"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/LevelManager.gd" id="1_dha8j"]
+[ext_resource type="PackedScene" path="res://#Template/MainLine.tscn" id="2_ots34"]
+[ext_resource type="PackedScene" path="res://#Template/RoadMaker.tscn" id="3_h4xkc"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
+[ext_resource type="AudioStream" path="res://#Template/[Music]/Sample.mp3" id="5_lu6ew"]
+[ext_resource type="PackedScene" path="res://#Template/GAMEUI.tscn" id="6_hddbq"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_qbl1a"]
+[ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="8_vnc86"]
 
 [sub_resource type="Environment" id="Environment_c2ibq"]
 

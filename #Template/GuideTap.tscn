@@ -1,8 +1,8 @@
-[gd_scene format=3 uid="uid://cnyojjt0i7ra7"]
+[gd_scene format=3]
 
-[ext_resource type="Texture2D" uid="uid://rav3v353fs3g" path="res://#Template/[Resources]/Taper.png" id="1_a05sh"]
-[ext_resource type="Texture2D" uid="uid://c0icldun6cond" path="res://#Template/[Resources]/Taper_True.png" id="2_coo7h"]
-[ext_resource type="Script" uid="uid://be248ststm26s" path="res://#Template/[Scripts]/GuideLine/GuideTap.gd" id="3_1lryv"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/Taper.png" id="1_a05sh"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/Taper_True.png" id="2_coo7h"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/GuideLine/GuideTap.gd" id="3_1lryv"]
 
 [sub_resource type="Animation" id="Animation_sc732"]
 length = 0.001

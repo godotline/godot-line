@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://bw2k15r21fk7"]
+[gd_scene format=3]
 
-[ext_resource type="ArrayMesh" uid="uid://poc0fs8wr7o4" path="res://#Template/[Resources]/Models/HalfPyramid.obj" id="1_ajvws"]
-[ext_resource type="Script" uid="uid://drgktfa6v6qvm" path="res://#Template/[Scripts]/Ending.gd" id="1_oowoy"]
+[ext_resource type="ArrayMesh" path="res://#Template/[Resources]/Models/HalfPyramid.obj" id="1_ajvws"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/Trigger/Ending.gd" id="1_oowoy"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oowoy"]
 

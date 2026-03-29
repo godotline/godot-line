@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://c1n8bx17ts38c"]
+[gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://lvagihw0v4wd" path="res://#Template/[Scripts]/MainLine.gd" id="1"]
-[ext_resource type="AudioStream" uid="uid://dg4noxkxcgbfj" path="res://#Template/[Resources]/WaterDie.wav" id="2"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/MainLine.gd" id="1"]
+[ext_resource type="AudioStream" path="res://#Template/[Resources]/WaterDie.wav" id="2"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7ow2k"]
 height = 1.0
