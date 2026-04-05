@@ -70,6 +70,11 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint() or not is_live:
 		return
 
+	# 音画同步：根据音乐精确播放位置同步动画
+	if music and $MusicPlayer.playing and animation_node and animation_node.is_playing():
+		var time = $MusicPlayer.get_playback_position() + AudioServer.get_time_since_last_mix() - AudioServer.get_output_latency()
+		animation_node.seek(time, true)
+
 	var is_on_floor_now := is_on_floor() or fly
 	if is_on_floor_now and not past_is_on_floor_effect:
 		_play_land_effect()
@@ -210,6 +215,12 @@ func die():
 		if animation_node: animation_node.pause()
 		$MusicPlayer.stop()
 		$AudioStreamPlayer.play()
+		
+		# 计算速度方向和反方向
+		var forward_dir := velocity.normalized() if velocity.length() > 0.01 else Vector3.FORWARD
+		var backward_dir := -forward_dir
+		
+		# 生成8个粒子，一半沿速度方向，一半沿反方向
 		for i in 8:
 			var death_particle_instance: RigidBody3D = DEATH_PARTICLE.instantiate()
 			get_parent().add_child(death_particle_instance)
@@ -218,8 +229,11 @@ func die():
 			death_particle_instance.global_position = global_position
 			var random_rot := _random_rotation()
 			death_particle_instance.rotation = random_rot
-			var impulse_dir := random_rot.normalized() * speed
-			death_particle_instance.apply_central_impulse(impulse_dir)
+			
+			# 根据索引决定是向前还是向后发射
+			var direction := forward_dir if i < 4 else backward_dir
+			var impulse := direction * speed + _rand_dir() * 0.5
+			death_particle_instance.apply_central_impulse(impulse)
 			death_particle_instance.apply_torque(_rand_dir())
 
 func _rand_dir() -> Vector3:
