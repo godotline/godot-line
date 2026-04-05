@@ -1,0 +1,89 @@
+[gd_scene format=3 uid="uid://cpo3g3k6m5nib"]
+
+[ext_resource type="Script" uid="uid://d2244y2svyt45" path="res://#Template/[Scripts]/GameManager.gd" id="1_dha8j"]
+[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/MainLine.tscn" id="2_ots34"]
+[ext_resource type="PackedScene" path="res://#Template/RoadMaker.tscn" id="3_h4xkc"]
+[ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
+[ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_lu6ew"]
+[ext_resource type="PackedScene" path="res://#Template/GAMEUI.tscn" id="6_hddbq"]
+[ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_qbl1a"]
+[ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="8_vnc86"]
+
+[sub_resource type="Environment" id="Environment_c2ibq"]
+
+[sub_resource type="Animation" id="Animation_wkp8b"]
+length = 0.001
+
+[sub_resource type="Animation" id="3"]
+length = 130.0
+tracks/0/type = "audio"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Object/AnimationPlayer/AudioStreamPlayer")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"clips": [{
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource("5_lu6ew")
+}],
+"times": PackedFloat32Array(0)
+}
+tracks/0/use_blend = true
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cm0pq"]
+_data = {
+&"RESET": SubResource("Animation_wkp8b"),
+&"level": SubResource("3")
+}
+
+[node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Camera", "Mainline")]
+script = ExtResource("1_dha8j")
+MainlineColor = Color(1, 1, 1, 1)
+DiamondColor = Color(1, 1, 1, 1)
+Camera = NodePath("Object/CameraFollower/Camera3D")
+Mainline = NodePath("Object/MainLine")
+factor = 1.0
+
+[node name="Object" type="Node3D" parent="." unique_id=1533079692]
+
+[node name="MainLine" parent="Object" unique_id=2020142567 instance=ExtResource("2_ots34")]
+color = Color(0, 1, 0, 1)
+animation = NodePath("../AnimationPlayer")
+
+[node name="RoadMaker" parent="Object/MainLine" unique_id=600784977 instance=ExtResource("3_h4xkc")]
+
+[node name="CameraFollower" type="Node3D" parent="Object" unique_id=364981525]
+unique_name_in_owner = true
+transform = Transform3D(-0.70710677, 0.4999999, -0.4999999, 0, 0.7071067, 0.7071067, 0.70710665, 0.49999997, -0.49999997, -10, 20, -10)
+script = ExtResource("4_opejn")
+player = NodePath("../MainLine")
+add_position = Vector3(-10, 20, -10)
+rotation_offset = Vector3(-45, 225, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Object/CameraFollower" unique_id=1071878446]
+environment = SubResource("Environment_c2ibq")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Object" unique_id=560431425]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_cm0pq")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Object/AnimationPlayer" unique_id=1995291670]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Object" unique_id=1791213843]
+transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
+shadow_enabled = true
+
+[node name="gameui" parent="Object" unique_id=75582180 node_paths=PackedStringArray("line") instance=ExtResource("6_hddbq")]
+line = NodePath("../MainLine")
+crown_no_light = ExtResource("7_qbl1a")
+
+[node name="Scene" type="Node3D" parent="." unique_id=1042175662]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -45)
+
+[node name="BaseFloor" parent="Scene" unique_id=755968428 instance=ExtResource("8_vnc86")]
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 45, -1, 45)
+
+[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="Scene/BaseFloor" unique_id=1160046144]
+size = Vector3(1, 1, 1)

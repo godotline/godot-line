@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites id="2026-04-05" name="report_1" tests="87" failures="3" skipped="0" flaky="0" time="0.000">
+	<testsuite id="0" name="basic_assertions_test" package="Tests" timestamp="2026-04-05T05:03:50" hostname="localhost" tests="15" failures="2" errors="3" skipped="0" flaky="0" time="0.051">
+		<testcase name="test_integer_assertions" classname="basic_assertions_test" time="0.003">
+			<error message="ERROR: res://Tests/basic_assertions_test.gd:12" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitIntAssertImpl.gd)'.'
+	at res://Tests/basic_assertions_test.gd:12
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_float_assertions" classname="basic_assertions_test" time="0.002">
+			<error message="ERROR: res://Tests/basic_assertions_test.gd:25" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid call. Nonexistent function 'is_greater_than' in base 'RefCounted (GdUnitFloatAssertImpl.gd)'.'
+	at res://Tests/basic_assertions_test.gd:25
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_boolean_assertions" classname="basic_assertions_test" time="0.003">
+		</testcase>
+		<testcase name="test_string_assertions" classname="basic_assertions_test" time="0.002">
+		</testcase>
+		<testcase name="test_array_assertions" classname="basic_assertions_test" time="0.006">
+		</testcase>
+		<testcase name="test_dictionary_assertions" classname="basic_assertions_test" time="0.006">
+			<error message="ERROR: res://Tests/basic_assertions_test.gd:74" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid call. Nonexistent function 'contains_key' in base 'RefCounted (GdUnitDictionaryAssertImpl.gd)'.'
+	at res://Tests/basic_assertions_test.gd:74
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_vector2_assertions" classname="basic_assertions_test" time="0.004">
+			<failure message="FAILED: res://Tests/basic_assertions_test.gd:89" type="FAILURE">
+<![CDATA[
+Expecting:
+ '10'
+ but was
+ '10.000000'
+]]>
+			</failure>
+			<failure message="FAILED: res://Tests/basic_assertions_test.gd:90" type="FAILURE">
+<![CDATA[
+Expecting:
+ '20'
+ but was
+ '20.000000'
+]]>
+			</failure>
+		</testcase>
+	</testsuite>
+	<testsuite id="1" name="Crown_test" package="Tests" timestamp="2026-04-05T05:03:50" hostname="localhost" tests="13" failures="0" errors="0" skipped="0" flaky="0" time="0.131">
+		<testcase name="test_crown_script_exists" classname="Crown_test" time="0.001">
+		</testcase>
+		<testcase name="test_crown_scene_exists" classname="Crown_test" time="0.004">
+		</testcase>
+		<testcase name="test_crown_extends_area3d" classname="Crown_test" time="0.006">
+		</testcase>
+		<testcase name="test_speed_default" classname="Crown_test" time="0.012">
+		</testcase>
+		<testcase name="test_speed_setter" classname="Crown_test" time="0.013">
+		</testcase>
+		<testcase name="test_tag_default" classname="Crown_test" time="0.013">
+		</testcase>
+		<testcase name="test_tag_setter" classname="Crown_test" time="0.013">
+		</testcase>
+		<testcase name="test_crown_collection_increases_counter" classname="Crown_test" time="0.006">
+		</testcase>
+		<testcase name="test_crown_sets_checkpoint_flag" classname="Crown_test" time="0.006">
+		</testcase>
+		<testcase name="test_multiple_crown_tags" classname="Crown_test" time="0.006">
+		</testcase>
+		<testcase name="test_get_camera_follower_method_exists" classname="Crown_test" time="0.013">
+		</testcase>
+		<testcase name="test_crown_collection_flow" classname="Crown_test" time="0.006">
+		</testcase>
+		<testcase name="test_crown_rotation_property" classname="Crown_test" time="0.013">
+		</testcase>
+	</testsuite>
+	<testsuite id="2" name="Diamond_test" package="Tests" timestamp="2026-04-05T05:03:50" hostname="localhost" tests="12" failures="0" errors="0" skipped="0" flaky="0" time="0.132">
+		<testcase name="test_diamond_script_exists" classname="Diamond_test" time="0.002">
+		</testcase>
+		<testcase name="test_diamond_scene_exists" classname="Diamond_test" time="0.005">
+		</testcase>
+		<testcase name="test_diamond_extends_area3d" classname="Diamond_test" time="0.005">
+		</testcase>
+		<testcase name="test_color_default" classname="Diamond_test" time="0.014">
+		</testcase>
+		<testcase name="test_color_setter" classname="Diamond_test" time="0.008">
+		</testcase>
+		<testcase name="test_speed_default" classname="Diamond_test" time="0.013">
+		</testcase>
+		<testcase name="test_speed_setter" classname="Diamond_test" time="0.012">
+		</testcase>
+		<testcase name="test_diamond_collection_increases_counter" classname="Diamond_test" time="0.005">
+		</testcase>
+		<testcase name="test_multiple_diamond_collections" classname="Diamond_test" time="0.006">
+		</testcase>
+		<testcase name="test_diamond_rotation_property" classname="Diamond_test" time="0.012">
+		</testcase>
+		<testcase name="test_update_mesh_color_method_exists" classname="Diamond_test" time="0.011">
+		</testcase>
+		<testcase name="test_color_change_triggers_update" classname="Diamond_test" time="0.012">
+		</testcase>
+	</testsuite>
+	<testsuite id="3" name="GameManager_test" package="Tests" timestamp="2026-04-05T05:03:50" hostname="localhost" tests="11" failures="0" errors="10" skipped="0" flaky="0" time="0.078">
+		<testcase name="test_class_exists" classname="GameManager_test" time="0.002">
+		</testcase>
+		<testcase name="test_origin_pos_property" classname="GameManager_test" time="0.003">
+			<error message="ERROR: res://Tests/GameManager_test.gd:44" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid assignment of property or key 'origin_pos' with value of type 'Vector3' on a base object of type 'Nil'.'
+	at res://Tests/GameManager_test.gd:44
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_factor_property" classname="GameManager_test" time="0.005">
+			<error message="ERROR: res://Tests/GameManager_test.gd:50" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid assignment of property or key 'factor' with value of type 'float' on a base object of type 'Nil'.'
+	at res://Tests/GameManager_test.gd:50
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_calculate_anim_start_time_basic" classname="GameManager_test" time="0.005">
+			<error message="ERROR: res://Tests/GameManager_test.gd:56" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid assignment of property or key 'origin_pos' with value of type 'Vector3' on a base object of type 'Nil'.'
+	at res://Tests/GameManager_test.gd:56
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_calculate_anim_start_time_no_mainline" classname="GameManager_test" time="0.005">
+			<error message="ERROR: res://Tests/GameManager_test.gd:69" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid assignment of property or key 'Mainline' with value of type 'Nil' on a base object of type 'Nil'.'
+	at res://Tests/GameManager_test.gd:69
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_calculate_anim_start_time_zero_speed" classname="GameManager_test" time="0.006">
+			<error message="ERROR: res://Tests/GameManager_test.gd:83" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid assignment of property or key 'Mainline' with value of type 'CharacterBody3D (TestMainLine.gd)' on a base object of type 'Nil'.'
+	at res://Tests/GameManager_test.gd:83
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_calculate_anim_start_time_2d_distance" classname="GameManager_test" time="0.004">
+			<error message="ERROR: res://Tests/GameManager_test.gd:93" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid assignment of property or key 'origin_pos' with value of type 'Vector3' on a base object of type 'Nil'.'
+	at res://Tests/GameManager_test.gd:93
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_set_and_get_line_color" classname="GameManager_test" time="0.003">
+			<error message="ERROR: res://Tests/GameManager_test.gd:106" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid call. Nonexistent function 'setlinecolor' in base 'Nil'.'
+	at res://Tests/GameManager_test.gd:106
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_getlinecolor_no_mainline" classname="GameManager_test" time="0.006">
+			<error message="ERROR: res://Tests/GameManager_test.gd:114" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid assignment of property or key 'Mainline' with value of type 'Nil' on a base object of type 'Nil'.'
+	at res://Tests/GameManager_test.gd:114
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_factor_affects_anim_time" classname="GameManager_test" time="0.005">
+			<error message="ERROR: res://Tests/GameManager_test.gd:121" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid assignment of property or key 'origin_pos' with value of type 'Vector3' on a base object of type 'Nil'.'
+	at res://Tests/GameManager_test.gd:121
+]]>
+			</error>
+		</testcase>
+		<testcase name="test_camera_property" classname="GameManager_test" time="0.006">
+			<error message="ERROR: res://Tests/GameManager_test.gd:139" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid assignment of property or key 'Camera' with value of type 'Camera3D' on a base object of type 'Nil'.'
+	at res://Tests/GameManager_test.gd:139
+]]>
+			</error>
+		</testcase>
+	</testsuite>
+	<testsuite id="4" name="MainLine_test" package="Tests" timestamp="2026-04-05T05:03:50" hostname="localhost" tests="18" failures="0" errors="0" skipped="0" flaky="0" time="0.348">
+		<testcase name="test_mainline_script_exists" classname="MainLine_test" time="0.002">
+		</testcase>
+		<testcase name="test_mainline_scene_exists" classname="MainLine_test" time="0.002">
+		</testcase>
+		<testcase name="test_mainline_extends_characterbody3d" classname="MainLine_test" time="0.022">
+		</testcase>
+		<testcase name="test_speed_property" classname="MainLine_test" time="0.018">
+		</testcase>
+		<testcase name="test_rot_property" classname="MainLine_test" time="0.017">
+		</testcase>
+		<testcase name="test_color_property" classname="MainLine_test" time="0.032">
+		</testcase>
+		<testcase name="test_fly_property" classname="MainLine_test" time="0.022">
+		</testcase>
+		<testcase name="test_noclip_property" classname="MainLine_test" time="0.017">
+		</testcase>
+		<testcase name="test_is_turn_property" classname="MainLine_test" time="0.017">
+		</testcase>
+		<testcase name="test_is_live_property" classname="MainLine_test" time="0.017">
+		</testcase>
+		<testcase name="test_new_line1_signal_exists" classname="MainLine_test" time="0.016">
+		</testcase>
+		<testcase name="test_on_sky_signal_exists" classname="MainLine_test" time="0.018">
+		</testcase>
+		<testcase name="test_onturn_signal_exists" classname="MainLine_test" time="0.017">
+		</testcase>
+		<testcase name="test_timeout_property" classname="MainLine_test" time="0.016">
+		</testcase>
+		<testcase name="test_set_timeout_method" classname="MainLine_test" time="0.022">
+		</testcase>
+		<testcase name="test_turn_method_exists" classname="MainLine_test" time="0.016">
+		</testcase>
+		<testcase name="test_reload_method_exists" classname="MainLine_test" time="0.018">
+		</testcase>
+		<testcase name="test_die_method_exists" classname="MainLine_test" time="0.023">
+		</testcase>
+	</testsuite>
+	<testsuite id="5" name="State_test" package="Tests" timestamp="2026-04-05T05:03:51" hostname="localhost" tests="18" failures="1" errors="0" skipped="0" flaky="0" time="0.037">
+		<testcase name="test_state_script_exists" classname="State_test" time="0.002">
+		</testcase>
+		<testcase name="test_state_is_autoload" classname="State_test" time="0.002">
+		</testcase>
+		<testcase name="test_main_line_transform_initial" classname="State_test" time="0.001">
+		</testcase>
+		<testcase name="test_main_line_transform_set" classname="State_test" time="0.006">
+		</testcase>
+		<testcase name="test_camera_follower_has_checkpoint_default" classname="State_test" time="0.005">
+			<failure message="FAILED: res://Tests/State_test.gd:53" type="FAILURE">
+<![CDATA[
+Expecting: 'false' but is 'true'
+]]>
+			</failure>
+		</testcase>
+	</testsuite>
+</testsuites>

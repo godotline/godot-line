@@ -1,7 +1,7 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://brdmblcywuklx"]
 
-[ext_resource type="Script" path="res://#Template/[Scripts]/MainLine.gd" id="1"]
-[ext_resource type="AudioStream" path="res://#Template/[Resources]/WaterDie.wav" id="2"]
+[ext_resource type="Script" uid="uid://lvagihw0v4wd" path="res://#Template/[Scripts]/MainLine.gd" id="1"]
+[ext_resource type="AudioStream" uid="uid://dg4noxkxcgbfj" path="res://#Template/[Resources]/WaterDie.wav" id="2"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7ow2k"]
 height = 1.0
@@ -11,43 +11,27 @@ size = Vector3(0.5, 0.5, 0.5)
 
 [sub_resource type="BoxMesh" id="2"]
 
-[sub_resource type="Gradient" id="Gradient_rhwj3"]
-colors = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 0)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_lwrne"]
-gradient = SubResource("Gradient_rhwj3")
-
-[sub_resource type="Curve" id="Curve_land_size"]
-_data = [Vector2(0, 1), 0.0, 1.4, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+[sub_resource type="Curve" id="Curve_7clfx"]
+_data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]
 point_count = 2
 
-[sub_resource type="CurveTexture" id="CurveTexture_iu6d0"]
-curve = SubResource("Curve_land_size")
+[sub_resource type="CurveTexture" id="CurveTexture_dpsif"]
+curve = SubResource("Curve_7clfx")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_sgava"]
-emission_shape = 6
-emission_ring_axis = Vector3(0, 0, 1)
-emission_ring_height = 0.0
-emission_ring_radius = 0.0
-emission_ring_inner_radius = 0.0
-emission_ring_cone_angle = 90.0
-direction = Vector3(0, 1, 0)
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_7clfx"]
 spread = 180.0
 flatness = 1.0
-initial_velocity_min = 4.0
-initial_velocity_max = 4.0
-gravity = Vector3(0, 6, 0)
-scale_min = 0.0
-scale_max = 2.0
-scale_curve = SubResource("CurveTexture_iu6d0")
-color_ramp = SubResource("GradientTexture1D_lwrne")
+initial_velocity_min = 2.0
+initial_velocity_max = 2.0
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("CurveTexture_dpsif")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ty8qn"]
-billboard_mode = 1
+shading_mode = 0
+disable_receive_shadows = true
 
-[sub_resource type="QuadMesh" id="QuadMesh_jntxg"]
+[sub_resource type="SphereMesh" id="SphereMesh_jntxg"]
 material = SubResource("StandardMaterial3D_ty8qn")
-size = Vector2(0.5, 0.5)
 
 [node name="MainLine" type="CharacterBody3D" unique_id=1905697100]
 collision_mask = 2
@@ -70,13 +54,14 @@ stream = ExtResource("2")
 mesh = SubResource("2")
 
 [node name="LandEffect" type="GPUParticles3D" parent="." unique_id=1594388987]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.5, 0)
 emitting = false
-amount = 20
+amount = 16
 lifetime = 0.5
 one_shot = true
 explosiveness = 1.0
-process_material = SubResource("ParticleProcessMaterial_sgava")
-draw_pass_1 = SubResource("QuadMesh_jntxg")
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_7clfx")
+draw_pass_1 = SubResource("SphereMesh_jntxg")
 
 [connection signal="body_entered" from="Area3D" to="." method="_on_Area_body_entered"]

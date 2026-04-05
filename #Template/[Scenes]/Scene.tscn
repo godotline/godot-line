@@ -1,12 +1,12 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cpo3g3k6m5nib"]
 
-[ext_resource type="Script" path="res://#Template/[Scripts]/LevelManager.gd" id="1_dha8j"]
-[ext_resource type="PackedScene" path="res://#Template/MainLine.tscn" id="2_ots34"]
+[ext_resource type="Script" uid="uid://d2244y2svyt45" path="res://#Template/[Scripts]/GameManager.gd" id="1_dha8j"]
+[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/MainLine.tscn" id="2_ots34"]
 [ext_resource type="PackedScene" path="res://#Template/RoadMaker.tscn" id="3_h4xkc"]
-[ext_resource type="Script" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
-[ext_resource type="AudioStream" path="res://#Template/[Music]/Sample.mp3" id="5_lu6ew"]
+[ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
+[ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_lu6ew"]
 [ext_resource type="PackedScene" path="res://#Template/GAMEUI.tscn" id="6_hddbq"]
-[ext_resource type="Texture2D" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_qbl1a"]
+[ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_qbl1a"]
 [ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="8_vnc86"]
 
 [sub_resource type="Environment" id="Environment_c2ibq"]
@@ -38,14 +38,13 @@ _data = {
 &"level": SubResource("3")
 }
 
-[node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Mainline")]
+[node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Camera", "Mainline")]
 script = ExtResource("1_dha8j")
-MainlineColor = Color(0, 1, 0, 1)
+Camera = NodePath("Object/CameraFollower/Camera3D")
 Mainline = NodePath("Object/MainLine")
-origin_pos = Vector3(0, 1, 0)
+factor = 1.0
 
 [node name="Object" type="Node3D" parent="." unique_id=1533079692]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.33333334, 0)
 
 [node name="MainLine" parent="Object" unique_id=2020142567 instance=ExtResource("2_ots34")]
 color = Color(0, 1, 0, 1)
@@ -83,3 +82,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -45)
 
 [node name="BaseFloor" parent="Scene" unique_id=755968428 instance=ExtResource("8_vnc86")]
 transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 45, -1, 45)
+
+[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="Scene/BaseFloor" unique_id=1160046144]
+size = Vector3(1, 1, 1)

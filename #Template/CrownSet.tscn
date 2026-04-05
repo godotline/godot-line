@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Texture2D" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="1_u2avh"]
-[ext_resource type="Script" path="res://#Template/[Scripts]/get_crown.gd" id="2_debt5"]
 [ext_resource type="Texture2D" path="res://#Template/[Resources]/BlackCrown_Light.png" id="3_gblg4"]
 
 [sub_resource type="Animation" id="Animation_yvy48"]
@@ -65,7 +64,6 @@ _data = {
 }
 
 [node name="CrownSet" type="Node3D"]
-script = ExtResource("2_debt5")
 
 [node name="crownset" type="Sprite3D" parent="."]
 transform = Transform3D(1.5, 0, 0, 0, -6.55671e-08, 1.5, 0, -1.5, -6.55671e-08, 0, 0, 0)

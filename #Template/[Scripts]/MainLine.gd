@@ -21,6 +21,8 @@ signal onturn
 @onready var animation_node:AnimationPlayer = get_node(animation) if animation else null
 @onready var land_effect: GPUParticles3D = $LandEffect
 
+const DEATH_PARTICLE = preload("res://#Template/DeathParticle.tscn")
+
 var level_manager
 var timeout := 0.1
 var is_live := true
@@ -197,6 +199,24 @@ func die():
 		is_live = false
 		if animation_node: animation_node.pause()
 		$AudioStreamPlayer.play()
+		for i in 8:
+			var death_particle_instance: RigidBody3D = DEATH_PARTICLE.instantiate()
+			get_parent().add_child(death_particle_instance)
+			death_particle_instance.get_node("MeshInstance3D").mesh = mesh
+			death_particle_instance.get_node("MeshInstance3D").material_override = material
+			death_particle_instance.global_position = global_position
+			var random_rot := _random_rotation()
+			death_particle_instance.rotation = random_rot
+			var impulse_dir := random_rot.normalized() * speed
+			death_particle_instance.apply_central_impulse(impulse_dir)
+			death_particle_instance.apply_torque(_rand_dir())
+
+func _rand_dir() -> Vector3:
+	return Vector3(randf_range(-speed, speed), randf_range(-speed, speed), randf_range(-speed, speed))
+
+func _random_rotation() -> Vector3:
+	# 仿照Unity版本: Random.rotation -> 随机欧拉角
+	return Vector3(randf_range(0, 360), randf_range(0, 360), randf_range(0, 360))
 func _on_button_pressed() -> void:
 	$RoadMaker.save()
 func set_timeout(delay :float):

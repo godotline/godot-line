@@ -1,10 +1,10 @@
-@tool  # 必须放在首行，启用编辑器模式
-extends Area3D
+@tool
+extends BaseTrigger
+## CustomAnimPlayTrigger - 自定义动画播放触发器
+## 当玩家进入时播放一个或多个 AnimationPlayer 的动画
 
 @export var animations: Array[AnimationPlayer] = []
 @export var animation_names: Array[StringName] = []
-@export var one_shot: bool = false
-var used: bool = false
 
 signal hit_the_line
 
@@ -25,20 +25,9 @@ signal hit_the_line
 			停止预览 = false
 
 # ==================== 核心逻辑 ====================
-func _on_body_entered(body: Node3D) -> void:
-	if Engine.is_editor_hint():  # 编辑器模式下忽略碰撞
-		return
-	
-	if not (body is CharacterBody3D):
-		return
-	if one_shot and used:
-		return
-	
+func _on_triggered(_body: Node3D) -> void:
 	hit_the_line.emit()
 	_play_animations()
-	
-	if one_shot:
-		used = true
 
 func _play_animations() -> void:
 	for i in range(animations.size()):
@@ -76,11 +65,11 @@ func _get_animation_name(player: AnimationPlayer, index: int) -> StringName:
 	return &""
 
 func _ready() -> void:
+	# 调用父类的 _ready
+	super._ready()
+	
 	# 编辑器模式下只初始化，不执行游戏逻辑
 	if Engine.is_editor_hint():
 		return
 	
-	used = false
 	_stop_animations()
-	if has_node("MeshInstance3D"):
-		$MeshInstance3D.visible = false
