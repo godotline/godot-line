@@ -56,8 +56,6 @@ func _on_gameplay_pressed() -> void:
 	State.diamond = 0
 	State.crown = 0
 	State.percent = 0
-	State.anim_time = 0.0
-	State.music_checkpoint_time = 0.0
 	State.line_crossing_crown = 0
 	State.crowns = [0, 0, 0]
 
@@ -71,3 +69,5 @@ func _on_gamereplay_pressed() -> void:
 	State.diamond = 0
 	State.crown = 0
 	State.percent = 0
+	State.anim_time = 0.0
+	State.music_checkpoint_time = 0.0

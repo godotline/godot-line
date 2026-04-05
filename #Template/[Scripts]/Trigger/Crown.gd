@@ -30,6 +30,10 @@ func _on_Crown_body_entered(main_line: PhysicsBody3D) -> void:
 	State.line_crossing_crown = tag
 	if tag >= 1 and tag <= 3:
 		State.crowns[tag - 1] = 1
+	# 记录音乐检查点时间
+	var music_player := main_line.get_node("MusicPlayer") as AudioStreamPlayer
+	if music_player and music_player.playing:
+		State.music_checkpoint_time = music_player.get_playback_position()
 	$AnimationPlayer.play("crown")
 	await $AnimationPlayer.animation_finished
 	queue_free()

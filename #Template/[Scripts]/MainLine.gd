@@ -184,8 +184,10 @@ func turn():
 			# 音乐同步播放
 			if music:
 				$MusicPlayer.stream = music
-				if State.anim_time > 0.0:
-					$MusicPlayer.play(State.anim_time)
+				# 复活时恢复音乐检查点时间，否则使用动画时间
+				var music_start_time := State.music_checkpoint_time if State.music_checkpoint_time > 0.0 else State.anim_time
+				if music_start_time > 0.0:
+					$MusicPlayer.play(music_start_time)
 				else:
 					$MusicPlayer.play()
 		if is_start :
