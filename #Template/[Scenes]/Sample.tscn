@@ -1,0 +1,129 @@
+[gd_scene format=3 uid="uid://b8pwikissfhmb"]
+
+[ext_resource type="Script" uid="uid://d2244y2svyt45" path="res://#Template/[Scripts]/GameManager.gd" id="1_ae7tf"]
+[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/MainLine.tscn" id="2_ep0cv"]
+[ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="3_acgrg"]
+[ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="4_4u5qg"]
+[ext_resource type="PackedScene" path="res://#Template/GAMEUI.tscn" id="5_0e4gd"]
+[ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="6_uy1mm"]
+[ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="7_sgchv"]
+[ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Diamond.tscn" id="8_uy1mm"]
+[ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/GuideTap.tscn" id="9_sgchv"]
+[ext_resource type="PackedScene" path="res://#Template/trigger.tscn" id="10_q71od"]
+[ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="11_lbrgy"]
+[ext_resource type="PackedScene" path="res://#Template/BaseWall.tscn" id="12_pxq50"]
+[ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Ending.tscn" id="13_lbrgy"]
+[ext_resource type="PackedScene" path="res://#Template/Crown.tscn" id="14_pxq50"]
+[ext_resource type="PackedScene" uid="uid://bjvijfdfvm1xl" path="res://#Template/CrownSet.tscn" id="15_67fsp"]
+
+[sub_resource type="Environment" id="Environment_c2ibq"]
+
+[sub_resource type="Animation" id="Animation_wkp8b"]
+length = 0.001
+
+[sub_resource type="Animation" id="3"]
+length = 130.0
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cm0pq"]
+_data = {
+&"RESET": SubResource("Animation_wkp8b"),
+&"level": SubResource("3")
+}
+
+[node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Camera", "Mainline")]
+script = ExtResource("1_ae7tf")
+Camera = NodePath("Object/CameraFollower/Camera3D")
+Mainline = NodePath("Object/MainLine")
+factor = 1.0
+
+[node name="Object" type="Node3D" parent="." unique_id=1533079692]
+
+[node name="MainLine" parent="Object" unique_id=2020142567 instance=ExtResource("2_ep0cv")]
+color = Color(0, 1, 0, 1)
+animation = NodePath("../AnimationPlayer")
+music = ExtResource("4_4u5qg")
+
+[node name="CameraFollower" type="Node3D" parent="Object" unique_id=364981525]
+transform = Transform3D(-0.70710677, 0.4999999, -0.4999999, 0, 0.7071067, 0.7071067, 0.70710665, 0.49999997, -0.49999997, -10, 20, -10)
+script = ExtResource("3_acgrg")
+player = NodePath("../MainLine")
+add_position = Vector3(-10, 20, -10)
+rotation_offset = Vector3(-45, 225, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Object/CameraFollower" unique_id=1071878446]
+environment = SubResource("Environment_c2ibq")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Object" unique_id=560431425]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_cm0pq")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Object" unique_id=1791213843]
+transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
+shadow_enabled = true
+
+[node name="gameui" parent="Object" unique_id=75582180 node_paths=PackedStringArray("line") instance=ExtResource("5_0e4gd")]
+line = NodePath("../MainLine")
+crown_no_light = ExtResource("6_uy1mm")
+
+[node name="Scene" type="Node3D" parent="." unique_id=1042175662]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -45)
+
+[node name="BaseFloor" parent="Scene" unique_id=755968428 instance=ExtResource("7_sgchv")]
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 45, -1, 45)
+
+[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="Scene/BaseFloor" unique_id=1160046144]
+size = Vector3(1, 1, 1)
+
+[node name="Diamond" parent="Scene" unique_id=149611988 instance=ExtResource("8_uy1mm")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 44.776867, 0.15720987, 55.215874)
+
+[node name="GuideTap" parent="Scene" unique_id=1723303954 instance=ExtResource("9_sgchv")]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 44.886116, -0.49999997, 55.619904)
+
+[node name="Trigger" parent="Scene" unique_id=608483111 instance=ExtResource("10_q71od")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.002282, 47.406303, -9.536743e-07, 55.828354)
+script = ExtResource("11_lbrgy")
+height = 4.0
+
+[node name="BaseWall" parent="Scene" unique_id=359263919 instance=ExtResource("12_pxq50")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 9.397742, 47.416126, -1.9073486e-06, 48.34996)
+
+[node name="BaseWall3" parent="Scene" unique_id=1978377756 instance=ExtResource("12_pxq50")]
+transform = Transform3D(-4.371139e-08, 0, -9.397742, 0, 1, 0, 1, 0, -4.1078837e-07, 47.416126, -1.9073486e-06, 58.91649)
+
+[node name="BaseWall2" parent="Scene" unique_id=605626697 instance=ExtResource("12_pxq50")]
+transform = Transform3D(61.305275, 0, 0, 0, 1, 0, 0, 0, 68.8622, 79.542465, -1.9073486e-06, 78.12301)
+
+[node name="BaseFloor2" parent="Scene" unique_id=1080893231 instance=ExtResource("7_sgchv")]
+transform = Transform3D(19.905514, 0, 0, 0, 1, 0, 0, 0, 4.5696793, 63.925785, 2.1299973, 55.686684)
+
+[node name="BaseFloor3" parent="Scene" unique_id=794439580 instance=ExtResource("7_sgchv")]
+transform = Transform3D(9.952755, 0, -3.9574575, 0, 1, 0, 17.238678, 0, 2.2848392, 75.729576, 2.1299973, 64.84505)
+
+[node name="BaseFloor4" parent="Scene" unique_id=412766049 instance=ExtResource("7_sgchv")]
+transform = Transform3D(19.905512, 0, 0, 0, 1, 0, 0, 0, 4.5696783, 88.06795, 2.1299973, 72.05956)
+
+[node name="jinzita" parent="Scene" unique_id=1497290031 instance=ExtResource("13_lbrgy")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 189.54523, 3.0376961, 71.80641)
+
+[node name="Crown" parent="Scene" unique_id=1805653336 instance=ExtResource("14_pxq50")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.806244, 3.1029124, 55.88733)
+tag = 2
+
+[node name="Crown3" parent="Scene" unique_id=1578351782 instance=ExtResource("14_pxq50")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 83.76927, 3.1029124, 71.94954)
+tag = 3
+
+[node name="CrownSet" parent="Scene" unique_id=127328941 instance=ExtResource("15_67fsp")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 56.278027, 0.50000006, 63.85392)
+tag = 2
+
+[node name="CrownSet2" parent="Scene" unique_id=1179078594 instance=ExtResource("15_67fsp")]
+transform = Transform3D(0.016963817, 0, -0.9998561, 0, 1, 0, 0.9998561, 0, 0.016963817, 50.605064, 0.49999762, 50.291656)
+
+[node name="Crown2" parent="Scene" unique_id=36470208 instance=ExtResource("14_pxq50")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.75054, -0.027085304, 50.502655)
+
+[node name="CrownSet3" parent="Scene" unique_id=1361139948 instance=ExtResource("15_67fsp")]
+transform = Transform3D(0, 0, -1.0000001, 0, 1, 0, 1.0000001, 0, 0, 83.82147, 0.49999762, 64.94314)
+tag = 3

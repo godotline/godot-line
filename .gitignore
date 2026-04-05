@@ -1,2 +1,6 @@
 # Ignore hidden directories (all levels)
-**/.*/
+.godot/
+
+# Ignore test reports
+reports/
+.vscode/

@@ -4,7 +4,7 @@ func _ready() -> void:
 
 func _on_taper_entered(body: Node3D) -> void:
 	if body is CharacterBody3D:
-			body.turn()
-			$"../AnimationPlayer".play("taper")
-			await $"../AnimationPlayer".animation_finished
-			$"..".visible = false
+		await body.onturn
+		$"../AnimationPlayer".play("taper")
+		await $"../AnimationPlayer".animation_finished
+		queue_free()

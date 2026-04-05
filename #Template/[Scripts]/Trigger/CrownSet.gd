@@ -4,17 +4,9 @@ extends Node3D
 func _ready() -> void:
 	$AnimationPlayer.play("RESET")
 
-func _process(delta: float) -> void:
-	if State.line_crossing_crown == tag:
-		if tag == 1 and State.firstcrown == 1:
-			$AnimationPlayer.play("crown_change")
-			await $AnimationPlayer.animation_finished
-			tag = 0
-		if tag == 2 and State.secondcrown == 1:
-			$AnimationPlayer.play("crown_change")
-			await $AnimationPlayer.animation_finished
-			tag = 0
-		if tag == 3 and State.thridcrown == 1:
+func _process(_delta: float) -> void:
+	if State.line_crossing_crown >= tag and tag >= 1 and tag <= 3:
+		if State.crowns[tag - 1] == 1:
 			$AnimationPlayer.play("crown_change")
 			await $AnimationPlayer.animation_finished
 			tag = 0

@@ -130,6 +130,7 @@ godot --headless --run-tests
 - **ShinnLine** - 原始项目来源
 - **冰焰模板** - 设计参考与对齐标准
 - **gdUnit4** - 优秀的 Godot 测试框架
+- https://github.com/Ironnoob73/DancingLineGodotTemplate
 - 所有贡献者和社区成员
 
 ---

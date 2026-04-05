@@ -21,6 +21,8 @@ signal onturn
 @onready var animation_node:AnimationPlayer = get_node(animation) if animation else null
 @onready var land_effect: GPUParticles3D = $LandEffect
 
+@export var music: AudioStream
+
 const DEATH_PARTICLE = preload("res://#Template/DeathParticle.tscn")
 
 var level_manager
@@ -48,6 +50,7 @@ func _ready() -> void:
 		if State.main_line_transform:
 			transform = State.main_line_transform
 			is_turn = State.is_turn
+	if is_inside_tree():
 		_last_floor_y = global_position.y
 
 func _physics_process(delta: float) -> void:
@@ -173,6 +176,13 @@ func turn():
 			animation_node.play("level")
 			#await get_tree().create_timer(timeout).timeout
 			animation_node.seek(State.anim_time)
+			# 音乐同步播放
+			if music:
+				$MusicPlayer.stream = music
+				if State.anim_time > 0.0:
+					$MusicPlayer.play(State.anim_time)
+				else:
+					$MusicPlayer.play()
 		if is_start :
 			emit_signal("onturn")
 			rotation_degrees += Vector3(0,1,0) * rot if is_turn else Vector3.DOWN * rot
@@ -198,6 +208,7 @@ func die():
 	if !noclip:
 		is_live = false
 		if animation_node: animation_node.pause()
+		$MusicPlayer.stop()
 		$AudioStreamPlayer.play()
 		for i in 8:
 			var death_particle_instance: RigidBody3D = DEATH_PARTICLE.instantiate()

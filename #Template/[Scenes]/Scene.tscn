@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://d2244y2svyt45" path="res://#Template/[Scripts]/GameManager.gd" id="1_dha8j"]
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/MainLine.tscn" id="2_ots34"]
-[ext_resource type="PackedScene" path="res://#Template/RoadMaker.tscn" id="3_h4xkc"]
 [ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
 [ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_lu6ew"]
 [ext_resource type="PackedScene" path="res://#Template/GAMEUI.tscn" id="6_hddbq"]
@@ -49,8 +48,6 @@ factor = 1.0
 [node name="MainLine" parent="Object" unique_id=2020142567 instance=ExtResource("2_ots34")]
 color = Color(0, 1, 0, 1)
 animation = NodePath("../AnimationPlayer")
-
-[node name="RoadMaker" parent="Object/MainLine" unique_id=600784977 instance=ExtResource("3_h4xkc")]
 
 [node name="CameraFollower" type="Node3D" parent="Object" unique_id=364981525]
 unique_name_in_owner = true

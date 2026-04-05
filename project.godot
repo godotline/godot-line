@@ -16,6 +16,7 @@ warnings/check_invalid_track_paths=false
 
 config/name="GodotLine"
 config/features=PackedStringArray("4.6")
+run/max_fps=0
 boot_splash/show_image=false
 
 [autoload]
@@ -78,7 +79,6 @@ savetaper={
 
 3d/run_on_separate_thread=true
 3d/physics_engine="Jolt Physics"
-common/physics_interpolation=true
 
 [rendering]
 

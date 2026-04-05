@@ -4,19 +4,10 @@ extends Area3D
 @export var tag := 1
 
 func _get_camera_follower() -> Node3D:
-	var current_scene := get_tree().current_scene
-	if not current_scene:
-		return null
-
-	var follower = current_scene.get_node_or_null("%CameraFollower") as Node3D
-	if follower:
-		return follower
-
-	follower = current_scene.find_child("CameraFollower", true, false) as Node3D
-	if follower:
-		return follower
-
-	return current_scene.find_child("BaseCam", true, false) as Node3D
+	var game_manager := get_tree().current_scene
+	if game_manager and game_manager.Camera:
+		return game_manager.Camera.get_parent() as Node3D
+	return null
 
 #皇冠旋转
 func _process(delta: float) -> void:
@@ -27,25 +18,18 @@ func _on_Crown_body_entered(main_line: PhysicsBody3D) -> void:
 	State.main_line_transform = main_line.transform
 	var camera_follower := _get_camera_follower()
 	if camera_follower:
-		var has_params := false
-		if "add_position" in camera_follower:
-			State.camera_follower_add_position = camera_follower.add_position
-			has_params = true
-		if "rotation_offset" in camera_follower:
-			State.camera_follower_rotation_offset = camera_follower.rotation_offset
-			has_params = true
-		if "distance_from_object" in camera_follower:
-			State.camera_follower_distance = camera_follower.distance_from_object
-			has_params = true
-		if "follow_speed" in camera_follower:
-			State.camera_follower_follow_speed = camera_follower.follow_speed
-			has_params = true
-		State.camera_follower_has_checkpoint = has_params
-	if "is_turn" in main_line:
-		State.is_turn = main_line.is_turn
-	if "animation_node" in main_line and main_line.animation_node and main_line.animation_node.current_animation:
+		State.camera_follower_add_position = camera_follower.add_position
+		State.camera_follower_rotation_offset = camera_follower.rotation_offset
+		State.camera_follower_distance = camera_follower.distance_from_object
+		State.camera_follower_follow_speed = camera_follower.follow_speed
+		State.camera_follower_has_checkpoint = true
+	State.is_turn = main_line.is_turn
+	if main_line.animation_node and main_line.animation_node.current_animation:
 		State.anim_time = main_line.animation_node.current_animation_position
+	
 	State.line_crossing_crown = tag
+	if tag >= 1 and tag <= 3:
+		State.crowns[tag - 1] = 1
 	$AnimationPlayer.play("crown")
 	await $AnimationPlayer.animation_finished
 	queue_free()

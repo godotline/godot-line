@@ -2,11 +2,9 @@
 
 [ext_resource type="ArrayMesh" uid="uid://c4vryn6nsdwar" path="res://#Template/[Resources]/Models/Diamond.obj" id="1"]
 [ext_resource type="Script" uid="uid://c2hh2qljydhbm" path="res://#Template/[Scripts]/Trigger/Diamond.gd" id="2"]
+[ext_resource type="Material" uid="uid://yr2s0ybyebck" path="res://#Template/[Materials]/Diamond.tres" id="3_lsh75"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_v601g"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v601g"]
-albedo_color = Color(0, 1, 1, 1)
 
 [sub_resource type="Animation" id="Animation_ptpe0"]
 length = 0.001
@@ -66,9 +64,6 @@ collision_mode = 1
 collision_friction = 0.5
 collision_bounce = 0.1
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pue2o"]
-vertex_color_use_as_albedo = true
-
 [sub_resource type="ArrayMesh" id="ArrayMesh_os5hl"]
 _surfaces = [{
 "aabb": AABB(-0.005616686, -0.001654883, -0.005644563, 0.010685256, 0.003282232, 0.010725637),
@@ -92,7 +87,7 @@ _surfaces = [{
 "index_count": 168,
 "index_data": PackedByteArray("KgAkACsAAQArACQAAgArAAEALAAkACoAIwAsACoAJQAsACMABAAtAAYALgAtAAQALgAHAC0ABwAFAC0ACgAtAAUAJgAtAAoAJgAvAC0ALwAwAC0ALQAwADEAMQAwAAkAMgAtADEALQAyAAYAMwAGADIACAAGADMACwAMADQADgA0AAwADQA0AA4AEwAUABUAFwA1ACcAJwA2ABcAFgA2ACcAFgAnADcANwAnABgAJwApABgAKQAnADgAOAAnACgAOQAoACcAGQAoADkAOQAnADoAJwA1ADoANQA7ADoAGgA7ADUAPAAPABEAEQAPABIAPQAPADwAHwA+ACEAPwA+AB8APwBAAD4AQQBAAD8AQQBCAEAAQwBCAEEAIgBCAEMAIABCACIAGwAcAEQAGwBEAB4AHgBEAB0ARQBGABAARwBGAEUASAAAAAMASQAAAEgA"),
 "lods": [0.0028572865, PackedByteArray("IwAkAAIAAQACACQAJQAkACMAIwAAACUAJQAAAAMABAAFAAYABAAHAAUABQAIAAYACAAFAAkAJgAJAAUAJgAFAAoACwAMAA0ADgANAAwACwAPABAAEAAPABEAEQAPABIAEwAUABUAFwAaACcAGQAnABoAFgAXACcAGQAoACcAFgAnABgAKQAnACgAJwApABgAGwAcAB0AGwAdAB4AHwAgACEAIgAgAB8A"), 0.0042859297, PackedByteArray("AAABAAIAAwABAAAABAAFAAYABAAHAAUABQAIAAYACAAFAAkACgAJAAUACwAMAA0ADgANAAwACwAPABAAEAAPABEAEQAPABIAEwAUABUAFgAXABgAGAAXABkAGQAXABoAGwAcAB0AGwAdAB4AHwAgACEAIgAgAB8A")],
-"material": SubResource("StandardMaterial3D_pue2o"),
+"material": ExtResource("3_lsh75"),
 "name": "Mesh",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
@@ -106,7 +101,6 @@ shadow_mesh = SubResource("ArrayMesh_os5hl")
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 collision_layer = 0
 script = ExtResource("2")
-color = Color(0, 1, 1, 1)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1645236605]
 shape = SubResource("BoxShape3D_v601g")
@@ -114,7 +108,7 @@ shape = SubResource("BoxShape3D_v601g")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=996011055]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 mesh = ExtResource("1")
-surface_material_override/0 = SubResource("StandardMaterial3D_v601g")
+surface_material_override/0 = ExtResource("3_lsh75")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=889977260]
 libraries/ = SubResource("AnimationLibrary_hg8oc")
