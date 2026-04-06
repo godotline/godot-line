@@ -110,3 +110,4 @@ script = ExtResource("3_1lryv")
 shape = SubResource("BoxShape3D_yo5sj")
 
 [connection signal="body_entered" from="Area3D" to="Area3D" method="_on_taper_entered"]
+[connection signal="body_exited" from="Area3D" to="Area3D" method="_on_taper_exited"]

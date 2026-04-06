@@ -5,7 +5,7 @@ class_name GameManager
 @export_group("Node")
 @export var Camera: Camera3D
 @export var Mainline: CharacterBody3D
-@export var factor:= 1.415
+@export var factor:= 1
 @export_tool_button("Origin Pos","TransitionImmediateBig")
 
 var origin_action = func():
