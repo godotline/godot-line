@@ -6,6 +6,12 @@ class_name GameManager
 @export var Camera: Camera3D
 @export var Mainline: CharacterBody3D
 @export var factor:= 1
+
+var camera_follower: Node3D:
+	get:
+		if Camera:
+			return Camera.get_parent() as Node3D
+		return null
 @export_tool_button("Origin Pos","TransitionImmediateBig")
 
 var origin_action = func():
@@ -37,10 +43,3 @@ func calculate_anim_start_time() -> float:
 
 	var anim_time = moved_distance / actual_speed
 	return anim_time
-func setlinecolor(color):
-	if Mainline:
-		Mainline.set_color(color)
-func getlinecolor() -> Color:
-	if Mainline:
-		return Mainline.get_color()
-	return Color.WHITE

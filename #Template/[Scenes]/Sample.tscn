@@ -87,7 +87,6 @@ height = 4.0
 
 [node name="Trigger2" parent="Scene/Trigger" unique_id=1001188073 instance=ExtResource("10_q71od")]
 script = ExtResource("12_67fsp")
-set_camera = NodePath("../../../Object/CameraFollower")
 active_position = true
 new_add_position = Vector3(-5, 10, -5)
 active_rotate = true

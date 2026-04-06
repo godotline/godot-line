@@ -10,7 +10,15 @@
 - [gameui.gd](file://#Template/[Scripts]/gameui.gd)
 - [MainLine.gd](file://#Template/[Scripts]/MainLine.gd)
 - [GameManager.gd](file://#Template/[Scripts]/GameManager.gd)
+- [State.gd](file://#Template/[Scripts]/State.gd)
 </cite>
+
+## 更新摘要
+**变更内容**
+- 更新CameraTrigger组件分析，详细说明其基于时间或事件的相机参数调整能力
+- 新增CameraTrigger的触发逻辑和参数配置说明
+- 补充多参数同时调整和缓动动画过渡的实现细节
+- 更新依赖关系分析，反映CameraTrigger与CameraFollower的协作关系
 
 ## 目录
 1. [简介](#简介)
@@ -25,12 +33,13 @@
 10. [附录](#附录)
 
 ## 简介
-相机系统是游戏中的重要组成部分，负责提供玩家视角体验。本系统包含三个核心组件：
+相机系统是游戏中的重要组成部分，负责提供玩家视角体验。本系统包含四个核心组件：
 - **CameraFollower**：相机跟随组件，实现平滑的相机跟随效果
 - **CamShaker**：相机抖动效果组件，提供震动反馈
 - **CameraTrigger**：相机触发器，用于场景中触发相机参数变化
+- **CamTransitionTrigger**：投影切换触发器，处理相机投影模式的切换
 
-这些组件通过状态管理机制实现相机参数的保存和恢复，支持游戏进程中的相机配置切换。
+这些组件通过状态管理机制实现相机参数的保存和恢复，支持游戏进程中的相机配置切换，并提供基于时间或事件的相机参数调整能力。
 
 ## 项目结构
 相机系统位于模板脚本目录下的CameraScripts文件夹中，包含四个主要脚本文件：
@@ -44,7 +53,7 @@ CT[CameraTrigger.gd<br/>相机触发器]
 CTT[CamTransitionTrigger.gd<br/>投影切换触发器]
 end
 subgraph "状态管理"
-ST[State模块<br/>全局状态存储]
+ST[State.gd<br/>全局状态存储]
 UI[gameui.gd<br/>用户界面控制]
 end
 subgraph "游戏逻辑"
@@ -65,11 +74,13 @@ GM --> CF
 - [CameraFollower.gd:1-168](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L168)
 - [CamShaker.gd:1-37](file://#Template/[Scripts]/CameraScripts/CamShaker.gd#L1-L37)
 - [CameraTrigger.gd:1-76](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L76)
+- [CamTransitionTrigger.gd:1-125](file://#Template/[Scripts]/CameraScripts/CamTransitionTrigger.gd#L1-L125)
 
 **章节来源**
 - [CameraFollower.gd:1-168](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L168)
 - [CamShaker.gd:1-37](file://#Template/[Scripts]/CameraScripts/CamShaker.gd#L1-L37)
 - [CameraTrigger.gd:1-76](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L76)
+- [CamTransitionTrigger.gd:1-125](file://#Template/[Scripts]/CameraScripts/CamTransitionTrigger.gd#L1-L125)
 
 ## 核心组件
 相机系统由四个核心组件构成，每个组件都有特定的功能和接口：
@@ -80,6 +91,7 @@ GM --> CF
 - 平滑的相机位置插值
 - 相机参数的实时调整
 - 状态检查点的保存和恢复
+- 多参数缓动动画的协调控制
 
 ### CamShaker（相机抖动组件）
 相机抖动组件提供震动效果：
@@ -90,10 +102,11 @@ GM --> CF
 
 ### CameraTrigger（相机触发器）
 相机触发器用于场景中触发相机参数变化：
-- 基于时间或事件的触发
-- 多参数同时调整
-- 缓动动画过渡
-- 条件性参数应用
+- 基于时间或事件的触发机制
+- 多参数同时调整能力
+- 缓动动画过渡效果
+- 条件性参数应用控制
+- 精确的时间判定系统
 
 ### CamTransitionTrigger（投影切换触发器）
 投影切换触发器处理相机投影模式的切换：
@@ -304,20 +317,24 @@ CameraTrigger组件提供基于区域的相机参数触发功能：
 
 **导出属性**
 - `set_camera`: NodePath - 目标相机跟随器
-- `active_position`: bool - 是否激活位置调整
-- `new_add_position`: Vector3 - 新的位置参数
-- `active_rotate`: bool - 是否激活旋转调整
-- `new_rotation`: Vector3 - 新的旋转参数
-- `active_distance`: bool - 是否激活距离调整
-- `new_distance`: float - 新的距离参数
-- `active_speed`: bool - 是否激活速度调整
-- `new_follow_speed`: float - 新的速度参数
+- `active_position`: bool - 是否激活位置调整（默认true）
+- `new_add_position`: Vector3 - 新的位置参数（默认Vector3.ZERO）
+- `active_rotate`: bool - 是否激活旋转调整（默认true）
+- `new_rotation`: Vector3 - 新的旋转参数（默认Vector3(45, 45, 0)）
+- `active_distance`: bool - 是否激活距离调整（默认true）
+- `new_distance`: float - 新的距离参数（默认25.0）
+- `active_speed`: bool - 是否激活速度调整（默认true）
+- `new_follow_speed`: float - 新的速度参数（默认1.2）
 - `ease_type`: Tween.EaseType - 缓动类型（默认EASE_IN_OUT）
 - `need_time`: float - 动画持续时间（默认2.0秒）
 
 **时间判定属性**
-- `use_time`: bool - 是否使用时间判定
-- `trigger_time`: float - 触发时间点
+- `use_time`: bool - 是否使用时间判定（默认false）
+- `trigger_time`: float - 触发时间点（默认0.0）
+
+**内部状态属性**
+- `triggered`: bool - 是否已触发（默认false）
+- `triggered_at_crown`: bool - 是否在皇冠处触发（默认false）
 
 **核心方法**
 - `_ready()`: 初始化触发器
@@ -399,6 +416,22 @@ TweenSpeed --> Complete
 **章节来源**
 - [CameraTrigger.gd:27-76](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L27-L76)
 
+#### 多参数同时调整机制
+CameraTrigger的触发逻辑展示了强大的多参数同时调整能力：
+
+1. **参数独立控制**：每个相机参数（位置、旋转、距离、速度）都可以独立启用或禁用
+2. **缓动动画协调**：所有激活的参数都会启动对应的Tween动画
+3. **统一的缓动参数**：所有动画共享相同的缓动类型和持续时间
+4. **条件性应用**：只有当对应参数的active_*标志为true时才执行动画
+
+这种设计允许开发者在同一触发器中实现复杂的相机效果，如：
+- 紧急转向时的相机位置偏移和速度调整
+- 进入特定区域时的全方位相机参数重置
+- 动作序列中的相机跟随参数优化
+
+**章节来源**
+- [CameraTrigger.gd:53-76](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L53-L76)
+
 ### CamTransitionTrigger 组件分析
 
 #### 投影切换接口
@@ -408,7 +441,7 @@ CamTransitionTrigger组件专门处理相机投影模式的切换：
 - `transition_duration`: float - 切换持续时间（默认1.0秒）
 - `orthogonal_size`: float - 正交投影大小（默认10.0）
 - `perspective_fov`: float - 透视投影FOV（默认75.0）
-- `projection_mode`: enum - 投影模式选择
+- `projection_mode`: enum - 投影模式选择（0: 正交, 1: 透视）
 
 **核心方法**
 - `_ready()`: 初始化切换器
@@ -488,13 +521,13 @@ CS[CamShaker] --> |影响| CF
 CTT[CamTransitionTrigger] --> |控制| Camera3D
 end
 subgraph "状态管理"
-ST[State模块] --> |保存/恢复| CF
+ST[State.gd] --> |保存/恢复| CF
 CG[Crown.gd] --> |设置检查点| ST
 UI[gameui.gd] --> |控制恢复| ST
 end
 subgraph "游戏逻辑"
-ML[MainLine] --> |提供位置| CF
-GM[GameManager] --> |提供辅助| CF
+ML[MainLine.gd] --> |提供位置| CF
+GM[GameManager.gd] --> |提供辅助| CF
 end
 CF -.->|事件| ML
 ST -.->|状态| UI
@@ -539,9 +572,17 @@ SetFlag --> [*]
 - [Crown.gd:28-43](file://#Template/[Scripts]/Trigger/Crown.gd#L28-L43)
 - [gameui.gd:44-58](file://#Template/[Scripts]/gameui.gd#L44-L58)
 
+### CameraTrigger与CameraFollower的协作
+CameraTrigger与CameraFollower之间建立了紧密的协作关系：
+
+1. **参数传递机制**：CameraTrigger通过NodePath引用直接控制CameraFollower的参数
+2. **缓动动画协调**：CameraTrigger启动的Tween动画与CameraFollower内部的缓动系统协同工作
+3. **状态一致性**：CameraTrigger会先调用`kill_tweens()`确保状态的一致性
+4. **条件性参数应用**：CameraTrigger根据active_*标志决定是否应用相应的参数调整
+
 **章节来源**
-- [CameraFollower.gd:54-72](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L54-L72)
-- [Crown.gd:28-43](file://#Template/[Scripts]/Trigger/Crown.gd#L28-L43)
+- [CameraTrigger.gd:44-76](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L44-L76)
+- [CameraFollower.gd:74-148](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L74-L148)
 
 ## 性能考虑
 相机系统在设计时充分考虑了性能优化：
@@ -561,6 +602,11 @@ SetFlag --> [*]
 - 相机抖动的即时执行，不保留长期状态
 - 触发器的事件驱动模式，减少轮询开销
 
+### CameraTrigger性能优化
+- **条件性执行**：仅在相关参数被激活时创建Tween对象
+- **统一缓动参数**：所有参数共享相同的缓动类型和持续时间
+- **状态检查**：触发前先停止现有动画，避免状态冲突
+
 ## 故障排除指南
 
 ### 常见问题及解决方案
@@ -579,11 +625,18 @@ SetFlag --> [*]
 - 检查目标节点是否在mainline组中
 - 确认use_time模式下的时间计算
 - 验证NodePath引用的有效性
+- 检查CameraTrigger是否正确引用了CameraFollower
 
 **状态恢复失败**
 - 检查State模块中的检查点参数
 - 确认gameui.gd中的恢复标志设置
 - 验证相机跟随器的延迟加载机制
+
+**CameraTrigger参数不生效**
+- 确认对应的active_*标志已启用
+- 检查ease_type和need_time参数设置
+- 验证new_*参数的数值范围是否合理
+- 确认triggered标志没有被意外设置
 
 **章节来源**
 - [CameraFollower.gd:30-52](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L30-L52)
@@ -598,18 +651,22 @@ SetFlag --> [*]
 - **状态管理**：完善的参数保存和恢复机制
 - **事件驱动**：基于Godot引擎的信号系统
 - **性能优化**：高效的跟随算法和缓动系统
+- **灵活的触发机制**：支持基于时间或事件的相机参数调整
 
 ### API特性
 - **直观的接口**：清晰的导出属性和方法命名
 - **灵活的配置**：丰富的参数选项满足不同需求
 - **平滑的动画**：统一的缓动系统提供流畅体验
 - **错误处理**：完善的边界条件检查和容错机制
+- **多参数协调**：支持同时调整多个相机参数
 
 ### 最佳实践建议
 - 合理设置follow_speed以平衡响应性和稳定性
 - 使用适当的ease_type提升用户体验
 - 在复杂场景中谨慎使用相机抖动效果
 - 利用状态检查点机制实现无缝的游戏体验
+- 充分利用CameraTrigger的多参数同时调整能力
+- 合理配置use_time模式以实现精确的时间同步
 
 ## 附录
 
@@ -644,6 +701,17 @@ SetFlag --> [*]
 | `_process(delta)` | float | void | 时间判定循环 |
 | `_trigger()` | 无 | void | 执行触发逻辑 |
 
+#### CamTransitionTrigger 方法参考
+| 方法名 | 参数 | 返回值 | 描述 |
+|--------|------|--------|------|
+| `_ready()` | 无 | void | 初始化切换器 |
+| `_on_body_entered(body)` | Node3D | void | 碰撞体进入回调 |
+| `_transition_to_orthogonal()` | 无 | void | 切换到正交投影 |
+| `_transition_to_perspective()` | 无 | void | 切换到透视投影 |
+| `_apply_transition(t, start_value, to_ortho)` | float, float, bool | void | 应用过渡效果 |
+| `_set_orthogonal_final()` | 无 | void | 设置最终正交状态 |
+| `_set_perspective_final()` | 无 | void | 设置最终透视状态 |
+
 ### 配置最佳实践
 
 **相机跟随参数调优**
@@ -660,3 +728,12 @@ SetFlag --> [*]
 - use_time模式适合精确的时间同步场景
 - active_*参数应根据实际需求启用
 - ease_type选择EASE_IN_OUT提供自然的过渡效果
+- need_time参数建议在1.0-3.0秒范围内调整
+- 多参数同时调整时注意参数间的协调性
+
+**CameraTrigger高级用法**
+- **事件触发**：适用于简单的碰撞触发场景
+- **时间触发**：适用于需要精确时间同步的动作序列
+- **多参数组合**：可以同时调整位置、旋转、距离和速度参数
+- **参数优先级**：被激活的参数会覆盖当前值，未激活的参数保持不变
+- **缓动协调**：所有参数共享相同的缓动类型和持续时间，确保视觉一致性
