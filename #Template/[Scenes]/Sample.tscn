@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/GuideTap.tscn" id="9_sgchv"]
 [ext_resource type="PackedScene" path="res://#Template/trigger.tscn" id="10_q71od"]
 [ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="11_lbrgy"]
+[ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="12_67fsp"]
 [ext_resource type="PackedScene" path="res://#Template/BaseWall.tscn" id="12_pxq50"]
 [ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Ending.tscn" id="13_lbrgy"]
 [ext_resource type="PackedScene" path="res://#Template/Crown.tscn" id="14_pxq50"]
@@ -85,6 +86,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.002282, 47.406303, -9.536743e-
 script = ExtResource("11_lbrgy")
 height = 4.0
 
+[node name="Trigger2" parent="Scene/Trigger" unique_id=1001188073 instance=ExtResource("10_q71od")]
+script = ExtResource("12_67fsp")
+set_camera = NodePath("../../../Object/CameraFollower")
+active_position = true
+new_add_position = Vector3(-5, 10, -5)
+active_rotate = true
+new_rotation = Vector3(-45, 225, 0)
+active_distance = true
+new_distance = 5.0
+active_speed = true
+new_follow_speed = 1.2
+ease_type = 2
+need_time = 2.0
+use_time = false
+trigger_time = 0.0
+
 [node name="BaseWall" parent="Scene" unique_id=359263919 instance=ExtResource("12_pxq50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 9.397742, 47.416126, -1.9073486e-06, 48.34996)
 
@@ -103,8 +120,11 @@ transform = Transform3D(9.952755, 0, -3.9574575, 0, 1, 0, 17.238678, 0, 2.284839
 [node name="BaseFloor4" parent="Scene" unique_id=412766049 instance=ExtResource("7_sgchv")]
 transform = Transform3D(19.905512, 0, 0, 0, 1, 0, 0, 0, 4.5696783, 88.06795, 2.1299973, 72.05956)
 
+[node name="BaseFloor5" parent="Scene" unique_id=1008768232 instance=ExtResource("7_sgchv")]
+transform = Transform3D(86.000534, 0, -7.1796446, 0, 0.99999905, 0, 86.000534, 0, 7.1796446, 127.426346, 2.1299973, 113.21098)
+
 [node name="jinzita" parent="Scene" unique_id=1497290031 instance=ExtResource("13_lbrgy")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 189.54523, 3.0376961, 71.80641)
+transform = Transform3D(-0.7071067, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071067, 162.60872, 3.0376961, 146.25203)
 
 [node name="Crown" parent="Scene" unique_id=1805653336 instance=ExtResource("14_pxq50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.806244, 3.1029124, 55.88733)
