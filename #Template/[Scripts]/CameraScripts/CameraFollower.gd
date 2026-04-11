@@ -7,7 +7,7 @@ extends Node3D
 @export var follow_speed: float = 1.2
 @export var following: bool = true
 
-@onready var player_node: Node3D = get_node(player) if player else null
+@onready var line: Node3D = get_node(player) if player else null
 @onready var camera: Node3D = get_child(0) if get_child_count() > 0 else null
 
 ## Tween 属性索引枚举
@@ -31,6 +31,12 @@ const TWEEN_PROPERTIES: Array[String] = [
 var _skip_follow_once := false
 var _checkpoint_applied := false
 
+## Lerp 状态
+var _lerp_target_position: Vector3 = Vector3.ZERO
+var _lerp_target_rotation: Vector3 = Vector3.ZERO
+var _lerping: bool = false
+var _lerp_speed: float = 2.0
+
 func _ready() -> void:
 	if not camera and get_child_count() > 0:
 		camera = get_child(0)
@@ -38,19 +44,21 @@ func _ready() -> void:
 		call_deferred("_apply_state_checkpoint")
 
 func _process(delta: float) -> void:
+	if _lerping:
+		_do_lerp(delta)
+		return
 	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending and not _checkpoint_applied:
 		_apply_state_checkpoint()
-	if following and player_node:
+	if following and line:
 		rotation_degrees = rotation_offset
-		var base_transform = player_node.position + add_position
+		var base_transform = line.position + add_position
 		if _skip_follow_once:
 			position = base_transform
 			_skip_follow_once = false
 		else:
 			position = position.slerp(base_transform, abs(follow_speed * delta))
 	
-	# 假设 player 有 Is_Stop 和 Over 属性
-	if player_node and player_node.get("Is_Stop") and player_node.get("Over") and following:
+	if line and State.is_end and following:
 		following = false
 		kill_tweens()
 
@@ -60,13 +68,13 @@ func _apply_state_checkpoint() -> void:
 	var cp := State.camera_checkpoint
 	if not cp.has_checkpoint or not cp.restore_pending:
 		return
-	if player_node == null and player:
-		player_node = get_node_or_null(player) as Node3D
-	if player_node == null:
+	if line == null and player:
+		line = get_node_or_null(player) as Node3D
+	if line == null:
 		return
 	State.load_to_camera_follower(self)
 	rotation_degrees = rotation_offset
-	var base_transform = player_node.position + add_position
+	var base_transform = line.position + add_position
 	position = base_transform
 	_skip_follow_once = true
 	_checkpoint_applied = true
@@ -84,7 +92,7 @@ func revive() -> void:
 	distance_from_object = tween_backups[TweenProp.DISTANCE]
 	follow_speed = tween_backups[TweenProp.SPEED]
 	rotation_degrees = rotation_offset
-	var base_transform = player_node.position + add_position
+	var base_transform = line.position + add_position
 	position = base_transform
 
 func pick() -> void:
@@ -94,29 +102,57 @@ func pick() -> void:
 	tween_backups[TweenProp.SPEED] = follow_speed if tweens[TweenProp.SPEED] == null or not tweens[TweenProp.SPEED].is_running() else tween_ends[TweenProp.SPEED]
 
 # 通用 Tween 动画方法
-func _tween_to(index: int, new_value: Variant, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
+func _tween_to(index: int, new_value: Variant, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
 	if tweens[index] and tweens[index].is_running():
 		tweens[index].kill()
 	tween_ends[index] = new_value
 	tweens[index] = create_tween()
+	tweens[index].set_trans(trans_type)
 	tweens[index].set_ease(ease_type)
 	tweens[index].tween_property(self, TWEEN_PROPERTIES[index], new_value, duration)
 
 # 辅助方法：设置目标位置（带 Tween 动画）
-func tween_to_position(new_pos: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
-	_tween_to(TweenProp.POSITION, new_pos, duration, ease_type)
+func tween_to_position(new_pos: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
+	_tween_to(TweenProp.POSITION, new_pos, duration, ease_type, trans_type)
 
 # 辅助方法：设置旋转（带 Tween 动画）
-func tween_to_rotation(new_rot: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
-	_tween_to(TweenProp.ROTATION, new_rot, duration, ease_type)
+func tween_to_rotation(new_rot: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
+	_tween_to(TweenProp.ROTATION, new_rot, duration, ease_type, trans_type)
 
 # 辅助方法：设置距离（带 Tween 动画）
-func tween_to_distance(new_dist: float, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
-	_tween_to(TweenProp.DISTANCE, new_dist, duration, ease_type)
+func tween_to_distance(new_dist: float, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
+	_tween_to(TweenProp.DISTANCE, new_dist, duration, ease_type, trans_type)
 
 # 辅助方法：设置速度（带 Tween 动画）
-func tween_to_speed(new_speed: float, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
-	_tween_to(TweenProp.SPEED, new_speed, duration, ease_type)
+func tween_to_speed(new_speed: float, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
+	_tween_to(TweenProp.SPEED, new_speed, duration, ease_type, trans_type)
+
+## 开始 lerp 到目标位置/旋转（最短角路径）
+func lerp_to(target_pos: Vector3, target_rot: Vector3, speed: float = 2.0) -> void:
+	_lerp_target_position = target_pos
+	_lerp_target_rotation = target_rot
+	_lerp_speed = speed
+	_lerping = true
+
+func stop_lerp() -> void:
+	_lerping = false
+
+func _do_lerp(delta: float) -> void:
+	var weight := 1.0 - exp(-_lerp_speed * delta)
+	position = position.lerp(_lerp_target_position, weight)
+	var cur := rotation_degrees
+	rotation_degrees = Vector3(
+		rad_to_deg(lerp_angle(deg_to_rad(cur.x), deg_to_rad(_lerp_target_rotation.x), weight)),
+		rad_to_deg(lerp_angle(deg_to_rad(cur.y), deg_to_rad(_lerp_target_rotation.y), weight)),
+		rad_to_deg(lerp_angle(deg_to_rad(cur.z), deg_to_rad(_lerp_target_rotation.z), weight)),
+	)
+	if position.is_equal_approx(_lerp_target_position) and _angle_approx(rotation_degrees, _lerp_target_rotation):
+		_lerping = false
+
+func _angle_approx(from: Vector3, to: Vector3, tolerance: float = 0.1) -> bool:
+	return abs(fmod(to.x - from.x + 180.0, 360.0) - 180.0) < tolerance \
+		and abs(fmod(to.y - from.y + 180.0, 360.0) - 180.0) < tolerance \
+		and abs(fmod(to.z - from.z + 180.0, 360.0) - 180.0) < tolerance
 
 # 相机震动函数
 func camera_shake(intensity: float, time: float) -> void:

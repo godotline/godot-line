@@ -18,10 +18,6 @@ config/name="GodotLine"
 config/features=PackedStringArray("4.6")
 boot_splash/show_image=false
 
-[audio]
-
-buses/default_bus_layout="uid://bndjl13wvh5ef"
-
 [autoload]
 
 SaveManager="*uid://ck4ih2layufdo"
@@ -33,11 +29,6 @@ shapes/collision/shape_color=Color(0, 0.6, 0.69803923, 1)
 [display]
 
 window/stretch/mode="canvas_items"
-
-[editor]
-
-movie_writer/movie_file="D:/Code/dl/DLCE/1.avi"
-movie_writer/disable_vsync=true
 
 [editor_plugins]
 
@@ -86,5 +77,3 @@ savetaper={
 [rendering]
 
 renderer/rendering_method="mobile"
-textures/vram_compression/import_etc2_astc=true
-occlusion_culling/use_occlusion_culling=true

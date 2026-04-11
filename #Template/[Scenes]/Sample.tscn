@@ -14,7 +14,7 @@
 [ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="12_67fsp"]
 [ext_resource type="PackedScene" path="res://#Template/BaseWall.tscn" id="12_pxq50"]
 [ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Ending.tscn" id="13_lbrgy"]
-[ext_resource type="PackedScene" path="res://#Template/Crown.tscn" id="14_pxq50"]
+[ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/Crown.tscn" id="14_pxq50"]
 [ext_resource type="PackedScene" uid="uid://bjvijfdfvm1xl" path="res://#Template/CrownSet.tscn" id="15_67fsp"]
 
 [sub_resource type="Environment" id="Environment_c2ibq"]
@@ -106,7 +106,7 @@ script = ExtResource("12_67fsp")
 active_position = true
 new_add_position = Vector3(-5, 5, -5)
 active_rotate = true
-new_rotation = Vector3(-45, 225, 0)
+new_rotation = Vector3(-45, 200, 0)
 active_distance = true
 new_distance = 5.0
 active_speed = true
@@ -129,23 +129,23 @@ transform = Transform3D(61.305275, 0, 0, 0, 1, 0, 0, 0, 68.8622, 79.542465, -1.9
 transform = Transform3D(19.905514, 0, 0, 0, 1, 0, 0, 0, 4.5696793, 63.925785, 2.1299973, 55.686684)
 
 [node name="BaseFloor3" parent="Scene" unique_id=794439580 instance=ExtResource("7_sgchv")]
-transform = Transform3D(9.952755, 0, -3.9574575, 0, 1, 0, 17.238678, 0, 2.2848392, 75.729576, 2.1299973, 64.84505)
+transform = Transform3D(9.952755, 0, -3.9574575, 0, 1, 0, 17.238678, 0, 2.2848392, 75.14364, 2.1299973, 63.830173)
 
 [node name="BaseFloor4" parent="Scene" unique_id=412766049 instance=ExtResource("7_sgchv")]
-transform = Transform3D(19.905512, 0, 0, 0, 1, 0, 0, 0, 4.5696783, 88.06795, 2.1299973, 70.672585)
+transform = Transform3D(19.905512, 0, 0, 0, 1, 0, 0, 0, 2.1410718, 88.06795, 2.1299973, 71.48349)
 
 [node name="BaseFloor5" parent="Scene" unique_id=1008768232 instance=ExtResource("7_sgchv")]
-transform = Transform3D(86.000534, 0, -7.1796446, 0, 0.99999905, 0, 86.000534, 0, 7.1796446, 127.426346, 2.1299973, 113.21098)
+transform = Transform3D(107.24461, 0, -7.1796446, 0, 0.99999905, 0, 107.24461, 0, 7.1796446, 138.96089, 2.1299973, 124.74552)
 
 [node name="Ending" parent="Scene" unique_id=1497290031 instance=ExtResource("13_lbrgy")]
-transform = Transform3D(-0.7071067, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071067, 162.60872, 3.0376961, 146.25203)
+transform = Transform3D(-0.7071067, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071067, 164.65387, 3.0376942, 151.17961)
 
 [node name="Crown" parent="Scene" unique_id=1805653336 instance=ExtResource("14_pxq50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.806244, 3.1029124, 55.88733)
 tag = 2
 
 [node name="Crown3" parent="Scene" unique_id=1578351782 instance=ExtResource("14_pxq50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.93895, 3.1029124, 72.4944)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87.68902, 3.1029115, 74.419556)
 tag = 3
 
 [node name="CrownSet" parent="Scene" unique_id=127328941 instance=ExtResource("15_67fsp")]

@@ -13,6 +13,13 @@
 - [MainLine_test.gd](file://Tests/MainLine_test.gd)
 </cite>
 
+## 更新摘要
+**变更内容**
+- 更新MainLine类的API规范，反映最新的优化改进
+- 新增音乐同步播放功能的详细说明
+- 完善状态管理系统的数据持久化机制
+- 增强相机跟随系统的检查点恢复功能
+
 ## 目录
 1. [简介](#简介)
 2. [项目结构](#项目结构)
@@ -62,20 +69,20 @@ DI --> ST
 RM --> ML
 ```
 
-图表来源
-- [GameManager.gd:1-47](file://#Template/[Scripts]/GameManager.gd#L1-L47)
-- [State.gd:1-23](file://#Template/[Scripts]/State.gd#L1-L23)
-- [MainLine.gd:1-224](file://#Template/[Scripts]/MainLine.gd#L1-L224)
-- [CameraFollower.gd:1-168](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L168)
+**图表来源**
+- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
+- [State.gd:1-190](file://#Template/[Scripts]/State.gd#L1-L190)
+- [MainLine.gd:1-214](file://#Template/[Scripts]/MainLine.gd#L1-L214)
+- [CameraFollower.gd:1-139](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L139)
 - [CameraTrigger.gd:1-75](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L75)
-- [Crown.gd:1-52](file://#Template/[Scripts]/Trigger/Crown.gd#L1-L52)
+- [Crown.gd:1-22](file://#Template/[Scripts]/Trigger/Crown.gd#L1-L22)
 - [Diamond.gd:1-17](file://#Template/[Scripts]/Trigger/Diamond.gd#L1-L17)
-- [RoadMaker.gd:1-45](file://#Template/[Scripts]/RoadMaker.gd#L1-L45)
+- [RoadMaker.gd:1-46](file://#Template/[Scripts]/RoadMaker.gd#L1-L46)
 
-章节来源
-- [GameManager.gd:1-47](file://#Template/[Scripts]/GameManager.gd#L1-L47)
-- [State.gd:1-23](file://#Template/[Scripts]/State.gd#L1-L23)
-- [MainLine.gd:1-224](file://#Template/[Scripts]/MainLine.gd#L1-L224)
+**章节来源**
+- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
+- [State.gd:1-190](file://#Template/[Scripts]/State.gd#L1-L190)
+- [MainLine.gd:1-214](file://#Template/[Scripts]/MainLine.gd#L1-L214)
 
 ## 核心组件
 
@@ -87,7 +94,7 @@ RM --> ML
 关键导出属性
 - Camera: Camera3D
 - Mainline: CharacterBody3D
-- factor: float（缩放因子，默认1.415）
+- factor: float（缩放因子，默认1）
 
 公共方法
 - calculate_anim_start_time() -> float
@@ -110,38 +117,37 @@ RM --> ML
   - 返回：Color
   - 使用示例：let currentColor = GameManager.getlinecolor()
 
-章节来源
-- [GameManager.gd:1-47](file://#Template/[Scripts]/GameManager.gd#L1-L47)
+**章节来源**
+- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
 
 ### State API规范
-- 类型：Node（全局单例）
+- 类型：RefCounted（全局单例）
 - 作用：集中管理全局状态，支持数据持久化与跨场景恢复
 
 状态字段
 - main_line_transform: 变换（用于重载时恢复主角色位置）
-- camera_follower_has_checkpoint: bool（相机跟随是否已设置检查点）
-- camera_follower_add_position: Vector3（相机偏移位置）
-- camera_follower_rotation_offset: Vector3（相机旋转偏移）
-- camera_follower_distance: float（相机距离）
-- camera_follower_follow_speed: float（相机跟随速度）
-- camera_follower_restore_pending: bool（相机恢复待处理）
 - is_turn: bool（角色转向状态）
 - anim_time: float（动画当前时间）
+- music_checkpoint_time: float（音乐检查点时间）
 - is_end: bool（关卡结束标志）
 - percent: int（进度百分比）
 - line_crossing_crown: int（当前穿越的皇冠标签）
-- firstcrown/secondcrown/thridcrown: int（各阶段皇冠计数）
+- crowns: Array[int]（各阶段皇冠计数数组）
 - is_relive: bool（是否复活）
 - diamond: int（钻石计数）
 - crown: int（皇冠计数）
 
+相机检查点数据
+- camera_checkpoint: Dictionary（包含has_checkpoint、add_position、rotation_offset、distance、follow_speed、restore_pending）
+
 数据持久化与恢复
 - 重载时保存：MainLine.reload()会将当前状态写入State
 - 场景重启后恢复：MainLine._ready()从State读取并应用
+- SaveKit集成：支持序列化/反序列化所有状态属性
 
-章节来源
-- [State.gd:1-23](file://#Template/[Scripts]/State.gd#L1-L23)
-- [MainLine.gd:114-124](file://#Template/[Scripts]/MainLine.gd#L114-L124)
+**章节来源**
+- [State.gd:1-190](file://#Template/[Scripts]/State.gd#L1-L190)
+- [MainLine.gd:110-115](file://#Template/[Scripts]/MainLine.gd#L110-L115)
 
 ### MainLine API规范
 - 类型：CharacterBody3D
@@ -159,10 +165,13 @@ RM --> ML
 
 内部状态
 - level_manager: 关卡管理器引用
-- timeout: float（动画播放延迟）
+- timeout: float（动画播放延迟，默认0.1）
 - is_live: bool（存活状态）
 - line: MeshInstance3D（当前线段）
 - floor_segment_lines: Array[MeshInstance3D]（地面线段列表）
+- v: Vector3（速度向量）
+- is_start: bool（开始状态）
+- tailScale: float（尾部缩放）
 
 信号
 - new_line1：生成新线段时发出
@@ -184,6 +193,7 @@ RM --> ML
   - 功能：执行转向动作，播放动画并更新方向
   - 返回：void
   - 使用示例：响应输入事件触发
+  - 实现要点：当line_crossing_crown为0时计算动画起始时间，支持音乐同步播放
 
 - set_color(value: Color) -> void
   - 功能：设置材质颜色
@@ -204,7 +214,7 @@ RM --> ML
   - 返回：void
 
 - _get_or_create_player_tail_holder() -> Node3D
-  - 功能：获取或创建“PlayerTailHolder”节点
+  - 功能：获取或创建"PlayerTailHolder"节点
   - 返回：Node3D
 
 - _on_Area_body_entered(_body: Node) -> void
@@ -215,8 +225,8 @@ RM --> ML
   - 功能：保存道路场景
   - 返回：void
 
-章节来源
-- [MainLine.gd:1-224](file://#Template/[Scripts]/MainLine.gd#L1-L224)
+**章节来源**
+- [MainLine.gd:1-214](file://#Template/[Scripts]/MainLine.gd#L1-L214)
 
 ## 架构总览
 GameManager作为外部控制器，通过MainLine暴露的接口进行动画时间计算与颜色管理；MainLine负责物理移动与路径生成，并通过信号与其他系统解耦；State作为全局状态中心，贯穿重载与恢复；相机系统通过CameraFollower与CameraTrigger实现动态跟随与过渡；触发器系统（Crown、Diamond）更新State并触发视觉反馈。
@@ -238,11 +248,11 @@ Trigger->>Cam : 读取相机参数并设置检查点
 Cam->>State : 应用相机跟随参数
 ```
 
-图表来源
-- [GameManager.gd:23-39](file://#Template/[Scripts]/GameManager.gd#L23-L39)
-- [MainLine.gd:168-184](file://#Template/[Scripts]/MainLine.gd#L168-L184)
-- [Crown.gd:25-51](file://#Template/[Scripts]/Trigger/Crown.gd#L25-L51)
-- [CameraFollower.gd:37-72](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L37-L72)
+**图表来源**
+- [GameManager.gd:29-45](file://#Template/[Scripts]/GameManager.gd#L29-L45)
+- [MainLine.gd:149-171](file://#Template/[Scripts]/MainLine.gd#L149-L171)
+- [Crown.gd:16-21](file://#Template/[Scripts]/Trigger/Crown.gd#L16-L21)
+- [CameraFollower.gd:57-73](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L57-L73)
 
 ## 详细组件分析
 
@@ -272,17 +282,18 @@ class MainLine {
 GameManager --> MainLine : "读取状态/设置颜色"
 ```
 
-图表来源
-- [GameManager.gd:1-47](file://#Template/[Scripts]/GameManager.gd#L1-L47)
-- [MainLine.gd:8-22](file://#Template/[Scripts]/MainLine.gd#L8-L22)
+**图表来源**
+- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
+- [MainLine.gd:8-21](file://#Template/[Scripts]/MainLine.gd#L8-L21)
 
-章节来源
-- [GameManager.gd:1-47](file://#Template/[Scripts]/GameManager.gd#L1-L47)
+**章节来源**
+- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
 
 ### State类分析
 - 全局状态：集中存储与恢复角色变换、相机跟随参数、游戏进度与收集品数量
 - 数据持久化：通过MainLine.reload()写入，场景重启后读取
 - 并发注意：多处系统共享同一State实例，需避免竞态
+- SaveKit集成：支持完整的序列化/反序列化机制
 
 ```mermaid
 flowchart TD
@@ -295,19 +306,20 @@ Save --> Restart["重启场景"]
 Restart --> LoadState
 ```
 
-图表来源
-- [State.gd:1-23](file://#Template/[Scripts]/State.gd#L1-L23)
+**图表来源**
+- [State.gd:72-85](file://#Template/[Scripts]/State.gd#L72-L85)
 - [MainLine.gd:42-51](file://#Template/[Scripts]/MainLine.gd#L42-L51)
-- [Crown.gd:25-51](file://#Template/[Scripts]/Trigger/Crown.gd#L25-L51)
+- [Crown.gd:16-21](file://#Template/[Scripts]/Trigger/Crown.gd#L16-L21)
 
-章节来源
-- [State.gd:1-23](file://#Template/[Scripts]/State.gd#L1-L23)
+**章节来源**
+- [State.gd:1-190](file://#Template/[Scripts]/State.gd#L1-L190)
 
 ### MainLine类分析
 - 物理移动：基于CharacterBody3D，支持重力、墙面碰撞、飞行模式
 - 路径生成：每步移动生成线段，地面阶段同步线段高度
 - 信号系统：new_line1/on_sky/onturn解耦渲染与逻辑
 - 集成点：与GameManager协作计算动画时间，与State协作持久化
+- 音乐同步：支持音频播放器与动画同步播放
 
 ```mermaid
 sequenceDiagram
@@ -322,14 +334,14 @@ ML-->>Cam : emit on_sky离地
 Cam-->>Cam : 停止跟随或切换状态
 ```
 
-图表来源
-- [MainLine.gd:66-103](file://#Template/[Scripts]/MainLine.gd#L66-L103)
-- [RoadMaker.gd:12-27](file://#Template/[Scripts]/RoadMaker.gd#L12-L27)
-- [CameraFollower.gd:37-52](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L37-L52)
+**图表来源**
+- [MainLine.gd:128-142](file://#Template/[Scripts]/MainLine.gd#L128-L142)
+- [RoadMaker.gd:22-27](file://#Template/[Scripts]/RoadMaker.gd#L22-L27)
+- [CameraFollower.gd:40-56](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L40-L56)
 
-章节来源
-- [MainLine.gd:1-224](file://#Template/[Scripts]/MainLine.gd#L1-L224)
-- [RoadMaker.gd:1-45](file://#Template/[Scripts]/RoadMaker.gd#L1-L45)
+**章节来源**
+- [MainLine.gd:1-214](file://#Template/[Scripts]/MainLine.gd#L1-L214)
+- [RoadMaker.gd:1-46](file://#Template/[Scripts]/RoadMaker.gd#L1-L46)
 
 ### 相机控制接口分析
 - CameraFollower：实现平滑跟随、参数化过渡、震动效果
@@ -373,12 +385,12 @@ class CameraTrigger {
 CameraFollower <-- CameraTrigger : "参数来源"
 ```
 
-图表来源
-- [CameraFollower.gd:1-168](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L168)
+**图表来源**
+- [CameraFollower.gd:1-139](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L139)
 - [CameraTrigger.gd:1-75](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L75)
 
-章节来源
-- [CameraFollower.gd:1-168](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L168)
+**章节来源**
+- [CameraFollower.gd:1-139](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L139)
 - [CameraTrigger.gd:1-75](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L75)
 
 ### 触发器系统分析
@@ -397,13 +409,13 @@ Crown->>Cam : 读取相机参数并设置检查点
 Crown-->>Player : 播放crown动画
 ```
 
-图表来源
-- [Crown.gd:25-51](file://#Template/[Scripts]/Trigger/Crown.gd#L25-L51)
-- [State.gd:1-23](file://#Template/[Scripts]/State.gd#L1-L23)
-- [CameraFollower.gd:54-72](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L54-L72)
+**图表来源**
+- [Crown.gd:16-21](file://#Template/[Scripts]/Trigger/Crown.gd#L16-L21)
+- [State.gd:46-66](file://#Template/[Scripts]/State.gd#L46-L66)
+- [CameraFollower.gd:57-73](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L57-L73)
 
-章节来源
-- [Crown.gd:1-52](file://#Template/[Scripts]/Trigger/Crown.gd#L1-L52)
+**章节来源**
+- [Crown.gd:1-22](file://#Template/[Scripts]/Trigger/Crown.gd#L1-L22)
 - [Diamond.gd:1-17](file://#Template/[Scripts]/Trigger/Diamond.gd#L1-L17)
 
 ## 依赖关系分析
@@ -424,45 +436,49 @@ DI["Diamond"] --> ST
 RM["RoadMaker"] --> ML
 ```
 
-图表来源
+**图表来源**
 - [MainLine.gd:42-51](file://#Template/[Scripts]/MainLine.gd#L42-L51)
-- [GameManager.gd:23-39](file://#Template/[Scripts]/GameManager.gd#L23-L39)
-- [CameraFollower.gd:37-72](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L37-L72)
+- [GameManager.gd:29-45](file://#Template/[Scripts]/GameManager.gd#L29-L45)
+- [CameraFollower.gd:34-43](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L34-L43)
 - [CameraTrigger.gd:1-75](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L75)
-- [Crown.gd:25-51](file://#Template/[Scripts]/Trigger/Crown.gd#L25-L51)
+- [Crown.gd:16-21](file://#Template/[Scripts]/Trigger/Crown.gd#L16-L21)
 - [Diamond.gd:1-17](file://#Template/[Scripts]/Trigger/Diamond.gd#L1-L17)
-- [RoadMaker.gd:12-27](file://#Template/[Scripts]/RoadMaker.gd#L12-L27)
+- [RoadMaker.gd:12-17](file://#Template/[Scripts]/RoadMaker.gd#L12-L17)
 
-章节来源
-- [MainLine.gd:1-224](file://#Template/[Scripts]/MainLine.gd#L1-L224)
-- [GameManager.gd:1-47](file://#Template/[Scripts]/GameManager.gd#L1-L47)
-- [CameraFollower.gd:1-168](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L168)
+**章节来源**
+- [MainLine.gd:1-214](file://#Template/[Scripts]/MainLine.gd#L1-L214)
+- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
+- [CameraFollower.gd:1-139](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L139)
 - [CameraTrigger.gd:1-75](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L75)
-- [Crown.gd:1-52](file://#Template/[Scripts]/Trigger/Crown.gd#L1-L52)
+- [Crown.gd:1-22](file://#Template/[Scripts]/Trigger/Crown.gd#L1-L22)
 - [Diamond.gd:1-17](file://#Template/[Scripts]/Trigger/Diamond.gd#L1-L17)
-- [RoadMaker.gd:1-45](file://#Template/[Scripts]/RoadMaker.gd#L1-L45)
+- [RoadMaker.gd:1-46](file://#Template/[Scripts]/RoadMaker.gd#L1-L46)
 
 ## 性能考量
 - 动画时间计算：O(1)，建议在turn()前调用，避免重复计算
 - 线段生成：每帧可能创建MeshInstance3D，建议限制线段数量或合并渲染
 - 相机跟随：使用slerp插值，follow_speed过大可能导致抖动
 - 触发器：Area3D进入/退出事件频繁，建议减少不必要的信号连接
+- 音频同步：音乐播放器与动画同步需要考虑音频延迟补偿
 
 ## 故障排查指南
 - 动画时间异常为0
   - 检查Mainline.speed是否为0或Mainline为空
   - 确认origin_pos已设置且Mainline.global_position有效
 - 相机跟随未生效
-  - 检查State.camera_follower_has_checkpoint是否为true
+  - 检查State.camera_checkpoint.has_checkpoint是否为true
   - 确认CameraFollower.player_node指向正确
 - 线段不显示
   - 检查PlayerTailHolder是否存在或被正确创建
   - 确认MainLine的mesh/material有效
 - 重载后状态未恢复
   - 检查MainLine.reload()是否被调用
-  - 确认State中的字段在_main_line_transform等处被读取
+  - 确认State中的字段在load_checkpoint_to_main_line等处被读取
+- 音频不同步
+  - 检查AudioServer.get_time_since_last_mix()和AudioServer.get_output_latency()的使用
+  - 确认State.music_checkpoint_time的正确设置
 
-章节来源
+**章节来源**
 - [MainLine_test.gd:141-177](file://Tests/MainLine_test.gd#L141-L177)
 
 ## 结论

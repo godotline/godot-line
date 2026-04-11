@@ -45,8 +45,6 @@ func _stop_animations() -> void:
 	for player in animations:
 		if is_instance_valid(player):
 			player.stop()
-			# 可选：重置到起始位置
-			# player.seek(0, true)
 
 func _get_animation_name(player: AnimationPlayer, index: int) -> StringName:
 	# 优先使用指定名称
@@ -65,11 +63,5 @@ func _get_animation_name(player: AnimationPlayer, index: int) -> StringName:
 	return &""
 
 func _ready() -> void:
-	# 调用父类的 _ready
 	super._ready()
-	
-	# 编辑器模式下只初始化，不执行游戏逻辑
-	if Engine.is_editor_hint():
-		return
-	
 	_stop_animations()

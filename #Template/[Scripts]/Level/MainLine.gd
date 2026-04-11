@@ -38,6 +38,7 @@ var _last_floor_y := 0.0
 var floor_segment_lines: Array[MeshInstance3D] = []
 
 var start_transform = transform
+@export var allowTurn := true
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
@@ -104,7 +105,7 @@ func _process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
-		if event.is_action_pressed("turn") and is_live:
+		if event.is_action_pressed("turn") and is_live and allowTurn:
 			turn()
 
 func reload() -> void:

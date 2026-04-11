@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bvchtbimvb182"]
 
-[ext_resource type="Script" uid="uid://b32sis3h1d0ie" path="res://#Template/death_particle.gd" id="1_tb4tw"]
+[ext_resource type="Script" uid="uid://b32sis3h1d0ie" path="res://#Template/[Scripts]/Level/death_particle.gd" id="1_tb4tw"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xq6xi"]
 friction = 0.5

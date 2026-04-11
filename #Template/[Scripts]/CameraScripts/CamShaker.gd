@@ -1,4 +1,4 @@
-extends Area3D
+extends BaseTrigger
 
 @export var camera_parent: Node3D  # 这是Camera3D的父节点
 @export var shake_intensity: float = 0.5
@@ -8,10 +8,7 @@ var shake_timer: float = 0.0
 var original_position: Vector3
 
 func _ready():
-	if body_entered.is_connected(_on_body_entered):
-		body_entered.disconnect(_on_body_entered)
-	body_entered.connect(_on_body_entered)
-	$MeshInstance3D.queue_free()
+	super._ready()
 
 func _process(delta):
 	if shake_timer > 0 and camera_parent:

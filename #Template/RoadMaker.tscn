@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://#Template/[Scripts]/RoadMaker.gd" id="1"]
+[ext_resource type="Script" uid="uid://dr6kymfjs0usi" path="res://#Template/[Scripts]/Level/RoadMaker.gd" id="1"]
 [ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="2"]
 
 [node name="RoadMaker" type="Marker3D" unique_id=183537675]

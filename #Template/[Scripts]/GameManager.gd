@@ -12,6 +12,10 @@ var camera_follower: Node3D:
 		if Camera:
 			return Camera.get_parent() as Node3D
 		return null
+
+func get_camera_follower() -> Node3D:
+	"""获取 CameraFollower 节点（Camera 的父节点）"""
+	return camera_follower
 @export_tool_button("Origin Pos","TransitionImmediateBig")
 
 var origin_action = func():

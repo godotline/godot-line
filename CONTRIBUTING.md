@@ -24,10 +24,6 @@
    - 将 Issue 分配给自己，并设置状态为 "In Progress"
 2. Fork 仓库并从 `master` 分支创建新分支
    - 使用 Issue 编号作为分支名称，例如：GD-111
-3. 如果代码更改需要测试，请编写相应的测试用例
-   - 本项目使用 **gdUnit4** 测试框架（位于 `addons/gdUnit4`）
-   - 测试文件应放在 `Tests/` 目录下
-   - 运行测试：`godot --headless --run-tests`
 4. 如果修改了 API，请确保同步更新相关文档
 5. 创建 Pull Request 并在 "Why" 和 "What" 部分提供详细说明：
    - 将 Pull Request 关联到对应的 Issue
@@ -35,27 +31,7 @@
    - 确保每个 Pull Request 只关联一个 Issue
    - 如果 Pull Request 仍在开发中，请标记为 Draft
    - 确保代码遵循[代码规范](#代码规范)
-   - 确保通过持续集成 (CI) 检查
 6. 提交 Pull Request！
-
-## 测试要求
-
-本项目使用 **gdUnit4** 进行单元测试：
-
-- 测试文件继承 `GdUnitTestSuite`
-- 使用 `_before()` 和 `_after()` 管理实例生命周期
-- 使用 `assert_that(...).is_equal(...)` 等断言方法
-- 测试文件命名规范：`*_test.gd`
-- 测试报告生成在 `reports/` 目录
-
-### 运行测试
-
-```bash
-# 无头模式运行所有测试
-godot --headless --run-tests
-
-# 在编辑器中运行测试（打开 gdUnit4 面板）
-```
 
 ## 毁灭性更改规范
 
@@ -97,8 +73,8 @@ var player_score: int = 0
 
 # 函数使用 snake_case
 func add_score(points: int) -> void:
-    player_score += points
-    score_changed.emit(player_score)
+	player_score += points
+	score_changed.emit(player_score)
 
 # 信号使用 snake_case
 signal score_changed(new_score: int)
