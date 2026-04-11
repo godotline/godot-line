@@ -29,8 +29,6 @@ var level_manager
 var timeout := 0.1
 var is_live := true
 var line:MeshInstance3D
-@warning_ignore("shadowed_variable_base_class")
-#var velocity := Vector3.ZERO
 var past_is_on_floor := false
 var past_is_on_floor_effect := false
 var v := Vector3(0,0,0)
@@ -47,7 +45,7 @@ func _ready() -> void:
 		if State.is_end == true:
 			State.is_end = false
 			reload()
-		State.load_to_main_line(self)
+		State.load_checkpoint_to_main_line(self)
 	if is_inside_tree():
 		_last_floor_y = global_position.y
 
@@ -87,14 +85,11 @@ func _process(_delta: float) -> void:
 		var offset = position - past_translation
 		var distance = offset.length()
 		
-		# 设置线段位置为中点
 		line.position = past_translation + offset / 2
 		line.position.y = global_position.y
 		
-		# 设置线段长度（沿Z轴拉伸）
 		line.scale = Vector3(1, 1, distance + tailScale)
 
-		# 地面阶段：同步该阶段所有 tail 段的全局 Y，使其跟随主线高度
 		var current_y := global_position.y
 		if abs(current_y - _last_floor_y) > 0.001:
 			for segment in floor_segment_lines:
@@ -104,7 +99,6 @@ func _process(_delta: float) -> void:
 	else:
 		if past_is_on_floor != is_on_floor_now:
 			emit_signal("on_sky")
-			# 离地后冻结上一段地面 tail 窗口
 			floor_segment_lines.clear()
 	past_is_on_floor = is_on_floor_now
 
@@ -122,8 +116,6 @@ func reload() -> void:
 
 func _get_or_create_player_tail_holder() -> Node3D:
 	var root := tree.current_scene
-	if not root:
-		return null
 
 	var tail_holder := root.get_node_or_null("PlayerTailHolder") as Node3D
 	if not tail_holder:
@@ -139,16 +131,9 @@ func new_line():
 	line.position = position
 	line.rotation = rotation  # 继承当前旋转
 	line.set_surface_override_material(0, material)
-	line.name = "Line"
-	line.top_level = true
 
 	var tail_holder := _get_or_create_player_tail_holder()
-	if tail_holder:
-		tail_holder.add_child(line)
-	else:
-		# 回退到场景根节点，避免线段丢失
-		tree.current_scene.add_child(line)
-		push_warning("PlayerTailHolder 创建失败，线段已添加到场景根节点")
+	tail_holder.add_child(line)
 
 	if is_on_floor() or fly:
 		floor_segment_lines.append(line)
@@ -226,6 +211,3 @@ func _rand_dir() -> Vector3:
 
 func _random_rotation() -> Vector3:
 	return Vector3(randf_range(0, 360), randf_range(0, 360), randf_range(0, 360))
-
-func set_timeout(delay :float):
-	timeout = delay

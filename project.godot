@@ -41,7 +41,7 @@ movie_writer/disable_vsync=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/asset_placer/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/savekit/plugin.cfg")
+enabled=PackedStringArray("res://addons/savekit/plugin.cfg")
 
 [input]
 

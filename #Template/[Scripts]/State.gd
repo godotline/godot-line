@@ -28,7 +28,7 @@ static var camera_checkpoint := {
 
 ## ========== 运行时数据（仅场景存活期间有效） ==========
 
-## 主线运行时属性（transform、velocity等由 save_from_main_line / load_to_main_line 管理）
+## 主线运行时属性（transform、velocity等由 save_checkpoint / load_checkpoint_to_main_line 管理）
 static var main_line_data := {
 	"transform": null,
 	"linear_velocity": Vector3.ZERO,
@@ -40,65 +40,40 @@ static var main_line_data := {
 
 
 ## ============================================================
-## 从游戏对象保存到 State
+## 保存检查点（Crown 触发时调用）
 ## ============================================================
 
-## 从 MainLine 保存检查点到 State
-static func save_from_main_line(main_line: CharacterBody3D) -> void:
-	main_line_transform = main_line.transform
-	is_turn = main_line.is_turn
-
-## 从 MainLine 保存完整运行时数据
-static func save_runtime_from_main_line(main_line: CharacterBody3D) -> void:
-	main_line_data.transform = main_line.transform
-	main_line_data.linear_velocity = main_line.velocity
-	main_line_data.is_turn = main_line.is_turn
-	main_line_data.is_start = main_line.is_start
-	main_line_data.v = main_line.v
-	main_line_data.past_translation = main_line.past_translation
-
-## 从 CameraFollower 保存检查点到 State
-static func save_from_camera_follower(cf: Node3D) -> void:
-	camera_checkpoint.add_position = cf.add_position
-	camera_checkpoint.rotation_offset = cf.rotation_offset
-	camera_checkpoint.distance = cf.distance_from_object
-	camera_checkpoint.follow_speed = cf.follow_speed
-	camera_checkpoint.has_checkpoint = true
-
-## 综合保存检查点（Crown 触发时调用）
 static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, crown_tag: int) -> void:
-	# 主线状态
 	main_line_transform = main_line.transform
 	is_turn = main_line.is_turn
 	if main_line.animation_node and main_line.animation_node.current_animation:
 		anim_time = main_line.animation_node.current_animation_position
 	
-	# 相机跟随器状态
 	if camera_follower:
-		save_from_camera_follower(camera_follower)
+		camera_checkpoint.add_position = camera_follower.add_position
+		camera_checkpoint.rotation_offset = camera_follower.rotation_offset
+		camera_checkpoint.distance = camera_follower.distance_from_object
+		camera_checkpoint.follow_speed = camera_follower.follow_speed
+		camera_checkpoint.has_checkpoint = true
 	
-	# 皇冠信息
 	line_crossing_crown = crown_tag
 	if crown_tag >= 1 and crown_tag <= 3:
 		crowns[crown_tag - 1] = 1
 	
-	# 音乐检查点
 	var music_player := main_line.get_node("MusicPlayer") as AudioStreamPlayer
 	if music_player and music_player.playing:
 		music_checkpoint_time = music_player.get_playback_position()
 
 
 ## ============================================================
-## 从 State 加载到游戏对象
+## 加载检查点到游戏对象
 ## ============================================================
 
-## 将检查点数据加载到 MainLine
-static func load_to_main_line(main_line: CharacterBody3D) -> void:
+static func load_checkpoint_to_main_line(main_line: CharacterBody3D) -> void:
 	if main_line_transform:
 		main_line.transform = main_line_transform
 		main_line.is_turn = is_turn
 
-## 将完整运行时数据加载到 MainLine
 static func load_runtime_to_main_line(main_line: CharacterBody3D) -> void:
 	if main_line_data.transform:
 		main_line.transform = main_line_data.transform
@@ -109,7 +84,6 @@ static func load_runtime_to_main_line(main_line: CharacterBody3D) -> void:
 	main_line.v = main_line_data.v
 	main_line.past_translation = main_line_data.past_translation
 
-## 将检查点数据加载到 CameraFollower
 static func load_to_camera_follower(cf: Node3D) -> void:
 	var cp := camera_checkpoint
 	if not cp.has_checkpoint:
@@ -126,21 +100,21 @@ static func load_to_camera_follower(cf: Node3D) -> void:
 
 ## 使用 SaveKitSerializer 序列化所有状态属性到字典
 static func save_to_dict(s: SaveKitSerializer) -> Dictionary:
-	var data := {}
-	data["main_line_transform"] = s.encode_var(main_line_transform)
-	data["camera_checkpoint"] = s.encode_var(camera_checkpoint)
-	data["main_line_data"] = s.encode_var(main_line_data)
-	data["is_turn"] = s.encode_var(is_turn)
-	data["anim_time"] = s.encode_var(anim_time)
-	data["music_checkpoint_time"] = s.encode_var(music_checkpoint_time)
-	data["is_end"] = s.encode_var(is_end)
-	data["percent"] = s.encode_var(percent)
-	data["line_crossing_crown"] = s.encode_var(line_crossing_crown)
-	data["crowns"] = s.encode_var(crowns)
-	data["is_relive"] = s.encode_var(is_relive)
-	data["diamond"] = s.encode_var(diamond)
-	data["crown"] = s.encode_var(crown)
-	return data
+	return {
+		"main_line_transform": s.encode_var(main_line_transform),
+		"camera_checkpoint": s.encode_var(camera_checkpoint),
+		"main_line_data": s.encode_var(main_line_data),
+		"is_turn": s.encode_var(is_turn),
+		"anim_time": s.encode_var(anim_time),
+		"music_checkpoint_time": s.encode_var(music_checkpoint_time),
+		"is_end": s.encode_var(is_end),
+		"percent": s.encode_var(percent),
+		"line_crossing_crown": s.encode_var(line_crossing_crown),
+		"crowns": s.encode_var(crowns),
+		"is_relive": s.encode_var(is_relive),
+		"diamond": s.encode_var(diamond),
+		"crown": s.encode_var(crown),
+	}
 
 
 ## 使用 SaveKitDeserializer 从字典反序列化所有状态属性
@@ -177,6 +151,21 @@ static func load_from_dict(s: SaveKitDeserializer, data: Dictionary) -> void:
 ## 重置
 ## ============================================================
 
+static func reset_to_defaults() -> void:
+	main_line_transform = null
+	reset_camera_checkpoint()
+	reset_main_line_data()
+	is_turn = false
+	anim_time = 0.0
+	music_checkpoint_time = 0.0
+	is_end = false
+	percent = 0
+	line_crossing_crown = 0
+	crowns = [0, 0, 0]
+	is_relive = false
+	diamond = 0
+	crown = 0
+
 ## 重置相机检查点为默认值
 static func reset_camera_checkpoint() -> void:
 	camera_checkpoint = {
@@ -198,19 +187,3 @@ static func reset_main_line_data() -> void:
 		"v": Vector3.ZERO,
 		"past_translation": Vector3.ZERO,
 	}
-
-## 重置为默认值（用于重新开始游戏）
-static func reset_to_defaults() -> void:
-	main_line_transform = null
-	reset_camera_checkpoint()
-	reset_main_line_data()
-	is_turn = false
-	anim_time = 0.0
-	music_checkpoint_time = 0.0
-	is_end = false
-	percent = 0
-	line_crossing_crown = 0
-	crowns = [0, 0, 0]
-	is_relive = false
-	diamond = 0
-	crown = 0

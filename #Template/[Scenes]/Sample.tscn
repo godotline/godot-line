@@ -100,6 +100,22 @@ need_time = 2.0
 use_time = false
 trigger_time = 0.0
 
+[node name="Trigger3" parent="Scene/Trigger" unique_id=1067104480 instance=ExtResource("10_q71od")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.726989, 2.9287004, 0)
+script = ExtResource("12_67fsp")
+active_position = true
+new_add_position = Vector3(-5, 5, -5)
+active_rotate = true
+new_rotation = Vector3(-45, 225, 0)
+active_distance = true
+new_distance = 5.0
+active_speed = true
+new_follow_speed = 1.2
+ease_type = 2
+need_time = 2.0
+use_time = false
+trigger_time = 0.0
+
 [node name="BaseWall" parent="Scene" unique_id=359263919 instance=ExtResource("12_pxq50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 9.397742, 47.416126, -1.9073486e-06, 48.34996)
 
