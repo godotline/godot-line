@@ -61,25 +61,13 @@ func _trigger() -> void:
 	cf.kill_tweens()
 	
 	if active_position:
-		cf.pos_e = new_add_position
-		cf.do_pos = create_tween()
-		cf.do_pos.set_ease(ease_type)
-		cf.do_pos.tween_property(cf, "add_position", new_add_position, need_time)
+		cf.tween_to_position(new_add_position, need_time, ease_type)
 	
 	if active_rotate:
-		cf.rot_e = new_rotation
-		cf.do_rot = create_tween()
-		cf.do_rot.set_ease(ease_type)
-		cf.do_rot.tween_property(cf, "rotation_offset", new_rotation, need_time)
+		cf.tween_to_rotation(new_rotation, need_time, ease_type)
 	
 	if active_distance:
-		cf.dtc_e = new_distance
-		cf.do_dis = create_tween()
-		cf.do_dis.set_ease(ease_type)
-		cf.do_dis.tween_property(cf, "distance_from_object", new_distance, need_time)
+		cf.tween_to_distance(new_distance, need_time, ease_type)
 	
 	if active_speed:
-		cf.spd_e = new_follow_speed
-		cf.do_spe = create_tween()
-		cf.do_spe.set_ease(ease_type)
-		cf.do_spe.tween_property(cf, "follow_speed", new_follow_speed, need_time)
+		cf.tween_to_speed(new_follow_speed, need_time, ease_type)

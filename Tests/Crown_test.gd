@@ -146,17 +146,17 @@ func test_crown_collection_flow() -> void:
 	# 初始状态
 	State.crown = 0
 	State.line_crossing_crown = 0
-	State.camera_follower_has_checkpoint = false
+	State.camera_checkpoint.has_checkpoint = false
 	
 	# 模拟皇冠收集
 	State.crown += 1
 	State.line_crossing_crown = 1
-	State.camera_follower_has_checkpoint = true
+	State.camera_checkpoint.has_checkpoint = true
 	
 	# 验证状态
 	assert_that(State.crown).is_equal(1)
 	assert_that(State.line_crossing_crown).is_equal(1)
-	assert_that(State.camera_follower_has_checkpoint).is_true()
+	assert_that(State.camera_checkpoint.has_checkpoint).is_true()
 
 
 ## 测试皇冠旋转属性

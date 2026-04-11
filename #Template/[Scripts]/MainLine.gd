@@ -47,9 +47,7 @@ func _ready() -> void:
 		if State.is_end == true:
 			State.is_end = false
 			reload()
-		if State.main_line_transform:
-			transform = State.main_line_transform
-			is_turn = State.is_turn
+		State.load_to_main_line(self)
 	if is_inside_tree():
 		_last_floor_y = global_position.y
 
@@ -70,7 +68,7 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint() or not is_live:
 		return
 
-	# 音画同步：根据音乐精确播放位置同步动画
+	# TODO: 不知道有没有用
 	if music and $MusicPlayer.playing and animation_node and animation_node.is_playing():
 		var time = $MusicPlayer.get_playback_position() + AudioServer.get_time_since_last_mix() - AudioServer.get_output_latency()
 		animation_node.seek(time, true)
@@ -114,19 +112,10 @@ func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
 		if event.is_action_pressed("turn") and is_live:
 			turn()
-		#if event.is_action_pressed("retry"):
-			#tree.reload_current_scene()
-		#if event.is_action_pressed("reload"):
-			#reload()
 
 func reload() -> void:
 	State.main_line_transform = start_transform
-	State.camera_follower_has_checkpoint = false
-	State.camera_follower_add_position = Vector3.ZERO
-	State.camera_follower_rotation_offset = Vector3.ZERO
-	State.camera_follower_distance = 0.0
-	State.camera_follower_follow_speed = 0.0
-	State.camera_follower_restore_pending = false
+	State.reset_camera_checkpoint()
 	State.is_turn = $".".is_turn
 	State.anim_time = 0.0
 	tree.reload_current_scene()
@@ -152,8 +141,7 @@ func new_line():
 	line.set_surface_override_material(0, material)
 	line.name = "Line"
 	line.top_level = true
-	
-	# 将线段添加到场景根节点下的 PlayerTailHolder（不存在则自动创建）
+
 	var tail_holder := _get_or_create_player_tail_holder()
 	if tail_holder:
 		tail_holder.add_child(line)
@@ -179,12 +167,9 @@ func turn():
 			if State.line_crossing_crown == 0:
 				State.anim_time = level_manager.calculate_anim_start_time()
 			animation_node.play("level")
-			#await get_tree().create_timer(timeout).timeout
 			animation_node.seek(State.anim_time)
-			# 音乐同步播放
 			if music:
 				$MusicPlayer.stream = music
-				# 复活时恢复音乐检查点时间，否则使用动画时间
 				var music_start_time := State.music_checkpoint_time if State.music_checkpoint_time > 0.0 else State.anim_time
 				if music_start_time > 0.0:
 					$MusicPlayer.play(music_start_time)
@@ -218,21 +203,19 @@ func die():
 		$MusicPlayer.stop()
 		$AudioStreamPlayer.play()
 		
-		# 计算速度方向和反方向
 		var forward_dir := velocity.normalized() if velocity.length() > 0.01 else Vector3.FORWARD
 		var backward_dir := -forward_dir
-		
-		# 生成8个粒子，一半沿速度方向，一半沿反方向
+
 		for i in 8:
 			var death_particle_instance: RigidBody3D = DEATH_PARTICLE.instantiate()
 			get_parent().add_child(death_particle_instance)
 			death_particle_instance.get_node("MeshInstance3D").mesh = mesh
 			death_particle_instance.get_node("MeshInstance3D").material_override = material
 			death_particle_instance.global_position = global_position
+			death_particle_instance.linear_damp = 0.5
 			var random_rot := _random_rotation()
 			death_particle_instance.rotation = random_rot
-			
-			# 根据索引决定是向前还是向后发射
+
 			var direction := forward_dir if i < 4 else backward_dir
 			var impulse := direction * speed + _rand_dir() * 0.5
 			death_particle_instance.apply_central_impulse(impulse)
@@ -242,9 +225,7 @@ func _rand_dir() -> Vector3:
 	return Vector3(randf_range(-speed, speed), randf_range(-speed, speed), randf_range(-speed, speed))
 
 func _random_rotation() -> Vector3:
-	# 仿照Unity版本: Random.rotation -> 随机欧拉角
 	return Vector3(randf_range(0, 360), randf_range(0, 360), randf_range(0, 360))
-func _on_button_pressed() -> void:
-	$RoadMaker.save()
+
 func set_timeout(delay :float):
 	timeout = delay

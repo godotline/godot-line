@@ -10,32 +10,35 @@ extends Node3D
 @onready var player_node: Node3D = get_node(player) if player else null
 @onready var camera: Node3D = get_child(0) if get_child_count() > 0 else null
 
-var do_pos: Tween
-var do_rot: Tween
-var do_dis: Tween
-var do_spe: Tween
+## Tween 属性索引枚举
+enum TweenProp { POSITION, ROTATION, DISTANCE, SPEED, COUNT }
 
-var pos_e: Vector3
-var rot_e: Vector3
-var dtc_e: float
-var spd_e: float
+## Tween 实例数组：[pos, rot, dis, spe]
+var tweens: Array = [null, null, null, null]
+## Tween 目标值数组：[pos_e, rot_e, dtc_e, spd_e]
+var tween_ends: Array = [Vector3.ZERO, Vector3.ZERO, 0.0, 0.0]
+## Tween 备份值数组：[_pos, _rot, _dtc, _spd]
+var tween_backups: Array = [Vector3.ZERO, Vector3.ZERO, 0.0, 0.0]
 
-var _pos: Vector3
-var _rot: Vector3
-var _dtc: float
-var _spd: float
+## Tween 属性名数组，用于动态绑定
+const TWEEN_PROPERTIES: Array[String] = [
+	"add_position",
+	"rotation_offset",
+	"distance_from_object",
+	"follow_speed",
+]
+
 var _skip_follow_once := false
 var _checkpoint_applied := false
 
 func _ready() -> void:
 	if not camera and get_child_count() > 0:
 		camera = get_child(0)
-	if State.camera_follower_has_checkpoint and State.camera_follower_restore_pending:
+	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending:
 		call_deferred("_apply_state_checkpoint")
-	# 这里假设有 Crown 系统，在 GDScript 中需要手动连接信号
 
 func _process(delta: float) -> void:
-	if State.camera_follower_has_checkpoint and State.camera_follower_restore_pending and not _checkpoint_applied:
+	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending and not _checkpoint_applied:
 		_apply_state_checkpoint()
 	if following and player_node:
 		rotation_degrees = rotation_offset
@@ -54,98 +57,66 @@ func _process(delta: float) -> void:
 func _apply_state_checkpoint() -> void:
 	if _checkpoint_applied:
 		return
-	if not State.camera_follower_has_checkpoint or not State.camera_follower_restore_pending:
+	var cp := State.camera_checkpoint
+	if not cp.has_checkpoint or not cp.restore_pending:
 		return
 	if player_node == null and player:
 		player_node = get_node_or_null(player) as Node3D
 	if player_node == null:
 		return
-	add_position = State.camera_follower_add_position
-	rotation_offset = State.camera_follower_rotation_offset
-	distance_from_object = State.camera_follower_distance
-	follow_speed = State.camera_follower_follow_speed
+	State.load_to_camera_follower(self)
 	rotation_degrees = rotation_offset
 	var base_transform = player_node.position + add_position
 	position = base_transform
 	_skip_follow_once = true
 	_checkpoint_applied = true
-	State.camera_follower_restore_pending = false
+	State.camera_checkpoint.restore_pending = false
+
 
 func kill_tweens() -> void:
-	if do_pos and do_pos.is_running():
-		do_pos.kill()
-	if do_rot and do_rot.is_running():
-		do_rot.kill()
-	if do_dis and do_dis.is_running():
-		do_dis.kill()
-	if do_spe and do_spe.is_running():
-		do_spe.kill()
+	for i in TweenProp.COUNT:
+		if tweens[i] and tweens[i].is_running():
+			tweens[i].kill()
 
 func revive() -> void:
-	add_position = _pos
-	rotation_offset = _rot
-	distance_from_object = _dtc
-	follow_speed = _spd
+	add_position = tween_backups[TweenProp.POSITION]
+	rotation_offset = tween_backups[TweenProp.ROTATION]
+	distance_from_object = tween_backups[TweenProp.DISTANCE]
+	follow_speed = tween_backups[TweenProp.SPEED]
 	rotation_degrees = rotation_offset
 	var base_transform = player_node.position + add_position
 	position = base_transform
 
 func pick() -> void:
-	if do_pos == null or not do_pos.is_running():
-		_pos = add_position
-	else:
-		_pos = pos_e
-	
-	if do_rot == null or not do_rot.is_running():
-		_rot = rotation_offset
-	else:
-		_rot = rot_e
-	
-	if do_dis == null or not do_dis.is_running():
-		_dtc = distance_from_object
-	else:
-		_dtc = dtc_e
-	
-	if do_spe == null or not do_spe.is_running():
-		_spd = follow_speed
-	else:
-		_spd = spd_e
+	tween_backups[TweenProp.POSITION] = add_position if tweens[TweenProp.POSITION] == null or not tweens[TweenProp.POSITION].is_running() else tween_ends[TweenProp.POSITION]
+	tween_backups[TweenProp.ROTATION] = rotation_offset if tweens[TweenProp.ROTATION] == null or not tweens[TweenProp.ROTATION].is_running() else tween_ends[TweenProp.ROTATION]
+	tween_backups[TweenProp.DISTANCE] = distance_from_object if tweens[TweenProp.DISTANCE] == null or not tweens[TweenProp.DISTANCE].is_running() else tween_ends[TweenProp.DISTANCE]
+	tween_backups[TweenProp.SPEED] = follow_speed if tweens[TweenProp.SPEED] == null or not tweens[TweenProp.SPEED].is_running() else tween_ends[TweenProp.SPEED]
+
+# 通用 Tween 动画方法
+func _tween_to(index: int, new_value: Variant, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
+	if tweens[index] and tweens[index].is_running():
+		tweens[index].kill()
+	tween_ends[index] = new_value
+	tweens[index] = create_tween()
+	tweens[index].set_ease(ease_type)
+	tweens[index].tween_property(self, TWEEN_PROPERTIES[index], new_value, duration)
 
 # 辅助方法：设置目标位置（带 Tween 动画）
 func tween_to_position(new_pos: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
-	if do_pos and do_pos.is_running():
-		do_pos.kill()
-	pos_e = new_pos
-	do_pos = create_tween()
-	do_pos.set_ease(ease_type)
-	do_pos.tween_property(self, "add_position", new_pos, duration)
+	_tween_to(TweenProp.POSITION, new_pos, duration, ease_type)
 
 # 辅助方法：设置旋转（带 Tween 动画）
 func tween_to_rotation(new_rot: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
-	if do_rot and do_rot.is_running():
-		do_rot.kill()
-	rot_e = new_rot
-	do_rot = create_tween()
-	do_rot.set_ease(ease_type)
-	do_rot.tween_property(self, "rotation_offset", new_rot, duration)
+	_tween_to(TweenProp.ROTATION, new_rot, duration, ease_type)
 
 # 辅助方法：设置距离（带 Tween 动画）
 func tween_to_distance(new_dist: float, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
-	if do_dis and do_dis.is_running():
-		do_dis.kill()
-	dtc_e = new_dist
-	do_dis = create_tween()
-	do_dis.set_ease(ease_type)
-	do_dis.tween_property(self, "distance_from_object", new_dist, duration)
+	_tween_to(TweenProp.DISTANCE, new_dist, duration, ease_type)
 
 # 辅助方法：设置速度（带 Tween 动画）
 func tween_to_speed(new_speed: float, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT) -> void:
-	if do_spe and do_spe.is_running():
-		do_spe.kill()
-	spd_e = new_speed
-	do_spe = create_tween()
-	do_spe.set_ease(ease_type)
-	do_spe.tween_property(self, "follow_speed", new_speed, duration)
+	_tween_to(TweenProp.SPEED, new_speed, duration, ease_type)
 
 # 相机震动函数
 func camera_shake(intensity: float, time: float) -> void:

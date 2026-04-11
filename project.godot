@@ -16,12 +16,15 @@ warnings/check_invalid_track_paths=false
 
 config/name="GodotLine"
 config/features=PackedStringArray("4.6")
-run/max_fps=0
 boot_splash/show_image=false
+
+[audio]
+
+buses/default_bus_layout="uid://bndjl13wvh5ef"
 
 [autoload]
 
-State="*res://#Template/[Scripts]/State.gd"
+SaveManager="*uid://ck4ih2layufdo"
 
 [debug]
 
@@ -38,7 +41,7 @@ movie_writer/disable_vsync=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
+enabled=PackedStringArray("res://addons/asset_placer/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/savekit/plugin.cfg")
 
 [input]
 
