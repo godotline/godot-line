@@ -33,16 +33,6 @@
    - 确保代码遵循[代码规范](#代码规范)
 6. 提交 Pull Request！
 
-## 毁灭性更改规范
-
-如果修改涉及 **破坏性 API 变更**，请遵循以下规范：
-
-1. 在 Pull Request 标题标注 `[BREAKING]`
-2. 提供详细的迁移指南
-3. 更新所有相关测试用例
-4. 提交到指定分支（非 master 主分支）
-5. 在文档中明确标注不兼容的变更
-
 ## 许可证
 
 通过为本项目做出贡献，您同意您的贡献将遵循与项目相同的 [MIT 许可证](https://github.com/meny2333/godot-line/blob/master/LICENSE)。
@@ -53,10 +43,10 @@
 为保持代码一致性，请遵循以下代码规范：
 
 - [Godot GDScript 编码规范](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
-- 使用 `snake_case` 命名变量和函数
+- 使用 `lowerCamelCase` 命名变量和函数
 - 类名使用 `PascalCase`
 - 常量使用 `UPPER_SNAKE_CASE`
-- 信号使用 `snake_case`
+- 信号使用 `lowerCamelCase`
 
 ### GDScript 示例
 
@@ -68,14 +58,14 @@ extends Node
 # 常量使用大写
 const MAX_PLAYERS = 4
 
-# 变量使用 snake_case
-var player_score: int = 0
+# 变量使用 lowerCamelCase
+var playerScore: int = 0
 
-# 函数使用 snake_case
-func add_score(points: int) -> void:
-	player_score += points
-	score_changed.emit(player_score)
+# 函数使用 lowerCamelCase
+func addScore(points: int) -> void:
+	playerScore += points
+	scoreChanged.emit(playerScore)
 
-# 信号使用 snake_case
-signal score_changed(new_score: int)
+# 信号使用 lowerCamelCase
+signal scoreChanged(newScore: int)
 ```

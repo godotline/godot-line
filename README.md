@@ -1,6 +1,6 @@
 # Godot Line 模板
 
-基于 **Godot Engine 4.6** 开发的 Dancing Line 游戏模板框架。本项目抽离自 ShinnLine，向冰焰模板 3/4 对齐，旨在降低使用者的学习成本。通过本模板，您可以方便地将关卡从冰焰模板 3、4（WIP）迁移到此模板，或直接发布至 ShinnLine 平台。
+基于 **Godot Engine 4.6** 开发的 Dancing Line 游戏模板框架。本项目抽离自 ShinnLine，向冰焰模板 3/4 对齐，旨在降低使用者的学习成本。通过本模板，您可以方便地将关卡从冰焰模板 3、4（WIP）迁移到此模板，或直接发布至 ShinnLine。
 
 ![Godot Version](https://img.shields.io/badge/Godot-4.6-green.svg)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)
@@ -12,7 +12,6 @@
 - 🎮 **Dancing Line 核心玩法**：完整的线条游戏机制实现
 - 🔄 **高兼容性**：与冰焰模板 3/4 对齐，便于关卡迁移
 - 📦 **开箱即用**：内置完整的游戏框架和模板系统
-- 🧪 **测试驱动**：集成 gdUnit4 测试框架，保障代码质量
 - 🎯 **模块化设计**：清晰的代码结构，易于扩展和定制
 - 🌐 **跨平台支持**：支持 Windows、Linux、macOS 平台
 
@@ -55,35 +54,11 @@
 ```
 godot-line/
 ├── #Template/          # 核心模板系统
-├── Tests/              # 单元测试文件 (gdUnit4)
 ├── addons/             # Godot 插件
-│   └── gdUnit4/       # 测试框架
-├── reports/            # 测试报告输出
 ├── Main.tscn          # 主场景文件
 ├── project.godot      # 项目配置文件
 └── CONTRIBUTING.md    # 贡献指南
 ```
-
-## 🧪 测试
-
-本项目使用 **gdUnit4** 进行单元测试，确保代码质量和稳定性。
-
-### 运行测试
-
-```bash
-# 无头模式运行所有测试
-godot --headless --run-tests
-
-# 在编辑器中运行测试
-# 打开 Godot 编辑器 → 底部面板 → gdUnit4 标签页
-```
-
-### 编写测试
-
-- 测试文件命名规范：`*_test.gd`
-- 测试文件位置：`Tests/` 目录
-- 继承基类：`GdUnitTestSuite`
-- 测试报告输出至：`reports/` 目录
 
 ## 📖 文档
 
@@ -104,16 +79,6 @@ godot --headless --run-tests
 
 详细的贡献指南请查阅：[CONTRIBUTING.md](./CONTRIBUTING.md)
 
-### ⚠️ 毁灭性更改规范
-
-如果您的修改涉及 **破坏性 API 变更**，请务必遵循：
-
-- PR 标题标注 `[BREAKING]`
-- 提供详细的迁移指南
-- 更新所有相关测试用例
-- 提交到指定分支（非 master）
-- 在文档中明确标注不兼容变更
-
 ## 📧 联系方式
 
 - 🐛 **问题反馈**：[GitHub Issues](https://github.com/meny2333/godot-line/issues)
@@ -129,7 +94,6 @@ godot --headless --run-tests
 - **Godot Engine** - 强大的开源游戏引擎
 - **ShinnLine** - 原始项目来源
 - **冰焰模板** - 设计参考与对齐标准
-- **gdUnit4** - 优秀的 Godot 测试框架
 - https://github.com/Ironnoob73/DancingLineGodotTemplate
 - 所有贡献者和社区成员
 
