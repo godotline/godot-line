@@ -8,7 +8,8 @@ extends Area3D
 @export var new_distance: float = 25.0
 @export var active_speed: bool = true
 @export var new_follow_speed: float = 1.2
-@export var ease_type: Tween.EaseType = Tween.EASE_IN_OUT
+@export var tween_transition: Tween.TransitionType = Tween.TRANS_SINE
+@export var tween_ease: Tween.EaseType = Tween.EASE_IN_OUT
 @export var need_time: float = 2.0
 
 @export_group("时间判定")
@@ -61,13 +62,13 @@ func _trigger() -> void:
 	cf.kill_tweens()
 	
 	if active_position:
-		cf.tween_to_position(new_add_position, need_time, ease_type)
+		cf.tween_to_position(new_add_position, need_time, tween_ease, tween_transition)
 	
 	if active_rotate:
-		cf.tween_to_rotation(new_rotation, need_time, ease_type)
+		cf.tween_to_rotation(new_rotation, need_time, tween_ease, tween_transition)
 	
 	if active_distance:
-		cf.tween_to_distance(new_distance, need_time, ease_type)
+		cf.tween_to_distance(new_distance, need_time, tween_ease, tween_transition)
 	
 	if active_speed:
-		cf.tween_to_speed(new_follow_speed, need_time, ease_type)
+		cf.tween_to_speed(new_follow_speed, need_time, tween_ease, tween_transition)

@@ -6,6 +6,8 @@ extends Node3D
 @export var distance_from_object: float = 25.0
 @export var follow_speed: float = 1.2
 @export var following: bool = true
+@export var tween_transition: Tween.TransitionType = Tween.TRANS_SINE
+@export var tween_ease: Tween.EaseType = Tween.EASE_IN_OUT
 
 @onready var line: Node3D = get_node(player) if player else null
 @onready var camera: Node3D = get_child(0) if get_child_count() > 0 else null
@@ -102,29 +104,31 @@ func pick() -> void:
 	tween_backups[TweenProp.SPEED] = follow_speed if tweens[TweenProp.SPEED] == null or not tweens[TweenProp.SPEED].is_running() else tween_ends[TweenProp.SPEED]
 
 # 通用 Tween 动画方法
-func _tween_to(index: int, new_value: Variant, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
+func _tween_to(index: int, new_value: Variant, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
 	if tweens[index] and tweens[index].is_running():
 		tweens[index].kill()
 	tween_ends[index] = new_value
 	tweens[index] = create_tween()
-	tweens[index].set_trans(trans_type)
-	tweens[index].set_ease(ease_type)
+	var final_trans := trans_type if trans_type != -1 else tween_transition
+	var final_ease := ease_type if ease_type != -1 else tween_ease
+	tweens[index].set_trans(final_trans)
+	tweens[index].set_ease(final_ease)
 	tweens[index].tween_property(self, TWEEN_PROPERTIES[index], new_value, duration)
 
 # 辅助方法：设置目标位置（带 Tween 动画）
-func tween_to_position(new_pos: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
+func tween_to_position(new_pos: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
 	_tween_to(TweenProp.POSITION, new_pos, duration, ease_type, trans_type)
 
 # 辅助方法：设置旋转（带 Tween 动画）
-func tween_to_rotation(new_rot: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
+func tween_to_rotation(new_rot: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
 	_tween_to(TweenProp.ROTATION, new_rot, duration, ease_type, trans_type)
 
 # 辅助方法：设置距离（带 Tween 动画）
-func tween_to_distance(new_dist: float, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
+func tween_to_distance(new_dist: float, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
 	_tween_to(TweenProp.DISTANCE, new_dist, duration, ease_type, trans_type)
 
 # 辅助方法：设置速度（带 Tween 动画）
-func tween_to_speed(new_speed: float, duration: float = 2.0, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, trans_type: Tween.TransitionType = Tween.TRANS_SINE) -> void:
+func tween_to_speed(new_speed: float, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
 	_tween_to(TweenProp.SPEED, new_speed, duration, ease_type, trans_type)
 
 ## 开始 lerp 到目标位置/旋转（最短角路径）
