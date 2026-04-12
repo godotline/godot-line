@@ -4,18 +4,21 @@
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/MainLine.tscn" id="2_ep0cv"]
 [ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="3_acgrg"]
 [ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="4_4u5qg"]
-[ext_resource type="PackedScene" path="res://#Template/GAMEUI.tscn" id="5_0e4gd"]
+[ext_resource type="PackedScene" path="res://#Template/[Resources]/GAMEUI.tscn" id="5_0e4gd"]
 [ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="6_uy1mm"]
 [ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="7_sgchv"]
 [ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Diamond.tscn" id="8_uy1mm"]
-[ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/GuideTap.tscn" id="9_sgchv"]
+[ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="9_sgchv"]
 [ext_resource type="PackedScene" path="res://#Template/trigger.tscn" id="10_q71od"]
 [ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="11_lbrgy"]
 [ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="12_67fsp"]
 [ext_resource type="PackedScene" path="res://#Template/BaseWall.tscn" id="12_pxq50"]
 [ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Ending.tscn" id="13_lbrgy"]
-[ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/Crown.tscn" id="14_pxq50"]
-[ext_resource type="PackedScene" uid="uid://bjvijfdfvm1xl" path="res://#Template/CrownSet.tscn" id="15_67fsp"]
+[ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Trigger/Crown.gd" id="15_7p28s"]
+[ext_resource type="ArrayMesh" uid="uid://dmpr4wgxf28ca" path="res://#Template/[Resources]/Models/PerfactCrown.obj" id="16_ygfuf"]
+[ext_resource type="Texture2D" uid="uid://bi33owy3t41ql" path="res://#Template/[Resources]/PCrownT.png" id="17_3q3n2"]
+[ext_resource type="Texture2D" uid="uid://x66ygieiwjpf" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="18_mf85f"]
+[ext_resource type="Texture2D" uid="uid://d3w0a5cs7y31v" path="res://#Template/[Resources]/BlackCrown_Light.png" id="19_ivwr3"]
 
 [sub_resource type="Environment" id="Environment_c2ibq"]
 
@@ -30,6 +33,74 @@ _data = {
 &"RESET": SubResource("Animation_wkp8b"),
 &"level": SubResource("3")
 }
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qoafd"]
+albedo_color = Color(1, 1, 0, 1)
+albedo_texture = ExtResource("17_3q3n2")
+
+[sub_resource type="BoxShape3D" id="2"]
+
+[sub_resource type="Animation" id="Animation_8fven"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Crown:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(5, 5, 5)]
+}
+
+[sub_resource type="Animation" id="Animation_ctg82"]
+resource_name = "crown"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Crown:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(2.21914, 0.307786),
+"update": 0,
+"values": [Vector3(5, 5, 5), Vector3(0, 0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CrownSprite:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(3.03144, 1, 0.307786),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("CrownSprite:texture")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("18_mf85f"), ExtResource("19_ivwr3")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_pds1l"]
+_data = {
+&"RESET": SubResource("Animation_8fven"),
+&"crown": SubResource("Animation_ctg82")
+}
+
+[sub_resource type="BoxMesh" id="BoxMesh_t50w7"]
 
 [node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Camera", "Mainline")]
 script = ExtResource("1_ae7tf")
@@ -142,24 +213,92 @@ transform = Transform3D(107.24461, 0, -7.1796446, 0, 0.99999905, 0, 107.24461, 0
 [node name="Ending" parent="Scene" unique_id=1497290031 instance=ExtResource("13_lbrgy")]
 transform = Transform3D(-0.7071067, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071067, 164.65387, 3.0376942, 151.17961)
 
-[node name="Crown" parent="Scene" unique_id=1805653336 instance=ExtResource("14_pxq50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.806244, 3.1029124, 55.88733)
+[node name="Crown" type="Area3D" parent="." unique_id=1805653336]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.33110213, 0, 7.5652833)
+collision_layer = 0
+script = ExtResource("15_7p28s")
+
+[node name="Crown" type="MeshInstance3D" parent="Crown" unique_id=1455513811]
+transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
+mesh = ExtResource("16_ygfuf")
+surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
+
+[node name="CrownTrigger" type="CollisionShape3D" parent="Crown" unique_id=18434010]
+transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
+shape = SubResource("2")
+
+[node name="Marker3D" type="Marker3D" parent="Crown/CrownTrigger" unique_id=626349944]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Crown" unique_id=1721480882]
+libraries/ = SubResource("AnimationLibrary_pds1l")
+
+[node name="RevivePos" type="MeshInstance3D" parent="Crown" unique_id=1500499588]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.954218)
+mesh = SubResource("BoxMesh_t50w7")
+
+[node name="CrownSprite" type="Sprite3D" parent="Crown" unique_id=1095474833]
+transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
+texture = ExtResource("18_mf85f")
+
+[node name="Crown2" type="Area3D" parent="." unique_id=1120545963]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.07884, 3.2402897, 9.86498)
+collision_layer = 0
+script = ExtResource("15_7p28s")
 tag = 2
 
-[node name="Crown3" parent="Scene" unique_id=1578351782 instance=ExtResource("14_pxq50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87.68902, 3.1029115, 74.419556)
+[node name="Crown" type="MeshInstance3D" parent="Crown2" unique_id=1188569407]
+transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
+mesh = ExtResource("16_ygfuf")
+surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
+
+[node name="CrownTrigger" type="CollisionShape3D" parent="Crown2" unique_id=815547165]
+transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
+shape = SubResource("2")
+
+[node name="Marker3D" type="Marker3D" parent="Crown2/CrownTrigger" unique_id=1338090123]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Crown2" unique_id=1900478624]
+libraries/ = SubResource("AnimationLibrary_pds1l")
+
+[node name="RevivePos" type="MeshInstance3D" parent="Crown2" unique_id=805901116]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.142956, -9.536743e-07, 0.60635185)
+mesh = SubResource("BoxMesh_t50w7")
+
+[node name="CrownSprite" type="Sprite3D" parent="Crown2" unique_id=827014091]
+transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
+texture = ExtResource("18_mf85f")
+
+[node name="Crown3" type="Area3D" parent="." unique_id=834212275]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.48222, 3.2402906, 27.055702)
+collision_layer = 0
+script = ExtResource("15_7p28s")
 tag = 3
 
-[node name="CrownSet" parent="Scene" unique_id=127328941 instance=ExtResource("15_67fsp")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 56.278027, 0.50000006, 63.85392)
-tag = 2
+[node name="Crown" type="MeshInstance3D" parent="Crown3" unique_id=409742355]
+transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
+mesh = ExtResource("16_ygfuf")
+surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 
-[node name="CrownSet2" parent="Scene" unique_id=1179078594 instance=ExtResource("15_67fsp")]
-transform = Transform3D(0.016963817, 0, -0.9998561, 0, 1, 0, 0.9998561, 0, 0.016963817, 50.605064, 0.49999762, 50.291656)
+[node name="CrownTrigger" type="CollisionShape3D" parent="Crown3" unique_id=616274311]
+transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
+shape = SubResource("2")
 
-[node name="Crown2" parent="Scene" unique_id=36470208 instance=ExtResource("14_pxq50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.75054, -0.027085304, 50.502655)
+[node name="Marker3D" type="Marker3D" parent="Crown3/CrownTrigger" unique_id=943109600]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
-[node name="CrownSet3" parent="Scene" unique_id=1361139948 instance=ExtResource("15_67fsp")]
-transform = Transform3D(0, 0, -1.0000001, 0, 1, 0, 1.0000001, 0, 0, 83.82147, 0.49999762, 64.94314)
-tag = 3
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Crown3" unique_id=1121234370]
+libraries/ = SubResource("AnimationLibrary_pds1l")
+
+[node name="RevivePos" type="MeshInstance3D" parent="Crown3" unique_id=12311870]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.142956, -9.536743e-07, 0.60635185)
+mesh = SubResource("BoxMesh_t50w7")
+
+[node name="CrownSprite" type="Sprite3D" parent="Crown3" unique_id=2077143878]
+transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
+texture = ExtResource("18_mf85f")
+
+[connection signal="body_entered" from="Crown" to="Crown" method="_on_Crown_body_entered"]
+[connection signal="body_entered" from="Crown2" to="Crown2" method="_on_Crown_body_entered"]
+[connection signal="body_entered" from="Crown3" to="Crown3" method="_on_Crown_body_entered"]

@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/MainLine.tscn" id="2_ots34"]
 [ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
 [ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_lu6ew"]
-[ext_resource type="PackedScene" path="res://#Template/GAMEUI.tscn" id="6_hddbq"]
+[ext_resource type="PackedScene" path="res://#Template/[Resources]/GAMEUI.tscn" id="6_hddbq"]
 [ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_qbl1a"]
 [ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="8_vnc86"]
 

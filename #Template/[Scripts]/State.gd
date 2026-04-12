@@ -4,6 +4,7 @@ extends RefCounted
 ## ========== 持久化检查点数据 ==========
 
 static var main_line_transform 
+static var revive_position := Vector3.ZERO
 static var is_turn := false
 static var anim_time := 0.0
 static var music_checkpoint_time := 0.0
@@ -43,7 +44,9 @@ static var main_line_data := {
 ## 保存检查点（Crown 触发时调用）
 ## ============================================================
 
-static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, crown_tag: int) -> void:
+static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, crown_tag: int, revive_pos: Node3D = null) -> void:
+	if revive_pos:
+		revive_position = revive_pos.global_position
 	main_line_transform = main_line.transform
 	is_turn = main_line.is_turn
 	if main_line.animation_node and main_line.animation_node.current_animation:
@@ -72,6 +75,8 @@ static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, c
 static func load_checkpoint_to_main_line(main_line: CharacterBody3D) -> void:
 	if main_line_transform:
 		main_line.transform = main_line_transform
+		if revive_position != Vector3.ZERO:
+			main_line.global_position = revive_position
 		main_line.is_turn = is_turn
 
 static func load_runtime_to_main_line(main_line: CharacterBody3D) -> void:
@@ -153,6 +158,7 @@ static func load_from_dict(s: SaveKitDeserializer, data: Dictionary) -> void:
 
 static func reset_to_defaults() -> void:
 	main_line_transform = null
+	revive_position = Vector3.ZERO
 	reset_camera_checkpoint()
 	reset_main_line_data()
 	is_turn = false

@@ -23,7 +23,7 @@ signal onturn
 
 @export var music: AudioStream
 
-const DEATH_PARTICLE = preload("res://#Template/DeathParticle.tscn")
+@export var deathParticle: PackedScene
 
 var level_manager
 var timeout := 0.1
@@ -189,23 +189,26 @@ func die():
 		$MusicPlayer.stop()
 		$AudioStreamPlayer.play()
 		
+		if not deathParticle:
+			return
+			
 		var forward_dir := velocity.normalized() if velocity.length() > 0.01 else Vector3.FORWARD
 		var backward_dir := -forward_dir
 
 		for i in 8:
-			var death_particle_instance: RigidBody3D = DEATH_PARTICLE.instantiate()
-			get_parent().add_child(death_particle_instance)
-			death_particle_instance.get_node("MeshInstance3D").mesh = mesh
-			death_particle_instance.get_node("MeshInstance3D").material_override = material
-			death_particle_instance.global_position = global_position
-			death_particle_instance.linear_damp = 0.5
+			var deathParticle_instance: RigidBody3D = deathParticle.instantiate()
+			get_parent().add_child(deathParticle_instance)
+			deathParticle_instance.get_node("MeshInstance3D").mesh = mesh
+			deathParticle_instance.get_node("MeshInstance3D").material_override = material
+			deathParticle_instance.global_position = global_position
+			deathParticle_instance.linear_damp = 0.5
 			var random_rot := _random_rotation()
-			death_particle_instance.rotation = random_rot
+			deathParticle_instance.rotation = random_rot
 
 			var direction := forward_dir if i < 4 else backward_dir
 			var impulse := direction * speed + _rand_dir() * 0.5
-			death_particle_instance.apply_central_impulse(impulse)
-			death_particle_instance.apply_torque(_rand_dir())
+			deathParticle_instance.apply_central_impulse(impulse)
+			deathParticle_instance.apply_torque(_rand_dir())
 
 func _rand_dir() -> Vector3:
 	return Vector3(randf_range(-speed, speed), randf_range(-speed, speed), randf_range(-speed, speed))

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://lvagihw0v4wd" path="res://#Template/[Scripts]/Level/MainLine.gd" id="1"]
 [ext_resource type="AudioStream" uid="uid://dg4noxkxcgbfj" path="res://#Template/[Resources]/WaterDie.wav" id="2"]
+[ext_resource type="PackedScene" uid="uid://bvchtbimvb182" path="res://#Template/[Resources]/DeathParticle.tscn" id="2_jntxg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7ow2k"]
 height = 1.0
@@ -36,6 +37,7 @@ material = SubResource("StandardMaterial3D_ty8qn")
 [node name="MainLine" type="CharacterBody3D" unique_id=1905697100]
 collision_mask = 2
 script = ExtResource("1")
+deathParticle = ExtResource("2_jntxg")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=157464276]
 shape = SubResource("CapsuleShape3D_7ow2k")

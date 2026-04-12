@@ -3,6 +3,8 @@
 [ext_resource type="ArrayMesh" uid="uid://dmpr4wgxf28ca" path="res://#Template/[Resources]/Models/PerfactCrown.obj" id="1"]
 [ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Trigger/Crown.gd" id="2"]
 [ext_resource type="Texture2D" uid="uid://bi33owy3t41ql" path="res://#Template/[Resources]/PCrownT.png" id="3_ctg82"]
+[ext_resource type="Texture2D" uid="uid://x66ygieiwjpf" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="5_dklm7"]
+[ext_resource type="Texture2D" uid="uid://d3w0a5cs7y31v" path="res://#Template/[Resources]/BlackCrown_Light.png" id="6_8wqky"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qoafd"]
 albedo_color = Color(1, 1, 0, 1)
@@ -15,7 +17,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("MeshInstance3D:scale")
+tracks/0/path = NodePath("Crown:scale")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -27,11 +29,10 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_ctg82"]
 resource_name = "crown"
-length = 0.2
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("MeshInstance3D:scale")
+tracks/0/path = NodePath("Crown:scale")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -40,6 +41,30 @@ tracks/0/keys = {
 "update": 0,
 "values": [Vector3(5, 5, 5), Vector3(0, 0, 0)]
 }
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CrownSprite:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(3.03144, 1, 0.307786),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("CrownSprite:texture")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [ExtResource("5_dklm7"), ExtResource("6_8wqky")]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_pds1l"]
 _data = {
@@ -47,23 +72,32 @@ _data = {
 &"crown": SubResource("Animation_ctg82")
 }
 
+[sub_resource type="BoxMesh" id="BoxMesh_t50w7"]
+
 [node name="Crown" type="Area3D" unique_id=1805653336]
 collision_layer = 0
 script = ExtResource("2")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1455513811]
+[node name="Crown" type="MeshInstance3D" parent="." unique_id=1455513811]
 transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
 mesh = ExtResource("1")
 surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=18434010]
-transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
+[node name="CrownTrigger" type="CollisionShape3D" parent="." unique_id=18434010]
+transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
 shape = SubResource("2")
 
-[node name="Marker3D" type="Marker3D" parent="CollisionShape3D" unique_id=626349944]
-gizmo_extents = 0.5
+[node name="Marker3D" type="Marker3D" parent="CrownTrigger" unique_id=626349944]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1721480882]
 libraries/ = SubResource("AnimationLibrary_pds1l")
+
+[node name="RevivePos" type="MeshInstance3D" parent="." unique_id=1500499588]
+mesh = SubResource("BoxMesh_t50w7")
+
+[node name="CrownSprite" type="Sprite3D" parent="." unique_id=1095474833]
+transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
+texture = ExtResource("5_dklm7")
 
 [connection signal="body_entered" from="." to="." method="_on_Crown_body_entered"]
