@@ -210,95 +210,95 @@ transform = Transform3D(19.905512, 0, 0, 0, 1, 0, 0, 0, 2.1410718, 88.06795, 2.1
 [node name="BaseFloor5" parent="Scene" unique_id=1008768232 instance=ExtResource("7_sgchv")]
 transform = Transform3D(107.24461, 0, -7.1796446, 0, 0.99999905, 0, 107.24461, 0, 7.1796446, 138.96089, 2.1299973, 124.74552)
 
-[node name="Ending" parent="Scene" unique_id=1497290031 instance=ExtResource("13_lbrgy")]
-transform = Transform3D(-0.7071067, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071067, 164.65387, 3.0376942, 151.17961)
-
-[node name="Crown" type="Area3D" parent="." unique_id=1805653336]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.33110213, 0, 7.5652833)
+[node name="Crown" type="Area3D" parent="Scene" unique_id=1805653336]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.3311, 0, 52.565285)
 collision_layer = 0
 script = ExtResource("15_7p28s")
 
-[node name="Crown" type="MeshInstance3D" parent="Crown" unique_id=1455513811]
+[node name="Crown" type="MeshInstance3D" parent="Scene/Crown" unique_id=1455513811]
 transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
 mesh = ExtResource("16_ygfuf")
 surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 
-[node name="CrownTrigger" type="CollisionShape3D" parent="Crown" unique_id=18434010]
+[node name="CrownTrigger" type="CollisionShape3D" parent="Scene/Crown" unique_id=18434010]
 transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
 shape = SubResource("2")
 
-[node name="Marker3D" type="Marker3D" parent="Crown/CrownTrigger" unique_id=626349944]
+[node name="Marker3D" type="Marker3D" parent="Scene/Crown/CrownTrigger" unique_id=626349944]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Crown" unique_id=1721480882]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Scene/Crown" unique_id=1721480882]
 libraries/ = SubResource("AnimationLibrary_pds1l")
 
-[node name="RevivePos" type="MeshInstance3D" parent="Crown" unique_id=1500499588]
+[node name="RevivePos" type="MeshInstance3D" parent="Scene/Crown" unique_id=1500499588]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.954218)
 mesh = SubResource("BoxMesh_t50w7")
 
-[node name="CrownSprite" type="Sprite3D" parent="Crown" unique_id=1095474833]
+[node name="CrownSprite" type="Sprite3D" parent="Scene/Crown" unique_id=1095474833]
 transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
 texture = ExtResource("18_mf85f")
 
-[node name="Crown2" type="Area3D" parent="." unique_id=1120545963]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.07884, 3.2402897, 9.86498)
+[node name="Crown2" type="Area3D" parent="Scene" unique_id=1120545963]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.07884, 3.2402897, 54.86498)
 collision_layer = 0
 script = ExtResource("15_7p28s")
 tag = 2
 
-[node name="Crown" type="MeshInstance3D" parent="Crown2" unique_id=1188569407]
+[node name="Crown" type="MeshInstance3D" parent="Scene/Crown2" unique_id=1188569407]
 transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
 mesh = ExtResource("16_ygfuf")
 surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 
-[node name="CrownTrigger" type="CollisionShape3D" parent="Crown2" unique_id=815547165]
+[node name="CrownTrigger" type="CollisionShape3D" parent="Scene/Crown2" unique_id=815547165]
 transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
 shape = SubResource("2")
 
-[node name="Marker3D" type="Marker3D" parent="Crown2/CrownTrigger" unique_id=1338090123]
+[node name="Marker3D" type="Marker3D" parent="Scene/Crown2/CrownTrigger" unique_id=1338090123]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Crown2" unique_id=1900478624]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Scene/Crown2" unique_id=1900478624]
 libraries/ = SubResource("AnimationLibrary_pds1l")
 
-[node name="RevivePos" type="MeshInstance3D" parent="Crown2" unique_id=805901116]
+[node name="RevivePos" type="MeshInstance3D" parent="Scene/Crown2" unique_id=805901116]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.142956, -9.536743e-07, 0.60635185)
 mesh = SubResource("BoxMesh_t50w7")
 
-[node name="CrownSprite" type="Sprite3D" parent="Crown2" unique_id=827014091]
+[node name="CrownSprite" type="Sprite3D" parent="Scene/Crown2" unique_id=827014091]
 transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
 texture = ExtResource("18_mf85f")
 
-[node name="Crown3" type="Area3D" parent="." unique_id=834212275]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.48222, 3.2402906, 27.055702)
+[node name="Crown3" type="Area3D" parent="Scene" unique_id=834212275]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.48222, 3.2402906, 72.0557)
 collision_layer = 0
 script = ExtResource("15_7p28s")
 tag = 3
 
-[node name="Crown" type="MeshInstance3D" parent="Crown3" unique_id=409742355]
+[node name="Crown" type="MeshInstance3D" parent="Scene/Crown3" unique_id=409742355]
 transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
 mesh = ExtResource("16_ygfuf")
 surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 
-[node name="CrownTrigger" type="CollisionShape3D" parent="Crown3" unique_id=616274311]
+[node name="CrownTrigger" type="CollisionShape3D" parent="Scene/Crown3" unique_id=616274311]
 transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
 shape = SubResource("2")
 
-[node name="Marker3D" type="Marker3D" parent="Crown3/CrownTrigger" unique_id=943109600]
+[node name="Marker3D" type="Marker3D" parent="Scene/Crown3/CrownTrigger" unique_id=943109600]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Crown3" unique_id=1121234370]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Scene/Crown3" unique_id=1121234370]
 libraries/ = SubResource("AnimationLibrary_pds1l")
 
-[node name="RevivePos" type="MeshInstance3D" parent="Crown3" unique_id=12311870]
+[node name="RevivePos" type="MeshInstance3D" parent="Scene/Crown3" unique_id=12311870]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.142956, -9.536743e-07, 0.60635185)
 mesh = SubResource("BoxMesh_t50w7")
 
-[node name="CrownSprite" type="Sprite3D" parent="Crown3" unique_id=2077143878]
+[node name="CrownSprite" type="Sprite3D" parent="Scene/Crown3" unique_id=2077143878]
 transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
 texture = ExtResource("18_mf85f")
 
-[connection signal="body_entered" from="Crown" to="Crown" method="_on_Crown_body_entered"]
-[connection signal="body_entered" from="Crown2" to="Crown2" method="_on_Crown_body_entered"]
-[connection signal="body_entered" from="Crown3" to="Crown3" method="_on_Crown_body_entered"]
+[node name="Ending" parent="Scene" unique_id=1497290031 instance=ExtResource("13_lbrgy")]
+transform = Transform3D(-0.7071067, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071067, 164.65387, 3.0376942, 151.17961)
+
+[connection signal="body_entered" from="Scene/Crown" to="Scene/Crown" method="_on_Crown_body_entered"]
+[connection signal="body_entered" from="Scene/Crown2" to="Scene/Crown2" method="_on_Crown_body_entered"]
+[connection signal="body_entered" from="Scene/Crown3" to="Scene/Crown3" method="_on_Crown_body_entered"]

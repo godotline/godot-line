@@ -15,7 +15,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("../Jinzita:position")
+tracks/0/path = NodePath("../Left:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -42,7 +42,7 @@ resource_name = "jinzita"
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("../Jinzita:position")
+tracks/0/path = NodePath("../Left:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -72,14 +72,14 @@ _data = {
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ajvws"]
 
-[node name="Ending" type="Node3D" unique_id=1497290031]
+[node name="Pyramid" type="Node3D" unique_id=1497290031]
 
-[node name="Jinzita" type="MeshInstance3D" parent="." unique_id=920015160]
+[node name="Left" type="MeshInstance3D" parent="." unique_id=920015160]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.009581, -0.24, 0)
 mesh = ExtResource("1_ajvws")
 surface_material_override/0 = SubResource("StandardMaterial3D_oowoy")
 
-[node name="Jinzita2" type="MeshInstance3D" parent="." unique_id=971480060]
+[node name="Right" type="MeshInstance3D" parent="." unique_id=971480060]
 transform = Transform3D(-0.999995, 0.00326376, 1.50996e-07, 0.00326376, 0.999995, -2.85326e-10, -1.50996e-07, 2.07489e-10, -1, -0.189368, -0.24, 0)
 mesh = ExtResource("1_ajvws")
 surface_material_override/0 = SubResource("StandardMaterial3D_ajvws")
@@ -90,21 +90,21 @@ script = ExtResource("3_tulby")
 Offset = Vector3(10, 50, 10)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Trigger" unique_id=399391729]
-root_node = NodePath("../../Jinzita2")
+root_node = NodePath("../../Right")
 libraries/ = SubResource("AnimationLibrary_8gmve")
 
-[node name="Area3D2" type="Area3D" parent="." unique_id=1308708813]
+[node name="StopPlayer" type="Area3D" parent="." unique_id=1308708813]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 0)
 script = ExtResource("1_oowoy")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D2" unique_id=1819117074]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StopPlayer" unique_id=1819117074]
 shape = SubResource("BoxShape3D_ajvws")
 
-[node name="Marker3D" type="Marker3D" parent="Area3D2" unique_id=427985879]
+[node name="Marker3D" type="Marker3D" parent="StopPlayer" unique_id=427985879]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
-[node name="Trigger" parent="Area3D2" unique_id=622069521 instance=ExtResource("2_tulby")]
+[node name="Trigger" parent="StopPlayer" unique_id=622069521 instance=ExtResource("2_tulby")]
 script = ExtResource("5_u5w0w")
 new_speed = 0.0
 
-[connection signal="body_entered" from="Area3D2" to="Area3D2" method="_on_body_entered_jinzita"]
+[connection signal="body_entered" from="StopPlayer" to="StopPlayer" method="_on_body_entered_jinzita"]
