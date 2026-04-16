@@ -8,10 +8,13 @@ extends Area3D
 @export var new_distance: float = 25.0
 @export var active_speed: bool = true
 @export var new_follow_speed: float = 1.2
-@export var tween_transition: Tween.TransitionType = Tween.TRANS_SINE
-@export var tween_ease: Tween.EaseType = Tween.EASE_IN_OUT
-@export var need_time: float = 2.0
-
+enum RotateMode {
+	Fast,           # 最短路径旋转
+	FastBeyond360,  # 允许超过360度的旋转
+	WorldAxisAdd,   # 世界坐标系 - 基于当前旋转增加
+	LocalAxisAdd    # 本地坐标系 - 基于当前旋转增加
+}
+@export var rotate_mode: RotateMode = RotateMode.Fast
 @export_group("时间判定")
 @export var use_time: bool = false
 @export var trigger_time: float = 0.0
@@ -46,7 +49,6 @@ func _process(_delta: float) -> void:
 			var main_line = cf.player_node
 			if main_line.animation_node:
 				current_time = main_line.animation_node.current_animation_position
-				#print("CameraTrigger animtime: ", current_time)
 		
 		if current_time >= trigger_time:
 			_trigger()
@@ -58,17 +60,14 @@ func _trigger() -> void:
 	
 	triggered = true
 	
-	# 停止现有 Tween
-	cf.kill_tweens()
-	
 	if active_position:
-		cf.tween_to_position(new_add_position, need_time, tween_ease, tween_transition)
+		cf.add_position = new_add_position
 	
 	if active_rotate:
-		cf.tween_to_rotation(new_rotation, need_time, tween_ease, tween_transition)
+		cf.DORotateOffset(new_rotation, rotate_mode)
 	
 	if active_distance:
-		cf.tween_to_distance(new_distance, need_time, tween_ease, tween_transition)
+		cf.distance_from_object = new_distance
 	
 	if active_speed:
-		cf.tween_to_speed(new_follow_speed, need_time, tween_ease, tween_transition)
+		cf.follow_speed = new_follow_speed

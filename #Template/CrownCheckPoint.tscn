@@ -77,7 +77,7 @@ _data = {
 [node name="Crown" type="Area3D" unique_id=1805653336 node_paths=PackedStringArray("RevivePosition")]
 collision_layer = 0
 script = ExtResource("2")
-RevivePosition = NodePath("RevivePos")
+RevivePosition = NodePath("RevivePosition")
 
 [node name="Crown" type="MeshInstance3D" parent="." unique_id=1455513811]
 transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
@@ -94,7 +94,7 @@ transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1721480882]
 libraries/ = SubResource("AnimationLibrary_pds1l")
 
-[node name="RevivePos" type="MeshInstance3D" parent="." unique_id=1500499588]
+[node name="RevivePosition" type="MeshInstance3D" parent="." unique_id=1500499588]
 mesh = SubResource("BoxMesh_t50w7")
 
 [node name="CrownSprite" type="Sprite3D" parent="." unique_id=1095474833]

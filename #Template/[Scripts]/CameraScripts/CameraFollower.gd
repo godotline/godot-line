@@ -1,43 +1,34 @@
 extends Node3D
 
+enum RotateMode {
+	Fast,           # 最短路径旋转
+	FastBeyond360,  # 允许超过360度的旋转
+	WorldAxisAdd,   # 世界坐标系 - 基于当前旋转增加
+	LocalAxisAdd    # 本地坐标系 - 基于当前旋转增加
+}
+
 @export var player: NodePath
 @export var add_position: Vector3 = Vector3.ZERO
 @export var rotation_offset: Vector3 = Vector3(45, 45, 0)
 @export var distance_from_object: float = 25.0
 @export var follow_speed: float = 1.2
 @export var following: bool = true
-@export var tween_transition: Tween.TransitionType = Tween.TRANS_SINE
-@export var tween_ease: Tween.EaseType = Tween.EASE_IN_OUT
 
 @onready var line: Node3D = get_node(player) if player else null
 @onready var camera: Node3D = get_child(0) if get_child_count() > 0 else null
 
-## Tween 属性索引枚举
-enum TweenProp { POSITION, ROTATION, DISTANCE, SPEED, COUNT }
-
-## Tween 实例数组：[pos, rot, dis, spe]
-var tweens: Array = [null, null, null, null]
-## Tween 目标值数组：[pos_e, rot_e, dtc_e, spd_e]
-var tween_ends: Array = [Vector3.ZERO, Vector3.ZERO, 0.0, 0.0]
-## Tween 备份值数组：[_pos, _rot, _dtc, _spd]
-var tween_backups: Array = [Vector3.ZERO, Vector3.ZERO, 0.0, 0.0]
-
-## Tween 属性名数组，用于动态绑定
-const TWEEN_PROPERTIES: Array[String] = [
-	"add_position",
-	"rotation_offset",
-	"distance_from_object",
-	"follow_speed",
-]
-
-var _skip_follow_once := false
 var _checkpoint_applied := false
 
-## Lerp 状态
-var _lerp_target_position: Vector3 = Vector3.ZERO
-var _lerp_target_rotation: Vector3 = Vector3.ZERO
-var _lerping: bool = false
-var _lerp_speed: float = 2.0
+## Tween 状态
+var _tween: Tween = null
+
+## Tween 状态
+var _current_rotate_mode: RotateMode = RotateMode.Fast
+var _target_rotation: Vector3 = Vector3.ZERO
+var _start_rotation: Vector3 = Vector3.ZERO
+var _rotation_progress: float = 0.0
+var _is_rotating: bool = false
+var _base_rotation: Vector3 = Vector3.ZERO  # AxisAdd 模式下的基准旋转
 
 func _ready() -> void:
 	if not camera and get_child_count() > 0:
@@ -46,23 +37,32 @@ func _ready() -> void:
 		call_deferred("_apply_state_checkpoint")
 
 func _process(delta: float) -> void:
-	if _lerping:
-		_do_lerp(delta)
+	if _tween and _tween.is_running():
 		return
 	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending and not _checkpoint_applied:
 		_apply_state_checkpoint()
-	if following and line:
-		rotation_degrees = rotation_offset
+	if following and line and ("is_start" not in line or line.is_start):
 		var base_transform = line.position + add_position
-		if _skip_follow_once:
-			position = base_transform
-			_skip_follow_once = false
+		position = position.slerp(base_transform, abs(follow_speed * delta))
+		
+		# 使用 RotateMode 处理旋转
+		if _is_rotating:
+			_rotation_progress = min(_rotation_progress + abs(follow_speed * delta), 1.0)
+			var current_target = _calculate_target_rotation()
+			rotation_degrees = _apply_rotate_mode(_start_rotation, current_target, _rotation_progress)
+			if _rotation_progress >= 1.0:
+				_is_rotating = false
 		else:
-			position = position.slerp(base_transform, abs(follow_speed * delta))
+			# 正常跟随模式
+			var target_rot = _get_target_rotation()
+			rotation_degrees = Vector3(
+				rad_to_deg(lerp_angle(deg_to_rad(rotation_degrees.x), deg_to_rad(target_rot.x), abs(follow_speed * delta))),
+				rad_to_deg(lerp_angle(deg_to_rad(rotation_degrees.y), deg_to_rad(target_rot.y), abs(follow_speed * delta))),
+				rad_to_deg(lerp_angle(deg_to_rad(rotation_degrees.z), deg_to_rad(target_rot.z), abs(follow_speed * delta))),
+			)
 	
 	if line and State.is_end and following:
 		following = false
-		kill_tweens()
 
 func _apply_state_checkpoint() -> void:
 	if _checkpoint_applied:
@@ -75,104 +75,91 @@ func _apply_state_checkpoint() -> void:
 	if line == null:
 		return
 	State.load_to_camera_follower(self)
-	rotation_degrees = rotation_offset
-	var base_transform = line.position + add_position
-	position = base_transform
-	_skip_follow_once = true
+	# 恢复到检查点记录的位置和旋转
+	position = cp.position
+	rotation_degrees = cp.rotation
 	_checkpoint_applied = true
 	State.camera_checkpoint.restore_pending = false
 
 
-func kill_tweens() -> void:
-	for i in TweenProp.COUNT:
-		if tweens[i] and tweens[i].is_running():
-			tweens[i].kill()
+## DO前缀：创建旋转补间动画（DOTween风格）
+func DORotateOffset(end_value: Vector3, mode: RotateMode = RotateMode.Fast) -> void:
+	_current_rotate_mode = mode
+	_start_rotation = rotation_degrees
+	_base_rotation = rotation_degrees  # 记录基准旋转用于AxisAdd模式
+	
+	match mode:
+		RotateMode.Fast:
+			# 最短路径：直接旋转到目标值
+			_target_rotation = _normalize_rotation_shortest(_start_rotation, end_value)
+		RotateMode.FastBeyond360:
+			# 允许超过360度的旋转
+			_target_rotation = end_value
+		RotateMode.WorldAxisAdd:
+			# 世界坐标系增量：在当前旋转基础上增加
+			_target_rotation = _start_rotation + end_value
+		RotateMode.LocalAxisAdd:
+			# 本地坐标系增量：在当前旋转基础上增加
+			_target_rotation = _start_rotation + end_value
+	
+	rotation_offset = end_value
+	_rotation_progress = 0.0
+	_is_rotating = true
 
-func revive() -> void:
-	add_position = tween_backups[TweenProp.POSITION]
-	rotation_offset = tween_backups[TweenProp.ROTATION]
-	distance_from_object = tween_backups[TweenProp.DISTANCE]
-	follow_speed = tween_backups[TweenProp.SPEED]
-	rotation_degrees = rotation_offset
-	var base_transform = line.position + add_position
-	position = base_transform
+## 获取当前目标旋转值
+func _get_target_rotation() -> Vector3:
+	match _current_rotate_mode:
+		RotateMode.WorldAxisAdd, RotateMode.LocalAxisAdd:
+			return _base_rotation + rotation_offset
+	return rotation_offset
 
-func pick() -> void:
-	tween_backups[TweenProp.POSITION] = add_position if tweens[TweenProp.POSITION] == null or not tweens[TweenProp.POSITION].is_running() else tween_ends[TweenProp.POSITION]
-	tween_backups[TweenProp.ROTATION] = rotation_offset if tweens[TweenProp.ROTATION] == null or not tweens[TweenProp.ROTATION].is_running() else tween_ends[TweenProp.ROTATION]
-	tween_backups[TweenProp.DISTANCE] = distance_from_object if tweens[TweenProp.DISTANCE] == null or not tweens[TweenProp.DISTANCE].is_running() else tween_ends[TweenProp.DISTANCE]
-	tween_backups[TweenProp.SPEED] = follow_speed if tweens[TweenProp.SPEED] == null or not tweens[TweenProp.SPEED].is_running() else tween_ends[TweenProp.SPEED]
+## 计算旋转插值的目标值
+func _calculate_target_rotation() -> Vector3:
+	match _current_rotate_mode:
+		RotateMode.WorldAxisAdd, RotateMode.LocalAxisAdd:
+			return _base_rotation + rotation_offset
+	return _target_rotation
 
-# 通用 Tween 动画方法
-func _tween_to(index: int, new_value: Variant, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
-	if tweens[index] and tweens[index].is_running():
-		tweens[index].kill()
-	tween_ends[index] = new_value
-	tweens[index] = create_tween()
-	var final_trans := trans_type if trans_type != -1 else tween_transition
-	var final_ease := ease_type if ease_type != -1 else tween_ease
-	tweens[index].set_trans(final_trans)
-	tweens[index].set_ease(final_ease)
-	tweens[index].tween_property(self, TWEEN_PROPERTIES[index], new_value, duration)
+## 归一化旋转到最短路径
+func _normalize_rotation_shortest(from: Vector3, to: Vector3) -> Vector3:
+	var result := Vector3.ZERO
+	for i in 3:
+		var diff = fmod(to[i] - from[i], 360.0)
+		if diff > 180:
+			diff -= 360
+		elif diff < -180:
+			diff += 360
+		result[i] = from[i] + diff
+	return result
 
-# 辅助方法：设置目标位置（带 Tween 动画）
-func tween_to_position(new_pos: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
-	_tween_to(TweenProp.POSITION, new_pos, duration, ease_type, trans_type)
+## 应用 RotateMode 计算旋转
+func _apply_rotate_mode(from: Vector3, to: Vector3, t: float) -> Vector3:
+	match _current_rotate_mode:
+		RotateMode.Fast:
+			# 最短路径：每轴使用 lerp_angle
+			return Vector3(
+				rad_to_deg(lerp_angle(deg_to_rad(from.x), deg_to_rad(to.x), t)),
+				rad_to_deg(lerp_angle(deg_to_rad(from.y), deg_to_rad(to.y), t)),
+				rad_to_deg(lerp_angle(deg_to_rad(from.z), deg_to_rad(to.z), t)),
+			)
+		RotateMode.FastBeyond360, RotateMode.WorldAxisAdd, RotateMode.LocalAxisAdd:
+			# 直接线性插值，允许超过360度
+			return from.lerp(to, t)
+	return from.lerp(to, t)
 
-# 辅助方法：设置旋转（带 Tween 动画）
-func tween_to_rotation(new_rot: Vector3, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
-	_tween_to(TweenProp.ROTATION, new_rot, duration, ease_type, trans_type)
-
-# 辅助方法：设置距离（带 Tween 动画）
-func tween_to_distance(new_dist: float, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
-	_tween_to(TweenProp.DISTANCE, new_dist, duration, ease_type, trans_type)
-
-# 辅助方法：设置速度（带 Tween 动画）
-func tween_to_speed(new_speed: float, duration: float = 2.0, ease_type: Tween.EaseType = -1, trans_type: Tween.TransitionType = -1) -> void:
-	_tween_to(TweenProp.SPEED, new_speed, duration, ease_type, trans_type)
-
-## 开始 lerp 到目标位置/旋转（最短角路径）
+## 开始 tween 到目标位置/旋转（最短角路径）
 func lerp_to(target_pos: Vector3, target_rot: Vector3, speed: float = 2.0) -> void:
-	_lerp_target_position = target_pos
-	_lerp_target_rotation = target_rot
-	_lerp_speed = speed
-	_lerping = true
-
-func stop_lerp() -> void:
-	_lerping = false
-
-func _do_lerp(delta: float) -> void:
-	var weight := 1.0 - exp(-_lerp_speed * delta)
-	position = position.lerp(_lerp_target_position, weight)
-	var cur := rotation_degrees
-	rotation_degrees = Vector3(
-		rad_to_deg(lerp_angle(deg_to_rad(cur.x), deg_to_rad(_lerp_target_rotation.x), weight)),
-		rad_to_deg(lerp_angle(deg_to_rad(cur.y), deg_to_rad(_lerp_target_rotation.y), weight)),
-		rad_to_deg(lerp_angle(deg_to_rad(cur.z), deg_to_rad(_lerp_target_rotation.z), weight)),
-	)
-	if position.is_equal_approx(_lerp_target_position) and _angle_approx(rotation_degrees, _lerp_target_rotation):
-		_lerping = false
-
-func _angle_approx(from: Vector3, to: Vector3, tolerance: float = 0.1) -> bool:
-	return abs(fmod(to.x - from.x + 180.0, 360.0) - 180.0) < tolerance \
-		and abs(fmod(to.y - from.y + 180.0, 360.0) - 180.0) < tolerance \
-		and abs(fmod(to.z - from.z + 180.0, 360.0) - 180.0) < tolerance
-
-# 相机震动函数
-func camera_shake(intensity: float, time: float) -> void:
-	var cam = get_node("Camera3D") if has_node("Camera3D") else null
-	if not cam:
-		return
-	var original_pos = cam.position
-	var timer = 0.0
-	while timer < time:
-		var decay = 1.0 - (timer / time)
-		var shake_offset = Vector3(
-			randf_range(-1, 1) * intensity * decay,
-			randf_range(-1, 1) * intensity * decay,
-			0
+	if _tween:
+		_tween.kill()
+	_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUART)
+	var duration := 1.0 / speed
+	_tween.tween_property(self, "position", target_pos, duration)
+	# 旋转需要逐轴用 lerp_angle 实现最短路径
+	var start_rot := rotation_degrees
+	_tween.tween_method(func(w: float) -> void:
+		rotation_degrees = Vector3(
+			rad_to_deg(lerp_angle(deg_to_rad(start_rot.x), deg_to_rad(target_rot.x), w)),
+			rad_to_deg(lerp_angle(deg_to_rad(start_rot.y), deg_to_rad(target_rot.y), w)),
+			rad_to_deg(lerp_angle(deg_to_rad(start_rot.z), deg_to_rad(target_rot.z), w)),
 		)
-		cam.position = original_pos + shake_offset
-		timer += get_process_delta_time()
-		await get_tree().process_frame
-	cam.position = original_pos
+	, 0.0, 1.0, duration)

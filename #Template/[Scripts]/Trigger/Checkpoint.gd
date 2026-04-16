@@ -4,7 +4,7 @@ class_name Checkpoint
 @export var RevivePosition: Node3D
 
 func _ready() -> void:
-	$RevivePos.visible = false
+	$RevivePosition.visible = false
 	if not body_entered.is_connected(_on_checkpoint_body_entered):
 		body_entered.connect(_on_checkpoint_body_entered)
 

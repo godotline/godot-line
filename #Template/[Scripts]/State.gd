@@ -24,20 +24,16 @@ static var camera_checkpoint := {
 	"rotation_offset": Vector3.ZERO,
 	"distance": 0.0,
 	"follow_speed": 0.0,
+	"position": Vector3.ZERO,
+	"rotation": Vector3.ZERO,
 	"restore_pending": false,
 }
 
-## ========== 运行时数据（仅场景存活期间有效） ==========
 
-## 主线运行时属性（transform、velocity等由 save_checkpoint / load_checkpoint_to_main_line 管理）
-static var main_line_data := {
-	"transform": null,
-	"linear_velocity": Vector3.ZERO,
-	"is_turn": false,
-	"is_start": false,
-	"v": Vector3.ZERO,
-	"past_translation": Vector3.ZERO,
-}
+## ============================================================
+
+
+
 
 
 ## ============================================================
@@ -57,6 +53,8 @@ static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, r
 		camera_checkpoint.rotation_offset = camera_follower.rotation_offset
 		camera_checkpoint.distance = camera_follower.distance_from_object
 		camera_checkpoint.follow_speed = camera_follower.follow_speed
+		camera_checkpoint.position = camera_follower.position
+		camera_checkpoint.rotation = camera_follower.rotation_degrees
 		camera_checkpoint.has_checkpoint = true
 	
 	var music_player := main_line.get_node("MusicPlayer") as AudioStreamPlayer
@@ -75,15 +73,7 @@ static func load_checkpoint_to_main_line(main_line: CharacterBody3D) -> void:
 			main_line.global_position = revive_position
 		main_line.is_turn = is_turn
 
-static func load_runtime_to_main_line(main_line: CharacterBody3D) -> void:
-	if main_line_data.transform:
-		main_line.transform = main_line_data.transform
-	if main_line_data.linear_velocity:
-		main_line.velocity = main_line_data.linear_velocity
-	main_line.is_turn = main_line_data.is_turn
-	main_line.is_start = main_line_data.is_start
-	main_line.v = main_line_data.v
-	main_line.past_translation = main_line_data.past_translation
+
 
 static func load_to_camera_follower(cf: Node3D) -> void:
 	var cp := camera_checkpoint
@@ -104,7 +94,7 @@ static func save_to_dict(s: SaveKitSerializer) -> Dictionary:
 	return {
 		"main_line_transform": s.encode_var(main_line_transform),
 		"camera_checkpoint": s.encode_var(camera_checkpoint),
-		"main_line_data": s.encode_var(main_line_data),
+
 		"is_turn": s.encode_var(is_turn),
 		"anim_time": s.encode_var(anim_time),
 		"music_checkpoint_time": s.encode_var(music_checkpoint_time),
@@ -124,8 +114,7 @@ static func load_from_dict(s: SaveKitDeserializer, data: Dictionary) -> void:
 		main_line_transform = s.decode_var(data["main_line_transform"], TYPE_TRANSFORM3D)
 	if data.has("camera_checkpoint"):
 		camera_checkpoint = s.decode_var(data["camera_checkpoint"], TYPE_DICTIONARY)
-	if data.has("main_line_data"):
-		main_line_data = s.decode_var(data["main_line_data"], TYPE_DICTIONARY)
+
 	if data.has("is_turn"):
 		is_turn = s.decode_var(data["is_turn"], TYPE_BOOL)
 	if data.has("anim_time"):
@@ -156,7 +145,7 @@ static func reset_to_defaults() -> void:
 	main_line_transform = null
 	revive_position = Vector3.ZERO
 	reset_camera_checkpoint()
-	reset_main_line_data()
+
 	is_turn = false
 	anim_time = 0.0
 	music_checkpoint_time = 0.0
@@ -176,16 +165,7 @@ static func reset_camera_checkpoint() -> void:
 		"rotation_offset": Vector3.ZERO,
 		"distance": 0.0,
 		"follow_speed": 0.0,
+		"position": Vector3.ZERO,
+		"rotation": Vector3.ZERO,
 		"restore_pending": false,
-	}
-
-## 重置运行时数据为默认值
-static func reset_main_line_data() -> void:
-	main_line_data = {
-		"transform": null,
-		"linear_velocity": Vector3.ZERO,
-		"is_turn": false,
-		"is_start": false,
-		"v": Vector3.ZERO,
-		"past_translation": Vector3.ZERO,
 	}
