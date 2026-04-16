@@ -44,7 +44,7 @@ static var main_line_data := {
 ## 保存检查点（Crown 触发时调用）
 ## ============================================================
 
-static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, crown_tag: int, revive_pos: Node3D = null) -> void:
+static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, revive_pos: Node3D = null) -> void:
 	if revive_pos:
 		revive_position = revive_pos.global_position
 	main_line_transform = main_line.transform
@@ -58,10 +58,6 @@ static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, c
 		camera_checkpoint.distance = camera_follower.distance_from_object
 		camera_checkpoint.follow_speed = camera_follower.follow_speed
 		camera_checkpoint.has_checkpoint = true
-	
-	line_crossing_crown = crown_tag
-	if crown_tag >= 1 and crown_tag <= 3:
-		crowns[crown_tag - 1] = 1
 	
 	var music_player := main_line.get_node("MusicPlayer") as AudioStreamPlayer
 	if music_player and music_player.playing:

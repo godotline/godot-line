@@ -74,9 +74,10 @@ _data = {
 
 [sub_resource type="BoxMesh" id="BoxMesh_t50w7"]
 
-[node name="Crown" type="Area3D" unique_id=1805653336]
+[node name="Crown" type="Area3D" unique_id=1805653336 node_paths=PackedStringArray("RevivePosition")]
 collision_layer = 0
 script = ExtResource("2")
+RevivePosition = NodePath("RevivePos")
 
 [node name="Crown" type="MeshInstance3D" parent="." unique_id=1455513811]
 transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
