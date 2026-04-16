@@ -15,11 +15,15 @@ enum RotateMode {
 	LocalAxisAdd    # 本地坐标系 - 基于当前旋转增加
 }
 @export var rotate_mode: RotateMode = RotateMode.Fast
+@export var TransitionType: Tween.TransitionType = Tween.TRANS_SINE
+@export var EaseType: Tween.EaseType = Tween.EASE_IN_OUT
+@export var need_time: float = 1.0
 @export_group("时间判定")
 @export var use_time: bool = false
 @export var trigger_time: float = 0.0
 
 var camera_follower: Node3D = null
+var _tween: Tween = null
 
 func _get_camera_follower() -> Node3D:
 	if camera_follower != null:
@@ -60,14 +64,18 @@ func _trigger() -> void:
 	
 	triggered = true
 	
+	if _tween:
+		_tween.kill()
+	_tween = create_tween().set_trans(TransitionType).set_ease(EaseType)
+	
 	if active_position:
-		cf.add_position = new_add_position
+		_tween.tween_property(cf, "add_position", new_add_position, need_time)
 	
 	if active_rotate:
-		cf.DORotateOffset(new_rotation, rotate_mode)
+		cf.DORotateOffset(new_rotation, rotate_mode, TransitionType, EaseType, need_time)
 	
 	if active_distance:
-		cf.distance_from_object = new_distance
+		_tween.tween_property(cf, "distance_from_object", new_distance, need_time)
 	
 	if active_speed:
-		cf.follow_speed = new_follow_speed
+		_tween.tween_property(cf, "follow_speed", new_follow_speed, need_time)

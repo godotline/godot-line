@@ -14,6 +14,7 @@
 [ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="12_67fsp"]
 [ext_resource type="PackedScene" path="res://#Template/BaseWall.tscn" id="12_pxq50"]
 [ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Ending.tscn" id="13_lbrgy"]
+[ext_resource type="PackedScene" uid="uid://dup02jc1bhxfc" path="res://#Template/HeartCheckPoint.tscn" id="13_pxq50"]
 
 [sub_resource type="Environment" id="Environment_c2ibq"]
 
@@ -78,6 +79,9 @@ transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 44.776867, 0.15720987, 55.215
 [node name="GuideTap" parent="Scene" unique_id=1723303954 instance=ExtResource("9_sgchv")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 44.886116, -0.49999997, 55.619904)
 
+[node name="HeartCheckpoint" parent="Scene" unique_id=1805653336 instance=ExtResource("13_pxq50")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 71.68459, 3.1299963, 55.55351)
+
 [node name="Trigger" parent="Scene" unique_id=608483111 instance=ExtResource("10_q71od")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.002282, 47.406303, -9.536743e-07, 55.828354)
 script = ExtResource("11_lbrgy")
@@ -94,6 +98,9 @@ new_distance = 5.0
 active_speed = true
 new_follow_speed = 1.2
 rotate_mode = 0
+TransitionType = 1
+EaseType = 2
+need_time = 1.0
 use_time = false
 trigger_time = 0.0
 
@@ -109,6 +116,9 @@ new_distance = 5.0
 active_speed = true
 new_follow_speed = 1.2
 rotate_mode = 0
+TransitionType = 1
+EaseType = 2
+need_time = 1.0
 use_time = false
 trigger_time = 0.0
 

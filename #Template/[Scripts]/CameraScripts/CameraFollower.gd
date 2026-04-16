@@ -21,6 +21,7 @@ var _checkpoint_applied := false
 
 ## Tween 状态
 var _tween: Tween = null
+var _rotate_tween: Tween = null
 
 ## Tween 状态
 var _current_rotate_mode: RotateMode = RotateMode.Fast
@@ -83,28 +84,42 @@ func _apply_state_checkpoint() -> void:
 
 
 ## DO前缀：创建旋转补间动画（DOTween风格）
-func DORotateOffset(end_value: Vector3, mode: RotateMode = RotateMode.Fast) -> void:
+func DORotateOffset(end_value: Vector3, mode: RotateMode = RotateMode.Fast, trans_type: Tween.TransitionType = Tween.TRANS_SINE, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, duration: float = 0.0) -> void:
 	_current_rotate_mode = mode
 	_start_rotation = rotation_degrees
-	_base_rotation = rotation_degrees  # 记录基准旋转用于AxisAdd模式
+	_base_rotation = rotation_degrees
 	
 	match mode:
 		RotateMode.Fast:
-			# 最短路径：直接旋转到目标值
 			_target_rotation = _normalize_rotation_shortest(_start_rotation, end_value)
 		RotateMode.FastBeyond360:
-			# 允许超过360度的旋转
 			_target_rotation = end_value
 		RotateMode.WorldAxisAdd:
-			# 世界坐标系增量：在当前旋转基础上增加
 			_target_rotation = _start_rotation + end_value
 		RotateMode.LocalAxisAdd:
-			# 本地坐标系增量：在当前旋转基础上增加
 			_target_rotation = _start_rotation + end_value
 	
 	rotation_offset = end_value
-	_rotation_progress = 0.0
-	_is_rotating = true
+	
+	if duration > 0.0:
+		_is_rotating = false
+		if _rotate_tween:
+			_rotate_tween.kill()
+		_rotate_tween = create_tween().set_trans(trans_type).set_ease(ease_type)
+		var start_rot := rotation_degrees
+		if mode == RotateMode.Fast:
+			_rotate_tween.tween_method(func(w: float) -> void:
+				rotation_degrees = Vector3(
+					rad_to_deg(lerp_angle(deg_to_rad(start_rot.x), deg_to_rad(_target_rotation.x), w)),
+					rad_to_deg(lerp_angle(deg_to_rad(start_rot.y), deg_to_rad(_target_rotation.y), w)),
+					rad_to_deg(lerp_angle(deg_to_rad(start_rot.z), deg_to_rad(_target_rotation.z), w)),
+				)
+			, 0.0, 1.0, duration)
+		else:
+			_rotate_tween.tween_property(self, "rotation_degrees", _target_rotation, duration)
+	else:
+		_rotation_progress = 0.0
+		_is_rotating = true
 
 ## 获取当前目标旋转值
 func _get_target_rotation() -> Vector3:
