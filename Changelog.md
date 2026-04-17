@@ -10,7 +10,7 @@
 ### Changed
 - 移除多个3D场景资源并优化主场景依赖
   - 删除 Crown、CrownSet、DeathParticle、GAMEUI、GuideTap 和 RoadMaker 场景文件
-  - 在 MainLine 场景中引入 DeathParticle 预制资源
+  - 在 Player 场景中引入 DeathParticle 预制资源
   - 更新 Sample 场景引用，迁移资源路径至 #Template/[Resources] 文件夹
   - 将原有 Crown 和 CrownSet 资源拆解为脚本和纹理等单独资源重新管理
   - 添加 StandardMaterial3D 和相应的动画资源到 Sample 场景，保持视觉效果一致

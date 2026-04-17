@@ -37,20 +37,12 @@ func _ready() -> void:
 	if not body_entered.is_connected(_on_checkpoint_body_entered):
 		body_entered.connect(_on_checkpoint_body_entered)
 
-func _get_camera_follower() -> CameraFollower:
-	if CameraFollower.instance:
-		return CameraFollower.instance
-	var game_manager := get_tree().current_scene as GameManager
-	if game_manager:
-		return game_manager.camera_follower as CameraFollower
-	return null
-
 func _on_checkpoint_body_entered(body: Node3D) -> void:
 	if used:
 		return
 	used = true
 	State.current_checkpoint = self
-	State.save_checkpoint(body, _get_camera_follower(), $RevivePosition)
+	State.save_checkpoint(body, CameraFollower.instance, $RevivePosition)
 
 	if AutoRecord:
 		var music_player := body.get_node_or_null("MusicPlayer") as AudioStreamPlayer
@@ -59,7 +51,7 @@ func _on_checkpoint_body_entered(body: Node3D) -> void:
 		PlayerSpeed = body.speed
 
 	if not manual_camera:
-		var cf := _get_camera_follower()
+		var cf := CameraFollower.instance
 		if cf:
 			if not UsingOldCameraFollower:
 				camera_new.offset = cf.add_position
@@ -88,7 +80,7 @@ func _capture_fog() -> void:
 		fog.end = env.fog_depth_end
 
 func _capture_light() -> void:
-	var main_line := MainLine.instance
+	var main_line := Player.instance
 	if main_line:
 		var scene_light := main_line.get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
 		if scene_light:
@@ -113,7 +105,7 @@ func _capture_ambient() -> void:
 				ambient.lighting_type = AmbientSettings.EnvironmentLightingType.Color
 
 func _restore_camera() -> void:
-	var cf := _get_camera_follower()
+	var cf := CameraFollower.instance
 	if not cf:
 		return
 	if not UsingOldCameraFollower:
@@ -136,7 +128,7 @@ func _restore_fog() -> void:
 		env.fog_depth_end = fog.end
 
 func _restore_light() -> void:
-	var main_line := MainLine.instance
+	var main_line := Player.instance
 	if main_line:
 		var scene_light := main_line.get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
 		if scene_light:
@@ -161,7 +153,7 @@ func _restore_ambient() -> void:
 				env.ambient_light_ground_color = ambient.ground_color
 
 func revive() -> void:
-	var main_line := MainLine.instance
+	var main_line := Player.instance
 	if not main_line:
 		return
 
@@ -188,7 +180,7 @@ func revive() -> void:
 	for tween in get_tree().get_processed_tweens():
 		tween.kill()
 
-	var cf := _get_camera_follower()
+	var cf := CameraFollower.instance
 	if cf:
 		State.load_to_camera_follower(cf)
 		cf.position = main_line.position + cf.add_position

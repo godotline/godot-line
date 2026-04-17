@@ -1,5 +1,5 @@
 extends Control
-@export var levelname := "level name"
+var levelname := "level name"
 @export var crown_no_light: Texture2D
 var 一 := false
 
@@ -7,11 +7,12 @@ var 一 := false
 const CROWN_ANIMS: Array[String] = ["", "1crown", "2crown", "3crown"]
 
 func _ready() -> void:
+	levelname = Player.instance.level_data.levelTitle
 	$".".visible = false
 
 func _process(_delta: float) -> void:
 	if not 一:
-		if MainLine.instance and not MainLine.instance.is_live:
+		if Player.instance and not Player.instance.is_live:
 			visible()
 		if State.is_end:
 			visible()
@@ -53,14 +54,16 @@ func _on_back_pressed() -> void:
 func _on_revive_pressed() -> void:
 	一 = false
 	$".".visible = false
-	if MainLine.instance.is_end:
+	if Player.instance.is_end:
 		_on_gamereplay_pressed()
 	elif State.current_checkpoint:
 		State.current_checkpoint.revive()
 		if State.crown > 0:
 			State.is_relive = true
+	else:
+		_on_gamereplay_pressed()
 
 func _on_gamereplay_pressed() -> void:
-	if MainLine.instance:
-		MainLine.instance.reload()
+	if Player.instance:
+		Player.instance.reload()
 	State.reset_to_defaults()

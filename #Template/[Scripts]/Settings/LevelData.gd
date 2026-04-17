@@ -23,9 +23,10 @@ extends Resource
 
 
 ## 应用关卡数据到游戏
-func apply_to(main_line: MainLine, space_rid: RID = RID()) -> void:
+func apply_to(main_line: Player, space_rid: RID = RID()) -> void:
 	if main_line:
 		main_line.speed = speed
+		_apply_player_collider_size(main_line)
 	Engine.time_scale = timeScale
 	if space_rid.is_valid():
 		PhysicsServer3D.area_set_param(space_rid, PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR, gravity.normalized())
@@ -34,6 +35,9 @@ func apply_to(main_line: MainLine, space_rid: RID = RID()) -> void:
 	for single_color in colors:
 		if single_color:
 			single_color.apply()
+	
+	# 应用时间缩放对音乐的影响
+	_apply_time_scale_to_music(main_line)
 
 
 ## 获取音频流（用于播放）
@@ -45,3 +49,23 @@ func get_audio_stream() -> AudioStream:
 func get_audio_start_time() -> float:
 	var start_time := State.music_checkpoint_time if State.music_checkpoint_time > 0.0 else State.anim_time
 	return start_time if start_time > 0.0 else 0.0
+
+
+## 应用时间缩放到音乐播放器
+func _apply_time_scale_to_music(main_line: Player) -> void:
+	if main_line and main_line.has_node("MusicPlayer"):
+		var music_player: AudioStreamPlayer = main_line.get_node("MusicPlayer")
+		music_player.pitch_scale = timeScale
+
+
+## 获取时间缩放
+func get_time_scale() -> float:
+	return timeScale
+
+
+## 应用玩家碰撞体大小
+func _apply_player_collider_size(main_line: Player) -> void:
+	if main_line.has_node("CollisionShape3D"):
+		var collider: CollisionShape3D = main_line.get_node("CollisionShape3D")
+		if collider.shape is BoxShape3D:
+			(collider.shape as BoxShape3D).size = playerHeadBoxColliderSize

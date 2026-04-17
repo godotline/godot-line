@@ -33,17 +33,17 @@ _data = {
 &"level": SubResource("3")
 }
 
-[node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Camera", "Mainline")]
+[node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Camera", "Player")]
 script = ExtResource("1_dha8j")
 Camera = NodePath("BasicOBJ_Group/CameraFollower/Camera3D")
-Mainline = NodePath("BasicOBJ_Group/MainLine")
+Player = NodePath("BasicOBJ_Group/Player")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2093202605]
 environment = SubResource("Environment_ots34")
 
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
-[node name="MainLine" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("2_ots34")]
+[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("2_ots34")]
 color = Color(0, 1, 0, 1)
 animation = NodePath("../AnimationPlayer")
 level_data = ExtResource("3_ys6ci")
@@ -52,7 +52,7 @@ level_data = ExtResource("3_ys6ci")
 unique_name_in_owner = true
 transform = Transform3D(-0.70710677, 0.4999999, -0.4999999, 0, 0.7071067, 0.7071067, 0.70710665, 0.49999997, -0.49999997, -10, 20, -10)
 script = ExtResource("4_opejn")
-player = NodePath("../MainLine")
+player = NodePath("../Player")
 add_position = Vector3(-10, 20, -10)
 rotation_offset = Vector3(-45, 225, 0)
 

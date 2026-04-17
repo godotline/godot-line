@@ -1,15 +1,15 @@
 @tool
 extends CharacterBody3D
-class_name MainLine
+class_name Player
 
-static var instance: MainLine
+static var instance: Player
 
 signal new_line1
 signal on_sky
 signal onturn
 
 @onready var y = $".".position.y
-@export var speed := 12.0
+var speed:float
 @export var rot := -90
 @export var color := Color(0,0,0): get = get_color, set = set_color
 @export var fly := false
@@ -50,13 +50,15 @@ func _ready() -> void:
 			State.is_end = false
 			reload()
 		State.load_checkpoint_to_main_line(self)
+		speed = level_data.speed
 	if is_inside_tree():
 		_last_floor_y = global_position.y
 
 func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint() and is_live:
 		if not is_on_floor():
-			velocity.y -= 9.8 * delta
+			var gravity_strength: float = level_data.gravity.length() if level_data else 9.8
+			velocity.y -= gravity_strength * delta
 		move_and_slide()
 		if is_on_wall():
 			die()

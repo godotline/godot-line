@@ -7,8 +7,7 @@ func _on_triggered(body: Node3D) -> void:
 	if not body:
 		return
 	
-	var game_manager := get_tree().current_scene as GameManager
-	_camera_follower = game_manager.get_camera_follower() if game_manager else null
+	_camera_follower = CameraFollower.instance
 	
 	#body.allowTurn = false
 	if _camera_follower:
