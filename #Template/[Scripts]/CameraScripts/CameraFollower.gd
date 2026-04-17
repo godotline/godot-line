@@ -21,33 +21,38 @@ var _checkpoint_applied := false
 
 ## Tween 状态
 var _tween: Tween = null
-var _rotate_tween: Tween = null
-
-## Tween 状态
 var _current_rotate_mode: RotateMode = RotateMode.Fast
 var _target_rotation: Vector3 = Vector3.ZERO
 var _start_rotation: Vector3 = Vector3.ZERO
 var _rotation_progress: float = 0.0
 var _is_rotating: bool = false
-var _base_rotation: Vector3 = Vector3.ZERO  # AxisAdd 模式下的基准旋转
+var _base_rotation: Vector3 = Vector3.ZERO
+var _target_add_position: Vector3
+var _target_follow_speed: float
+var _target_distance: float
+var _pending_resume: bool = false
 
 func _ready() -> void:
+	_target_add_position = add_position
+	_target_follow_speed = follow_speed
+	_target_distance = distance_from_object
 	if not camera and get_child_count() > 0:
 		camera = get_child(0)
 	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending:
-		call_deferred("_apply_state_checkpoint")
+		_apply_state_checkpoint()
 
 func _process(delta: float) -> void:
-	if _tween and _tween.is_running():
-		return
 	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending and not _checkpoint_applied:
 		_apply_state_checkpoint()
 	if following and line and ("is_start" not in line or line.is_start):
+		if _pending_resume:
+			_resume_tweens()
 		var base_transform = line.position + add_position
 		position = position.slerp(base_transform, abs(follow_speed * delta))
 		
-		# 使用 RotateMode 处理旋转
-		if _is_rotating:
+		if _tween and _tween.is_running():
+			pass
+		elif _is_rotating:
 			_rotation_progress = min(_rotation_progress + abs(follow_speed * delta), 1.0)
 			var current_target = _calculate_target_rotation()
 			rotation_degrees = _apply_rotate_mode(_start_rotation, current_target, _rotation_progress)
@@ -76,50 +81,46 @@ func _apply_state_checkpoint() -> void:
 	if line == null:
 		return
 	State.load_to_camera_follower(self)
-	# 恢复到检查点记录的位置和旋转
-	position = cp.position
-	rotation_degrees = cp.rotation
+	position = line.position + add_position
+	rotation_degrees = cp.rotation_degrees
+	_pending_resume = true
 	_checkpoint_applied = true
 	State.camera_checkpoint.restore_pending = false
 
-
-## DO前缀：创建旋转补间动画（DOTween风格）
-func DORotateOffset(end_value: Vector3, mode: RotateMode = RotateMode.Fast, trans_type: Tween.TransitionType = Tween.TRANS_SINE, ease_type: Tween.EaseType = Tween.EASE_IN_OUT, duration: float = 0.0) -> void:
-	_current_rotate_mode = mode
-	_start_rotation = rotation_degrees
-	_base_rotation = rotation_degrees
-	
-	match mode:
-		RotateMode.Fast:
-			_target_rotation = _normalize_rotation_shortest(_start_rotation, end_value)
-		RotateMode.FastBeyond360:
-			_target_rotation = end_value
-		RotateMode.WorldAxisAdd:
-			_target_rotation = _start_rotation + end_value
-		RotateMode.LocalAxisAdd:
-			_target_rotation = _start_rotation + end_value
-	
-	rotation_offset = end_value
-	
-	if duration > 0.0:
-		_is_rotating = false
-		if _rotate_tween:
-			_rotate_tween.kill()
-		_rotate_tween = create_tween().set_trans(trans_type).set_ease(ease_type)
-		var start_rot := rotation_degrees
-		if mode == RotateMode.Fast:
-			_rotate_tween.tween_method(func(w: float) -> void:
+func _resume_tweens() -> void:
+	_pending_resume = false
+	if _tween:
+		_tween.kill()
+	var has_tween := false
+	if not add_position.is_equal_approx(_target_add_position) or not is_equal_approx(follow_speed, _target_follow_speed) or not is_equal_approx(distance_from_object, _target_distance):
+		_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+		has_tween = true
+		if not add_position.is_equal_approx(_target_add_position):
+			_tween.tween_property(self, "add_position", _target_add_position, 1.0)
+		if not is_equal_approx(follow_speed, _target_follow_speed):
+			_tween.tween_property(self, "follow_speed", _target_follow_speed, 1.0)
+		if not is_equal_approx(distance_from_object, _target_distance):
+			_tween.tween_property(self, "distance_from_object", _target_distance, 1.0)
+	var need_rotate := true
+	if rotation_degrees.is_equal_approx(_target_rotation):
+		need_rotate = false
+	if need_rotate:
+		if not has_tween:
+			_tween = create_tween().set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+			has_tween = true
+		if _current_rotate_mode == RotateMode.Fast:
+			var start_rot := rotation_degrees
+			_tween.tween_method(func(w: float) -> void:
 				rotation_degrees = Vector3(
 					rad_to_deg(lerp_angle(deg_to_rad(start_rot.x), deg_to_rad(_target_rotation.x), w)),
 					rad_to_deg(lerp_angle(deg_to_rad(start_rot.y), deg_to_rad(_target_rotation.y), w)),
 					rad_to_deg(lerp_angle(deg_to_rad(start_rot.z), deg_to_rad(_target_rotation.z), w)),
 				)
-			, 0.0, 1.0, duration)
+			, 0.0, 1.0, 1.0)
 		else:
-			_rotate_tween.tween_property(self, "rotation_degrees", _target_rotation, duration)
-	else:
-		_rotation_progress = 0.0
-		_is_rotating = true
+			_tween.tween_property(self, "rotation_degrees", _target_rotation, 1.0)
+
+
 
 ## 获取当前目标旋转值
 func _get_target_rotation() -> Vector3:

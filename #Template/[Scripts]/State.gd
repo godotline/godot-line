@@ -20,13 +20,17 @@ static var crown := 0
 ## 相机跟随器检查点数据，整合为字典结构
 static var camera_checkpoint := {
 	"has_checkpoint": false,
-	"add_position": Vector3.ZERO,
-	"rotation_offset": Vector3.ZERO,
+	"restore_pending": false,
+	"offset": Vector3.ZERO,
+	"rotation_degrees": Vector3.ZERO,
 	"distance": 0.0,
 	"follow_speed": 0.0,
-	"position": Vector3.ZERO,
-	"rotation": Vector3.ZERO,
-	"restore_pending": false,
+	"rotate_mode": 0,
+	"base_rotation": Vector3.ZERO,
+	"target_add_position": Vector3.ZERO,
+	"target_follow_speed": 0.0,
+	"target_distance": 0.0,
+	"target_rotation": Vector3.ZERO,
 }
 
 
@@ -49,12 +53,16 @@ static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, r
 		anim_time = main_line.animation_node.current_animation_position
 	
 	if camera_follower:
-		camera_checkpoint.add_position = camera_follower.add_position
-		camera_checkpoint.rotation_offset = camera_follower.rotation_offset
+		camera_checkpoint.offset = camera_follower.position - main_line.position
+		camera_checkpoint.rotation_degrees = camera_follower.rotation_degrees
 		camera_checkpoint.distance = camera_follower.distance_from_object
 		camera_checkpoint.follow_speed = camera_follower.follow_speed
-		camera_checkpoint.position = camera_follower.position
-		camera_checkpoint.rotation = camera_follower.rotation_degrees
+		camera_checkpoint.rotate_mode = camera_follower._current_rotate_mode
+		camera_checkpoint.base_rotation = camera_follower._base_rotation
+		camera_checkpoint.target_add_position = camera_follower._target_add_position
+		camera_checkpoint.target_follow_speed = camera_follower._target_follow_speed
+		camera_checkpoint.target_distance = camera_follower._target_distance
+		camera_checkpoint.target_rotation = camera_follower._target_rotation
 		camera_checkpoint.has_checkpoint = true
 	
 	var music_player := main_line.get_node("MusicPlayer") as AudioStreamPlayer
@@ -79,10 +87,15 @@ static func load_to_camera_follower(cf: Node3D) -> void:
 	var cp := camera_checkpoint
 	if not cp.has_checkpoint:
 		return
-	cf.add_position = cp.add_position
-	cf.rotation_offset = cp.rotation_offset
+	cf.add_position = cp.offset
 	cf.distance_from_object = cp.distance
 	cf.follow_speed = cp.follow_speed
+	cf._current_rotate_mode = cp.rotate_mode
+	cf._base_rotation = cp.base_rotation
+	cf._target_add_position = cp.get("target_add_position", cf.add_position)
+	cf._target_follow_speed = cp.get("target_follow_speed", cf.follow_speed)
+	cf._target_distance = cp.get("target_distance", cf.distance_from_object)
+	cf._target_rotation = cp.get("target_rotation", cf.rotation_offset)
 
 
 ## ============================================================
@@ -161,11 +174,15 @@ static func reset_to_defaults() -> void:
 static func reset_camera_checkpoint() -> void:
 	camera_checkpoint = {
 		"has_checkpoint": false,
-		"add_position": Vector3.ZERO,
-		"rotation_offset": Vector3.ZERO,
+		"restore_pending": false,
+		"offset": Vector3.ZERO,
+		"rotation_degrees": Vector3.ZERO,
 		"distance": 0.0,
 		"follow_speed": 0.0,
-		"position": Vector3.ZERO,
-		"rotation": Vector3.ZERO,
-		"restore_pending": false,
+		"rotate_mode": 0,
+		"base_rotation": Vector3.ZERO,
+		"target_add_position": Vector3.ZERO,
+		"target_follow_speed": 0.0,
+		"target_distance": 0.0,
+		"target_rotation": Vector3.ZERO,
 	}

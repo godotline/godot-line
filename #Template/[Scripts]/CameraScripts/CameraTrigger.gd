@@ -41,7 +41,7 @@ func _ready() -> void:
 	pass
 
 func _on_body_entered(body: Node3D) -> void:
-	if body.is_in_group("mainline") or body.name == "MainLine":
+	if body is CharacterBody3D:
 		if not use_time:
 			_trigger()
 
@@ -66,16 +66,44 @@ func _trigger() -> void:
 	
 	if _tween:
 		_tween.kill()
-	_tween = create_tween().set_trans(TransitionType).set_ease(EaseType)
+	if cf._tween:
+		cf._tween.kill()
+	_tween = create_tween().set_parallel(true).set_trans(TransitionType).set_ease(EaseType)
+	cf._tween = _tween
 	
 	if active_position:
 		_tween.tween_property(cf, "add_position", new_add_position, need_time)
+		cf._target_add_position = new_add_position
 	
 	if active_rotate:
-		cf.DORotateOffset(new_rotation, rotate_mode, TransitionType, EaseType, need_time)
+		cf._current_rotate_mode = rotate_mode
+		cf._start_rotation = cf.rotation_degrees
+		cf._base_rotation = cf.rotation_degrees
+		match rotate_mode:
+			RotateMode.Fast:
+				cf._target_rotation = cf._normalize_rotation_shortest(cf._start_rotation, new_rotation)
+			RotateMode.FastBeyond360:
+				cf._target_rotation = new_rotation
+			RotateMode.WorldAxisAdd, RotateMode.LocalAxisAdd:
+				cf._target_rotation = cf._start_rotation + new_rotation
+		cf.rotation_offset = new_rotation
+		cf._is_rotating = false
+		if rotate_mode == RotateMode.Fast:
+			var start_rot: Vector3 = cf.rotation_degrees
+			_tween.tween_method(func(w: float) -> void:
+				cf.rotation_degrees = Vector3(
+					rad_to_deg(lerp_angle(deg_to_rad(start_rot.x), deg_to_rad(cf._target_rotation.x), w)),
+					rad_to_deg(lerp_angle(deg_to_rad(start_rot.y), deg_to_rad(cf._target_rotation.y), w)),
+					rad_to_deg(lerp_angle(deg_to_rad(start_rot.z), deg_to_rad(cf._target_rotation.z), w)),
+				)
+			, 0.0, 1.0, need_time)
+		else:
+			_tween.tween_property(cf, "rotation_degrees", cf._target_rotation, need_time)
 	
 	if active_distance:
 		_tween.tween_property(cf, "distance_from_object", new_distance, need_time)
+		cf._target_distance = new_distance
 	
 	if active_speed:
 		_tween.tween_property(cf, "follow_speed", new_follow_speed, need_time)
+		cf._target_follow_speed = new_follow_speed
