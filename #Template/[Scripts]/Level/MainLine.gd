@@ -1,5 +1,8 @@
 @tool
 extends CharacterBody3D
+class_name MainLine
+
+static var instance: MainLine
 
 signal new_line1
 signal on_sky
@@ -13,6 +16,7 @@ signal onturn
 @export var noclip := false
 @export var animation:NodePath
 @export var is_turn := false
+@export var is_end := false
 
 @onready var mesh:Mesh = $MeshInstance3D.mesh
 @onready var past_translation := position
@@ -25,7 +29,6 @@ signal onturn
 
 @export var deathParticle: PackedScene
 
-var level_manager
 var timeout := 0.1
 var is_live := true
 var line:MeshInstance3D
@@ -41,8 +44,8 @@ var start_transform = transform
 @export var allowTurn := true
 
 func _ready() -> void:
+	instance = self
 	if not Engine.is_editor_hint():
-		level_manager = get_tree().current_scene
 		if State.is_end == true:
 			State.is_end = false
 			reload()
@@ -113,7 +116,17 @@ func reload() -> void:
 	State.reset_camera_checkpoint()
 	State.is_turn = $".".is_turn
 	State.anim_time = 0.0
+	_clear_tail()
 	tree.reload_current_scene()
+
+func _clear_tail() -> void:
+	line = null
+	past_translation = position
+	floor_segment_lines.clear()
+	var tail_holder := tree.current_scene.get_node_or_null("PlayerTailHolder") as Node3D
+	if tail_holder:
+		for child in tail_holder.get_children():
+			child.queue_free()
 
 func _get_or_create_player_tail_holder() -> Node3D:
 	var root := tree.current_scene
@@ -151,7 +164,7 @@ func turn():
 	if is_on_floor() or fly:
 		if animation_node and not animation_node.is_playing():
 			if State.line_crossing_crown == 0:
-				State.anim_time = level_manager.calculate_anim_start_time()
+				State.anim_time = 0
 			animation_node.play("level")
 			animation_node.seek(State.anim_time)
 			if music:
@@ -185,6 +198,7 @@ func _on_Area_body_entered(_body: Node) -> void:
 func die():
 	if !noclip:
 		is_live = false
+		v = Vector3.ZERO
 		if animation_node: animation_node.pause()
 		$MusicPlayer.stop()
 		$AudioStreamPlayer.play()
@@ -197,6 +211,7 @@ func die():
 
 		for i in 8:
 			var deathParticle_instance: RigidBody3D = deathParticle.instantiate()
+			deathParticle_instance.add_to_group("death_particles")
 			get_parent().add_child(deathParticle_instance)
 			deathParticle_instance.get_node("MeshInstance3D").mesh = mesh
 			deathParticle_instance.get_node("MeshInstance3D").material_override = material

@@ -28,11 +28,8 @@ var _tween: Tween = null
 func _get_camera_follower() -> Node3D:
 	if camera_follower != null:
 		return camera_follower
-	var game_manager := get_tree().current_scene as GameManager
-	if game_manager:
-		camera_follower = game_manager.camera_follower
-		return camera_follower
-	return null
+	camera_follower = CameraFollower.instance
+	return camera_follower
 
 var triggered: bool = false
 var triggered_at_crown: bool = false

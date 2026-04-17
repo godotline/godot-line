@@ -1,10 +1,9 @@
 [gd_scene format=4 uid="uid://b8pwikissfhmb"]
 
-[ext_resource type="Script" uid="uid://d2244y2svyt45" path="res://#Template/[Scripts]/GameManager.gd" id="1_ae7tf"]
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/MainLine.tscn" id="2_ep0cv"]
 [ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="3_acgrg"]
 [ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="4_4u5qg"]
-[ext_resource type="PackedScene" path="res://#Template/[Resources]/GAMEUI.tscn" id="5_0e4gd"]
+[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="5_0e4gd"]
 [ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="6_uy1mm"]
 [ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="7_sgchv"]
 [ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Diamond.tscn" id="8_uy1mm"]
@@ -17,8 +16,6 @@
 [ext_resource type="Script" uid="uid://cl7pyxuxgg61g" path="res://#Template/[Scripts]/Trigger/HeartCheckpoint.gd" id="15_pxq50"]
 [ext_resource type="Material" uid="uid://ktbkvswrq32a" path="res://#Template/[Materials]/Checkpoint1.tres" id="16_67fsp"]
 
-[sub_resource type="Environment" id="Environment_c2ibq"]
-
 [sub_resource type="Animation" id="Animation_wkp8b"]
 length = 0.001
 
@@ -30,6 +27,19 @@ _data = {
 &"RESET": SubResource("Animation_wkp8b"),
 &"level": SubResource("3")
 }
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_pxq50"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_67fsp"]
+sky_material = SubResource("ProceduralSkyMaterial_pxq50")
+
+[sub_resource type="Environment" id="Environment_0kuh0"]
+background_mode = 2
+sky = SubResource("Sky_67fsp")
+tonemap_mode = 2
+glow_enabled = true
 
 [sub_resource type="BoxShape3D" id="2"]
 
@@ -130,56 +140,54 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_08x2n")
 
-[node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Camera", "Mainline")]
-script = ExtResource("1_ae7tf")
-Camera = NodePath("Object/CameraFollower/Camera3D")
-Mainline = NodePath("Object/MainLine")
+[node name="LevelHolder" type="Node3D" unique_id=542804875]
 
-[node name="Object" type="Node3D" parent="." unique_id=1533079692]
+[node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
-[node name="MainLine" parent="Object" unique_id=2020142567 instance=ExtResource("2_ep0cv")]
+[node name="MainLine" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("2_ep0cv")]
 color = Color(0, 1, 0, 1)
 animation = NodePath("../AnimationPlayer")
 music = ExtResource("4_4u5qg")
 
-[node name="CameraFollower" type="Node3D" parent="Object" unique_id=364981525]
+[node name="CameraFollower" type="Node3D" parent="BasicOBJ_Group" unique_id=364981525]
 transform = Transform3D(-0.70710677, 0.4999999, -0.4999999, 0, 0.7071067, 0.7071067, 0.70710665, 0.49999997, -0.49999997, -10, 20, -10)
 script = ExtResource("3_acgrg")
 player = NodePath("../MainLine")
 add_position = Vector3(-10, 20, -10)
 rotation_offset = Vector3(-45, 225, 0)
 
-[node name="Camera3D" type="Camera3D" parent="Object/CameraFollower" unique_id=1071878446]
-environment = SubResource("Environment_c2ibq")
+[node name="Camera3D" type="Camera3D" parent="BasicOBJ_Group/CameraFollower" unique_id=1071878446]
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Object" unique_id=560431425]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="BasicOBJ_Group" unique_id=560431425]
 root_node = NodePath("../..")
 libraries/ = SubResource("AnimationLibrary_cm0pq")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Object" unique_id=1791213843]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="BasicOBJ_Group" unique_id=1791213843]
 transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
 shadow_enabled = true
 
-[node name="gameui" parent="Object" unique_id=75582180 node_paths=PackedStringArray("line") instance=ExtResource("5_0e4gd")]
-line = NodePath("../MainLine")
+[node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("5_0e4gd")]
 crown_no_light = ExtResource("6_uy1mm")
 
-[node name="Scene" type="Node3D" parent="." unique_id=1042175662]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="BasicOBJ_Group" unique_id=474557095]
+environment = SubResource("Environment_0kuh0")
+
+[node name="Scene_Group" type="Node3D" parent="." unique_id=1042175662]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -45)
 
-[node name="BaseFloor" parent="Scene" unique_id=755968428 instance=ExtResource("7_sgchv")]
+[node name="BaseFloor" parent="Scene_Group" unique_id=755968428 instance=ExtResource("7_sgchv")]
 transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 45, -1, 45)
 
-[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="Scene/BaseFloor" unique_id=1160046144]
+[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="Scene_Group/BaseFloor" unique_id=1160046144]
 size = Vector3(1, 1, 1)
 
-[node name="Diamond" parent="Scene" unique_id=149611988 instance=ExtResource("8_uy1mm")]
+[node name="Diamond" parent="Scene_Group" unique_id=149611988 instance=ExtResource("8_uy1mm")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 44.776867, 0.15720987, 55.215874)
 
-[node name="GuideTap" parent="Scene" unique_id=1723303954 instance=ExtResource("9_sgchv")]
+[node name="GuideTap" parent="Scene_Group" unique_id=1723303954 instance=ExtResource("9_sgchv")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 44.886116, -0.49999997, 55.619904)
 
-[node name="Trigger3" parent="Scene" unique_id=1067104480 instance=ExtResource("10_q71od")]
+[node name="Trigger3" parent="Scene_Group" unique_id=1067104480 instance=ExtResource("10_q71od")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.002282, 54.48696, 2.9286995, 55.828354)
 script = ExtResource("12_67fsp")
 active_position = true
@@ -197,62 +205,61 @@ need_time = 1.0
 use_time = false
 trigger_time = 0.0
 
-[node name="Trigger" parent="Scene" unique_id=608483111 instance=ExtResource("10_q71od")]
+[node name="Trigger" parent="Scene_Group" unique_id=608483111 instance=ExtResource("10_q71od")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.002282, 47.406303, -9.536743e-07, 55.828354)
 script = ExtResource("11_lbrgy")
 height = 4.0
 
-[node name="BaseWall" parent="Scene" unique_id=359263919 instance=ExtResource("12_pxq50")]
+[node name="BaseWall" parent="Scene_Group" unique_id=359263919 instance=ExtResource("12_pxq50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 9.397742, 47.416126, -1.9073486e-06, 48.34996)
 
-[node name="BaseWall3" parent="Scene" unique_id=1978377756 instance=ExtResource("12_pxq50")]
+[node name="BaseWall3" parent="Scene_Group" unique_id=1978377756 instance=ExtResource("12_pxq50")]
 transform = Transform3D(-4.371139e-08, 0, -9.397742, 0, 1, 0, 1, 0, -4.1078837e-07, 47.416126, -1.9073486e-06, 58.91649)
 
-[node name="BaseWall2" parent="Scene" unique_id=605626697 instance=ExtResource("12_pxq50")]
+[node name="BaseWall2" parent="Scene_Group" unique_id=605626697 instance=ExtResource("12_pxq50")]
 transform = Transform3D(61.305275, 0, 0, 0, 1, 0, 0, 0, 68.8622, 79.542465, -1.9073486e-06, 78.12301)
 
-[node name="BaseFloor2" parent="Scene" unique_id=1080893231 instance=ExtResource("7_sgchv")]
+[node name="BaseFloor2" parent="Scene_Group" unique_id=1080893231 instance=ExtResource("7_sgchv")]
 transform = Transform3D(19.905514, 0, 0, 0, 1, 0, 0, 0, 4.5696793, 63.925785, 2.1299973, 55.686684)
 
-[node name="BaseFloor3" parent="Scene" unique_id=794439580 instance=ExtResource("7_sgchv")]
+[node name="BaseFloor3" parent="Scene_Group" unique_id=794439580 instance=ExtResource("7_sgchv")]
 transform = Transform3D(9.952755, 0, -3.9574575, 0, 1, 0, 17.238678, 0, 2.2848392, 75.14364, 2.1299973, 63.830173)
 
-[node name="BaseFloor4" parent="Scene" unique_id=412766049 instance=ExtResource("7_sgchv")]
+[node name="BaseFloor4" parent="Scene_Group" unique_id=412766049 instance=ExtResource("7_sgchv")]
 transform = Transform3D(19.905512, 0, 0, 0, 1, 0, 0, 0, 2.1410718, 88.06795, 2.1299973, 71.48349)
 
-[node name="BaseFloor5" parent="Scene" unique_id=1008768232 instance=ExtResource("7_sgchv")]
+[node name="BaseFloor5" parent="Scene_Group" unique_id=1008768232 instance=ExtResource("7_sgchv")]
 transform = Transform3D(107.24461, 0, -7.1796446, 0, 0.99999905, 0, 107.24461, 0, 7.1796446, 138.96089, 2.1299973, 124.74552)
 
-[node name="Ending" parent="Scene" unique_id=1497290031 instance=ExtResource("13_lbrgy")]
+[node name="Ending" parent="Scene_Group" unique_id=1497290031 instance=ExtResource("13_lbrgy")]
 transform = Transform3D(-0.7071067, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071067, 164.65387, 3.0376942, 151.17961)
 
-[node name="HeartCheckpoint" type="Area3D" parent="." unique_id=1805653336 node_paths=PackedStringArray("RevivePosition")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.698381, 3.1299973, 10.695235)
+[node name="HeartCheckpoint" type="Area3D" parent="Scene_Group" unique_id=1805653336]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.69838, 3.1299973, 55.695236)
 collision_layer = 0
 script = ExtResource("15_pxq50")
-RevivePosition = NodePath("RevivePosition")
 
-[node name="CheckpointTrigger" type="CollisionShape3D" parent="HeartCheckpoint" unique_id=18434010]
+[node name="CheckpointTrigger" type="CollisionShape3D" parent="Scene_Group/HeartCheckpoint" unique_id=18434010]
 transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
 shape = SubResource("2")
 
-[node name="Marker3D" type="Marker3D" parent="HeartCheckpoint/CheckpointTrigger" unique_id=626349944]
+[node name="Marker3D" type="Marker3D" parent="Scene_Group/HeartCheckpoint/CheckpointTrigger" unique_id=626349944]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0.7614288)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="HeartCheckpoint" unique_id=1721480882]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Scene_Group/HeartCheckpoint" unique_id=1721480882]
 libraries/ = SubResource("AnimationLibrary_pds1l")
 
-[node name="RevivePosition" type="MeshInstance3D" parent="HeartCheckpoint" unique_id=1500499588]
+[node name="RevivePosition" type="MeshInstance3D" parent="Scene_Group/HeartCheckpoint" unique_id=1500499588]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.295147, 0, 0)
 mesh = SubResource("BoxMesh_t50w7")
 
-[node name="Rotator" type="Node3D" parent="HeartCheckpoint" unique_id=1538698628]
+[node name="Rotator" type="Node3D" parent="Scene_Group/HeartCheckpoint" unique_id=1538698628]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
 
-[node name="Core" type="MeshInstance3D" parent="HeartCheckpoint/Rotator" unique_id=869692095]
+[node name="Core" type="MeshInstance3D" parent="Scene_Group/HeartCheckpoint/Rotator" unique_id=869692095]
 mesh = SubResource("ArrayMesh_yroa6")
 
-[node name="Frame" type="MeshInstance3D" parent="HeartCheckpoint/Rotator" unique_id=1876299699]
+[node name="Frame" type="MeshInstance3D" parent="Scene_Group/HeartCheckpoint/Rotator" unique_id=1876299699]
 mesh = SubResource("ArrayMesh_jlccs")
 
-[connection signal="body_entered" from="HeartCheckpoint" to="HeartCheckpoint" method="_on_Crown_body_entered"]
+[connection signal="body_entered" from="Scene_Group/HeartCheckpoint" to="Scene_Group/HeartCheckpoint" method="_on_Crown_body_entered"]

@@ -1,5 +1,4 @@
 extends Control
-@export var line : CharacterBody3D
 @export var levelname := "level name"
 @export var crown_no_light: Texture2D
 var 一 := false
@@ -12,7 +11,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if not 一:
-		if not line.is_live:
+		if MainLine.instance and not MainLine.instance.is_live:
 			visible()
 		if State.is_end:
 			visible()
@@ -51,18 +50,17 @@ func _on_back_pressed() -> void:
 	State.crown = 0
 	State.percent = 0
 
-func _on_gameplay_pressed() -> void:
-	line.tree.reload_current_scene()
-	if State.crown > 0 :
-		State.is_relive = true
-	State.camera_checkpoint.restore_pending = true
-	State.diamond = 0
-	State.crown = 0
-	State.percent = 0
-	State.line_crossing_crown = 0
-	State.crowns = [0, 0, 0]
-	State.music_checkpoint_time = 0.0
+func _on_revive_pressed() -> void:
+	一 = false
+	$".".visible = false
+	if MainLine.instance.is_end:
+		_on_gamereplay_pressed()
+	elif State.current_checkpoint:
+		State.current_checkpoint.revive()
+		if State.crown > 0:
+			State.is_relive = true
 
 func _on_gamereplay_pressed() -> void:
-	line.reload()
+	if MainLine.instance:
+		MainLine.instance.reload()
 	State.reset_to_defaults()

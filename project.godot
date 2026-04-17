@@ -18,10 +18,6 @@ config/name="GodotLine"
 config/features=PackedStringArray("4.6")
 boot_splash/show_image=false
 
-[autoload]
-
-SaveManager="*uid://ck4ih2layufdo"
-
 [debug]
 
 shapes/collision/shape_color=Color(0, 0.6, 0.69803923, 1)
@@ -29,10 +25,6 @@ shapes/collision/shape_color=Color(0, 0.6, 0.69803923, 1)
 [display]
 
 window/stretch/mode="canvas_items"
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/savekit/plugin.cfg")
 
 [input]
 

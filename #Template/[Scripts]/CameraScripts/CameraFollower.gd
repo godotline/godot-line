@@ -1,4 +1,7 @@
 extends Node3D
+class_name CameraFollower
+
+static var instance: CameraFollower
 
 enum RotateMode {
 	Fast,           # 最短路径旋转
@@ -32,6 +35,7 @@ var _target_follow_speed: float
 var _target_distance: float
 
 func _ready() -> void:
+	instance = self
 	_target_add_position = add_position
 	_target_follow_speed = follow_speed
 	_target_distance = distance_from_object

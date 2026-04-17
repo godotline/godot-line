@@ -13,9 +13,13 @@ static var percent := 0
 static var line_crossing_crown := 0
 static var crowns := [0, 0, 0]
 static var is_relive := false
-#后续代码补充，如果玩家在本局有复活即is_live=true就在结算时 crown -= 1
 static var diamond := 0
 static var crown := 0
+static var current_checkpoint: Checkpoint = null
+static var player_speed := 12.0
+static var gravity := Vector3(0, -9.8, 0)
+static var player_first_direction := Vector3.ZERO
+static var player_second_direction := Vector3.ZERO
 
 ## 相机跟随器检查点数据，整合为字典结构
 static var camera_checkpoint := {
@@ -50,6 +54,8 @@ static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, r
 		revive_position = revive_pos.global_position
 	main_line_transform = main_line.transform
 	is_turn = main_line.is_turn
+	player_speed = main_line.speed
+	gravity = ProjectSettings.get_setting("physics/3d/default_gravity_vector") * ProjectSettings.get_setting("physics/3d/default_gravity")
 	if main_line.animation_node and main_line.animation_node.current_animation:
 		anim_time = main_line.animation_node.current_animation_position
 	
@@ -83,6 +89,9 @@ static func load_checkpoint_to_main_line(main_line: CharacterBody3D) -> void:
 		if revive_position != Vector3.ZERO:
 			main_line.global_position = revive_position
 		main_line.is_turn = is_turn
+		main_line.speed = player_speed
+	PhysicsServer3D.area_set_param(main_line.get_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY, gravity.length())
+	PhysicsServer3D.area_set_param(main_line.get_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR, gravity.normalized() if gravity.length() > 0 else Vector3.DOWN)
 
 
 
@@ -103,56 +112,7 @@ static func load_to_camera_follower(cf: Node3D) -> void:
 	print("State: load_to_camera_follower add_pos=", cf.add_position, " rot_offset=", cf.rotation_offset, " mode=", cf._current_rotate_mode, " base_rot=", cf._base_rotation, " target_add_pos=", cf._target_add_position, " target_rot=", cf._target_rotation, " target_speed=", cf._target_follow_speed, " target_dist=", cf._target_distance)
 
 
-## ============================================================
-## SaveKit 序列化 / 反序列化
-## ============================================================
 
-## 使用 SaveKitSerializer 序列化所有状态属性到字典
-static func save_to_dict(s: SaveKitSerializer) -> Dictionary:
-	return {
-		"main_line_transform": s.encode_var(main_line_transform),
-		"camera_checkpoint": s.encode_var(camera_checkpoint),
-
-		"is_turn": s.encode_var(is_turn),
-		"anim_time": s.encode_var(anim_time),
-		"music_checkpoint_time": s.encode_var(music_checkpoint_time),
-		"is_end": s.encode_var(is_end),
-		"percent": s.encode_var(percent),
-		"line_crossing_crown": s.encode_var(line_crossing_crown),
-		"crowns": s.encode_var(crowns),
-		"is_relive": s.encode_var(is_relive),
-		"diamond": s.encode_var(diamond),
-		"crown": s.encode_var(crown),
-	}
-
-
-## 使用 SaveKitDeserializer 从字典反序列化所有状态属性
-static func load_from_dict(s: SaveKitDeserializer, data: Dictionary) -> void:
-	if data.has("main_line_transform"):
-		main_line_transform = s.decode_var(data["main_line_transform"], TYPE_TRANSFORM3D)
-	if data.has("camera_checkpoint"):
-		camera_checkpoint = s.decode_var(data["camera_checkpoint"], TYPE_DICTIONARY)
-
-	if data.has("is_turn"):
-		is_turn = s.decode_var(data["is_turn"], TYPE_BOOL)
-	if data.has("anim_time"):
-		anim_time = s.decode_var(data["anim_time"], TYPE_FLOAT)
-	if data.has("music_checkpoint_time"):
-		music_checkpoint_time = s.decode_var(data["music_checkpoint_time"], TYPE_FLOAT)
-	if data.has("is_end"):
-		is_end = s.decode_var(data["is_end"], TYPE_BOOL)
-	if data.has("percent"):
-		percent = s.decode_var(data["percent"], TYPE_INT)
-	if data.has("line_crossing_crown"):
-		line_crossing_crown = s.decode_var(data["line_crossing_crown"], TYPE_INT)
-	if data.has("crowns"):
-		crowns = s.decode_var(data["crowns"], TYPE_ARRAY)
-	if data.has("is_relive"):
-		is_relive = s.decode_var(data["is_relive"], TYPE_BOOL)
-	if data.has("diamond"):
-		diamond = s.decode_var(data["diamond"], TYPE_INT)
-	if data.has("crown"):
-		crown = s.decode_var(data["crown"], TYPE_INT)
 
 
 ## ============================================================
@@ -164,6 +124,10 @@ static func reset_to_defaults() -> void:
 	revive_position = Vector3.ZERO
 	reset_camera_checkpoint()
 
+	player_speed = 12.0
+	gravity = Vector3(0, -9.8, 0)
+	player_first_direction = Vector3.ZERO
+	player_second_direction = Vector3.ZERO
 	is_turn = false
 	anim_time = 0.0
 	music_checkpoint_time = 0.0

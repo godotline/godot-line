@@ -1,4 +1,4 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://wx3awwdt8xdy"]
 
 [ext_resource type="Script" uid="uid://qco7fgruvgdp" path="res://#Template/[Scripts]/Level/gameui.gd" id="1_kyccr"]
 [ext_resource type="Texture2D" uid="uid://dn07fgcsmm4pc" path="res://#Template/[Resources]/ui/back.png" id="1_ost3h"]
@@ -351,7 +351,7 @@ offset_bottom = 629.0
 theme_override_icons/icon = ExtResource("1_ost3h")
 flat = true
 
-[node name="play" type="Button" parent="." unique_id=1869438121]
+[node name="revive" type="Button" parent="." unique_id=1869438121]
 layout_mode = 0
 offset_left = 209.0
 offset_top = 477.0
@@ -362,15 +362,15 @@ theme_override_icons/icon = ExtResource("3_rien4")
 flat = true
 icon_alignment = 1
 
-[node name="ButtonSide" type="Sprite2D" parent="play" unique_id=1715673482]
+[node name="ButtonSide" type="Sprite2D" parent="revive" unique_id=1715673482]
 position = Vector2(49, 65)
 texture = ExtResource("4_ll6ia")
 
-[node name="ButtonInner" type="Sprite2D" parent="play" unique_id=690871823]
+[node name="ButtonInner" type="Sprite2D" parent="revive" unique_id=690871823]
 position = Vector2(196, 65)
 texture = ExtResource("5_ey6o0")
 
-[node name="ButtonSide2" type="Sprite2D" parent="play" unique_id=1469949046]
+[node name="ButtonSide2" type="Sprite2D" parent="revive" unique_id=1469949046]
 position = Vector2(343, 65)
 rotation = -3.14159
 texture = ExtResource("4_ll6ia")
@@ -449,5 +449,5 @@ libraries/ = SubResource("AnimationLibrary_qve72")
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="AnimationPlayer" unique_id=1971946730]
 
 [connection signal="pressed" from="back" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="play" to="." method="_on_gameplay_pressed"]
+[connection signal="pressed" from="revive" to="." method="_on_revive_pressed"]
 [connection signal="pressed" from="replay" to="." method="_on_gamereplay_pressed"]

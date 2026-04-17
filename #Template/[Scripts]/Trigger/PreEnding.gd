@@ -21,10 +21,10 @@ func _on_triggered(body: Node3D) -> void:
 		_camera_follower.lerp_to(_camera_follower.position + Offset, target_rot, 0.1)
 	$AnimationPlayer.play("jinzita")
 	body.look_at(to_global(self.position))
-	# 将旋转角度整除5取整
 	var angle_deg = rad_to_deg(body.rotation.y)
 	var rounded_angle_deg = round(angle_deg / 5.0) * 5.0
 	body.rotation.y = deg_to_rad(rounded_angle_deg)
 	body.rot=body.rotation.y
 	body.tailScale=0
 	body.turn()
+	body.is_end = true
