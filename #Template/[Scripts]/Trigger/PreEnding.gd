@@ -28,3 +28,4 @@ func _on_triggered(body: Node3D) -> void:
 	body.tailScale=0
 	body.turn()
 	body.is_end = true
+	body.call_deferred("turn")

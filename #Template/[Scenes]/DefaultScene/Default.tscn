@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://cpo3g3k6m5nib"]
 
 [ext_resource type="Script" uid="uid://d2244y2svyt45" path="res://#Template/[Scripts]/GameManager.gd" id="1_dha8j"]
-[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/MainLine.tscn" id="2_ots34"]
+[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="2_ots34"]
+[ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/DefaultScene/Default.tres" id="3_ys6ci"]
 [ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
-[ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_lu6ew"]
-[ext_resource type="PackedScene" path="res://#Template/[Resources]/GAMEUI.tscn" id="6_hddbq"]
+[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="6_hddbq"]
 [ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_qbl1a"]
 [ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="8_vnc86"]
 
@@ -26,21 +26,6 @@ length = 0.001
 
 [sub_resource type="Animation" id="3"]
 length = 130.0
-tracks/0/type = "audio"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("BasicOBJ_Group/AnimationPlayer/AudioStreamPlayer")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"clips": [{
-"end_offset": 0.0,
-"start_offset": 0.0,
-"stream": ExtResource("5_lu6ew")
-}],
-"times": PackedFloat32Array(0)
-}
-tracks/0/use_blend = true
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_cm0pq"]
 _data = {
@@ -61,6 +46,7 @@ environment = SubResource("Environment_ots34")
 [node name="MainLine" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("2_ots34")]
 color = Color(0, 1, 0, 1)
 animation = NodePath("../AnimationPlayer")
+level_data = ExtResource("3_ys6ci")
 
 [node name="CameraFollower" type="Node3D" parent="BasicOBJ_Group" unique_id=364981525]
 unique_name_in_owner = true
@@ -82,9 +68,8 @@ libraries/ = SubResource("AnimationLibrary_cm0pq")
 transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
 shadow_enabled = true
 
-[node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 node_paths=PackedStringArray("line") instance=ExtResource("6_hddbq")]
+[node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("6_hddbq")]
 crown_no_light = ExtResource("7_qbl1a")
-line = NodePath("../MainLine")
 
 [node name="Scene_Group" type="Node3D" parent="." unique_id=1042175662]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -45)

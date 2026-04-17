@@ -101,16 +101,16 @@ func _capture_ambient() -> void:
 	if env:
 		ambient.intensity = env.ambient_light_energy
 		match env.ambient_light_source:
-			0: # AMBIENT_SOURCE_SKYBOX
+			Environment.AMBIENT_SOURCE_BG:
 				ambient.lighting_type = AmbientSettings.EnvironmentLightingType.Skybox
-			1: # AMBIENT_SOURCE_COLOR
+			Environment.AMBIENT_SOURCE_COLOR:
 				ambient.lighting_type = AmbientSettings.EnvironmentLightingType.Color
 				ambient.ambient_color = env.ambient_light_color
-			2: # AMBIENT_SOURCE_TRILIGHT
-				ambient.lighting_type = AmbientSettings.EnvironmentLightingType.Gradient
-				ambient.sky_color = env.ambient_light_sky_color
-				ambient.equator_color = env.ambient_light_horizon_color
-				ambient.ground_color = env.ambient_light_ground_color
+			Environment.AMBIENT_SOURCE_SKY:
+				ambient.lighting_type = AmbientSettings.EnvironmentLightingType.Skybox
+			_:
+				# AMBIENT_SOURCE_DISABLED or other values
+				ambient.lighting_type = AmbientSettings.EnvironmentLightingType.Color
 
 func _restore_camera() -> void:
 	var cf := _get_camera_follower()
@@ -150,12 +150,12 @@ func _restore_ambient() -> void:
 		env.ambient_light_energy = ambient.intensity
 		match ambient.lighting_type:
 			AmbientSettings.EnvironmentLightingType.Skybox:
-				env.ambient_light_source = 0 # AMBIENT_SOURCE_SKYBOX
+				env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 			AmbientSettings.EnvironmentLightingType.Color:
-				env.ambient_light_source = 1 # AMBIENT_SOURCE_COLOR
+				env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 				env.ambient_light_color = ambient.ambient_color
 			AmbientSettings.EnvironmentLightingType.Gradient:
-				env.ambient_light_source = 2 # AMBIENT_SOURCE_TRILIGHT
+				env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 				env.ambient_light_sky_color = ambient.sky_color
 				env.ambient_light_horizon_color = ambient.equator_color
 				env.ambient_light_ground_color = ambient.ground_color

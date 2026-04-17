@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="LevelData" format=3]
+
+[ext_resource type="Script" uid="uid://dwvw82b5c55ey" path="res://#Template/[Scripts]/Settings/LevelData.gd" id="1_abc123"]
+[ext_resource type="Script" uid="uid://cpejwvo4pns1" path="res://#Template/[Scripts]/Settings/SingleColor.gd" id="2_def456"]
+[ext_resource type="Script" uid="uid://cb0rklrw2kuc3" path="res://#Template/[Scripts]/Settings/AuthorInfo.gd" id="3_ghi789"]
+
+
+[resource]
+script = ExtResource("1_abc123")
+saveID = 0
+levelTitleKey = "LevelName"
+levelTitle = "默认关卡"
+speed = 12.0
+timeScale = 1.0
+gravity = Vector3(0, -9.8, 0)
+playerHeadBoxColliderSize = Vector3(0.3, 1.0, 0.3)
+levelAudioClip = null
+useCustomLevelTime = false
+levelTotalTime = 0.0
+haveMultipleAudio = false
+audioClips = []
+colors = []
+authors = []

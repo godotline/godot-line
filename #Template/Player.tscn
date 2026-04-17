@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://brdmblcywuklx"]
 
-[ext_resource type="Script" uid="uid://lvagihw0v4wd" path="res://#Template/[Scripts]/Level/MainLine.gd" id="1"]
+[ext_resource type="Script" uid="uid://lvagihw0v4wd" path="res://#Template/[Scripts]/Level/Player.gd" id="1"]
 [ext_resource type="AudioStream" uid="uid://dg4noxkxcgbfj" path="res://#Template/[Resources]/WaterDie.wav" id="2"]
 [ext_resource type="PackedScene" uid="uid://bvchtbimvb182" path="res://#Template/[Resources]/DeathParticle.tscn" id="2_jntxg"]
+[ext_resource type="Material" uid="uid://jitnvfywue03" path="res://#Template/[Materials]/MainPlayer.tres" id="4_osvj6"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7ow2k"]
 height = 1.0
@@ -11,6 +12,7 @@ height = 1.0
 size = Vector3(0.5, 1, 0.5)
 
 [sub_resource type="BoxMesh" id="2"]
+material = ExtResource("4_osvj6")
 
 [sub_resource type="Curve" id="Curve_7clfx"]
 _data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]

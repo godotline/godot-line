@@ -25,7 +25,7 @@ signal onturn
 @onready var animation_node:AnimationPlayer = get_node(animation) if animation else null
 @onready var land_effect: GPUParticles3D = $LandEffect
 
-@export var music: AudioStream
+@export var level_data: LevelData
 
 @export var deathParticle: PackedScene
 
@@ -34,7 +34,7 @@ var is_live := true
 var line:MeshInstance3D
 var past_is_on_floor := false
 var past_is_on_floor_effect := false
-var v := Vector3(0,0,0)
+
 var is_start := false
 var tailScale = 1
 var _last_floor_y := 0.0
@@ -57,12 +57,9 @@ func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint() and is_live:
 		if not is_on_floor():
 			velocity.y -= 9.8 * delta
-		velocity.x = v.x
-		velocity.z = v.z
 		move_and_slide()
 		if is_on_wall():
 			die()
-		v = Vector3(velocity.x, v.y, velocity.z)
 		if fly:
 			$".".position.y = y
 
@@ -71,7 +68,7 @@ func _process(_delta: float) -> void:
 		return
 
 	# TODO: 不知道有没有用
-	if music and $MusicPlayer.playing and animation_node and animation_node.is_playing():
+	if level_data and level_data.levelAudioClip and $MusicPlayer.playing and animation_node and animation_node.is_playing():
 		var time = $MusicPlayer.get_playback_position() + AudioServer.get_time_since_last_mix() - AudioServer.get_output_latency()
 		animation_node.seek(time, true)
 
@@ -167,9 +164,9 @@ func turn():
 				State.anim_time = 0
 			animation_node.play("level")
 			animation_node.seek(State.anim_time)
-			if music:
-				$MusicPlayer.stream = music
-				var music_start_time := State.music_checkpoint_time if State.music_checkpoint_time > 0.0 else State.anim_time
+			if level_data and level_data.levelAudioClip and not $MusicPlayer.playing:
+				$MusicPlayer.stream = level_data.levelAudioClip
+				var music_start_time: float = level_data.get_audio_start_time()
 				if music_start_time > 0.0:
 					$MusicPlayer.play(music_start_time)
 				else:
@@ -180,7 +177,10 @@ func turn():
 			is_turn = not is_turn
 		else:
 			is_start = true
-		v = to_global(Vector3(0,0,1) * speed) - position
+			# 应用关卡数据
+			if level_data:
+				level_data.apply_to(self, get_world_3d().space)
+		velocity = to_global(Vector3(0,0,1) * speed) - position
 		past_translation = position
 		new_line()
 
@@ -198,7 +198,7 @@ func _on_Area_body_entered(_body: Node) -> void:
 func die():
 	if !noclip:
 		is_live = false
-		v = Vector3.ZERO
+		velocity = Vector3.ZERO
 		if animation_node: animation_node.pause()
 		$MusicPlayer.stop()
 		$AudioStreamPlayer.play()
