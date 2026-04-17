@@ -1,4 +1,4 @@
-extends Marker3D
+extends Node3D
 
 @export var base_floor:PackedScene
 @export var road_width := 3.0

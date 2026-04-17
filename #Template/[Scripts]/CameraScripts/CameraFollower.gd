@@ -39,7 +39,7 @@ func _ready() -> void:
 	if not camera and get_child_count() > 0:
 		camera = get_child(0)
 	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending:
-		_apply_state_checkpoint()
+		call_deferred("_apply_state_checkpoint")
 
 func _process(delta: float) -> void:
 	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending and not _checkpoint_applied:
@@ -79,6 +79,7 @@ func _apply_state_checkpoint() -> void:
 	if line == null and player:
 		line = get_node_or_null(player) as Node3D
 	if line == null:
+		push_warning("CameraFollower: checkpoint restore failed, line is null")
 		return
 	State.load_to_camera_follower(self)
 	position = line.position + add_position
@@ -86,12 +87,14 @@ func _apply_state_checkpoint() -> void:
 	_pending_resume = true
 	_checkpoint_applied = true
 	State.camera_checkpoint.restore_pending = false
+	print("CameraFollower: checkpoint applied pos=", position, " rot=", rotation_degrees, " add_pos=", add_position, " rot_offset=", rotation_offset, " target_rot=", _target_rotation, " target_add_pos=", _target_add_position, " mode=", _current_rotate_mode, " base_rot=", _base_rotation)
 
 func _resume_tweens() -> void:
 	_pending_resume = false
 	if _tween:
 		_tween.kill()
 	var has_tween := false
+	print("CameraFollower: _resume_tweens add_pos=", add_position, " target=", _target_add_position, " follow_speed=", follow_speed, " target=", _target_follow_speed, " distance=", distance_from_object, " target=", _target_distance, " rot=", rotation_degrees, " target_rot=", _target_rotation, " mode=", _current_rotate_mode)
 	if not add_position.is_equal_approx(_target_add_position) or not is_equal_approx(follow_speed, _target_follow_speed) or not is_equal_approx(distance_from_object, _target_distance):
 		_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 		has_tween = true
@@ -104,6 +107,7 @@ func _resume_tweens() -> void:
 	var need_rotate := true
 	if rotation_degrees.is_equal_approx(_target_rotation):
 		need_rotate = false
+		print("CameraFollower: rotation already at target, skipping")
 	if need_rotate:
 		if not has_tween:
 			_tween = create_tween().set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)

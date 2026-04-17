@@ -41,7 +41,6 @@ _data = {
 script = ExtResource("1_dha8j")
 Camera = NodePath("Object/CameraFollower/Camera3D")
 Mainline = NodePath("Object/MainLine")
-factor = 1.0
 
 [node name="Object" type="Node3D" parent="." unique_id=1533079692]
 
