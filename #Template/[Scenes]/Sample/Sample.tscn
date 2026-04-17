@@ -45,8 +45,6 @@ glow_enabled = true
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
 [node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("1_8i0ov")]
-floor_block_on_wall = false
-floor_max_angle = 1.5707964
 color = Color(0, 1, 0, 1)
 animation = NodePath("../AnimationPlayer")
 level_data = ExtResource("2_2atlu")
@@ -125,7 +123,7 @@ transform = Transform3D(61.305275, 0, 0, 0, 1, 0, 0, 0, 68.8622, 79.542465, -1.9
 transform = Transform3D(19.905514, 0, 0, 0, 1, 0, 0, 0, 4.5696793, 63.925785, 2.1299973, 55.686684)
 
 [node name="BaseFloor3" parent="Scene_Group" unique_id=794439580 instance=ExtResource("6_cr5py")]
-transform = Transform3D(9.952755, 0, -3.9574575, 0, 1, 0, 17.238678, 0, 2.2848392, 75.14364, 2.4076805, 63.830173)
+transform = Transform3D(9.952755, 0, -3.9574575, 0, 1, 0, 17.238678, 0, 2.2848392, 75.14364, 2.3337727, 63.830173)
 
 [node name="BaseFloor4" parent="Scene_Group" unique_id=412766049 instance=ExtResource("6_cr5py")]
 transform = Transform3D(19.905512, 0, 0, 0, 1, 0, 0, 0, 2.1410718, 88.06795, 2.1299973, 71.48349)

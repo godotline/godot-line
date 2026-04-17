@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://cpo3g3k6m5nib"]
 
-[ext_resource type="Script" uid="uid://d2244y2svyt45" path="res://#Template/[Scripts]/GameManager.gd" id="1_dha8j"]
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="2_ots34"]
 [ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/DefaultScene/Default.tres" id="3_ys6ci"]
 [ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
@@ -34,7 +33,6 @@ _data = {
 }
 
 [node name="LevelHolder" type="Node3D" unique_id=542804875 node_paths=PackedStringArray("Camera", "Player")]
-script = ExtResource("1_dha8j")
 Camera = NodePath("BasicOBJ_Group/CameraFollower/Camera3D")
 Player = NodePath("BasicOBJ_Group/Player")
 

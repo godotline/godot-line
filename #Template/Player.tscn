@@ -5,7 +5,8 @@
 [ext_resource type="PackedScene" uid="uid://bvchtbimvb182" path="res://#Template/[Resources]/DeathParticle.tscn" id="2_jntxg"]
 [ext_resource type="Material" uid="uid://jitnvfywue03" path="res://#Template/[Materials]/MainPlayer.tres" id="4_osvj6"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_tmau4"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tmau4"]
+height = 1.0
 
 [sub_resource type="BoxShape3D" id="4"]
 size = Vector3(0.5, 1, 0.5)
@@ -37,11 +38,15 @@ material = SubResource("StandardMaterial3D_ty8qn")
 
 [node name="Player" type="CharacterBody3D" unique_id=1905697100]
 collision_mask = 2
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+floor_max_angle = 1.553343
 script = ExtResource("1")
 deathParticle = ExtResource("2_jntxg")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=157464276]
-shape = SubResource("BoxShape3D_tmau4")
+shape = SubResource("CapsuleShape3D_tmau4")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=1215796459]
 collision_layer = 0
