@@ -179,30 +179,8 @@ transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 44.776867, 0.15720987, 55.215
 [node name="GuideTap" parent="Scene" unique_id=1723303954 instance=ExtResource("9_sgchv")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 44.886116, -0.49999997, 55.619904)
 
-[node name="Trigger" parent="Scene" unique_id=608483111 instance=ExtResource("10_q71od")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.002282, 47.406303, -9.536743e-07, 55.828354)
-script = ExtResource("11_lbrgy")
-height = 4.0
-
-[node name="Trigger2" parent="Scene/Trigger" unique_id=1001188073 instance=ExtResource("10_q71od")]
-script = ExtResource("12_67fsp")
-active_position = true
-new_add_position = Vector3(-5, 0, -5)
-active_rotate = true
-new_rotation = Vector3(-45, 225, 0)
-active_distance = true
-new_distance = 5.0
-active_speed = true
-new_follow_speed = 1.2
-rotate_mode = 0
-TransitionType = 1
-EaseType = 2
-need_time = 1.0
-use_time = false
-trigger_time = 0.0
-
-[node name="Trigger3" parent="Scene/Trigger" unique_id=1067104480 instance=ExtResource("10_q71od")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.726989, 2.9287004, 0)
+[node name="Trigger3" parent="Scene" unique_id=1067104480 instance=ExtResource("10_q71od")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.002282, 54.48696, 2.9286995, 55.828354)
 script = ExtResource("12_67fsp")
 active_position = true
 new_add_position = Vector3(-5, 10, -5)
@@ -218,6 +196,11 @@ EaseType = 2
 need_time = 1.0
 use_time = false
 trigger_time = 0.0
+
+[node name="Trigger" parent="Scene" unique_id=608483111 instance=ExtResource("10_q71od")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.002282, 47.406303, -9.536743e-07, 55.828354)
+script = ExtResource("11_lbrgy")
+height = 4.0
 
 [node name="BaseWall" parent="Scene" unique_id=359263919 instance=ExtResource("12_pxq50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 9.397742, 47.416126, -1.9073486e-06, 48.34996)
@@ -254,7 +237,7 @@ transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135
 shape = SubResource("2")
 
 [node name="Marker3D" type="Marker3D" parent="HeartCheckpoint/CheckpointTrigger" unique_id=626349944]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0.7614288)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HeartCheckpoint" unique_id=1721480882]
 libraries/ = SubResource("AnimationLibrary_pds1l")

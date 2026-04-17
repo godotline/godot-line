@@ -30,7 +30,6 @@ var _base_rotation: Vector3 = Vector3.ZERO
 var _target_add_position: Vector3
 var _target_follow_speed: float
 var _target_distance: float
-var _pending_resume: bool = false
 
 func _ready() -> void:
 	_target_add_position = add_position
@@ -45,8 +44,6 @@ func _process(delta: float) -> void:
 	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending and not _checkpoint_applied:
 		_apply_state_checkpoint()
 	if following and line and ("is_start" not in line or line.is_start):
-		if _pending_resume:
-			_resume_tweens()
 		var base_transform = line.position + add_position
 		position = position.slerp(base_transform, abs(follow_speed * delta))
 		
@@ -83,48 +80,11 @@ func _apply_state_checkpoint() -> void:
 		return
 	State.load_to_camera_follower(self)
 	position = line.position + add_position
+	# Unity版本方式：直接恢复到最终状态
 	rotation_degrees = cp.rotation_degrees
-	_pending_resume = true
+	print("CameraFollower: checkpoint applied pos=", position, " rot=", rotation_degrees)
 	_checkpoint_applied = true
 	State.camera_checkpoint.restore_pending = false
-	print("CameraFollower: checkpoint applied pos=", position, " rot=", rotation_degrees, " add_pos=", add_position, " rot_offset=", rotation_offset, " target_rot=", _target_rotation, " target_add_pos=", _target_add_position, " mode=", _current_rotate_mode, " base_rot=", _base_rotation)
-
-func _resume_tweens() -> void:
-	_pending_resume = false
-	if _tween:
-		_tween.kill()
-	var has_tween := false
-	print("CameraFollower: _resume_tweens add_pos=", add_position, " target=", _target_add_position, " follow_speed=", follow_speed, " target=", _target_follow_speed, " distance=", distance_from_object, " target=", _target_distance, " rot=", rotation_degrees, " target_rot=", _target_rotation, " mode=", _current_rotate_mode)
-	if not add_position.is_equal_approx(_target_add_position) or not is_equal_approx(follow_speed, _target_follow_speed) or not is_equal_approx(distance_from_object, _target_distance):
-		_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-		has_tween = true
-		if not add_position.is_equal_approx(_target_add_position):
-			_tween.tween_property(self, "add_position", _target_add_position, 1.0)
-		if not is_equal_approx(follow_speed, _target_follow_speed):
-			_tween.tween_property(self, "follow_speed", _target_follow_speed, 1.0)
-		if not is_equal_approx(distance_from_object, _target_distance):
-			_tween.tween_property(self, "distance_from_object", _target_distance, 1.0)
-	var need_rotate := true
-	if rotation_degrees.is_equal_approx(_target_rotation):
-		need_rotate = false
-		print("CameraFollower: rotation already at target, skipping")
-	if need_rotate:
-		if not has_tween:
-			_tween = create_tween().set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-			has_tween = true
-		if _current_rotate_mode == RotateMode.Fast:
-			var start_rot := rotation_degrees
-			_tween.tween_method(func(w: float) -> void:
-				rotation_degrees = Vector3(
-					rad_to_deg(lerp_angle(deg_to_rad(start_rot.x), deg_to_rad(_target_rotation.x), w)),
-					rad_to_deg(lerp_angle(deg_to_rad(start_rot.y), deg_to_rad(_target_rotation.y), w)),
-					rad_to_deg(lerp_angle(deg_to_rad(start_rot.z), deg_to_rad(_target_rotation.z), w)),
-				)
-			, 0.0, 1.0, 1.0)
-		else:
-			_tween.tween_property(self, "rotation_degrees", _target_rotation, 1.0)
-
-
 
 ## 获取当前目标旋转值
 func _get_target_rotation() -> Vector3:

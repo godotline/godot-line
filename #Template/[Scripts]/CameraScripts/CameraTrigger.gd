@@ -78,14 +78,16 @@ func _trigger() -> void:
 	if active_rotate:
 		cf._current_rotate_mode = rotate_mode
 		cf._start_rotation = cf.rotation_degrees
-		cf._base_rotation = cf.rotation_degrees
+		# 只有非累加模式才重置 base_rotation，累加模式保持原值用于连续旋转
+		if rotate_mode == RotateMode.Fast or rotate_mode == RotateMode.FastBeyond360:
+			cf._base_rotation = cf.rotation_degrees
 		match rotate_mode:
 			RotateMode.Fast:
 				cf._target_rotation = cf._normalize_rotation_shortest(cf._start_rotation, new_rotation)
 			RotateMode.FastBeyond360:
 				cf._target_rotation = new_rotation
 			RotateMode.WorldAxisAdd, RotateMode.LocalAxisAdd:
-				cf._target_rotation = cf._start_rotation + new_rotation
+				cf._target_rotation = cf._base_rotation + new_rotation
 		cf.rotation_offset = new_rotation
 		cf._is_rotating = false
 		if rotate_mode == RotateMode.Fast:
