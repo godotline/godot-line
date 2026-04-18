@@ -3,7 +3,7 @@
 <cite>
 **本文档中引用的文件**
 - [Player.gd](file://#Template/[Scripts]/Level/Player.gd)
-- [GameManager.gd](file://#Template/[Scripts]/GameManager.gd)
+- [CameraFollower.gd](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd)
 - [State.gd](file://#Template/[Scripts]/State.gd)
 - [RoadMaker.gd](file://#Template/[Scripts]/Level/RoadMaker.gd)
 - [gameui.gd](file://#Template/[Scripts]/Level/gameui.gd)
@@ -13,7 +13,6 @@
 - [Diamond.gd](file://#Template/[Scripts]/Trigger/Diamond.gd)
 - [Trigger.gd](file://#Template/[Scripts]/Trigger/Trigger.gd)
 - [Checkpoint.gd](file://#Template/[Scripts]/Trigger/Checkpoint.gd)
-- [CameraFollower.gd](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd)
 </cite>
 
 ## 更新摘要
@@ -49,7 +48,7 @@
 graph TB
 subgraph "核心游戏逻辑"
 PL[Player.gd - 主线角色<br/>Singleton模式]
-GM[GameManager.gd - 游戏管理器]
+CF[CameraFollower.gd - 相机跟随器<br/>Singleton模式]
 ST[State.gd - 游戏状态]
 end
 subgraph "环境生成"
@@ -66,12 +65,9 @@ DT[Diamond.gd - 钻石触发器]
 TR[Trigger.gd - 通用触发器]
 CP[Checkpoint.gd - 检查点系统]
 end
-subgraph "相机系统"
-CF[CameraFollower.gd - 相机跟随器<br/>Singleton模式]
-end
 PL --> RM
 PL --> ST
-PL --> GM
+PL --> CF
 RM --> PL
 CT --> ST
 DT --> ST
@@ -82,15 +78,14 @@ CP --> PL
 ```
 
 **图表来源**
-- [Player.gd:1-233](file://#Template/[Scripts]/Level/Player.gd#L1-L233)
-- [GameManager.gd:1-50](file://#Template/[Scripts]/GameManager.gd#L1-L50)
-- [State.gd:1-159](file://#Template/[Scripts]/State.gd#L1-L159)
-- [Checkpoint.gd:1-215](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L1-L215)
+- [Player.gd:1-239](file://#Template/[Scripts]/Level/Player.gd#L1-L239)
 - [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
+- [State.gd:1-159](file://#Template/[Scripts]/State.gd#L1-L159)
+- [Checkpoint.gd:1-210](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L1-L210)
 
 **章节来源**
-- [Player.gd:1-233](file://#Template/[Scripts]/Level/Player.gd#L1-L233)
-- [GameManager.gd:1-50](file://#Template/[Scripts]/GameManager.gd#L1-L50)
+- [Player.gd:1-239](file://#Template/[Scripts]/Level/Player.gd#L1-L239)
+- [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
 - [State.gd:1-159](file://#Template/[Scripts]/State.gd#L1-L159)
 
 ## 核心组件
@@ -106,15 +101,15 @@ CP --> PL
 - 死亡处理和粒子效果
 - **Singleton模式实现**：通过 Player.instance 提供全局访问
 
-### 游戏管理器 (GameManager)
+### 相机跟随器 (CameraFollower)
 
-提供全局游戏控制功能，包括相机跟随、位置管理和动画时间计算。
+提供智能的相机跟随功能，支持多种旋转模式和动画过渡效果。
 
 **核心功能：**
-- 相机跟随器访问
-- 原点位置设置和获取
-- 动画开始时间计算
-- 因子调节机制
+- 多种旋转模式支持
+- 平滑的相机跟随算法
+- 动画过渡和缓动效果
+- 检查点状态恢复
 
 ### 状态管理系统 (State)
 
@@ -127,8 +122,8 @@ CP --> PL
 - 游戏统计信息
 
 **章节来源**
-- [Player.gd:43-117](file://#Template/[Scripts]/Level/Player.gd#L43-L117)
-- [GameManager.gd:33-49](file://#Template/[Scripts]/GameManager.gd#L33-L49)
+- [Player.gd:47-56](file://#Template/[Scripts]/Level/Player.gd#L47-L56)
+- [CameraFollower.gd:37-46](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L37-L46)
 - [State.gd:46-66](file://#Template/[Scripts]/State.gd#L46-L66)
 
 ## 架构概览
@@ -194,12 +189,6 @@ class RoadMaker {
 +new_road() void
 +on_sky() void
 }
-class GameManager {
-+Camera3D Camera
-+CharacterBody3D Mainline
-+float factor
-+calculate_anim_start_time() float
-}
 class CameraFollower {
 +static CameraFollower instance
 +Node3D line
@@ -208,7 +197,6 @@ class CameraFollower {
 +lerp_to() void
 }
 Player --> RoadMaker : "连接信号"
-Player --> GameManager : "查询状态"
 Player --> CameraFollower : "Singleton访问"
 RoadMaker --> Player : "响应事件"
 CameraFollower --> Player : "相机跟随"
@@ -217,7 +205,6 @@ CameraFollower --> Player : "相机跟随"
 **图表来源**
 - [Player.gd:8-41](file://#Template/[Scripts]/Level/Player.gd#L8-L41)
 - [RoadMaker.gd:3-10](file://#Template/[Scripts]/Level/RoadMaker.gd#L3-L10)
-- [GameManager.gd:5-8](file://#Template/[Scripts]/GameManager.gd#L5-L8)
 - [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
 
 #### 物理处理流程
@@ -245,8 +232,8 @@ Die --> End
 ```
 
 **图表来源**
-- [Player.gd:56-65](file://#Template/[Scripts]/Level/Player.gd#L56-L65)
-- [Player.gd:196-205](file://#Template/[Scripts]/Level/Player.gd#L196-L205)
+- [Player.gd:58-69](file://#Template/[Scripts]/Level/Player.gd#L58-L69)
+- [Player.gd:204-239](file://#Template/[Scripts]/Level/Player.gd#L204-L239)
 
 #### 转向机制分析
 
@@ -269,12 +256,11 @@ Player->>Player : 重新计算速度向量
 ```
 
 **图表来源**
-- [Player.gd:160-185](file://#Template/[Scripts]/Level/Player.gd#L160-L185)
-- [GameManager.gd:33-49](file://#Template/[Scripts]/GameManager.gd#L33-L49)
+- [Player.gd:166-191](file://#Template/[Scripts]/Level/Player.gd#L166-L191)
 
 **章节来源**
-- [Player.gd:56-104](file://#Template/[Scripts]/Level/Player.gd#L56-L104)
-- [Player.gd:160-185](file://#Template/[Scripts]/Level/Player.gd#L160-L185)
+- [Player.gd:58-110](file://#Template/[Scripts]/Level/Player.gd#L58-L110)
+- [Player.gd:166-191](file://#Template/[Scripts]/Level/Player.gd#L166-L191)
 
 ### 触发器系统分析
 
@@ -326,7 +312,7 @@ Checkpoint --> CameraFollower : "通过Singleton访问"
 - [Crown.gd:1-14](file://#Template/[Scripts]/Trigger/Crown.gd#L1-L14)
 - [Diamond.gd:1-15](file://#Template/[Scripts]/Trigger/Diamond.gd#L1-L15)
 - [Trigger.gd:1-10](file://#Template/[Scripts]/Trigger/Trigger.gd#L1-L10)
-- [Checkpoint.gd:1-215](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L1-L215)
+- [Checkpoint.gd:1-210](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L1-L210)
 
 #### 检查点保存流程
 
@@ -356,7 +342,7 @@ FreeNode --> End
 **图表来源**
 - [Crown.gd:7-14](file://#Template/[Scripts]/Trigger/Crown.gd#L7-L14)
 - [Diamond.gd:6-11](file://#Template/[Scripts]/Trigger/Diamond.gd#L6-L11)
-- [Checkpoint.gd:45-78](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L45-L78)
+- [Checkpoint.gd:40-78](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L40-L78)
 
 **章节来源**
 - [BaseTrigger.gd:18-38](file://#Template/[Scripts]/Trigger/BaseTrigger.gd#L18-L38)
@@ -416,7 +402,7 @@ Player ..|> SingletonPattern : implements
 
 **图表来源**
 - [Player.gd:5](file://#Template/[Scripts]/Level/Player.gd#L5)
-- [Player.gd:46-47](file://#Template/[Scripts]/Level/Player.gd#L46-L47)
+- [Player.gd:47-48](file://#Template/[Scripts]/Level/Player.gd#L47-L48)
 
 ### Singleton初始化流程
 
@@ -433,7 +419,7 @@ Note over Player,InstanceVar : Singleton模式建立
 ```
 
 **图表来源**
-- [Player.gd:46-47](file://#Template/[Scripts]/Level/Player.gd#L46-L47)
+- [Player.gd:47-48](file://#Template/[Scripts]/Level/Player.gd#L47-L48)
 
 ### Singleton模式优势
 
@@ -444,7 +430,7 @@ Note over Player,InstanceVar : Singleton模式建立
 
 **章节来源**
 - [Player.gd:5](file://#Template/[Scripts]/Level/Player.gd#L5)
-- [Player.gd:46-47](file://#Template/[Scripts]/Level/Player.gd#L46-L47)
+- [Player.gd:47-48](file://#Template/[Scripts]/Level/Player.gd#L47-L48)
 
 ## 跨脚本访问模式
 
@@ -518,9 +504,8 @@ Rendering[渲染引擎]
 end
 subgraph "核心层"
 Player[主线角色<br/>Singleton模式]
-GameManager[游戏管理器]
-State[状态管理]
 CameraFollower[相机跟随器<br/>Singleton模式]
+State[状态管理]
 end
 subgraph "功能层"
 RoadMaker[道路生成]
@@ -538,7 +523,6 @@ Physics --> Player
 Rendering --> Player
 Player --> RoadMaker
 Player --> State
-Player --> GameManager
 Player --> CameraFollower
 RoadMaker --> Physics
 Triggers --> Physics
@@ -598,7 +582,7 @@ H --> I[零开销访问]
 
 **章节来源**
 - [Player.gd:5](file://#Template/[Scripts]/Level/Player.gd#L5)
-- [Player.gd:46-47](file://#Template/[Scripts]/Level/Player.gd#L46-L47)
+- [Player.gd:47-48](file://#Template/[Scripts]/Level/Player.gd#L47-L48)
 
 ## 故障排除指南
 

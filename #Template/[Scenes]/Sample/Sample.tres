@@ -30,5 +30,5 @@ script = ExtResource("6_k7wbl")
 levelTitleKey = "Default"
 levelAudioClip = ExtResource("5_k6gnx")
 colors = Array[ExtResource("2_8q35j")]([SubResource("Resource_c57ag"), SubResource("Resource_tno1u")])
-levelTitle = "测试"
+levelTitle = "测试场景"
 authors = Array[ExtResource("1_3030t")]([SubResource("Resource_1icaj")])

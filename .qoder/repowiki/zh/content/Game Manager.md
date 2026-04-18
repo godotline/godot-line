@@ -2,20 +2,24 @@
 
 <cite>
 **本文档引用的文件**
-- [GameManager.gd](file://#Template/[Scripts]/GameManager.gd)
-- [MainLine.gd](file://#Template/[Scripts]/MainLine.gd)
-- [State.gd](file://#Template/[Scripts]/State.gd)
-- [gameui.gd](file://#Template/[Scripts]/gameui.gd)
-- [RoadMaker.gd](file://#Template/[Scripts]/RoadMaker.gd)
-- [BaseTrigger.gd](file://#Template/[Scripts]/Trigger/BaseTrigger.gd)
 - [CameraFollower.gd](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd)
 - [CameraTrigger.gd](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd)
-- [CamShaker.gd](file://#Template/[Scripts]/CameraScripts/CamShaker.gd)
-- [MainLine.tscn](file://#Template/MainLine.tscn)
-- [GAMEUI.tscn](file://#Template/GAMEUI.tscn)
-- [RoadMaker.tscn](file://#Template/RoadMaker.tscn)
+- [Checkpoint.gd](file://#Template/[Scripts]/Trigger/Checkpoint.gd)
+- [PreEnding.gd](file://#Template/[Scripts]/Trigger/PreEnding.gd)
+- [State.gd](file://#Template/[Scripts]/State.gd)
+- [BaseTrigger.gd](file://#Template/[Scripts]/Trigger/BaseTrigger.gd)
+- [CameraSettings.gd](file://#Template/[Scripts]/Settings/CameraSettings.gd)
+- [OldCameraSettings.gd](file://#Template/[Scripts]/Settings/OldCameraSettings.gd)
 - [README.md](file://README.md)
 </cite>
+
+## 更新摘要
+**所做更改**
+- 删除了所有关于 GameManager 脚本的内容和引用
+- 更新了相机跟随系统的访问方式说明
+- 新增了直接使用 CameraFollower.instance 的说明
+- 更新了相关的架构图和依赖关系分析
+- 修改了故障排除指南中的相关问题
 
 ## 目录
 1. [简介](#简介)
@@ -31,6 +35,8 @@
 ## 简介
 
 Game Manager 是一个基于 Godot Engine 4.6 开发的 Dancing Line 游戏模板的核心管理系统。该项目实现了完整的线条游戏机制，包括角色控制、道路生成、相机跟随、触发器系统等核心功能。项目采用模块化设计，提供了高度的可扩展性和兼容性。
+
+**重要更新**：GameManager 脚本已被完全删除，相机跟随器现在通过静态实例直接访问。
 
 本项目的主要特点包括：
 - 基于 Dancing Line 核心玩法的完整实现
@@ -61,22 +67,21 @@ H[Tests/]
 I[addons/gdUnit4/]
 end
 subgraph "核心脚本"
-D1[GameManager.gd]
-D2[MainLine.gd]
+D1[CameraFollower.gd]
+D2[CameraTrigger.gd]
 D3[State.gd]
-D4[gameui.gd]
-D5[RoadMaker.gd]
-end
-subgraph "相机系统"
-J[CameraScripts/]
-K[CameraFollower.gd]
-L[CameraTrigger.gd]
-M[CamShaker.gd]
+D4[Checkpoint.gd]
+D5[PreEnding.gd]
 end
 subgraph "触发器系统"
-N[Trigger/]
-O[BaseTrigger.gd]
-P[各触发器类型]
+J[Trigger/]
+K[BaseTrigger.gd]
+L[各触发器类型]
+end
+subgraph "设置系统"
+M[Settings/]
+N[CameraSettings.gd]
+O[OldCameraSettings.gd]
 end
 A --> D
 D --> D1
@@ -85,16 +90,16 @@ D --> D3
 D --> D4
 D --> D5
 D --> J
-D --> N
+D --> M
 J --> K
 J --> L
-J --> M
-N --> O
+M --> N
+M --> O
 ```
 
 **图表来源**
-- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
-- [MainLine.gd:1-251](file://#Template/[Scripts]/MainLine.gd#L1-L251)
+- [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
+- [CameraTrigger.gd:1-109](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L109)
 - [State.gd:1-22](file://#Template/[Scripts]/State.gd#L1-L22)
 
 **章节来源**
@@ -102,66 +107,14 @@ N --> O
 
 ## 核心组件
 
-### Game Manager 核心功能
-
-Game Manager 作为整个游戏系统的协调中心，负责管理游戏状态、相机跟随和动画同步等关键功能：
-
-```mermaid
-classDiagram
-class GameManager {
-+Camera : Camera3D
-+Mainline : CharacterBody3D
-+factor : float
-+origin_pos : Vector3
-+camera_follower : Node3D
-+calculate_anim_start_time() float
-+Origin Pos() void
-+Get Origin Pos() void
-}
-class MainLine {
-+speed : float
-+rot : float
-+color : Color
-+fly : bool
-+noclip : bool
-+animation : AnimationPlayer
-+is_turn : bool
-+turn() void
-+reload() void
-+die() void
-+new_line() void
-}
-class State {
-+main_line_transform
-+camera_follower_has_checkpoint : bool
-+camera_follower_add_position : Vector3
-+camera_follower_rotation_offset : Vector3
-+camera_follower_distance : float
-+camera_follower_follow_speed : float
-+is_turn : bool
-+anim_time : float
-+music_checkpoint_time : float
-+is_end : bool
-+crown : int
-+diamond : int
-}
-GameManager --> MainLine : "管理"
-GameManager --> State : "协调"
-MainLine --> State : "读取状态"
-```
-
-**图表来源**
-- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
-- [MainLine.gd:1-251](file://#Template/[Scripts]/MainLine.gd#L1-L251)
-- [State.gd:1-22](file://#Template/[Scripts]/State.gd#L1-L22)
-
 ### 相机跟随系统
 
-相机跟随系统提供了灵活的摄像机控制机制，支持多种参数的动态调整：
+相机跟随系统提供了灵活的摄像机控制机制，支持多种参数的动态调整。**重要更新**：现在通过静态实例直接访问，无需 GameManager 协调。
 
 ```mermaid
 classDiagram
 class CameraFollower {
++instance : CameraFollower
 +player : NodePath
 +add_position : Vector3
 +rotation_offset : Vector3
@@ -185,327 +138,321 @@ class CameraTrigger {
 +new_distance : float
 +active_speed : bool
 +new_follow_speed : float
-+ease_type : Tween.EaseType
++rotate_mode : RotateMode
 +need_time : float
 +use_time : bool
 +trigger_time : float
 +_trigger() void
 }
-class CamShaker {
-+camera_parent : Node3D
-+shake_intensity : float
-+shake_duration : float
-+_on_body_entered() void
+class Checkpoint {
++AutoRecord : bool
++GameTime : float
++PlayerSpeed : float
++UsingOldCameraFollower : bool
++camera_new : CameraSettings
++camera_old : OldCameraSettings
++manual_camera : bool
++on_revive() void
 }
 CameraFollower --> CameraTrigger : "响应触发"
-CameraTrigger --> CamShaker : "相机震动"
+CameraTrigger --> CameraFollower : "直接访问"
+Checkpoint --> CameraFollower : "直接访问"
 ```
 
 **图表来源**
-- [CameraFollower.gd:1-168](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L168)
-- [CameraTrigger.gd:1-85](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L85)
-- [CamShaker.gd:1-37](file://#Template/[Scripts]/CameraScripts/CamShaker.gd#L1-L37)
+- [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
+- [CameraTrigger.gd:1-109](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L109)
+- [Checkpoint.gd:1-210](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L1-L210)
+
+### 相机跟随器访问方式
+
+**重要更新**：相机跟随器现在通过静态实例直接访问，替代了原有的 GameManager.get_camera_follower() 方式：
+
+```mermaid
+sequenceDiagram
+participant Script as 触发器脚本
+participant CF as CameraFollower
+participant State as State系统
+Script->>CF : CameraFollower.instance
+CF-->>Script : 返回静态实例
+Script->>CF : 直接调用方法
+Script->>State : State.load_to_camera_follower(cf)
+State-->>Script : 加载状态到相机跟随器
+```
+
+**图表来源**
+- [CameraFollower.gd:37-45](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L37-L45)
+- [Checkpoint.gd:45](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L45)
+- [Checkpoint.gd:183-188](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L183-L188)
 
 **章节来源**
-- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
-- [CameraFollower.gd:1-168](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L168)
-- [CameraTrigger.gd:1-85](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L85)
+- [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
+- [CameraTrigger.gd:28-32](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L28-L32)
+- [Checkpoint.gd:54](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L54)
 
 ## 架构概览
 
-游戏的整体架构采用了分层设计，各个组件之间通过清晰的接口进行通信：
+游戏的整体架构采用了分层设计，各个组件之间通过清晰的接口进行通信。**重要更新**：去除了 GameManager 作为中介层，直接通过静态实例访问相机跟随器。
 
 ```mermaid
 graph TB
 subgraph "用户界面层"
-UI[GAMEUI.tscn]
+UI[游戏界面]
 Menu[菜单系统]
 end
 subgraph "游戏逻辑层"
-GM[GameManager.gd]
-ML[MainLine.gd]
-ST[State.gd]
-RM[RoadMaker.gd]
+ML[MainLine角色]
+ST[State状态]
+RM[RoadMaker道路]
 end
 subgraph "相机系统层"
-CF[CameraFollower.gd]
-CT[CameraTrigger.gd]
-CS[CamShaker.gd]
+CF[CameraFollower相机跟随器]
+CT[CameraTrigger触发器]
+CS[CamShaker震动]
 end
 subgraph "触发器系统层"
-BT[BaseTrigger.gd]
+BT[BaseTrigger基础触发器]
 TRIG[各种触发器]
 end
 subgraph "场景层"
-SCENE[MainLine.tscn]
-ROAD[RoadMaker.tscn]
+SCENE[主场景]
+ROAD[RoadMaker场景]
 end
-UI --> GM
-GM --> ML
-GM --> CF
+UI --> CF
+CF --> CT
+CT --> CF
+BT --> TRIG
 ML --> ST
 ML --> RM
-CF --> CT
-CT --> CS
-BT --> TRIG
-ML --> BT
-RM --> ROAD
 ST --> UI
+CF --> State
 ```
 
 **图表来源**
-- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
-- [MainLine.gd:1-251](file://#Template/[Scripts]/MainLine.gd#L1-L251)
+- [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
+- [CameraTrigger.gd:1-109](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L109)
 - [State.gd:1-22](file://#Template/[Scripts]/State.gd#L1-L22)
-- [CameraFollower.gd:1-168](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L168)
 
 ## 详细组件分析
 
-### Game Manager 组件详解
+### CameraFollower 相机跟随器
 
-Game Manager 是整个游戏系统的核心协调器，负责管理游戏状态和相机跟随：
+CameraFollower 现在作为独立的静态实例提供相机控制功能，无需 GameManager 协调：
 
 #### 核心属性和方法
 
 | 属性名 | 类型 | 描述 | 默认值 |
 |--------|------|------|--------|
-| Camera | Camera3D | 主相机节点 | null |
-| Mainline | CharacterBody3D | 主角节点 | null |
-| factor | float | 距离计算因子 | 1.0 |
-| origin_pos | Vector3 | 起始位置 | Vector3.ZERO |
+| instance | CameraFollower | 静态实例引用 | null |
+| player | NodePath | 相机跟随的角色节点 | null |
+| add_position | Vector3 | 相机偏移位置 | Vector3.ZERO |
+| rotation_offset | Vector3 | 旋转偏移角度 | Vector3(45, 45, 0) |
+| distance_from_object | float | 相机距离 | 25.0 |
+| follow_speed | float | 跟随速度 | 1.2 |
+| following | bool | 是否跟随 | true |
 
-#### 计算动画起始时间流程
-
-```mermaid
-flowchart TD
-Start([调用 calculate_anim_start_time]) --> CheckMainline{Mainline 是否存在?}
-CheckMainline --> |否| ReturnZero[返回 0.0]
-CheckMainline --> |是| Calc2D[计算 2D 距离<br/>忽略 Y 轴]
-Calc2D --> GetSpeed[获取实际速度]
-GetSpeed --> CheckSpeed{速度是否为 0?}
-CheckSpeed --> |是| ReturnZero
-CheckSpeed --> |否| CalcDistance[计算移动距离 / 速度]
-CalcDistance --> ReturnTime[返回动画时间]
-ReturnZero --> End([结束])
-ReturnTime --> End
-```
-
-**图表来源**
-- [GameManager.gd:29-46](file://#Template/[Scripts]/GameManager.gd#L29-L46)
-
-#### 工具按钮功能
-
-Game Manager 提供了两个重要的工具按钮功能：
-
-1. **Origin Pos 按钮**：设置当前主角位置为起点
-2. **Get Origin Pos 按钮**：将主角移动到记录的起点位置
-
-这些功能主要用于关卡编辑和调试目的。
-
-**章节来源**
-- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
-
-### MainLine 角色控制系统
-
-MainLine 实现了游戏的核心角色控制逻辑，包括物理运动、动画同步和特效处理：
-
-#### 物理运动系统
-
-```mermaid
-sequenceDiagram
-participant Game as 游戏循环
-participant ML as MainLine
-participant Physics as 物理系统
-participant Effects as 特效系统
-Game->>ML : _physics_process(delta)
-ML->>Physics : 检查地面碰撞
-Physics-->>ML : is_on_floor() 结果
-ML->>ML : 根据状态更新速度
-ML->>Physics : move_and_slide()
-Physics-->>ML : 移动结果
-ML->>Effects : 检查着陆特效
-Effects-->>ML : 播放着陆效果
-ML->>ML : 更新轨迹线段
-```
-
-**图表来源**
-- [MainLine.gd:56-112](file://#Template/[Scripts]/MainLine.gd#L56-L112)
-
-#### 动画同步机制
-
-MainLine 实现了精确的音画同步功能：
-
-1. **音乐播放位置跟踪**：实时获取音乐播放位置
-2. **动画节点同步**：将动画播放位置与音乐同步
-3. **延迟补偿**：考虑音频混音和输出延迟
-
-#### 轨迹生成系统
-
-当角色在地面上移动时，系统会自动生成轨迹线段：
-
-```mermaid
-flowchart LR
-Start([角色移动]) --> CheckGround{是否在地面上?}
-CheckGround --> |否| ClearLines[清理线段列表]
-CheckGround --> |是| CreateLine[创建新线段]
-CreateLine --> SetPosition[设置线段位置]
-SetPosition --> SetScale[设置线段缩放]
-SetScale --> UpdateY[同步地面高度]
-UpdateY --> AddToList[添加到线段列表]
-ClearLines --> End([结束])
-AddToList --> End
-```
-
-**图表来源**
-- [MainLine.gd:147-169](file://#Template/[Scripts]/MainLine.gd#L147-L169)
-
-**章节来源**
-- [MainLine.gd:1-251](file://#Template/[Scripts]/MainLine.gd#L1-L251)
-
-### State 状态管理系统
-
-State 提供了全局游戏状态的集中管理，支持状态持久化和恢复：
-
-#### 状态变量分类
-
-| 分类 | 变量名 | 类型 | 描述 |
-|------|--------|------|------|
-| 角色状态 | main_line_transform | 变体 | 主角初始变换 |
-| | is_live | bool | 角色存活状态 |
-| | is_turn | bool | 角色转向状态 |
-| 相机状态 | camera_follower_has_checkpoint | bool | 相机检查点存在 |
-| | camera_follower_add_position | Vector3 | 相机偏移位置 |
-| | camera_follower_rotation_offset | Vector3 | 相机旋转偏移 |
-| | camera_follower_distance | float | 相机距离 |
-| | camera_follower_follow_speed | float | 相机跟随速度 |
-| 游戏进度 | anim_time | float | 动画起始时间 |
-| | music_checkpoint_time | float | 音乐检查点时间 |
-| | percent | int | 完成百分比 |
-| 收集品 | crown | int | 王冠数量 |
-| | diamond | int | 钻石数量 |
-| | crowns | Array[int] | 三颗王冠状态 |
-
-**章节来源**
-- [State.gd:1-22](file://#Template/[Scripts]/State.gd#L1-L22)
-
-### RoadMaker 道路生成系统
-
-RoadMaker 负责动态生成玩家经过路径的物理道路：
-
-#### 道路生成流程
-
-```mermaid
-sequenceDiagram
-participant ML as MainLine
-participant RM as RoadMaker
-participant Road as 道路实例
-participant Scene as 场景
-ML->>RM : new_line1 信号
-RM->>RM : 创建道路实例
-RM->>Road : 设置位置和缩放
-RM->>Scene : 添加到场景
-loop 每帧更新
-RM->>RM : 计算偏移量
-RM->>Road : 更新位置和缩放
-end
-ML->>RM : on_sky 信号
-RM->>RM : 清空当前道路引用
-```
-
-**图表来源**
-- [RoadMaker.gd:22-46](file://#Template/[Scripts]/RoadMaker.gd#L22-L46)
-
-**章节来源**
-- [RoadMaker.gd:1-46](file://#Template/[Scripts]/RoadMaker.gd#L1-L46)
-
-### 触发器系统
-
-BaseTrigger 提供了统一的触发器基类，支持多种触发条件和过滤器：
-
-#### 触发器工作流程
+#### 静态实例初始化流程
 
 ```mermaid
 flowchart TD
-Enter([物体进入触发区域]) --> CheckFilter{检查触发过滤器}
-CheckFilter --> |不匹配| Ignore[忽略触发]
-CheckFilter --> |匹配| CheckOneShot{检查一次性触发}
-CheckOneShot --> |已使用且启用| Ignore
-CheckOneShot --> |未使用或禁用| MarkUsed[标记已使用]
-MarkUsed --> EmitSignal[发出触发信号]
-EmitSignal --> CallOnTriggered[调用子类处理]
-CallOnTriggered --> Reset[重置状态]
-Ignore --> End([结束])
-Reset --> End
+Start([CameraFollower._ready]) --> SetInstance[设置静态实例]
+SetInstance --> InitTarget[初始化目标参数]
+InitTarget --> CheckCheckpoint{检查检查点?}
+CheckCheckpoint --> |是| ApplyCheckpoint[应用检查点状态]
+CheckCheckpoint --> |否| End([完成初始化])
+ApplyCheckpoint --> End
 ```
 
 **图表来源**
-- [BaseTrigger.gd:54-102](file://#Template/[Scripts]/Trigger/BaseTrigger.gd#L54-L102)
+- [CameraFollower.gd:37-45](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L37-L45)
+
+#### 相机跟随算法
+
+```mermaid
+sequenceDiagram
+participant CF as CameraFollower
+participant Line as 角色节点
+participant Camera as 相机节点
+CF->>CF : _process(delta)
+CF->>Line : 检查跟随条件
+Line-->>CF : 返回角色位置
+CF->>CF : 计算目标位置
+CF->>Camera : 平滑移动到目标位置
+CF->>CF : 更新旋转角度
+Camera-->>CF : 完成跟随
+```
+
+**图表来源**
+- [CameraFollower.gd:47-72](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L47-L72)
 
 **章节来源**
-- [BaseTrigger.gd:1-102](file://#Template/[Scripts]/Trigger/BaseTrigger.gd#L1-L102)
+- [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
+
+### CameraTrigger 相机触发器
+
+CameraTrigger 现在直接通过 CameraFollower.instance 访问相机跟随器：
+
+#### 直接访问流程
+
+```mermaid
+flowchart TD
+Enter([触发器进入]) --> CheckTime{使用时间判定?}
+CheckTime --> |否| DirectAccess[直接访问相机跟随器]
+CheckTime --> |是| TimeCheck[检查当前时间]
+TimeCheck --> |达到时间| DirectAccess
+TimeCheck --> |未达到| Wait[等待]
+DirectAccess --> ApplyTween[应用Tween动画]
+ApplyTween --> UpdateParams[更新相机参数]
+UpdateParams --> End([完成触发])
+Wait --> End
+```
+
+**图表来源**
+- [CameraTrigger.gd:40-56](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L40-L56)
+- [CameraTrigger.gd:57-109](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L57-L109)
+
+#### 参数更新机制
+
+| 参数类型 | 更新方式 | 目标值 | 动画时长 |
+|----------|----------|--------|----------|
+| 位置偏移 | 直接属性修改 | new_add_position | need_time |
+| 旋转角度 | 逐轴插值 | new_rotation | need_time |
+| 相机距离 | 直接属性修改 | new_distance | need_time |
+| 跟随速度 | 直接属性修改 | new_follow_speed | need_time |
+
+**章节来源**
+- [CameraTrigger.gd:1-109](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L109)
+
+### Checkpoint 检查点系统
+
+Checkpoint 现在直接使用 CameraFollower.instance 进行相机状态保存和恢复：
+
+#### 检查点保存流程
+
+```mermaid
+sequenceDiagram
+participant CP as Checkpoint
+participant CF as CameraFollower
+participant State as State系统
+CP->>CF : CameraFollower.instance
+CF-->>CP : 返回相机跟随器实例
+CP->>State : State.save_checkpoint(body, cf, revive_pos)
+State-->>CP : 保存检查点数据
+CP->>CP : 捕获环境设置
+CP->>CP : AutoRecord模式处理
+```
+
+**图表来源**
+- [Checkpoint.gd:40-72](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L40-L72)
+
+#### 检查点恢复流程
+
+```mermaid
+sequenceDiagram
+participant CP as Checkpoint
+participant CF as CameraFollower
+participant State as State系统
+CP->>CF : CameraFollower.instance
+CF-->>CP : 返回相机跟随器实例
+CP->>State : State.load_checkpoint_to_main_line(main_line)
+State-->>CP : 加载角色状态
+CP->>State : State.load_to_camera_follower(cf)
+State-->>CP : 加载相机状态
+CP->>CF : 更新相机位置和旋转
+```
+
+**图表来源**
+- [Checkpoint.gd:155-190](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L155-L190)
+
+**章节来源**
+- [Checkpoint.gd:1-210](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L1-L210)
+
+### PreEnding 结束动画触发器
+
+PreEnding 现在直接通过 CameraFollower.instance 控制相机视角：
+
+#### 相机视角控制流程
+
+```mermaid
+flowchart TD
+Trigger([触发结束动画]) --> GetCamera[获取相机跟随器]
+GetCamera --> CheckCamera{相机存在?}
+CheckCamera --> |否| End([结束])
+CheckCamera --> |是| CalcDirection[计算方向向量]
+CalcDirection --> CalcRotation[计算目标旋转]
+CalcRotation --> ApplyLerp[应用插值动画]
+ApplyLerp --> PlayAnimation[播放结束动画]
+PlayAnimation --> End
+```
+
+**图表来源**
+- [PreEnding.gd:6-30](file://#Template/[Scripts]/Trigger/PreEnding.gd#L6-L30)
+
+**章节来源**
+- [PreEnding.gd:1-31](file://#Template/[Scripts]/Trigger/PreEnding.gd#L1-L31)
 
 ## 依赖关系分析
 
-游戏系统的组件间依赖关系呈现清晰的层次结构：
+游戏系统的组件间依赖关系呈现清晰的层次结构，**重要更新**：去除了 GameManager 作为中介层。
 
 ```mermaid
 graph TB
 subgraph "顶层依赖"
-UI[UI 界面] --> GM[Game Manager]
-GM --> ML[Main Line]
-GM --> CF[Camera Follower]
+UI[UI界面] --> CF[CameraFollower]
+CF --> CT[CameraTrigger]
 end
 subgraph "中间层依赖"
-ML --> ST[State]
-ML --> RM[Road Maker]
-ML --> BT[Base Trigger]
-CF --> CT[Camera Trigger]
-CT --> CS[Cam Shaker]
+ML[MainLine] --> ST[State]
+ML --> RM[RoadMaker]
+ML --> BT[BaseTrigger]
+CT --> CF
+CP[Checkpoint] --> CF
+PE[PreEnding] --> CF
 end
 subgraph "底层依赖"
 ST --> GameUI[Game UI]
 RM --> RoadScene[Road Scene]
 BT --> TriggerTypes[触发器类型]
+CF --> CameraNode[Camera Node]
 end
 subgraph "场景依赖"
 ML --> MainLineScene[MainLine Scene]
-CF --> CameraNode[Camera Node]
+CF --> CameraNode
 end
 ```
 
 **图表来源**
-- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
-- [MainLine.gd:1-251](file://#Template/[Scripts]/MainLine.gd#L1-L251)
+- [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
+- [CameraTrigger.gd:1-109](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L1-L109)
 - [State.gd:1-22](file://#Template/[Scripts]/State.gd#L1-L22)
 
 ### 关键依赖链
 
-1. **UI → Game Manager**: 用户界面通过 Game Manager 访问游戏状态
-2. **Game Manager → MainLine**: 协调角色控制和动画同步
-3. **MainLine → State**: 读取和更新游戏状态
-4. **Camera Follower → Game Manager**: 通过 Game Manager 获取相机跟随器
-5. **Road Maker → MainLine**: 监听角色事件生成道路
+1. **UI → CameraFollower**: 用户界面直接访问相机跟随器
+2. **CameraTrigger → CameraFollower**: 触发器直接访问相机跟随器
+3. **Checkpoint → CameraFollower**: 检查点系统直接访问相机跟随器
+4. **PreEnding → CameraFollower**: 结束动画直接访问相机跟随器
+5. **MainLine → State**: 角色控制读取和更新游戏状态
 
 **章节来源**
-- [GameManager.gd:1-46](file://#Template/[Scripts]/GameManager.gd#L1-L46)
-- [MainLine.gd:1-251](file://#Template/[Scripts]/MainLine.gd#L1-L251)
-- [State.gd:1-22](file://#Template/[Scripts]/State.gd#L1-L22)
+- [CameraFollower.gd:1-150](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L1-L150)
+- [CameraTrigger.gd:28-32](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L28-L32)
+- [Checkpoint.gd:54](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L54)
+- [PreEnding.gd:10](file://#Template/[Scripts]/Trigger/PreEnding.gd#L10)
 
 ## 性能考虑
 
 ### 优化策略
 
-1. **延迟补偿机制**：MainLine 实现了精确的音画同步，通过考虑音频混音和输出延迟来避免同步偏差
-
-2. **状态持久化**：State 系统支持游戏状态的保存和恢复，减少重新开始时的计算开销
-
-3. **相机跟随优化**：CameraFollower 使用球面线性插值（SLERP）实现平滑的相机跟随，同时支持 Tween 动画
-
-4. **内存管理**：RoadMaker 使用延迟添加机制，避免频繁的场景树操作
+1. **静态实例访问**：通过 CameraFollower.instance 直接访问，避免了 GameManager 的额外开销
+2. **延迟补偿机制**：MainLine 实现了精确的音画同步，通过考虑音频混音和输出延迟来避免同步偏差
+3. **状态持久化**：State 系统支持游戏状态的保存和恢复，减少重新开始时的计算开销
+4. **相机跟随优化**：CameraFollower 使用球面线性插值（SLERP）实现平滑的相机跟随，同时支持 Tween 动画
+5. **内存管理**：RoadMaker 使用延迟添加机制，避免频繁的场景树操作
 
 ### 性能监控点
 
-- 音乐播放位置跟踪的精度和性能平衡
+- 静态实例的生命周期管理
 - 相机跟随的平滑度和响应速度
 - 触发器系统的信号连接和事件处理
 - 轨迹线段的动态创建和销毁
@@ -519,13 +466,39 @@ end
 **问题症状**：相机不跟随角色或跟随不平滑
 **可能原因**：
 - 相机跟随器未正确设置 player 节点
+- Static.instance 未正确初始化
 - State 中的相机状态未正确保存
-- 相机触发器配置错误
 
 **解决步骤**：
 1. 检查 CameraFollower 的 player 节点路径
-2. 验证 State 中的相机状态数据
-3. 确认 CameraTrigger 的触发条件
+2. 验证 _ready 方法中 instance 的设置
+3. 确认 State 中的相机状态数据
+
+#### 相机触发器不工作
+
+**问题症状**：触发器无法正常改变相机参数
+**可能原因**：
+- CameraFollower.instance 返回 null
+- 触发器时间判定条件不满足
+- 相机参数设置无效
+
+**解决步骤**：
+1. 检查 CameraFollower 是否已正确初始化
+2. 验证触发器的时间判定逻辑
+3. 确认相机参数的有效范围
+
+#### 检查点系统异常
+
+**问题症状**：检查点保存或恢复失败
+**可能原因**：
+- CameraFollower.instance 访问失败
+- State 数据加载异常
+- 相机状态恢复逻辑错误
+
+**解决步骤**：
+1. 检查相机跟随器的实例状态
+2. 验证 State.load_to_camera_follower 方法
+3. 确认相机状态的恢复顺序
 
 #### 音画不同步
 
@@ -540,32 +513,22 @@ end
 2. 验证音乐播放器的播放状态
 3. 确认动画节点的同步逻辑
 
-#### 触发器不工作
-
-**问题症状**：触发器无法正常触发
-**可能原因**：
-- 触发过滤器设置不当
-- 信号连接丢失
-- 触发器位置或大小异常
-
-**解决步骤**：
-1. 检查 BaseTrigger 的 trigger_filter 设置
-2. 验证信号连接状态
-3. 调整触发器的碰撞体积
-
 **章节来源**
-- [MainLine.gd:74-76](file://#Template/[Scripts]/MainLine.gd#L74-L76)
-- [CameraFollower.gd:37-52](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L37-L52)
-- [BaseTrigger.gd:76-86](file://#Template/[Scripts]/Trigger/BaseTrigger.gd#L76-L86)
+- [CameraFollower.gd:37-45](file://#Template/[Scripts]/CameraScripts/CameraFollower.gd#L37-L45)
+- [CameraTrigger.gd:28-32](file://#Template/[Scripts]/CameraScripts/CameraTrigger.gd#L28-L32)
+- [Checkpoint.gd:183-188](file://#Template/[Scripts]/Trigger/Checkpoint.gd#L183-L188)
 
 ## 结论
 
-Game Manager 项目展现了现代游戏开发的最佳实践，通过模块化设计和清晰的架构分离，实现了功能完整且易于维护的游戏系统。项目的主要优势包括：
+Game Manager 项目展现了现代游戏开发的最佳实践，通过模块化设计和清晰的架构分离，实现了功能完整且易于维护的游戏系统。**重要更新**：移除了 GameManager 作为中介层，直接通过静态实例访问相机跟随器，简化了架构并提高了性能。
 
-1. **架构清晰**：分层设计使得各组件职责明确，便于维护和扩展
-2. **功能完整**：涵盖了现代线条游戏的所有核心功能
-3. **性能优化**：通过多种优化策略确保了良好的运行性能
-4. **测试友好**：集成了 gdUnit4 测试框架，保障了代码质量
-5. **兼容性强**：与多个模板系统保持高度兼容
+项目的主要优势包括：
+
+1. **架构简化**：移除 GameManager 后，架构更加简洁明了
+2. **性能提升**：直接访问静态实例减少了调用开销
+3. **功能完整**：涵盖了现代线条游戏的所有核心功能
+4. **状态管理**：通过 State 系统实现了完整的状态持久化
+5. **测试友好**：集成了 gdUnit4 测试框架，保障了代码质量
+6. **兼容性强**：与多个模板系统保持高度兼容
 
 该项目为开发者提供了一个坚实的基础，可以在此基础上快速开发和定制自己的 Dancing Line 风格游戏。其模块化的设计理念和完善的测试体系，使得项目具有很高的可扩展性和可持续发展性。

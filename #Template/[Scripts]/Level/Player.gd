@@ -11,7 +11,6 @@ signal onturn
 @onready var y = $".".position.y
 var speed:float
 @export var rot := -90
-@export var color := Color(0,0,0): get = get_color, set = set_color
 @export var fly := false
 @export var noclip := false
 @export var animation:NodePath
@@ -52,6 +51,8 @@ func _ready() -> void:
 		State.load_checkpoint_to_main_line(self)
 		speed = level_data.speed
 	if is_inside_tree():
+		if level_data:
+				level_data.apply_to(self, get_world_3d().space)
 		_last_floor_y = global_position.y
 
 func _physics_process(delta: float) -> void:
@@ -179,21 +180,11 @@ func turn():
 			is_turn = not is_turn
 		else:
 			is_start = true
-			# 应用关卡数据
-			if level_data:
-				level_data.apply_to(self, get_world_3d().space)
 		velocity = to_global(Vector3(0,0,1) * speed) - position
 		past_translation = position
 		new_line()
 
-func set_color(value: Color):
-	if not is_instance_valid(material):
-		material = StandardMaterial3D.new()
-		$MeshInstance3D.set_surface_override_material(0, material)
-	material.albedo_color = value
 
-func get_color() -> Color:
-	return material.albedo_color if is_instance_valid(material) else Color(0, 0, 0)
 
 func _on_Area_body_entered(_body: Node) -> void:
 	die()
