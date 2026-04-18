@@ -26,6 +26,10 @@ shapes/collision/shape_color=Color(0, 0.6, 0.69803923, 1)
 
 window/stretch/mode="canvas_items"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/mpm_importer/plugin.cfg")
+
 [input]
 
 turn={
