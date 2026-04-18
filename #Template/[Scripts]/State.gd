@@ -6,6 +6,7 @@ extends RefCounted
 static var main_line_transform 
 static var revive_position := Vector3.ZERO
 static var is_turn := false
+static var player_direction_index := 0
 static var anim_time := 0.0
 static var music_checkpoint_time := 0.0
 static var is_end := false
@@ -53,7 +54,10 @@ static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, r
 	if revive_pos:
 		revive_position = revive_pos.global_position
 	main_line_transform = main_line.transform
-	is_turn = main_line.is_turn
+	is_turn = main_line._currentDirection == 1
+	player_direction_index = main_line._currentDirection
+	player_first_direction = main_line.firstDirection
+	player_second_direction = main_line.secondDirection
 	player_speed = main_line.speed
 	gravity = ProjectSettings.get_setting("physics/3d/default_gravity_vector") * ProjectSettings.get_setting("physics/3d/default_gravity")
 	if main_line.animation_node and main_line.animation_node.current_animation:
@@ -89,6 +93,9 @@ static func load_checkpoint_to_main_line(main_line: CharacterBody3D) -> void:
 		if revive_position != Vector3.ZERO:
 			main_line.global_position = revive_position
 		main_line.is_turn = is_turn
+		main_line._currentDirection = player_direction_index
+		main_line.firstDirection = player_first_direction
+		main_line.secondDirection = player_second_direction
 		main_line.speed = player_speed
 	PhysicsServer3D.area_set_param(main_line.get_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY, gravity.length())
 	PhysicsServer3D.area_set_param(main_line.get_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR, gravity.normalized() if gravity.length() > 0 else Vector3.DOWN)
@@ -128,6 +135,7 @@ static func reset_to_defaults() -> void:
 	gravity = Vector3(0, -9.8, 0)
 	player_first_direction = Vector3.ZERO
 	player_second_direction = Vector3.ZERO
+	player_direction_index = 0
 	is_turn = false
 	anim_time = 0.0
 	music_checkpoint_time = 0.0

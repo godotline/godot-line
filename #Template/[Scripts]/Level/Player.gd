@@ -10,7 +10,14 @@ signal onturn
 
 @onready var y = $".".position.y
 var speed:float
-@export var rot := -90
+@export var firstDirection := Vector3(0, 0, 0)
+@export var secondDirection := Vector3(0, 90, 0)
+var _currentDirection := 0
+
+var current_direction: Vector3:
+	get:
+		return secondDirection if _currentDirection == 1 else firstDirection
+
 @export var fly := false
 @export var noclip := false
 @export var animation:NodePath
@@ -52,6 +59,7 @@ func _ready() -> void:
 			reload()
 		State.load_checkpoint_to_main_line(self)
 		speed = level_data.speed
+		rotation_degrees = current_direction
 	if is_inside_tree():
 		if level_data:
 				level_data.apply_to(self, get_world_3d().space)
@@ -134,7 +142,9 @@ func _input(event: InputEvent) -> void:
 func reload() -> void:
 	State.main_line_transform = start_transform
 	State.reset_camera_checkpoint()
-	State.is_turn = $".".is_turn
+	State.player_direction_index = _currentDirection
+	State.player_first_direction = firstDirection
+	State.player_second_direction = secondDirection
 	State.anim_time = 0.0
 	_clear_tail()
 	tree.reload_current_scene()
@@ -196,10 +206,11 @@ func turn():
 					$MusicPlayer.play()
 		if is_start :
 			emit_signal("onturn")
-			rotation_degrees += Vector3(0,1,0) * rot if is_turn else Vector3.DOWN * rot
-			is_turn = not is_turn
+			_currentDirection = 1 - _currentDirection
+			rotation_degrees = current_direction
 		else:
 			is_start = true
+			rotation_degrees = current_direction
 		velocity = to_global(Vector3(0,0,1) * speed) - position
 		past_translation = position
 		new_line()

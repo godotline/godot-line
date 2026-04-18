@@ -22,11 +22,10 @@ func _on_triggered(body: Node3D) -> void:
 	body.look_at(to_global(self.position))
 	var angle_deg = rad_to_deg(body.rotation.y)
 	var rounded_angle_deg = round(angle_deg / 5.0) * 5.0
-	body.rotation.y = deg_to_rad(rounded_angle_deg)
-	body.rot = body.rotation.y
+	var face_dir = Vector3(0, rounded_angle_deg, 0)
+	body.firstDirection = face_dir
+	body.secondDirection = face_dir
 	body.tailScale = 0
+	body.turn()
 	body.is_end = true
-	# 先创建新线段，确保尾巴方向与头部一致
-	body.new_line()
-	# 延迟调用 turn 开始移动
-	body.call_deferred("turn")
+	body.allowTurn = false
