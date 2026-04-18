@@ -38,7 +38,7 @@ func create_static_bodies_for_meshes():
 		# 创建 StaticBody3D
 		var static_body = StaticBody3D.new()
 		static_body.name = "StaticBody3D"
-		static_body.collision_layer = layer
+		static_body.collision_layer = 1 << (layer - 1)
 		
 		# 创建 CollisionShape3D
 		var collision_shape = CollisionShape3D.new()
@@ -89,7 +89,9 @@ func has_static_body_child(node: Node) -> bool:
 
 # 检查名称是否匹配任何过滤器
 func matches_any_filter(_name: String) -> bool:
-	var lower_name = name.to_lower()
+	if name_filters.is_empty():
+		return true
+	var lower_name = _name.to_lower()
 	for filter in name_filters:
 		if filter.to_lower() in lower_name:
 			return true

@@ -44,12 +44,7 @@ func _on_body_entered(body: Node3D) -> void:
 
 func _process(_delta: float) -> void:
 	if use_time and not triggered:
-		var current_time = 0.0
-		var cf = _get_camera_follower()
-		if cf and cf.player_node:
-			var main_line = cf.player_node
-			if main_line.animation_node:
-				current_time = main_line.animation_node.current_animation_position
+		var current_time = State.anim_time
 		
 		if current_time >= trigger_time:
 			_trigger()

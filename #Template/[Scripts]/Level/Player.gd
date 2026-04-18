@@ -40,6 +40,8 @@ var _last_floor_y := 0.0
 var floor_segment_lines: Array[MeshInstance3D] = []
 
 var start_transform = transform
+var loading := false
+var debug := false
 @export var allowTurn := true
 
 func _ready() -> void:
@@ -54,6 +56,11 @@ func _ready() -> void:
 		if level_data:
 				level_data.apply_to(self, get_world_3d().space)
 		_last_floor_y = global_position.y
+
+	var debug_overlay_scene := load("res://#Template/[Resources]/DebugOverlay.tscn") as PackedScene
+	if debug_overlay_scene:
+		var overlay := debug_overlay_scene.instantiate()
+		add_child(overlay)
 
 func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint() and is_live:
@@ -110,6 +117,19 @@ func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
 		if event.is_action_pressed("turn") and is_live and allowTurn:
 			turn()
+
+	if event is InputEventKey and event.pressed and not event.echo:
+		match event.keycode:
+			KEY_R:
+				if not Engine.is_editor_hint() and not loading:
+					loading = true
+					reload()
+			KEY_K:
+				if not Engine.is_editor_hint() and is_live:
+					die()
+			KEY_D:
+				if OS.is_debug_build():
+					debug = not debug
 
 func reload() -> void:
 	State.main_line_transform = start_transform
