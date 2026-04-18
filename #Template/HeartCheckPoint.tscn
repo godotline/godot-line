@@ -102,10 +102,10 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_08x2n")
 
-[node name="HeartCheckpoint" type="Area3D" unique_id=1805653336 node_paths=PackedStringArray("RevivePosition")]
+[node name="HeartCheckpoint" type="Area3D" unique_id=1805653336]
 collision_layer = 0
 script = ExtResource("1_oq3w0")
-RevivePosition = NodePath("RevivePosition")
+AutoRecord = true
 
 [node name="CheckpointTrigger" type="CollisionShape3D" parent="." unique_id=18434010]
 transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
@@ -121,7 +121,7 @@ libraries/ = SubResource("AnimationLibrary_pds1l")
 mesh = SubResource("BoxMesh_t50w7")
 
 [node name="Rotator" type="Node3D" parent="." unique_id=1538698628]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 5, 0)
 
 [node name="Core" type="MeshInstance3D" parent="Rotator" unique_id=869692095]
 mesh = SubResource("ArrayMesh_yroa6")

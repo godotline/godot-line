@@ -42,12 +42,12 @@ static var player_position: Vector3:
 
 static var camera_position: Vector3:
 	get:
-		if CameraFollower.instance:
-			return CameraFollower.instance.global_position
+		if OldCameraFollower.instance:
+			return OldCameraFollower.instance.global_position
 		return Vector3.ZERO
 	set(value):
-		if CameraFollower.instance:
-			CameraFollower.instance.global_position = value
+		if OldCameraFollower.instance:
+			OldCameraFollower.instance.global_position = value
 
 ## ========== 复活信号 ==========
 

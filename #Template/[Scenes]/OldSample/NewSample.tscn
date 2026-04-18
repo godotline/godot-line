@@ -1,15 +1,15 @@
-[gd_scene format=3 uid="uid://b8pwikissfhmb"]
+[gd_scene format=3 uid="uid://diayfqgquu005"]
 
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_8i0ov"]
-[ext_resource type="Resource" uid="uid://i22xrdefpntx" path="res://#Template/[Scenes]/Sample/Sample.tres" id="2_2atlu"]
-[ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="3_gvnqx"]
+[ext_resource type="Resource" uid="uid://cqelqfvbocn2f" path="res://#Template/[Scenes]/Sample/Sample.tres" id="2_8i0ov"]
+[ext_resource type="Script" uid="uid://c5nf3sq0ynd8a" path="res://#Template/[Scripts]/CameraScripts/OldCameraFollower.gd" id="3_m8ihx"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="4_7cu4a"]
 [ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="5_dnusj"]
 [ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="6_cr5py"]
 [ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Diamond.tscn" id="7_8ar0p"]
 [ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="8_jhod5"]
 [ext_resource type="PackedScene" path="res://#Template/trigger.tscn" id="9_blh37"]
-[ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="10_jqniq"]
+[ext_resource type="Script" uid="uid://b8n4oay836f4i" path="res://#Template/[Scripts]/CameraScripts/OldCameraTrigger.gd" id="10_8i0ov"]
 [ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="11_igvb5"]
 [ext_resource type="PackedScene" path="res://#Template/BaseWall.tscn" id="12_gnlg8"]
 [ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Pyramid.tscn" id="13_47x6u"]
@@ -46,14 +46,14 @@ glow_enabled = true
 
 [node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("1_8i0ov")]
 animation = NodePath("../AnimationPlayer")
-level_data = ExtResource("2_2atlu")
+level_data = ExtResource("2_8i0ov")
 
 [node name="CameraFollower" type="Node3D" parent="BasicOBJ_Group" unique_id=364981525]
 transform = Transform3D(-0.70710677, 0.4999999, -0.4999999, 0, 0.7071067, 0.7071067, 0.70710665, 0.49999997, -0.49999997, -10, 20, -10)
-script = ExtResource("3_gvnqx")
+script = ExtResource("3_m8ihx")
 player = NodePath("../Player")
 add_position = Vector3(-10, 20, -10)
-rotation_offset = Vector3(-45, 225, 0)
+rotation_offset = Vector3(-45, -135, 0)
 
 [node name="Camera3D" type="Camera3D" parent="BasicOBJ_Group/CameraFollower" unique_id=1071878446]
 
@@ -88,13 +88,13 @@ transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 44.886116, 
 
 [node name="Trigger3" parent="Scene_Group" unique_id=1067104480 instance=ExtResource("9_blh37")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 5.002282, 54.48696, 2.9286995, 55.828354)
-script = ExtResource("10_jqniq")
+script = ExtResource("10_8i0ov")
 active_position = true
 new_add_position = Vector3(-5, 10, -5)
 active_rotate = true
-new_rotation = Vector3(-45, 200, 0)
+new_rotation = Vector3(-45, -120, 0)
 active_distance = true
-new_distance = 5.0
+new_distance = 25.0
 active_speed = true
 new_follow_speed = 1.2
 rotate_mode = 0
@@ -144,6 +144,9 @@ final_direction = Vector3(0, 45, 0)
 
 [node name="HeartCheckpoint" parent="." unique_id=1805653336 instance=ExtResource("14_q7sod")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.504328, 3.1299968, 10.216999)
+
+[node name="Rotator" parent="HeartCheckpoint" index="3" unique_id=1538698628]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
 
 [editable path="Scene_Group/Pyramid"]
 [editable path="HeartCheckpoint"]

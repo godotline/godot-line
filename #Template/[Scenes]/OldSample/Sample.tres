@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://cqelqfvbocn2f"]
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://i22xrdefpntx"]
 
 [ext_resource type="Script" uid="uid://cb0rklrw2kuc3" path="res://#Template/[Scripts]/Settings/AuthorInfo.gd" id="1_3030t"]
 [ext_resource type="Script" uid="uid://cpejwvo4pns1" path="res://#Template/[Scripts]/Settings/SingleColor.gd" id="2_8q35j"]

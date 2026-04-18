@@ -43,8 +43,8 @@ func _open_door() -> void:
 	LevelManager.add_revive_listener(_reset_door)
 
 func _final() -> void:
-	if CameraFollower.instance:
-		CameraFollower.instance.following = false
+	if OldCameraFollower.instance:
+		OldCameraFollower.instance.following = false
 	LevelManager.game_state = LevelManager.GameStatus.Moving
 
 func _waiting() -> void:

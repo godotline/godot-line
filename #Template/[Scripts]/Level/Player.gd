@@ -85,10 +85,6 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint() or not is_live:
 		return
 
-	var moving := LevelManager.game_state == LevelManager.GameStatus.Playing or LevelManager.game_state == LevelManager.GameStatus.Moving
-	if not moving:
-		return
-
 	# TODO: 不知道有没有用
 	if level_data and level_data.levelAudioClip and $MusicPlayer.playing and animation_node and animation_node.is_playing():
 		var time = $MusicPlayer.get_playback_position() + AudioServer.get_time_since_last_mix() - AudioServer.get_output_latency()

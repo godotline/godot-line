@@ -1,11 +1,11 @@
-[gd_scene format=3 uid="uid://cpo3g3k6m5nib"]
+[gd_scene format=3 uid="uid://c41aa7ifl5vjy"]
 
-[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="2_ots34"]
-[ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/OldDefaultScene/Default.tres" id="3_ys6ci"]
-[ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
-[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="6_hddbq"]
-[ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_qbl1a"]
-[ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="8_vnc86"]
+[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_3t3rp"]
+[ext_resource type="Resource" uid="uid://dgvf7sn5q7cv0" path="res://#Template/[Scenes]/OldDefaultScene/Default.tres" id="2_0os2y"]
+[ext_resource type="Script" uid="uid://c5nf3sq0ynd8a" path="res://#Template/[Scripts]/CameraScripts/OldCameraFollower.gd" id="3_3t3rp"]
+[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="4_dj80y"]
+[ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="5_hta2p"]
+[ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="6_nb4qh"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0yb4g"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -39,21 +39,19 @@ environment = SubResource("Environment_ots34")
 
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
-[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("2_ots34")]
+[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("1_3t3rp")]
 animation = NodePath("../AnimationPlayer")
-level_data = ExtResource("3_ys6ci")
+level_data = ExtResource("2_0os2y")
 
 [node name="CameraFollower" type="Node3D" parent="BasicOBJ_Group" unique_id=364981525]
-script = ExtResource("4_opejn")
-target = NodePath("../Player")
+unique_name_in_owner = true
+transform = Transform3D(-0.70710677, 0.4999999, -0.4999999, 0, 0.7071067, 0.7071067, 0.70710665, 0.49999997, -0.49999997, -10, 20, -10)
+script = ExtResource("3_3t3rp")
+player = NodePath("../Player")
+add_position = Vector3(-10, 20, -10)
+rotation_offset = Vector3(-45, -135, 0)
 
-[node name="Rotator" type="Node3D" parent="BasicOBJ_Group/CameraFollower" unique_id=244367350]
-transform = Transform3D(0.70710677, 0.5720614, 0.4156269, 0, 0.58778524, -0.809017, -0.70710677, 0.5720614, 0.4156269, 0, 0, 0)
-
-[node name="Scale" type="Node3D" parent="BasicOBJ_Group/CameraFollower/Rotator" unique_id=26715926]
-
-[node name="Camera3D" type="Camera3D" parent="BasicOBJ_Group/CameraFollower/Rotator/Scale" unique_id=1071878446]
-transform = Transform3D(-1.0000001, 0, -8.7422784e-08, 0, 1.0000001, 0, 8.7422784e-08, 0, -1.0000001, 0, 0, -25)
+[node name="Camera3D" type="Camera3D" parent="BasicOBJ_Group/CameraFollower" unique_id=1071878446]
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="BasicOBJ_Group" unique_id=560431425]
 root_node = NodePath("../..")
@@ -65,15 +63,15 @@ libraries/ = SubResource("AnimationLibrary_cm0pq")
 transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
 shadow_enabled = true
 
-[node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("6_hddbq")]
-crown_no_light = ExtResource("7_qbl1a")
+[node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("4_dj80y")]
+crown_no_light = ExtResource("5_hta2p")
 
 [node name="Scene_Group" type="Node3D" parent="." unique_id=1042175662]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -45)
 
 [node name="Scene_001" type="Node3D" parent="Scene_Group" unique_id=514366687]
 
-[node name="BaseFloor" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("8_vnc86")]
+[node name="BaseFloor" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("6_nb4qh")]
 transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 45, -1, 45)
 
 [node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="Scene_Group/Scene_001/BaseFloor" unique_id=1160046144]

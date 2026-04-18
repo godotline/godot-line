@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://bflra16kjrdhi"]
+
+[ext_resource type="Script" uid="uid://cb0rklrw2kuc3" path="res://#Template/[Scripts]/Settings/AuthorInfo.gd" id="1_r7hvt"]
+[ext_resource type="Script" uid="uid://cpejwvo4pns1" path="res://#Template/[Scripts]/Settings/SingleColor.gd" id="2_vpgwp"]
+[ext_resource type="Material" uid="uid://yr2s0ybyebck" path="res://#Template/[Materials]/Diamond.tres" id="3_nji1k"]
+[ext_resource type="Material" uid="uid://jitnvfywue03" path="res://#Template/[Materials]/MainPlayer.tres" id="4_whbns"]
+[ext_resource type="AudioStream" uid="uid://d3yesj2v2j45i" path="res://#Template/[Music]/Sample.mp3" id="5_1icaj"]
+[ext_resource type="Script" uid="uid://dwvw82b5c55ey" path="res://#Template/[Scripts]/Settings/LevelData.gd" id="6_c57ag"]
+
+[sub_resource type="Resource" id="Resource_1icaj"]
+script = ExtResource("1_r7hvt")
+name = "meny233"
+page_url = "https://space.bilibili.com/340916655"
+metadata/_custom_type_script = "uid://cb0rklrw2kuc3"
+
+[sub_resource type="Resource" id="Resource_c57ag"]
+script = ExtResource("2_vpgwp")
+material = ExtResource("3_nji1k")
+color = Color(0, 0.77254903, 1, 1)
+metadata/_custom_type_script = "uid://cpejwvo4pns1"
+
+[sub_resource type="Resource" id="Resource_tno1u"]
+script = ExtResource("2_vpgwp")
+material = ExtResource("4_whbns")
+color = Color(1, 0.98039216, 0.42352942, 1)
+metadata/_custom_type_script = "uid://cpejwvo4pns1"
+
+[resource]
+script = ExtResource("6_c57ag")
+levelTitleKey = "Default"
+levelAudioClip = ExtResource("5_1icaj")
+colors = Array[ExtResource("2_vpgwp")]([SubResource("Resource_c57ag"), SubResource("Resource_tno1u")])
+levelTitle = "测试场景"
+authors = Array[ExtResource("1_r7hvt")]([SubResource("Resource_1icaj")])

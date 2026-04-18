@@ -1,7 +1,7 @@
 @tool
 extends RefCounted
 
-const CAMERA_TRIGGER_SCRIPT := preload("res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd")
+const CAMERA_TRIGGER_SCRIPT := preload("res://#Template/[Scripts]/CameraScripts/OldCameraTrigger.gd")
 
 static func apply_entry(root: Node, entry: Dictionary, default_set_camera: NodePath = NodePath(""), transform_fix: bool = false) -> Dictionary:
 	var report := {

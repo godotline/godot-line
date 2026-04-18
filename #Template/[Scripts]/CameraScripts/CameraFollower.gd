@@ -3,147 +3,209 @@ class_name CameraFollower
 
 static var instance: CameraFollower
 
-enum RotateMode {
-	Fast,           # 最短路径旋转
-	FastBeyond360,  # 允许超过360度的旋转
-	WorldAxisAdd,   # 世界坐标系 - 基于当前旋转增加
-	LocalAxisAdd    # 本地坐标系 - 基于当前旋转增加
-}
+@export var target: NodePath
+@export var follow: bool = true
+@export var smooth: bool = true
 
-@export var player: NodePath
-@export var add_position: Vector3 = Vector3.ZERO
-@export var rotation_offset: Vector3 = Vector3(45, 45, 0)
-@export var distance_from_object: float = 25.0
-@export var follow_speed: float = 1.2
-@export var following: bool = true
+var rotator: Node3D
+var scale_node: Node3D
+var camera: Camera3D
 
-@onready var line: Node3D = get_node(player) if player else null
-@onready var camera: Node3D = get_child(0) if get_child_count() > 0 else null
+## Tween references
+var offset_tween: Tween
+var rotation_tween: Tween
+var scale_tween: Tween
+var shake_tween: Tween
+var fov_tween: Tween
+var shake_power: float = 0.0
 
-var _checkpoint_applied := false
+## Follow speed (x, y, z components)
+var follow_speed := Vector3(1.2, 3.0, 6.0)
 
-## Tween 状态
-var _tween: Tween = null
-var _current_rotate_mode: RotateMode = RotateMode.Fast
-var _target_rotation: Vector3 = Vector3.ZERO
-var _start_rotation: Vector3 = Vector3.ZERO
-var _rotation_progress: float = 0.0
-var _is_rotating: bool = false
-var _base_rotation: Vector3 = Vector3.ZERO
-var _target_add_position: Vector3
-var _target_follow_speed: float
-var _target_distance: float
+## Rotation quaternion for follow calculation
+var follow_rotation := Quaternion.from_euler(Vector3(0, deg_to_rad(-45), 0))
+
+var _target_node: Node3D = null
 
 func _ready() -> void:
 	instance = self
-	_target_add_position = add_position
-	_target_follow_speed = follow_speed
-	_target_distance = distance_from_object
-	if not camera and get_child_count() > 0:
-		camera = get_child(0)
-	if LevelManager.camera_checkpoint.has_checkpoint and LevelManager.camera_checkpoint.restore_pending:
-		call_deferred("_apply_state_checkpoint")
+	
+	# Find child nodes
+	for child in get_children():
+		if child.name == "Rotator":
+			rotator = child
+			for sub_child in rotator.get_children():
+				if sub_child.name == "Scale":
+					scale_node = sub_child
+					for camera_child in scale_node.get_children():
+						if camera_child is Camera3D:
+							camera = camera_child
+							break
+	
+	# Get target node
+	if target:
+		_target_node = get_node_or_null(target) as Node3D
 
 func _process(delta: float) -> void:
-	if LevelManager.camera_checkpoint.has_checkpoint and LevelManager.camera_checkpoint.restore_pending and not _checkpoint_applied:
-		_apply_state_checkpoint()
-	if following and line and ("is_start" not in line or line.is_start):
-		var base_transform = line.position + add_position
-		position = position.slerp(base_transform, abs(follow_speed * delta))
-		
-		if _tween and _tween.is_running():
-			pass
-		elif _is_rotating:
-			_rotation_progress = min(_rotation_progress + abs(follow_speed * delta), 1.0)
-			var current_target = _calculate_target_rotation()
-			rotation_degrees = _apply_rotate_mode(_start_rotation, current_target, _rotation_progress)
-			if _rotation_progress >= 1.0:
-				_is_rotating = false
-		else:
-			# 正常跟随模式
-			var target_rot = _get_target_rotation()
-			rotation_degrees = Vector3(
-				rad_to_deg(lerp_angle(deg_to_rad(rotation_degrees.x), deg_to_rad(target_rot.x), abs(follow_speed * delta))),
-				rad_to_deg(lerp_angle(deg_to_rad(rotation_degrees.y), deg_to_rad(target_rot.y), abs(follow_speed * delta))),
-				rad_to_deg(lerp_angle(deg_to_rad(rotation_degrees.z), deg_to_rad(target_rot.z), abs(follow_speed * delta))),
-			)
+	if not _target_node or not follow:
+		return
 	
-	if line and LevelManager.is_end and following:
-		following = false
-
-func _apply_state_checkpoint() -> void:
-	if _checkpoint_applied:
+	# Only follow when playing
+	if LevelManager.game_state != LevelManager.GameStatus.Playing:
 		return
-	var cp := LevelManager.camera_checkpoint
-	if not cp.has_checkpoint or not cp.restore_pending:
+	
+	# Calculate translation based on rotated positions
+	var target_pos = follow_rotation * _target_node.position
+	var self_pos = follow_rotation * position
+	var translation = target_pos - self_pos
+	
+	var result = Vector3(
+		translation.x * delta * follow_speed.x,
+		translation.y * delta * follow_speed.y,
+		translation.z * delta * follow_speed.z
+	)
+	
+	if smooth:
+		# Apply translation relative to a rotated origin
+		var origin_transform = Transform3D(Basis.from_euler(Vector3(0, deg_to_rad(45), 0)), Vector3.ZERO)
+		position += origin_transform.basis * result
+	else:
+		position += result
+
+## Trigger camera transition with offset, rotation, scale, and FOV
+func trigger(n_offset: Vector3, n_rotation: Vector3, n_scale: Vector3, n_fov: float,
+		duration: float, trans_type: Tween.TransitionType, ease_type: Tween.EaseType,
+		callback: Callable = Callable()) -> void:
+	
+	_set_offset(n_offset, duration, trans_type, ease_type)
+	_set_rotation(n_rotation, duration, trans_type, ease_type)
+	_set_scale(n_scale, duration, trans_type, ease_type)
+	_set_fov(n_fov, duration, trans_type, ease_type)
+	
+	if callback.is_valid() and rotation_tween:
+		rotation_tween.finished.connect(callback)
+
+## Kill all active tweens
+func kill_all() -> void:
+	if offset_tween:
+		offset_tween.kill()
+		offset_tween = null
+	if rotation_tween:
+		rotation_tween.kill()
+		rotation_tween = null
+	if scale_tween:
+		scale_tween.kill()
+		scale_tween = null
+	if shake_tween:
+		shake_tween.kill()
+		shake_tween = null
+	if fov_tween:
+		fov_tween.kill()
+		fov_tween = null
+
+## Set offset with tween
+func _set_offset(n_offset: Vector3, duration: float, trans_type: Tween.TransitionType, ease_type: Tween.EaseType) -> void:
+	if offset_tween:
+		offset_tween.kill()
+		offset_tween = null
+	
+	if not rotator:
 		return
-	if line == null and player:
-		line = get_node_or_null(player) as Node3D
-	if line == null:
-		push_warning("CameraFollower: checkpoint restore failed, line is null")
+	
+	offset_tween = create_tween().set_trans(trans_type).set_ease(ease_type)
+	offset_tween.tween_property(rotator, "position", n_offset, duration)
+
+## Set rotation with tween
+func _set_rotation(n_rotation: Vector3, duration: float, trans_type: Tween.TransitionType, ease_type: Tween.EaseType) -> void:
+	if rotation_tween:
+		rotation_tween.kill()
+		rotation_tween = null
+	
+	if not rotator:
 		return
-	LevelManager.load_to_camera_follower(self)
-	position = line.position + add_position
-	# Unity版本方式：直接恢复到最终状态
-	rotation_degrees = cp.rotation_degrees
-	print("CameraFollower: checkpoint applied pos=", position, " rot=", rotation_degrees)
-	_checkpoint_applied = true
-	LevelManager.camera_checkpoint.restore_pending = false
+	
+	rotation_tween = create_tween().set_trans(trans_type).set_ease(ease_type)
+	rotation_tween.tween_property(rotator, "rotation_degrees", n_rotation, duration)
 
-## 获取当前目标旋转值
-func _get_target_rotation() -> Vector3:
-	match _current_rotate_mode:
-		RotateMode.WorldAxisAdd, RotateMode.LocalAxisAdd:
-			return _base_rotation + rotation_offset
-	return rotation_offset
+## Set scale with tween
+func _set_scale(n_scale: Vector3, duration: float, trans_type: Tween.TransitionType, ease_type: Tween.EaseType) -> void:
+	if scale_tween:
+		scale_tween.kill()
+		scale_tween = null
+	
+	if not scale_node:
+		return
+	
+	scale_tween = create_tween().set_trans(trans_type).set_ease(ease_type)
+	scale_tween.tween_property(scale_node, "scale", n_scale, duration)
 
-## 计算旋转插值的目标值
-func _calculate_target_rotation() -> Vector3:
-	match _current_rotate_mode:
-		RotateMode.WorldAxisAdd, RotateMode.LocalAxisAdd:
-			return _base_rotation + rotation_offset
-	return _target_rotation
+## Set FOV with tween
+func _set_fov(n_fov: float, duration: float, trans_type: Tween.TransitionType, ease_type: Tween.EaseType) -> void:
+	if fov_tween:
+		fov_tween.kill()
+		fov_tween = null
+	
+	if not camera:
+		return
+	
+	fov_tween = create_tween().set_trans(trans_type).set_ease(ease_type)
+	fov_tween.tween_property(camera, "fov", n_fov, duration)
 
-## 归一化旋转到最短路径
-func _normalize_rotation_shortest(from: Vector3, to: Vector3) -> Vector3:
-	var result := Vector3.ZERO
-	for i in 3:
-		var diff = fmod(to[i] - from[i], 360.0)
-		if diff > 180:
-			diff -= 360
-		elif diff < -180:
-			diff += 360
-		result[i] = from[i] + diff
-	return result
+## Shake camera with power and duration
+func do_shake(power: float = 1.0, duration: float = 3.0) -> void:
+	# Kill previous shake
+	if shake_tween:
+		shake_tween.kill()
+	
+	# Create sequence: ramp up then ramp down
+	var seq = create_tween()
+	
+	# Phase 1: ramp up from current to target power
+	var current_power = shake_power
+	seq.tween_method(func(val: float) -> void:
+		shake_power = val
+	, current_power, power, duration * 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	
+	# Phase 2: ramp down to 0
+	seq.tween_method(func(val: float) -> void:
+		shake_power = val
+	, power, 0.0, duration * 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	
+	# Update shake each step
+	seq.step_finished.connect(func(_step: int) -> void:
+		_shake_update()
+	)
+	
+	# On complete
+	seq.finished.connect(func() -> void:
+		_shake_finished()
+	)
+	
+	shake_tween = seq
 
-## 应用 RotateMode 计算旋转
-func _apply_rotate_mode(from: Vector3, to: Vector3, t: float) -> Vector3:
-	match _current_rotate_mode:
-		RotateMode.Fast:
-			# 最短路径：每轴使用 lerp_angle
-			return Vector3(
-				rad_to_deg(lerp_angle(deg_to_rad(from.x), deg_to_rad(to.x), t)),
-				rad_to_deg(lerp_angle(deg_to_rad(from.y), deg_to_rad(to.y), t)),
-				rad_to_deg(lerp_angle(deg_to_rad(from.z), deg_to_rad(to.z), t)),
-			)
-		RotateMode.FastBeyond360, RotateMode.WorldAxisAdd, RotateMode.LocalAxisAdd:
-			# 直接线性插值，允许超过360度
-			return from.lerp(to, t)
-	return from.lerp(to, t)
-
-## 开始 tween 到目标位置/旋转（最短角路径）
-func lerp_to(target_pos: Vector3, target_rot: Vector3, speed: float = 2.0) -> void:
-	if _tween:
-		_tween.kill()
-	_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUART)
-	var duration := 1.0 / speed
-	_tween.tween_property(self, "position", target_pos, duration)
-	# 旋转需要逐轴用 lerp_angle 实现最短路径
-	var start_rot := rotation_degrees
-	_tween.tween_method(func(w: float) -> void:
-		rotation_degrees = Vector3(
-			rad_to_deg(lerp_angle(deg_to_rad(start_rot.x), deg_to_rad(target_rot.x), w)),
-			rad_to_deg(lerp_angle(deg_to_rad(start_rot.y), deg_to_rad(target_rot.y), w)),
-			rad_to_deg(lerp_angle(deg_to_rad(start_rot.z), deg_to_rad(target_rot.z), w)),
+func _shake_update() -> void:
+	if scale_node:
+		scale_node.position = Vector3(
+			randf() * shake_power,
+			randf() * shake_power,
+			randf() * shake_power
 		)
-	, 0.0, 1.0, duration)
+
+func reset_shake() -> void:
+	if shake_tween:
+		shake_tween.kill()
+	shake_power = 0.0
+	if scale_node:
+		scale_node.position = Vector3.ZERO
+
+func _shake_finished() -> void:
+	if scale_node:
+		scale_node.position = Vector3.ZERO
+	shake_power = 0.0
+
+## Kill all camera tweens and reset shake
+func kill_all_camera_tweens() -> void:
+	kill_all()
+	shake_power = 0.0
+	if scale_node:
+		scale_node.position = Vector3.ZERO
