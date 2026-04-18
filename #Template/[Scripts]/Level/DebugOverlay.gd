@@ -39,16 +39,13 @@ func _update_label() -> void:
 			var total_sec := p.level_data.levelTotalTime if p.level_data.useCustomLevelTime else music_player.stream.get_length()
 			lines.append("进度: %d%% (%.1f秒/%.1f秒)" % [int(progress * 100), current_sec, total_sec])
 
-	var state_str := "Playing" if p.is_live else "Dead"
-	if not p.is_start:
-		state_str = "Waiting"
-	lines.append("游戏状态: %s" % state_str)
+	lines.append("游戏状态: %s" % LevelManager.GameStatus.keys()[LevelManager.game_state])
 
 	lines.append("线的坐标: (%.2f, %.2f, %.2f)" % [p.position.x, p.position.y, p.position.z])
 	lines.append("线的朝向: (%.1f, %.1f, %.1f)" % [p.rotation_degrees.x, p.rotation_degrees.y, p.rotation_degrees.z])
 
-	lines.append("已获取方块数量: %d" % State.diamond)
-	lines.append("已获取皇冠数量: %d/3" % State.crown)
+	lines.append("已获取方块数量: %d" % 	LevelManager.diamond)
+	lines.append("已获取皇冠数量: %d/3" % 	LevelManager.crown)
 
 	var cam := CameraFollower.instance
 	var camera := get_viewport().get_camera_3d()

@@ -41,8 +41,8 @@ func _on_checkpoint_body_entered(body: Node3D) -> void:
 	if used:
 		return
 	used = true
-	State.current_checkpoint = self
-	State.save_checkpoint(body, CameraFollower.instance, $RevivePosition)
+	LevelManager.current_checkpoint = self
+	LevelManager.save_checkpoint(body, CameraFollower.instance, $RevivePosition)
 
 	if AutoRecord:
 		var music_player := body.get_node_or_null("MusicPlayer") as AudioStreamPlayer
@@ -157,7 +157,7 @@ func revive() -> void:
 	if not main_line:
 		return
 
-	State.load_checkpoint_to_main_line(main_line)
+	LevelManager.load_checkpoint_to_main_line(main_line)
 	main_line.is_live = true
 	main_line.velocity = Vector3.ZERO
 	main_line.is_start = false
@@ -169,11 +169,11 @@ func revive() -> void:
 
 	match direction:
 		Direction.First:
-			if State.player_first_direction != Vector3.ZERO:
-				main_line.rotation_degrees = State.player_first_direction
+			if LevelManager.player_first_direction != Vector3.ZERO:
+				main_line.rotation_degrees = LevelManager.player_first_direction
 		Direction.Second:
-			if State.player_second_direction != Vector3.ZERO:
-				main_line.rotation_degrees = State.player_second_direction
+			if LevelManager.player_second_direction != Vector3.ZERO:
+				main_line.rotation_degrees = LevelManager.player_second_direction
 
 	get_tree().call_group("death_particles", "queue_free")
 
@@ -182,9 +182,9 @@ func revive() -> void:
 
 	var cf := CameraFollower.instance
 	if cf:
-		State.load_to_camera_follower(cf)
+		LevelManager.load_to_camera_follower(cf)
 		cf.position = main_line.position + cf.add_position
-		cf.rotation_degrees = State.camera_checkpoint.rotation_degrees
+		cf.rotation_degrees = LevelManager.camera_checkpoint.rotation_degrees
 		cf._checkpoint_applied = false
 		cf.following = true
 		cf._is_rotating = false

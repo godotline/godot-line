@@ -44,7 +44,7 @@ func _on_body_entered(body: Node3D) -> void:
 
 func _process(_delta: float) -> void:
 	if use_time and not triggered:
-		var current_time = State.anim_time
+		var current_time = 	LevelManager.anim_time
 		
 		if current_time >= trigger_time:
 			_trigger()

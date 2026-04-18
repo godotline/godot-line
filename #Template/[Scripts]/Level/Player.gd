@@ -54,10 +54,10 @@ var debug := false
 func _ready() -> void:
 	instance = self
 	if not Engine.is_editor_hint():
-		if State.is_end == true:
-			State.is_end = false
+		if LevelManager.is_end == true:
+			LevelManager.is_end = false
 			reload()
-		State.load_checkpoint_to_main_line(self)
+		LevelManager.load_checkpoint_to_main_line(self)
 		speed = level_data.speed
 		rotation_degrees = current_direction
 	if is_inside_tree():
@@ -83,6 +83,10 @@ func _physics_process(delta: float) -> void:
 
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint() or not is_live:
+		return
+
+	var moving := LevelManager.game_state == LevelManager.GameStatus.Playing or LevelManager.game_state == LevelManager.GameStatus.Moving
+	if not moving:
 		return
 
 	# TODO: 不知道有没有用
@@ -123,7 +127,8 @@ func _process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
-		if event.is_action_pressed("turn") and is_live and allowTurn:
+		var can_turn := LevelManager.game_state == LevelManager.GameStatus.Playing or (LevelManager.game_state == LevelManager.GameStatus.Waiting and not is_start)
+		if event.is_action_pressed("turn") and is_live and allowTurn and can_turn:
 			turn()
 
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -140,12 +145,12 @@ func _input(event: InputEvent) -> void:
 					debug = not debug
 
 func reload() -> void:
-	State.main_line_transform = start_transform
-	State.reset_camera_checkpoint()
-	State.player_direction_index = _currentDirection
-	State.player_first_direction = firstDirection
-	State.player_second_direction = secondDirection
-	State.anim_time = 0.0
+	LevelManager.main_line_transform = start_transform
+	LevelManager.reset_camera_checkpoint()
+	LevelManager.player_direction_index = _currentDirection
+	LevelManager.player_first_direction = firstDirection
+	LevelManager.player_second_direction = secondDirection
+	LevelManager.anim_time = 0.0
 	_clear_tail()
 	tree.reload_current_scene()
 
@@ -193,10 +198,10 @@ func _play_land_effect() -> void:
 func turn():
 	if is_on_floor() or fly:
 		if animation_node and not animation_node.is_playing():
-			if State.line_crossing_crown == 0:
-				State.anim_time = 0
+			if LevelManager.line_crossing_crown == 0:
+				LevelManager.anim_time = 0
 			animation_node.play("level")
-			animation_node.seek(State.anim_time)
+			animation_node.seek(LevelManager.anim_time)
 			if level_data and level_data.levelAudioClip and not $MusicPlayer.playing:
 				$MusicPlayer.stream = level_data.levelAudioClip
 				var music_start_time: float = level_data.get_audio_start_time()
@@ -210,6 +215,7 @@ func turn():
 			rotation_degrees = current_direction
 		else:
 			is_start = true
+			LevelManager.game_state = LevelManager.GameStatus.Playing
 			rotation_degrees = current_direction
 		velocity = to_global(Vector3(0,0,1) * speed) - position
 		past_translation = position

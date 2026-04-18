@@ -12,7 +12,7 @@
 [ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="10_jqniq"]
 [ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="11_igvb5"]
 [ext_resource type="PackedScene" path="res://#Template/BaseWall.tscn" id="12_gnlg8"]
-[ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Ending.tscn" id="13_47x6u"]
+[ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Pyramid.tscn" id="13_47x6u"]
 [ext_resource type="PackedScene" uid="uid://dup02jc1bhxfc" path="res://#Template/HeartCheckPoint.tscn" id="14_q7sod"]
 
 [sub_resource type="Animation" id="Animation_wkp8b"]
@@ -45,7 +45,6 @@ glow_enabled = true
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
 [node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("1_8i0ov")]
-firstDirection = Vector3(0, 0, 0)
 animation = NodePath("../AnimationPlayer")
 level_data = ExtResource("2_2atlu")
 
@@ -131,10 +130,20 @@ transform = Transform3D(19.905512, 0, 0, 0, 1, 0, 0, 0, 2.1410718, 88.06795, 2.1
 [node name="BaseFloor5" parent="Scene_Group" unique_id=1008768232 instance=ExtResource("6_cr5py")]
 transform = Transform3D(107.24461, 0, -7.1796446, 0, 0.99999905, 0, 107.24461, 0, 7.1796446, 138.96089, 2.1299973, 124.74552)
 
-[node name="Ending" parent="Scene_Group" unique_id=1497290031 instance=ExtResource("13_47x6u")]
-transform = Transform3D(-0.7071067, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071067, 164.65387, 3.0376942, 151.17961)
+[node name="Pyramid" parent="Scene_Group" unique_id=1497290031 instance=ExtResource("13_47x6u")]
+transform = Transform3D(-0.7071067, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071067, 161.32985, 3.0376942, 147.85559)
+waiting_time = 4.0
+
+[node name="OpenTrigger" parent="Scene_Group/Pyramid" index="2" unique_id=608483111]
+final_direction = Vector3(0, 45, 0)
+
+[node name="FinalTurn" parent="Scene_Group/Pyramid" index="3" unique_id=658946201]
+transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 99.13182)
+change_direction = true
+final_direction = Vector3(0, 45, 0)
 
 [node name="HeartCheckpoint" parent="." unique_id=1805653336 instance=ExtResource("14_q7sod")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.504328, 3.1299968, 10.216999)
 
+[editable path="Scene_Group/Pyramid"]
 [editable path="HeartCheckpoint"]

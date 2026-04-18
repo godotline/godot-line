@@ -41,11 +41,11 @@ func _ready() -> void:
 	_target_distance = distance_from_object
 	if not camera and get_child_count() > 0:
 		camera = get_child(0)
-	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending:
+	if LevelManager.camera_checkpoint.has_checkpoint and LevelManager.camera_checkpoint.restore_pending:
 		call_deferred("_apply_state_checkpoint")
 
 func _process(delta: float) -> void:
-	if State.camera_checkpoint.has_checkpoint and State.camera_checkpoint.restore_pending and not _checkpoint_applied:
+	if LevelManager.camera_checkpoint.has_checkpoint and LevelManager.camera_checkpoint.restore_pending and not _checkpoint_applied:
 		_apply_state_checkpoint()
 	if following and line and ("is_start" not in line or line.is_start):
 		var base_transform = line.position + add_position
@@ -68,13 +68,13 @@ func _process(delta: float) -> void:
 				rad_to_deg(lerp_angle(deg_to_rad(rotation_degrees.z), deg_to_rad(target_rot.z), abs(follow_speed * delta))),
 			)
 	
-	if line and State.is_end and following:
+	if line and LevelManager.is_end and following:
 		following = false
 
 func _apply_state_checkpoint() -> void:
 	if _checkpoint_applied:
 		return
-	var cp := State.camera_checkpoint
+	var cp := LevelManager.camera_checkpoint
 	if not cp.has_checkpoint or not cp.restore_pending:
 		return
 	if line == null and player:
@@ -82,13 +82,13 @@ func _apply_state_checkpoint() -> void:
 	if line == null:
 		push_warning("CameraFollower: checkpoint restore failed, line is null")
 		return
-	State.load_to_camera_follower(self)
+	LevelManager.load_to_camera_follower(self)
 	position = line.position + add_position
 	# Unity版本方式：直接恢复到最终状态
 	rotation_degrees = cp.rotation_degrees
 	print("CameraFollower: checkpoint applied pos=", position, " rot=", rotation_degrees)
 	_checkpoint_applied = true
-	State.camera_checkpoint.restore_pending = false
+	LevelManager.camera_checkpoint.restore_pending = false
 
 ## 获取当前目标旋转值
 func _get_target_rotation() -> Vector3:

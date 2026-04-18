@@ -14,16 +14,16 @@ func _process(_delta: float) -> void:
 	if not 一:
 		if Player.instance and not Player.instance.is_live:
 			visible()
-		if State.is_end:
+		if LevelManager.is_end:
 			visible()
 
 func visible() -> void:
 	一 = true
-	if State.is_relive == true:
-		State.crown -= 1
-	$diamond.text = str(State.diamond,"/10")
+	if LevelManager.is_relive == true:
+		LevelManager.crown -= 1
+	$diamond.text = str(LevelManager.diamond,"/10")
 	$title.text = levelname
-	_update_crown_display(State.crown)
+	_update_crown_display(LevelManager.crown)
 	$".".visible = true
 
 
@@ -44,26 +44,26 @@ func _update_crown_display(count: int) -> void:
 
 func _on_back_pressed() -> void:
 	get_tree().quit()
-	State.is_end = false
-	State.is_relive = false
-	State.camera_checkpoint.restore_pending = false
-	State.diamond = 0
-	State.crown = 0
-	State.percent = 0
+	LevelManager.is_end = false
+	LevelManager.is_relive = false
+	LevelManager.camera_checkpoint.restore_pending = false
+	LevelManager.diamond = 0
+	LevelManager.crown = 0
+	LevelManager.percent = 0
 
 func _on_revive_pressed() -> void:
 	一 = false
 	$".".visible = false
 	if Player.instance.is_end:
 		_on_gamereplay_pressed()
-	elif State.current_checkpoint:
-		State.current_checkpoint.revive()
-		if State.crown > 0:
-			State.is_relive = true
+	elif LevelManager.current_checkpoint:
+		LevelManager.current_checkpoint.revive()
+		if LevelManager.crown > 0:
+			LevelManager.is_relive = true
 	else:
 		_on_gamereplay_pressed()
 
 func _on_gamereplay_pressed() -> void:
 	if Player.instance:
 		Player.instance.reload()
-	State.reset_to_defaults()
+	LevelManager.reset_to_defaults()
