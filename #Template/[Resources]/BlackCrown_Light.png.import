@@ -4,16 +4,15 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3w0a5cs7y31v"
 path.s3tc="res://.godot/imported/BlackCrown_Light.png-7e1ed56c2cb695be8e2ebb35eb09973b.s3tc.ctex"
-path.etc2="res://.godot/imported/BlackCrown_Light.png-7e1ed56c2cb695be8e2ebb35eb09973b.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://#Template/[Resources]/BlackCrown_Light.png"
-dest_files=["res://.godot/imported/BlackCrown_Light.png-7e1ed56c2cb695be8e2ebb35eb09973b.s3tc.ctex", "res://.godot/imported/BlackCrown_Light.png-7e1ed56c2cb695be8e2ebb35eb09973b.etc2.ctex"]
+dest_files=["res://.godot/imported/BlackCrown_Light.png-7e1ed56c2cb695be8e2ebb35eb09973b.s3tc.ctex"]
 
 [params]
 

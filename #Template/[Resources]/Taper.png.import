@@ -4,16 +4,15 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://rav3v353fs3g"
 path.s3tc="res://.godot/imported/Taper.png-17efa0b088d150f935aa699b62343f79.s3tc.ctex"
-path.etc2="res://.godot/imported/Taper.png-17efa0b088d150f935aa699b62343f79.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://#Template/[Resources]/Taper.png"
-dest_files=["res://.godot/imported/Taper.png-17efa0b088d150f935aa699b62343f79.s3tc.ctex", "res://.godot/imported/Taper.png-17efa0b088d150f935aa699b62343f79.etc2.ctex"]
+dest_files=["res://.godot/imported/Taper.png-17efa0b088d150f935aa699b62343f79.s3tc.ctex"]
 
 [params]
 

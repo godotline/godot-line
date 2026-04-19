@@ -4,16 +4,15 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bi33owy3t41ql"
 path.s3tc="res://.godot/imported/PCrownT.png-214a3b5561ed7d30ddaf926af1f6a6a3.s3tc.ctex"
-path.etc2="res://.godot/imported/PCrownT.png-214a3b5561ed7d30ddaf926af1f6a6a3.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://#Template/[Resources]/PCrownT.png"
-dest_files=["res://.godot/imported/PCrownT.png-214a3b5561ed7d30ddaf926af1f6a6a3.s3tc.ctex", "res://.godot/imported/PCrownT.png-214a3b5561ed7d30ddaf926af1f6a6a3.etc2.ctex"]
+dest_files=["res://.godot/imported/PCrownT.png-214a3b5561ed7d30ddaf926af1f6a6a3.s3tc.ctex"]
 
 [params]
 

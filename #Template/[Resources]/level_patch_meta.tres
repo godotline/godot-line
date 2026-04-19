@@ -1,21 +1,3 @@
-[gd_resource type="Resource" script_class="LevelPatchMeta" format=3]
-
-[ext_resource type="Script" uid="uid://bq0dws3l75jyg" path="res://#Template/[Scripts]/UGC/LevelPatchMeta.gd" id="1"]
-[ext_resource type="Script" uid="uid://bdeqoxt22cy1w" path="res://#Template/[Scripts]/UGC/TinyLevelMeta.gd" id="2"]
-
-[sub_resource type="Resource" id="Resource_1"]
-script = ExtResource("2")
-name = "test"
-path = "uid://ch3241sy2gp13"
+[gd_resource type="Resource" format=3 uid="uid://g7jpmw4cq4hn"]
 
 [resource]
-script = ExtResource("1")
-name = "Demo Level"
-chinese_name = "测试"
-level_maker = "meny233"
-music_maker = "meny233"
-introduction = "1234567890"
-background_path = "res://#Template/[Resources]/ui/Button_inner.png"
-roundphoto_path = "res://#Template/[Resources]/BlackCrown_UnLight.png"
-file_name = "demo_level"
-tiny_levels = Array[ExtResource("2")]([SubResource("Resource_1")])

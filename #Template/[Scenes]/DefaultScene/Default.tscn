@@ -1,11 +1,11 @@
-[gd_scene format=3 uid="uid://cpo3g3k6m5nib"]
+[gd_scene format=3 uid="uid://bm1086mivcf7v"]
 
+[ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/DefaultScene/Default.tres" id="2_3t3rp"]
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="2_ots34"]
-[ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/OldDefaultScene/Default.tres" id="3_ys6ci"]
 [ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="4_opejn"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="6_hddbq"]
 [ext_resource type="Texture2D" uid="uid://b7aoq6aqibwqr" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="7_qbl1a"]
-[ext_resource type="PackedScene" path="res://#Template/BaseFloor.tscn" id="8_vnc86"]
+[ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/BaseFloor.tscn" id="8_vnc86"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0yb4g"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -41,7 +41,7 @@ environment = SubResource("Environment_ots34")
 
 [node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("2_ots34")]
 animation = NodePath("../AnimationPlayer")
-level_data = ExtResource("3_ys6ci")
+level_data = ExtResource("2_3t3rp")
 
 [node name="CameraFollower" type="Node3D" parent="BasicOBJ_Group" unique_id=364981525]
 script = ExtResource("4_opejn")

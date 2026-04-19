@@ -4,16 +4,15 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c0icldun6cond"
 path.s3tc="res://.godot/imported/Taper_True.png-26c1287af9805177b4f5e4267cb38ec0.s3tc.ctex"
-path.etc2="res://.godot/imported/Taper_True.png-26c1287af9805177b4f5e4267cb38ec0.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://#Template/[Resources]/Taper_True.png"
-dest_files=["res://.godot/imported/Taper_True.png-26c1287af9805177b4f5e4267cb38ec0.s3tc.ctex", "res://.godot/imported/Taper_True.png-26c1287af9805177b4f5e4267cb38ec0.etc2.ctex"]
+dest_files=["res://.godot/imported/Taper_True.png-26c1287af9805177b4f5e4267cb38ec0.s3tc.ctex"]
 
 [params]
 
