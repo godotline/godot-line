@@ -1,6 +1,6 @@
 # Godot Line 模板
 
-基于 **Godot Engine 4.6** 开发的 Dancing Line 游戏模板框架。本项目抽离自 ShinnLine，向冰焰模板 3/4 对齐，旨在降低使用者的学习成本。通过本模板，您可以方便地将关卡从冰焰模板 3、4（WIP）迁移到此模板，或直接发布至 ShinnLine。
+基于 **Godot Engine 4.6** 开发的 Dancing Line 游戏模板框架。本项目抽离自 ShinnLine，向冰焰模板 3/4 对齐，旨在降低使用者的学习成本。通过本模板，您可以方便地将关卡从冰焰模板 3、4（WIP）迁移到此模板，或直接[将关卡发布到 GodotLineCollection](https://github.com/meny2333/GodotLineCollection)。
 
 ![Godot Version](https://img.shields.io/badge/Godot-4.6-green.svg)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)
