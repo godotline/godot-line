@@ -27,8 +27,8 @@ metadata/_custom_type_script = "uid://cpejwvo4pns1"
 
 [resource]
 script = ExtResource("5_whbns")
-levelTitleKey = "Default"
+levelTitleKey = "Sample"
 levelAudioClip = ExtResource("4_nji1k")
 colors = Array[ExtResource("2_r7hvt")]([SubResource("Resource_c57ag"), SubResource("Resource_tno1u")])
-levelTitle = "测试场景"
+levelTitle = "Sample"
 authors = Array[ExtResource("1_ld6gi")]([SubResource("Resource_1icaj")])
