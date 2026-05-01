@@ -224,6 +224,7 @@ func _on_Area_body_entered(_body: Node) -> void:
 func die():
 	if !noclip:
 		is_live = false
+		LevelManager.game_state = LevelManager.GameStatus.Died
 		velocity = Vector3.ZERO
 		if animation_node: animation_node.pause()
 		$MusicPlayer.stop()
