@@ -268,4 +268,3 @@ static func SetFPSLimit(frame: int) -> void:
 static func GetColorByContent(color: Color) -> Color:
 	var brightness := color.r * 0.299 + color.g * 0.587 + color.b * 0.114
 	return Color.BLACK if brightness > 0.6 else Color.WHITE
-
