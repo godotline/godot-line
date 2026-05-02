@@ -54,6 +54,7 @@ func _on_back_pressed() -> void:
 func _on_revive_pressed() -> void:
 	一 = false
 	$".".visible = false
+	LevelManager.is_end = false
 	if Player.instance.is_end:
 		_on_gamereplay_pressed()
 	elif LevelManager.current_checkpoint:
