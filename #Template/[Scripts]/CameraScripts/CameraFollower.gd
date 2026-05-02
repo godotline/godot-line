@@ -51,7 +51,7 @@ func _process(delta: float) -> void:
 		return
 	
 	# Only follow when playing
-	if LevelManager.game_state != LevelManager.GameStatus.Playing:
+	if LevelManager.GameState != LevelManager.GameStatus.Playing:
 		return
 	
 	# Calculate translation based on rotated positions

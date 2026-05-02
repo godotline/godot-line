@@ -22,7 +22,7 @@ func _ready() -> void:
 	right = get_node_or_null("Right") as Node3D
 
 func trigger(type: TriggerType) -> void:
-	if LevelManager.game_state != LevelManager.GameStatus.Died:
+	if LevelManager.GameState != LevelManager.GameStatus.Died:
 		match type:
 			TriggerType.Open:
 				_open_door()
@@ -45,24 +45,24 @@ func _open_door() -> void:
 func _final() -> void:
 	if OldCameraFollower.instance:
 		OldCameraFollower.instance.following = false
-	LevelManager.game_state = LevelManager.GameStatus.Moving
+	LevelManager.GameState = LevelManager.GameStatus.Moving
 
 func _waiting() -> void:
 	get_tree().create_timer(waiting_time).timeout.connect(_complete)
 
 func _stop() -> void:
-	LevelManager.game_state = LevelManager.GameStatus.Completed
+	LevelManager.GameState = LevelManager.GameStatus.Completed
 	if Player.instance:
 		Player.instance.velocity = Vector3.ZERO
 
 func _complete() -> void:
 	print("关卡结束")
-	LevelManager.game_over_normal(true)
+	LevelManager.GameOverNormal(true)
 
 func stop_player() -> void:
-	if LevelManager.game_state != LevelManager.GameStatus.Completed:
+	if LevelManager.GameState != LevelManager.GameStatus.Completed:
 		get_tree().create_timer(1.0).timeout.connect(_complete)
-		LevelManager.game_state = LevelManager.GameStatus.Completed
+		LevelManager.GameState = LevelManager.GameStatus.Completed
 		if Player.instance:
 			Player.instance.velocity = Vector3.ZERO
 
