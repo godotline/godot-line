@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bd6wjnftaax54"
-path="res://.godot/imported/Diamond.png-484e3190a027f2bcf72aa308880b1786.ctex"
+uid="uid://b7aoq6aqibwqr"
+path="res://.godot/imported/PerfactCrownNoLight.png-0a6ebd78348625203813c723ed50adf4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://#Template/[Resources]/ui/Diamond.png"
-dest_files=["res://.godot/imported/Diamond.png-484e3190a027f2bcf72aa308880b1786.ctex"]
+source_file="res://#Template/[Resources]/PerfactCrownNoLight.png"
+dest_files=["res://.godot/imported/PerfactCrownNoLight.png-0a6ebd78348625203813c723ed50adf4.ctex"]
 
 [params]
 

@@ -18,20 +18,20 @@ enum Direction {
 
 ## ========== 游戏状态管理 ==========
 
-static var game_state: GameStatus = GameStatus.Waiting
+static var GameState: GameStatus = GameStatus.Waiting
 static var get_input := true
 
-static var clicked: bool:
+static var Clicked: bool:
 	get:
 		if get_input:
 			return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_key_pressed(KEY_SPACE) or Input.is_key_pressed(KEY_ENTER) or Input.is_key_pressed(KEY_KP_ENTER)
 		return false
 
-static var default_gravity: Vector3:
+static var DefaultGravity: Vector3:
 	get:
 		return Vector3(0.0, -9.3, 0.0)
 
-static var player_position: Vector3:
+static var PlayerPosition: Vector3:
 	get:
 		if Player.instance:
 			return Player.instance.global_position
@@ -40,7 +40,7 @@ static var player_position: Vector3:
 		if Player.instance:
 			Player.instance.global_position = value
 
-static var camera_position: Vector3:
+static var CameraPosition: Vector3:
 	get:
 		if OldCameraFollower.instance:
 			return OldCameraFollower.instance.global_position
@@ -202,7 +202,7 @@ static func reset_to_defaults() -> void:
 	is_relive = false
 	diamond = 0
 	crown = 0
-	game_state = GameStatus.Waiting
+	GameState = GameStatus.Waiting
 
 ## 重置相机检查点为默认值
 static func reset_camera_checkpoint() -> void:
@@ -226,37 +226,46 @@ static func reset_camera_checkpoint() -> void:
 ## 游戏结束处理
 ## ============================================================
 
-static func game_over_normal(complete: bool) -> void:
-	var percentage := 1.0 if complete else 0.0
-	if game_state == GameStatus.Died or game_state == GameStatus.Completed or game_state == GameStatus.Moving:
+static func GameOverNormal(complete: bool) -> void:
+	if complete:
+		percent = 100
+	elif Player.instance:
+		var p = Player.instance
+		var music_player = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+		if music_player and music_player.stream:
+			var total_sec = p.level_data.levelTotalTime if p.level_data.useCustomLevelTime else music_player.stream.get_length()
+			var current_sec = music_player.get_playback_position()
+			percent = int((current_sec / total_sec) * 100) if total_sec > 0 else 0
+
+	if GameState == GameStatus.Died or GameState == GameStatus.Completed or GameState == GameStatus.Moving:
 		if Player.instance and Player.instance.has_method("get_block_count"):
 			pass
 		# 触发UI显示，由gameui.gd监听is_end
 		is_end = true
 
-static func game_over_revive() -> void:
-	if game_state == GameStatus.Died or game_state == GameStatus.Moving:
+static func GameOverRevive() -> void:
+	if GameState == GameStatus.Died or GameState == GameStatus.Moving:
 		is_end = true
 
 ## ============================================================
 ## 辅助方法
 ## ============================================================
 
-static func destroy_remain() -> void:
-	game_state = GameStatus.Waiting
+static func DestroyRemain() -> void:
+	GameState = GameStatus.Waiting
 
-static func compare_checkpoint_index(index: int, callback: Callable) -> void:
+static func CompareCheckpointIndex(index: int, callback: Callable = Callable()) -> Variant:
 	if Player.instance and index > Player.instance.get("Checkpoints").size() - 1:
-		callback.call()
-
-static func compare_checkpoint_index_bool(index: int) -> bool:
-	if Player.instance and index > Player.instance.get("Checkpoints").size() - 1:
+		if callback.is_valid():
+			callback.call()
+			return null
 		return true
 	return false
 
-static func set_fps_limit(frame: int) -> void:
+static func SetFPSLimit(frame: int) -> void:
 	Engine.max_fps = frame
 
-static func get_color_by_content(color: Color) -> Color:
+static func GetColorByContent(color: Color) -> Color:
 	var brightness := color.r * 0.299 + color.g * 0.587 + color.b * 0.114
 	return Color.BLACK if brightness > 0.6 else Color.WHITE
+

@@ -275,7 +275,7 @@ func revive() -> void:
 	if main_line.animation_node and main_line.animation_node.has_animation("level"):
 		main_line.animation_node.stop()
 
-	LevelManager.game_state = LevelManager.GameStatus.Waiting
+	LevelManager.GameState = LevelManager.GameStatus.Waiting
 	LevelManager.emit_revive()
 
 	on_revive.emit()

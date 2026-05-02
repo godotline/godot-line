@@ -39,7 +39,7 @@ func _update_label() -> void:
 			var total_sec := p.level_data.levelTotalTime if p.level_data.useCustomLevelTime else music_player.stream.get_length()
 			lines.append("进度: %d%% (%.1f秒/%.1f秒)" % [int(progress * 100), current_sec, total_sec])
 
-	lines.append("游戏状态: %s" % LevelManager.GameStatus.keys()[LevelManager.game_state])
+	lines.append("游戏状态: %s" % LevelManager.GameStatus.keys()[LevelManager.GameState])
 
 	lines.append("线的坐标: (%.2f, %.2f, %.2f)" % [p.position.x, p.position.y, p.position.z])
 	lines.append("线的朝向: (%.1f, %.1f, %.1f)" % [p.rotation_degrees.x, p.rotation_degrees.y, p.rotation_degrees.z])

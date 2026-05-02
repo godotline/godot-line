@@ -2,7 +2,7 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://ce84g02bkq61b"
+uid="uid://dg4noxkxcgbfj"
 path="res://.godot/imported/WaterDie.wav-e05f3302f905d039565d5992a4d1e6d3.sample"
 
 [deps]
@@ -21,4 +21,4 @@ edit/normalize=false
 edit/loop_mode=0
 edit/loop_begin=0
 edit/loop_end=-1
-compress/mode=2
+compress/mode=0

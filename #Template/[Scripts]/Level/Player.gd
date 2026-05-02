@@ -54,6 +54,9 @@ var debug := false
 func _ready() -> void:
 	instance = self
 	if not Engine.is_editor_hint():
+		if not LevelManager.camera_checkpoint.has_checkpoint:
+			LevelManager.reset_to_defaults()
+		
 		if LevelManager.is_end == true:
 			LevelManager.is_end = false
 			reload()
@@ -123,7 +126,7 @@ func _process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
-		var can_turn := LevelManager.game_state == LevelManager.GameStatus.Playing or (LevelManager.game_state == LevelManager.GameStatus.Waiting and not is_start)
+		var can_turn := LevelManager.GameState == LevelManager.GameStatus.Playing or (LevelManager.GameState == LevelManager.GameStatus.Waiting and not is_start)
 		if event.is_action_pressed("turn") and is_live and allowTurn and can_turn:
 			turn()
 
@@ -211,7 +214,7 @@ func turn():
 			rotation_degrees = current_direction
 		else:
 			is_start = true
-			LevelManager.game_state = LevelManager.GameStatus.Playing
+			LevelManager.GameState = LevelManager.GameStatus.Playing
 			rotation_degrees = current_direction
 		velocity = to_global(Vector3(0,0,1) * speed) - position
 		past_translation = position
@@ -224,9 +227,10 @@ func _on_Area_body_entered(_body: Node) -> void:
 func die():
 	if !noclip:
 		is_live = false
-		LevelManager.game_state = LevelManager.GameStatus.Died
+		LevelManager.GameState = LevelManager.GameStatus.Died
 		velocity = Vector3.ZERO
 		if animation_node: animation_node.pause()
+		LevelManager.GameOverNormal(false)
 		$MusicPlayer.stop()
 		$AudioStreamPlayer.play()
 		
