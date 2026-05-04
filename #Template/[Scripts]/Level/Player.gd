@@ -197,17 +197,23 @@ func _play_land_effect() -> void:
 func turn():
 	if is_on_floor() or fly:
 		if animation_node and not animation_node.is_playing():
-			if LevelManager.line_crossing_crown == 0:
+			# Don't reset anim_time if we're resuming from a paused state (after revive)
+			if LevelManager.line_crossing_crown == 0 and not $MusicPlayer.stream_paused:
 				LevelManager.anim_time = 0
 			animation_node.play("level")
 			animation_node.seek(LevelManager.anim_time)
-			if level_data and level_data.levelAudioClip and not $MusicPlayer.playing:
-				$MusicPlayer.stream = level_data.levelAudioClip
-				var music_start_time: float = level_data.get_audio_start_time()
-				if music_start_time > 0.0:
-					$MusicPlayer.play(music_start_time)
-				else:
-					$MusicPlayer.play()
+			if level_data and level_data.levelAudioClip:
+				if $MusicPlayer.stream_paused:
+					# Resume paused music (after revive)
+					$MusicPlayer.stream_paused = false
+				elif not $MusicPlayer.playing:
+					# Start fresh music
+					$MusicPlayer.stream = level_data.levelAudioClip
+					var music_start_time: float = level_data.get_audio_start_time()
+					if music_start_time > 0.0:
+						$MusicPlayer.play(music_start_time)
+					else:
+						$MusicPlayer.play()
 		if is_start :
 			emit_signal("onturn")
 			_currentDirection = 1 - _currentDirection

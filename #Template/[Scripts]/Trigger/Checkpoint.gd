@@ -61,6 +61,7 @@ func _on_checkpoint_body_entered(body: Node3D) -> void:
 func _enter_trigger(body: Node3D) -> void:
 	used = true
 	LevelManager.current_checkpoint = self
+	LevelManager.checkpoint_count += 1
 
 	# Capture camera settings
 	if not manual_camera:
@@ -265,15 +266,28 @@ func revive() -> void:
 	for s in material_colors_manual:
 		s.apply()
 
-	# Stop and reset music
+	# Restore music to checkpoint position (paused, waiting for player to start)
 	var music_player := main_line.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 	if music_player:
 		music_player.stop()
 		music_player.pitch_scale = 1.0
+		# Set music to checkpoint position but don't play yet
+		var music_time := LevelManager.music_checkpoint_time
+		if music_time > 0.0 and main_line.level_data and main_line.level_data.levelAudioClip:
+			music_player.stream = main_line.level_data.levelAudioClip
+			# Play then immediately pause to set the position
+			music_player.play(music_time)
+			music_player.stream_paused = true
 
-	# Stop animation
+	# Restore animation to checkpoint position (paused, waiting for player to start)
 	if main_line.animation_node and main_line.animation_node.has_animation("level"):
-		main_line.animation_node.stop()
+		if _track_progress > 0.0:
+			main_line.animation_node.play("level")
+			main_line.animation_node.seek(_track_progress, true)
+			main_line.animation_node.pause()
+			LevelManager.anim_time = _track_progress
+		else:
+			main_line.animation_node.stop()
 
 	LevelManager.GameState = LevelManager.GameStatus.Waiting
 	LevelManager.emit_revive()

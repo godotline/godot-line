@@ -63,7 +63,8 @@ static func remove_revive_listener(callable: Callable) -> void:
 	_revive_listeners.erase(callable)
 
 static func emit_revive() -> void:
-	for listener in _revive_listeners:
+	var listeners_snapshot = _revive_listeners.duplicate()
+	for listener in listeners_snapshot:
 		listener.call()
 
 static func reset_revive_listeners() -> void:
@@ -85,6 +86,7 @@ static var is_relive := false
 static var diamond := 0
 static var crown := 0
 static var current_checkpoint: Node = null
+static var checkpoint_count := 0
 static var player_speed := 12.0
 static var gravity := Vector3(0, -9.8, 0)
 static var player_first_direction := Vector3.ZERO
@@ -202,6 +204,7 @@ static func reset_to_defaults() -> void:
 	is_relive = false
 	diamond = 0
 	crown = 0
+	checkpoint_count = 0
 	GameState = GameStatus.Waiting
 
 ## 重置相机检查点为默认值
@@ -255,7 +258,7 @@ static func DestroyRemain() -> void:
 	GameState = GameStatus.Waiting
 
 static func CompareCheckpointIndex(index: int, callback: Callable = Callable()) -> Variant:
-	if Player.instance and index > Player.instance.get("Checkpoints").size() - 1:
+	if index > checkpoint_count - 1:
 		if callback.is_valid():
 			callback.call()
 			return null

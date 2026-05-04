@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://cgj86xrh55cfr"]
 
-[ext_resource type="ArrayMesh" uid="uid://poc0fs8wr7o4" path="res://#Template/[Resources]/Models/HalfPyramid.obj" id="1_ajvws"]
+[ext_resource type="ArrayMesh" uid="uid://bijrilva7k3km" path="res://#Template/[Resources]/Models/HalfPyramid.obj" id="1_ajvws"]
 [ext_resource type="Script" uid="uid://ctksyy3gv3pwu" path="res://#Template/[Scripts]/Trigger/Pyramid.gd" id="1_oowoy"]
-[ext_resource type="PackedScene" path="res://#Template/trigger.tscn" id="2_tulby"]
+[ext_resource type="PackedScene" uid="uid://bee8w3v0ab4qq" path="res://#Template/Trigger.tscn" id="2_tulby"]
 [ext_resource type="Script" uid="uid://dtj3e2vqksb8s" path="res://#Template/[Scripts]/Trigger/PyramidTrigger.gd" id="6_pyrtr"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oowoy"]

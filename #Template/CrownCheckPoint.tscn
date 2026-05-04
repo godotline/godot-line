@@ -1,10 +1,12 @@
 [gd_scene format=3 uid="uid://dqvgfuneewf1j"]
 
-[ext_resource type="ArrayMesh" uid="uid://dmpr4wgxf28ca" path="res://#Template/[Resources]/Models/PerfactCrown.obj" id="1"]
+[ext_resource type="ArrayMesh" uid="uid://cnq7qr81j0cvw" path="res://#Template/[Resources]/Models/PerfactCrown.obj" id="1"]
 [ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Trigger/Crown.gd" id="2"]
-[ext_resource type="Texture2D" uid="uid://bi33owy3t41ql" path="res://#Template/[Resources]/PCrownT.png" id="3_ctg82"]
-[ext_resource type="Texture2D" uid="uid://x66ygieiwjpf" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="5_dklm7"]
-[ext_resource type="Texture2D" uid="uid://d3w0a5cs7y31v" path="res://#Template/[Resources]/BlackCrown_Light.png" id="6_8wqky"]
+[ext_resource type="Texture2D" uid="uid://dkh4268rrxtoj" path="res://#Template/[Resources]/PCrownT.png" id="3_ctg82"]
+[ext_resource type="Texture2D" uid="uid://bb36l0chn1l3s" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="5_dklm7"]
+[ext_resource type="Texture2D" uid="uid://c6y2vppvx5060" path="res://#Template/[Resources]/BlackCrown_Light.png" id="6_8wqky"]
+[ext_resource type="Texture2D" uid="uid://mj12gw3q1d3w" path="res://#Template/[Resources]/FX_CrownCircle.png" id="7_circle"]
+[ext_resource type="Texture2D" uid="uid://c4rc47thiqgln" path="res://#Template/[Resources]/Spirit.png" id="8_spirit"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qoafd"]
 albedo_color = Color(1, 1, 0, 1)
@@ -12,71 +14,93 @@ albedo_texture = ExtResource("3_ctg82")
 
 [sub_resource type="BoxShape3D" id="2"]
 
-[sub_resource type="Animation" id="Animation_8fven"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Crown:scale")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector3(5, 5, 5)]
-}
-
-[sub_resource type="Animation" id="Animation_ctg82"]
-resource_name = "crown"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Crown:scale")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.2),
-"transitions": PackedFloat32Array(2.21914, 0.307786),
-"update": 0,
-"values": [Vector3(5, 5, 5), Vector3(0, 0, 0)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("CrownSprite:modulate")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.5, 1),
-"transitions": PackedFloat32Array(3.03144, 1, 0.307786),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("CrownSprite:texture")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.5),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("5_dklm7"), ExtResource("6_8wqky")]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_pds1l"]
-_data = {
-&"RESET": SubResource("Animation_8fven"),
-&"crown": SubResource("Animation_ctg82")
-}
-
 [sub_resource type="BoxMesh" id="BoxMesh_t50w7"]
+
+[sub_resource type="Gradient" id="Gradient_dklm7"]
+offsets = PackedFloat32Array(0, 0.11895161, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_8wqky"]
+gradient = SubResource("Gradient_dklm7")
+
+[sub_resource type="Curve" id="Curve_scale"]
+_data = [Vector2(0, 0.49344832), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_scale"]
+curve = SubResource("Curve_scale")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_aura"]
+angle_min = 45.00001
+angle_max = 270.0
+direction = Vector3(0, 1, 0)
+spread = 25.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_scale")
+color_ramp = SubResource("GradientTexture1D_8wqky")
+sub_emitter_mode = 4
+sub_emitter_amount_at_start = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_particle_aura"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(1, 0.972549, 0, 1)
+albedo_texture = ExtResource("8_spirit")
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_aura"]
+material = SubResource("StandardMaterial3D_particle_aura")
+size = Vector2(2, 2)
+
+[sub_resource type="Gradient" id="Gradient_bfifm"]
+offsets = PackedFloat32Array(0, 0.110887095, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.5411765, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_d4clj"]
+gradient = SubResource("Gradient_bfifm")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_circle"]
+direction = Vector3(0, 1, 0)
+spread = 25.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.125
+scale_max = 0.5
+scale_curve = SubResource("CurveTexture_scale")
+color_ramp = SubResource("GradientTexture1D_d4clj")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_particle_circle"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(1, 0.972549, 0, 1)
+albedo_texture = ExtResource("7_circle")
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_circle"]
+material = SubResource("StandardMaterial3D_particle_circle")
+size = Vector2(2, 2)
 
 [node name="Crown" type="Area3D" unique_id=1805653336]
 collision_layer = 0
 script = ExtResource("2")
+aura_extra_time = 0.8
+light_texture = ExtResource("6_8wqky")
 
 [node name="Crown" type="MeshInstance3D" parent="." unique_id=1455513811]
 transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
@@ -90,9 +114,6 @@ shape = SubResource("2")
 [node name="Marker3D" type="Marker3D" parent="CrownTrigger" unique_id=626349944]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1721480882]
-libraries/ = SubResource("AnimationLibrary_pds1l")
-
 [node name="RevivePosition" type="MeshInstance3D" parent="." unique_id=1500499588]
 mesh = SubResource("BoxMesh_t50w7")
 
@@ -100,4 +121,25 @@ mesh = SubResource("BoxMesh_t50w7")
 transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
 texture = ExtResource("5_dklm7")
 
-[connection signal="body_entered" from="." to="." method="_on_Crown_body_entered"]
+[node name="FX_CrownAura" type="GPUParticles3D" parent="." unique_id=268301850]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+emitting = false
+amount = 5
+sub_emitter = NodePath("FX_CrownCircle")
+one_shot = true
+explosiveness = 1.0
+randomness = 0.1
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_aura")
+draw_pass_1 = SubResource("QuadMesh_aura")
+
+[node name="FX_CrownCircle" type="GPUParticles3D" parent="FX_CrownAura" unique_id=2030689913]
+emitting = false
+amount = 5
+one_shot = true
+explosiveness = 1.0
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_circle")
+draw_pass_1 = SubResource("QuadMesh_circle")
+
+[connection signal="body_entered" from="." to="." method="_on_checkpoint_body_entered"]

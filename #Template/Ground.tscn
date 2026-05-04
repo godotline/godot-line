@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cmson0cneufxo"]
 
-[ext_resource type="Material" path="res://#Template/[Materials]/BaseFloor.tres" id="1_5u1u5"]
+[ext_resource type="Material" uid="uid://ckc5qljonfb3v" path="res://#Template/[Materials]/Ground.tres" id="1_5u1u5"]
 
 [sub_resource type="BoxShape3D" id="1"]
 margin = 0.001
@@ -8,7 +8,7 @@ margin = 0.001
 [sub_resource type="BoxMesh" id="2"]
 material = ExtResource("1_5u1u5")
 
-[node name="BaseFloor" type="StaticBody3D" unique_id=1080893231]
+[node name="Ground" type="StaticBody3D" unique_id=1080893231]
 collision_layer = 2
 collision_mask = 0
 

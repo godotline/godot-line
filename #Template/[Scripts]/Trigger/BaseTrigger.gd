@@ -31,7 +31,7 @@ func _on_body_entered(body: Node3D) -> void:
 		
 		if debug_mode:
 			print("[BaseTrigger] ", name, " 被触发")
-		triggered.emit(body)
+		triggered.emit()
 		_on_triggered(body)
 
 func _on_triggered(_body: Node3D) -> void:
