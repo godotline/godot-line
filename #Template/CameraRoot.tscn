@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://be4vgpeo0nv84"]
+
+[ext_resource type="Script" uid="uid://bcrha75txrw31" path="res://#Template/[Scripts]/CameraScripts/CameraFollower.gd" id="1_xx0ic"]
+
+[node name="CameraRoot" type="Node3D" unique_id=1925825702]
+script = ExtResource("1_xx0ic")
+target = NodePath("../Player")
+
+[node name="Rotator" type="Node3D" parent="." unique_id=860368293]
+transform = Transform3D(0.70710677, 0.5720614, 0.4156269, 0, 0.58778524, -0.809017, -0.70710677, 0.5720614, 0.4156269, 0, 0, 0)
+
+[node name="Scale" type="Node3D" parent="Rotator" unique_id=1568144045]
+
+[node name="Camera3D" type="Camera3D" parent="Rotator/Scale" unique_id=1985620912]
+transform = Transform3D(-1.0000001, 0, -8.7422784e-08, 0, 1.0000001, 0, 8.7422784e-08, 0, -1.0000001, 0, 0, -25)

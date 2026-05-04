@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dkh4268rrxtoj"
-path.s3tc="res://.godot/imported/PCrownT.png-214a3b5561ed7d30ddaf926af1f6a6a3.s3tc.ctex"
+uid="uid://c4rc47thiqgln"
+path.s3tc="res://.godot/imported/Spirit.png-882c07cf0784d1037a57a9fcab147f07.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://#Template/[Resources]/PCrownT.png"
-dest_files=["res://.godot/imported/PCrownT.png-214a3b5561ed7d30ddaf926af1f6a6a3.s3tc.ctex"]
+source_file="res://#Template/[Resources]/Spirit.png"
+dest_files=["res://.godot/imported/Spirit.png-882c07cf0784d1037a57a9fcab147f07.s3tc.ctex"]
 
 [params]
 

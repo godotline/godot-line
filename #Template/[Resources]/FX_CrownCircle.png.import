@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dkh4268rrxtoj"
-path.s3tc="res://.godot/imported/PCrownT.png-214a3b5561ed7d30ddaf926af1f6a6a3.s3tc.ctex"
+uid="uid://mj12gw3q1d3w"
+path.s3tc="res://.godot/imported/FX_CrownCircle.png-c1882506126b84376ee59e96f83fd130.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://#Template/[Resources]/PCrownT.png"
-dest_files=["res://.godot/imported/PCrownT.png-214a3b5561ed7d30ddaf926af1f6a6a3.s3tc.ctex"]
+source_file="res://#Template/[Resources]/FX_CrownCircle.png"
+dest_files=["res://.godot/imported/FX_CrownCircle.png-c1882506126b84376ee59e96f83fd130.s3tc.ctex"]
 
 [params]
 
