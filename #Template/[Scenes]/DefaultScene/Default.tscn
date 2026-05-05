@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="9_4jcmk"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="9_cr5py"]
 [ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="9_dhqas"]
+[ext_resource type="PackedScene" path="res://#Template/FallPredictor.tscn" id="9_fxojy"]
 [ext_resource type="PackedScene" uid="uid://bnhhmjcg10054" path="res://#Template/Percentage.tscn" id="9_ymsgx"]
 [ext_resource type="Texture2D" uid="uid://bokq00qv7ojs5" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="10_8ar0p"]
 [ext_resource type="Script" uid="uid://bdbb1ogxk0fcr" path="res://#Template/[Scripts]/Trigger/JumpPredictor.gd" id="10_fxojy"]
@@ -54,7 +55,7 @@ font = ExtResource("10_yearn")
 font_size = 20
 
 [sub_resource type="TextMesh" id="TextMesh_yearn"]
-text = "PlayAnimator"
+text = "PlayAni"
 font = ExtResource("10_yearn")
 font_size = 20
 
@@ -159,17 +160,19 @@ target_methods = Array[String](["Trigger"])
 invoke_on_awake = false
 invoke_on_click = false
 
+[node name="FallPredictor" parent="." unique_id=1335291198 instance=ExtResource("9_fxojy")]
+transform = Transform3D(-4.3711385e-08, 0, -0.9999998, 0, 0.99999994, 0, 0.99999994, 0, -4.371138e-08, 3, 1, 48.999996)
+
 [node name="Trigger5" parent="." unique_id=1401464213 instance=ExtResource("7_hta2p")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.6499991, 4, 2.5339108, 6)
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.6499991, 4, -0.46608925, 6)
 script = ExtResource("9_dhqas")
-height = 5.0
+height = 8.0
 
 [node name="Node3D" type="Node3D" parent="Trigger5" unique_id=205400515]
 transform = Transform3D(2.4999979, 0, 0, 0, 2.4999995, 0, 0, 0, 2.6499906, 4, 0.53391075, 6)
 top_level = true
 script = ExtResource("10_fxojy")
 direction = 0
-show_in_game = false
 draw_preview = true
 
 [node name="Trigger2" parent="." unique_id=322261833 instance=ExtResource("7_hta2p")]
