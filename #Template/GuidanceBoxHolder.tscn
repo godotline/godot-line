@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://#Template/[Resources]/GuidanceBox.tscn" id="1_lrnnp"]
+
+[node name="GuidanceBoxHolder" type="Node3D" unique_id=2033417881]
+
+[node name="GuidanceBox_0" parent="." unique_id=1723303954 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, 0)
+
+[node name="GuidanceBox_1" parent="." unique_id=204802720 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, -0.45, 3.4000006)
+
+[node name="GuidanceBox_2" parent="." unique_id=59352584 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.799997, -0.45, 3.4000006)
+
+[node name="GuidanceBox_3" parent="." unique_id=780955764 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 7.799997, -0.45, 6.1999984)
+
+[node name="GuidanceBox_4" parent="." unique_id=1101162833 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.999993, -0.45, 6.1999984)
+
+[node name="GuidanceBox_5" parent="." unique_id=711411765 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 11.999993, -0.45, 11.7999935)
+
+[node name="GuidanceBox_6" parent="." unique_id=1691861817 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.599995, -0.45, 11.7999935)
+
+[node name="GuidanceBox_7" parent="." unique_id=1675864910 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 17.599995, -0.45, 14.599991)
+
+[node name="GuidanceBox_8" parent="." unique_id=497755543 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.40001, -0.45, 14.599991)
+
+[node name="GuidanceBox_9" parent="." unique_id=1926461830 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 21.40001, -0.45, 21.000008)
+
+[node name="GuidanceBox_10" parent="." unique_id=72870271 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.800018, -0.45, 21.000008)
+
+[node name="GuidanceBox_11" parent="." unique_id=59051009 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 23.800018, -0.45, 24.00002)
+
+[node name="GuidanceBox_12" parent="." unique_id=1125941483 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.400028, -0.45, 24.00002)
+
+[node name="GuidanceBox_13" parent="." unique_id=35255977 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 26.400028, -0.45, 27.00003)
+
+[node name="GuidanceBox_14" parent="." unique_id=1763134911 instance=ExtResource("1_lrnnp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.200039, -0.45, 27.00003)
