@@ -2,11 +2,22 @@
 extends Area3D
 class_name EventTrigger
 
+## 事件触发器 - 可配置多个目标节点和方法
+
 signal triggered
+
+@export_group("触发目标")
+## 目标节点列表
+@export var target_nodes: Array[Node] = []
+## 对应的方法名列表（默认为 "Trigger"）
+@export var target_methods: Array[String] = []
 
 @export_group("触发模式")
 @export var invoke_on_awake: bool = false
 @export var invoke_on_click: bool = false
+
+@export_group("调试")
+@export var debug_mode: bool = false
 
 var _invoked: bool = false
 var _waiting_click: bool = false
@@ -59,8 +70,34 @@ func _invoke() -> void:
 		return
 	_invoked = true
 	_trigger_index = LevelManager.checkpoint_count
+	if debug_mode:
+		print("[EventTrigger] %s 触发 (checkpoint: %d)" % [name, _trigger_index])
 	triggered.emit()
+	_invoke_targets()
 	LevelManager.add_revive_listener(_on_revive)
+
+## 调用所有配置的目标节点方法
+func _invoke_targets() -> void:
+	if debug_mode:
+		print("[EventTrigger] %s 调用 %d 个目标" % [name, target_nodes.size()])
+	
+	for i in range(target_nodes.size()):
+		var node: Node = target_nodes[i]
+		if node == null:
+			push_warning("[EventTrigger] 目标节点 #%d 为空，跳过" % i)
+			continue
+		
+		# 获取方法名，如果索引越界则使用默认值 "Trigger"
+		var method: String = "Trigger"
+		if i < target_methods.size() and target_methods[i] != "":
+			method = target_methods[i]
+		
+		if node.has_method(method):
+			if debug_mode:
+				print("[EventTrigger]   -> %s.%s()" % [node.name, method])
+			node.call(method)
+		else:
+			push_warning("[EventTrigger] 节点 '%s' 没有方法 '%s'" % [node.name, method])
 
 func _on_revive() -> void:
 	LevelManager.remove_revive_listener(_on_revive)
@@ -70,7 +107,9 @@ func _on_revive() -> void:
 	)
 
 func _exit_tree() -> void:
-	if not Engine.is_editor_hint():
-		LevelManager.remove_revive_listener(_on_revive)
-		if _waiting_click and Player.instance and Player.instance.has_signal("onturn"):
+	if Engine.is_editor_hint():
+		return
+	LevelManager.remove_revive_listener(_on_revive)
+	if _waiting_click and Player.instance and Player.instance.has_signal("onturn"):
+		if Player.instance.onturn.is_connected(_on_player_turn):
 			Player.instance.onturn.disconnect(_on_player_turn)

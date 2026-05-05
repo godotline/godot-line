@@ -1,5 +1,4 @@
 extends Area3D
-class_name animplay
 
 @export var animators: Array[NodePath] = []
 @export var dont_revive: bool = false
@@ -40,6 +39,8 @@ func _process(_delta: float) -> void:
 func _on_body_entered(body: Node3D) -> void:
 	if not body is CharacterBody3D:
 		return
+	if LevelManager.GameState == LevelManager.GameStatus.Waiting or LevelManager.GameState == LevelManager.GameStatus.Died:
+		return
 	for i in _animation_players.size():
 		if not _finished[i]:
 			_play(i)
@@ -71,7 +72,11 @@ func _get_state(index: int) -> void:
 
 func _set_state(index: int) -> void:
 	var player = _animation_players[index]
-	var anim_name = player.current_animation
+	var anim_name = ""
+	for name in player.get_animation_list():
+		if name != "RESET":
+			anim_name = name
+			break
 	if anim_name != "":
 		player.play(anim_name)
 		var anim = player.get_animation(anim_name)
@@ -82,14 +87,29 @@ func _set_state(index: int) -> void:
 
 func _on_revive() -> void:
 	LevelManager.remove_revive_listener(_on_revive)
+	for i in _animation_players.size():
+		_seek_and_pause(i)
 	LevelManager.CompareCheckpointIndex(_trigger_index, func():
 		for i in _animation_players.size():
 			if not dont_revive:
-				_set_state(i)
 				_finished[i] = false
 		_waiting_to_resume = true
 		LevelManager.add_revive_listener(_on_revive)
 	)
+
+func _seek_and_pause(index: int) -> void:
+	var player = _animation_players[index]
+	var anim_name = ""
+	for name in player.get_animation_list():
+		if name != "RESET":
+			anim_name = name
+			break
+	if anim_name != "":
+		player.play(anim_name)
+		var anim = player.get_animation(anim_name)
+		if anim:
+			player.seek(_progress[index] * anim.get_length(), true)
+	player.pause()
 
 func _exit_tree() -> void:
 	LevelManager.remove_revive_listener(_on_revive)

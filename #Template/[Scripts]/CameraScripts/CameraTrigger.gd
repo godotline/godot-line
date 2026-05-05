@@ -13,8 +13,6 @@ class_name CameraTrigger
 @export var transition_type: Tween.TransitionType = Tween.TRANS_SINE
 @export var ease_type: Tween.EaseType = Tween.EASE_IN_OUT
 
-@export_group("Trigger")
-@export var can_be_triggered: bool = true
 @export_group("时间判定")
 @export var use_time: bool = false
 @export var trigger_time: float = 0.0
@@ -22,28 +20,22 @@ class_name CameraTrigger
 signal on_finished
 
 var _follower: CameraFollower = null
-var _triggered: bool = false
 
 func _ready() -> void:
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
 
 func _on_body_entered(body: Node3D) -> void:
-	if body is CharacterBody3D and can_be_triggered and not use_time:
+	if body is CharacterBody3D and not use_time:
 		_trigger()
 
 func _process(_delta: float) -> void:
-	if use_time and not _triggered:
+	if use_time:
 		var current_time = LevelManager.anim_time
 		if current_time >= trigger_time:
 			_trigger()
 
 func _trigger() -> void:
-	if _triggered:
-		return
-	
-	_triggered = true
-	
 	if not _follower:
 		_follower = CameraFollower.instance
 	
