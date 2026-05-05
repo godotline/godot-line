@@ -1,0 +1,243 @@
+[gd_scene format=3 uid="uid://d1d8kjduauhiu"]
+
+[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_mdvn7"]
+[ext_resource type="Resource" uid="uid://bjdyrlvls8ls5" path="res://#Template/[Scenes]/Sample/Default.tres" id="2_2mw0t"]
+[ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_hhn6w"]
+[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="4_mpgki"]
+[ext_resource type="Texture2D" uid="uid://bokq00qv7ojs5" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="5_te3od"]
+[ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="6_6gedn"]
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/trigger.tscn" id="7_mmp1f"]
+[ext_resource type="Script" uid="uid://cu3xuawfji3m2" path="res://#Template/[Scripts]/Trigger/EventTrigger.gd" id="8_lvlg5"]
+[ext_resource type="PackedScene" path="res://#Template/FallPredictor.tscn" id="9_j20p7"]
+[ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="10_bmosm"]
+[ext_resource type="Script" uid="uid://bdbb1ogxk0fcr" path="res://#Template/[Scripts]/Trigger/JumpPredictor.gd" id="11_uo12o"]
+[ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="12_21ado"]
+[ext_resource type="Script" uid="uid://b1m236nbmh7ke" path="res://#Template/[Scripts]/Trigger/PlayAnimator.gd" id="13_sowmv"]
+[ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="14_oqacy"]
+[ext_resource type="PackedScene" uid="uid://bnhhmjcg10054" path="res://#Template/Percentage.tscn" id="15_smra3"]
+[ext_resource type="FontFile" uid="uid://diyv3w2nftxaw" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="16_4iu13"]
+[ext_resource type="Script" uid="uid://dypjr6kswkpyo" path="res://#Template/[Scripts]/Animator/LocalRotAnimator.gd" id="17_6vufw"]
+[ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="18_frkeu"]
+[ext_resource type="Script" uid="uid://cq7y41sswinln" path="res://#Template/[Scripts]/Guidance/GuidanceController.gd" id="19_cr5py"]
+[ext_resource type="PackedScene" path="res://#Template/GuidanceBoxHolder.tscn" id="20_8ar0p"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0yb4g"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_dha8j"]
+sky_material = SubResource("ProceduralSkyMaterial_0yb4g")
+
+[sub_resource type="Environment" id="Environment_ots34"]
+background_mode = 2
+sky = SubResource("Sky_dha8j")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="Animation" id="Animation_wkp8b"]
+length = 0.001
+
+[sub_resource type="Animation" id="3"]
+length = 130.0
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cm0pq"]
+_data = {
+&"RESET": SubResource("Animation_wkp8b"),
+&"level": SubResource("3")
+}
+
+[sub_resource type="TextMesh" id="TextMesh_hta2p"]
+text = "LocalPos"
+font = ExtResource("16_4iu13")
+font_size = 20
+
+[sub_resource type="TextMesh" id="TextMesh_nb4qh"]
+text = "LocalRot"
+font = ExtResource("16_4iu13")
+font_size = 20
+
+[sub_resource type="TextMesh" id="TextMesh_yearn"]
+text = "PlayAni"
+font = ExtResource("16_4iu13")
+font_size = 20
+
+[sub_resource type="Animation" id="Animation_mcu0o"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(6.5302486, 0, 26.103493)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_4jcmk"]
+resource_name = "new_animation"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.4, 0.8),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(6.5302486, 0, 26.103493), Vector3(10.827906, 0, 28.60758), Vector3(7.532775, 0.22648811, 32.51301)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.8333333),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(1, 1, 1), Vector3(10, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_5wtmk"]
+_data = {
+&"RESET": SubResource("Animation_mcu0o"),
+&"new_animation": SubResource("Animation_4jcmk")
+}
+
+[node name="LevelHolder" type="Node3D" unique_id=542804875]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2093202605]
+environment = SubResource("Environment_ots34")
+
+[node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
+
+[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("1_mdvn7")]
+animation = NodePath("../AnimationPlayer")
+level_data = ExtResource("2_2mw0t")
+
+[node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_hhn6w")]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="BasicOBJ_Group" unique_id=560431425]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_cm0pq")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="BasicOBJ_Group/AnimationPlayer" unique_id=1995291670]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="BasicOBJ_Group" unique_id=1791213843]
+transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
+shadow_enabled = true
+
+[node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("4_mpgki")]
+crown_no_light = ExtResource("5_te3od")
+
+[node name="Scene_Group" type="Node3D" parent="." unique_id=1042175662]
+
+[node name="Scene_001" type="Node3D" parent="Scene_Group" unique_id=514366687]
+
+[node name="Ground" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("6_6gedn")]
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -1, 0)
+
+[node name="Trigger" parent="." unique_id=608483111 node_paths=PackedStringArray("target_nodes") instance=ExtResource("7_mmp1f")]
+transform = Transform3D(1.767767, 0, -2.631019, 0, 2.5, 0, 1.767767, 0, 2.631019, 4.5491443, -0.50000095, 5.440832)
+script = ExtResource("8_lvlg5")
+target_nodes = [NodePath("../Ground")]
+target_methods = Array[String](["Trigger"])
+invoke_on_awake = false
+invoke_on_click = false
+
+[node name="FallPredictor" parent="." unique_id=1335291198 instance=ExtResource("9_j20p7")]
+transform = Transform3D(-4.3711385e-08, 0, -0.9999998, 0, 0.99999994, 0, 0.99999994, 0, -4.371138e-08, 3, 1, 48.999996)
+
+[node name="Trigger5" parent="." unique_id=1401464213 instance=ExtResource("7_mmp1f")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.6499991, 4, -0.46608925, 6)
+script = ExtResource("10_bmosm")
+height = 8.0
+
+[node name="Node3D" type="Node3D" parent="Trigger5" unique_id=205400515]
+transform = Transform3D(2.4999979, 0, 0, 0, 2.4999995, 0, 0, 0, 2.6499906, 4, 0.53391075, 6)
+top_level = true
+script = ExtResource("11_uo12o")
+direction = 0
+draw_preview = true
+
+[node name="Trigger2" parent="." unique_id=322261833 instance=ExtResource("7_mmp1f")]
+transform = Transform3D(1.767767, 0, -2.631019, 0, 2.5, 0, 1.767767, 0, 2.631019, 4.5491443, -0.50000095, 15.75985)
+
+[node name="Trigger4" parent="." unique_id=1667173945 instance=ExtResource("7_mmp1f")]
+transform = Transform3D(1.767767, 0, -2.631019, 0, 2.5, 0, 1.767767, 0, 2.631019, 12.549145, -0.50000095, 29.75985)
+script = ExtResource("12_21ado")
+offset = Vector3(-5, 20, -5)
+camera_rotation = Vector3(54, 45, 0)
+camera_scale = Vector3(1, 1, 1)
+field_of_view = 80.0
+follow = true
+duration = 2.0
+transition_type = 1
+ease_type = 2
+use_time = false
+trigger_time = 0.0
+
+[node name="Trigger3" parent="." unique_id=262321607 instance=ExtResource("7_mmp1f")]
+transform = Transform3D(1.767767, 0, -2.631019, 0, 2.5, 0, 1.767767, 0, 2.631019, 4.5491443, -0.50000095, 20.443941)
+script = ExtResource("13_sowmv")
+animators = Array[NodePath]([NodePath("../Ground3/AnimationPlayer")])
+dont_revive = false
+
+[node name="Ground" parent="." unique_id=1080893231 instance=ExtResource("6_6gedn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5302486, 0, 4.086172)
+script = ExtResource("14_oqacy")
+transform_type = 1
+start_value = Vector3(6.5302486, 0, 4.086172)
+end_offset = Vector3(0, 0, 10.675811)
+
+[node name="Percentage" parent="Ground" unique_id=1373098762 instance=ExtResource("15_smra3")]
+transform = Transform3D(1.3113416e-06, 0, -1, 0, 9.999999, 0, 9.999999, 0, 1.3113416e-07, 0, 1.9167848, 0)
+mesh = SubResource("TextMesh_hta2p")
+
+[node name="Ground2" parent="." unique_id=532365677 instance=ExtResource("6_6gedn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5302486, 0, 14.906174)
+script = ExtResource("17_6vufw")
+transform_type = 1
+end_offset = Vector3(179.99998, 0, 0)
+
+[node name="Percentage" parent="Ground2" unique_id=1381862570 instance=ExtResource("15_smra3")]
+transform = Transform3D(1.3113416e-06, 0, -1, 0, 9.999999, 0, 9.999999, 0, 1.3113416e-07, 0, 1.9167848, 0)
+mesh = SubResource("TextMesh_nb4qh")
+
+[node name="Crown" parent="." unique_id=1805653336 instance=ExtResource("18_frkeu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3752842, 0, 3.1362076)
+
+[node name="Ground3" parent="." unique_id=1230272800 instance=ExtResource("6_6gedn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5302486, 0, 26.103493)
+
+[node name="Percentage" parent="Ground3" unique_id=815989288 instance=ExtResource("15_smra3")]
+transform = Transform3D(1.3113416e-06, 0, -1, 0, 9.999999, 0, 9.999999, 0, 1.3113416e-07, 0, 1.9167848, 0)
+mesh = SubResource("TextMesh_yearn")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Ground3" unique_id=865217038]
+libraries/ = SubResource("AnimationLibrary_5wtmk")
+
+[node name="Node3D" type="Node3D" parent="." unique_id=818852756 node_paths=PackedStringArray("box_holder")]
+script = ExtResource("19_cr5py")
+box_holder = NodePath("../GuidanceBoxHolder")
+
+[node name="GuidanceBoxHolder" parent="." unique_id=2033417881 instance=ExtResource("20_8ar0p")]
+
+[connection signal="triggered" from="Trigger2" to="Ground2" method="Trigger"]
