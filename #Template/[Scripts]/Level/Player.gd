@@ -50,6 +50,7 @@ var start_transform = transform
 var loading := false
 var debug := false
 @export var allowTurn := true
+@export var disallow_input := false
 
 func _ready() -> void:
 	instance = self
@@ -127,7 +128,7 @@ func _process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
 		var can_turn := LevelManager.GameState == LevelManager.GameStatus.Playing or (LevelManager.GameState == LevelManager.GameStatus.Waiting and not is_start)
-		if event.is_action_pressed("turn") and is_live and allowTurn and can_turn:
+		if event.is_action_pressed("turn") and is_live and allowTurn and can_turn and not disallow_input:
 			turn()
 
 	if event is InputEventKey and event.pressed and not event.echo:

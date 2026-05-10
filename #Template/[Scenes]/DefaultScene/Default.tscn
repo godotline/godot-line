@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://bm1086mivcf7v"]
 
+[ext_resource type="Script" uid="uid://c8a4kabyt1fhu" path="res://#Template/[Scripts]/Editor/NoteReader.gd" id="1_0os2y"]
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_5eet3"]
+[ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="2_dj80y"]
 [ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/DefaultScene/Default.tres" id="2_dmxrr"]
 [ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_dj80y"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="9_cr5py"]
@@ -38,6 +40,10 @@ _data = {
 environment = SubResource("Environment_ots34")
 
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
+script = ExtResource("1_0os2y")
+beatmap_file = "res://ARForest - Inverted World (DRwinter) [Insane].osu"
+auto_play = true
+auto_play_scene = ExtResource("2_dj80y")
 
 [node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("1_5eet3")]
 animation = NodePath("../AnimationPlayer")
