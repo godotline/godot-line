@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778375400105_c9a03a00",
+  "status": "active",
+  "created_at": 1778375400.1054547,
+  "steps": [
+    {
+      "step_id": "step_37535c04",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "extends Node\n## AutoPlayController - 自动转向控制器\n## 运行时在 GuidanceBox 位置自动生成触发器（与 Unity 版一致）\n\n@export var guidance_controller: GuidanceController\n@export var player: Player\n@export var enabled: bool = true\n\nvar _holder: Node3D\nvar _triggers: Array[Area3D] = []\n\nfunc _ready() -> void:\n\tvar controller := guidance_controller if guidance_controller else GuidanceController.Instance\n\tif not controller or not controller.box_holder:\n\t\tpush_warning(\"[AutoPlayController] guidance_controller 或 box_holder 未设置\")\n\t\treturn\n\n\tvar boxes := controller.box_holder.get_children()\n\tif boxes.is_empty():\n\t\treturn\n\n\t# 创建 AutoPlayHolder\n\t_holder = Node3D.new()\n\t_holder.name = \"AutoPlayHolder\"\n\tget_tree().current_scene.add_child(_holder)\n\n\t# 从第二个 box 开始创建触发器（与 Unity 版一致，跳过第 0 个）\n\tfor i in range(1, boxes.size()):\n\t\tvar box := boxes[i]\n\t\tif not box is Node3D:\n\t\t\tcontinue\n\t\tvar trigger := _create_trigger(box.global_position)\n\t\t_triggers.append(trigger)\n\n\tset_holder(enabled)\n\nfunc _create_trigger(pos: Vector3) -> Area3D:\n\tvar area := Area3D.new()\n\tarea.name = \"AutoPlayTrigger\"\n\n\tvar collision := CollisionShape3D.new()\n\tvar sphere := SphereShape3D.new()\n\tsphere.radius = sqrt(0.33)\n\tcollision.shape = sphere\n\tarea.add_child(collision)\n\n\tvar script := load(\"res://#Template/[Scripts]/Auto/AutoPlay.gd\")\n\tarea.set_script(script)\n\n\tarea.global_position = pos\n\t_holder.add_child(area)\n\treturn area\n\nfunc set_holder(active: bool) -> void:\n\tif _holder:\n\t\t_holder.visible = active\n\t\tfor trigger in _triggers:\n\t\t\tif trigger is Area3D:\n\t\t\t\ttrigger.set_deferred(\"monitoring\", active)\n\t\t\t\ttrigger.set_deferred(\"monitorable\", active)",
+        "new_text": "class_name AutoPlayController\nextends Node\n## AutoPlayController - 自动转向控制器\n## 运行时在 GuidanceBox 位置自动生成触发器（与 Unity 版一致）\n\nstatic var Instance: AutoPlayController\n\n@export var enabled: bool = true\n\nvar _holder: Node3D\nvar _triggers: Array[Area3D] = []\n\nfunc _ready() -> void:\n\tInstance = self\n\n\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\tpush_warning(\"[AutoPlayController] GuidanceController 或 box_holder 未设置\")\n\t\treturn\n\n\tvar boxes := GuidanceController.Instance.box_holder.get_children()\n\tif boxes.is_empty():\n\t\treturn\n\n\t_holder = Node3D.new()\n\t_holder.name = \"AutoPlayHolder\"\n\tget_tree().current_scene.add_child(_holder)\n\n\t# 从第二个 box 开始创建触发器（与 Unity 版一致，跳过第 0 个）\n\tfor i in range(1, boxes.size()):\n\t\tvar box := boxes[i]\n\t\tif not box is Node3D:\n\t\t\tcontinue\n\t\tvar trigger := _create_trigger(box.global_position)\n\t\t_triggers.append(trigger)\n\n\tset_holder(enabled)\n\nfunc _create_trigger(pos: Vector3) -> Area3D:\n\tvar area := Area3D.new()\n\tarea.name = \"AutoPlayTrigger\"\n\n\tvar collision := CollisionShape3D.new()\n\tvar sphere := SphereShape3D.new()\n\tsphere.radius = sqrt(0.33)\n\tcollision.shape = sphere\n\tarea.add_child(collision)\n\n\tvar script := load(\"res://#Template/[Scripts]/Auto/AutoPlay.gd\")\n\tarea.set_script(script)\n\n\tarea.global_position = pos\n\t_holder.add_child(area)\n\treturn area\n\nfunc set_holder(active: bool) -> void:\n\tif _holder:\n\t\t_holder.visible = active\n\t\tfor trigger in _triggers:\n\t\t\tif trigger is Area3D:\n\t\t\t\ttrigger.set_deferred(\"monitoring\", active)\n\t\t\t\ttrigger.set_deferred(\"monitorable\", active)",
+        "start_line": 1,
+        "end_line": 61
+      },
+      "snapshot_id": "df77da21",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778375400.1086636,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_37535c04"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

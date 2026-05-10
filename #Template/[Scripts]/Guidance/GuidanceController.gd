@@ -1,6 +1,8 @@
 extends Node3D
 class_name GuidanceController
 
+static var Instance: GuidanceController
+
 @export var create_boxes: bool = false
 @export var create_lines: bool = true
 @export var box_holder: Node3D
@@ -16,6 +18,7 @@ var _box_scene: PackedScene
 var _ready_done: bool = false
 
 func _ready() -> void:
+	Instance = self
 	_box_scene = load("res://#Template/[Resources]/GuidanceBox.tscn")
 	if box_holder:
 		for child in box_holder.get_children():

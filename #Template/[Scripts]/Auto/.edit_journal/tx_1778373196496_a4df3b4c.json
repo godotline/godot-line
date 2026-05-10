@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778373196496_a4df3b4c",
+  "status": "active",
+  "created_at": 1778373196.4962153,
+  "steps": [
+    {
+      "step_id": "step_20d9df75",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "func set_holder(active: bool) -> void:\n\tif _holder:\n\t\t_holder.visible = active",
+        "new_text": "func set_holder(active: bool) -> void:\n\tif _holder:\n\t\t_holder.visible = active\n\t\tfor trigger in _triggers:\n\t\t\tif trigger is Area3D:\n\t\t\t\ttrigger.set_deferred(\"monitoring\", active)\n\t\t\t\ttrigger.set_deferred(\"monitorable\", active)",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "5bbef9bd",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778373196.4984803,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_20d9df75"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

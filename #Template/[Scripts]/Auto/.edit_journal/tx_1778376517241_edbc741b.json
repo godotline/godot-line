@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778376517241_edbc741b",
+  "status": "active",
+  "created_at": 1778376517.241737,
+  "steps": [
+    {
+      "step_id": "step_f542a9b6",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "func _ready() -> void:\n\tInstance = self\n\n\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\tpush_warning(\"[AutoPlayController] GuidanceController 或 box_holder 未设置\")\n\t\treturn\n\n\tvar boxes := GuidanceController.Instance.box_holder.get_children()\n\tif boxes.is_empty():\n\t\treturn",
+        "new_text": "func _ready() -> void:\n\tInstance = self\n\tprint(\"[AutoPlayController] _ready, enable=\", enable)\n\n\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\tpush_warning(\"[AutoPlayController] GuidanceController 或 box_holder 未设置\")\n\t\treturn\n\n\tvar boxes := GuidanceController.Instance.box_holder.get_children()\n\tprint(\"[AutoPlayController] boxes=\", boxes.size())\n\tif boxes.is_empty():\n\t\treturn",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "f1ff023c",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778376517.2443752,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_f542a9b6"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

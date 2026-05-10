@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778375294224_5059ffcb",
+  "status": "active",
+  "created_at": 1778375294.2247627,
+  "steps": [
+    {
+      "step_id": "step_ea3826bc",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "class_name AutoPlayController\nextends Node\n## AutoPlayController - 自动转向控制器\n## 在 GuidanceBox 位置创建自动转向触发器\n\n@export var guidance_controller: GuidanceController\n@export var enabled: bool = true\n\nvar _holder: Node3D\nvar _triggers: Array[Area3D] = []\n\nfunc _ready() -> void:\n\tif Engine.is_editor_hint():\n\t\treturn\n\t_create_triggers()\n\nfunc _create_triggers() -> void:\n\tif not guidance_controller or not guidance_controller.box_holder:\n\t\tpush_warning(\"[AutoPlayController] guidance_controller 或 box_holder 未设置\")\n\t\treturn\n\n\tvar boxes := guidance_controller.box_holder.get_children()\n\tif boxes.is_empty():\n\t\treturn\n\n\t# 创建 AutoPlayHolder 父节点\n\t_holder = Node3D.new()\n\t_holder.name = \"AutoPlayHolder\"\n\tget_tree().current_scene.add_child(_holder)\n\n\t# 从第二个 box 开始创建触发器（与 Unity 版本一致）\n\tfor i in range(1, boxes.size()):\n\t\tvar box := boxes[i]\n\t\tif not box is Node3D:\n\t\t\tcontinue\n\t\tvar trigger := _create_trigger(box.global_position)\n\t\t_triggers.append(trigger)\n\n\tset_holder(enabled)\n\nfunc _create_trigger(pos: Vector3) -> Area3D:\n\tvar area := Area3D.new()\n\tarea.name = \"AutoPlayTrigger\"\n\n\t# 创建碰撞形状 — 使用小球体匹配 trigger_distance\n\tvar collision := CollisionShape3D.new()\n\tvar sphere := SphereShape3D.new()\n\tsphere.radius = sqrt(0.33)  # 与 AutoPlay.trigger_distance 匹配\n\tcollision.shape = sphere\n\tarea.add_child(collision)\n\n\t# 添加 AutoPlay 脚本\n\tvar script := load(\"res://#Template/[Scripts]/Auto/AutoPlay.gd\")\n\tarea.set_script(script)\n\n\tarea.global_position = pos\n\t_holder.add_child(area)\n\treturn area\n\nfunc set_holder(active: bool) -> void:\n\tif _holder:\n\t\t_holder.visible = active\n\t\tfor trigger in _triggers:\n\t\t\tif trigger is Area3D:\n\t\t\t\ttrigger.set_deferred(\"monitoring\", active)\n\t\t\t\ttrigger.set_deferred(\"monitorable\", active)\n",
+        "new_text": "class_name AutoPlayController\nextends Node\n## AutoPlayController - 自动转向控制器\n## 运行时在 GuidanceBox 位置自动生成触发器（与 Unity 版一致）\n\n@export var guidance_controller: GuidanceController\n@export var player: Player\n@export var enabled: bool = true\n\nvar _holder: Node3D\nvar _triggers: Array[Area3D] = []\n\nfunc _ready() -> void:\n\tvar controller := guidance_controller if guidance_controller else GuidanceController.Instance\n\tif not controller or not controller.box_holder:\n\t\tpush_warning(\"[AutoPlayController] guidance_controller 或 box_holder 未设置\")\n\t\treturn\n\n\tvar boxes := controller.box_holder.get_children()\n\tif boxes.is_empty():\n\t\treturn\n\n\t# 创建 AutoPlayHolder\n\t_holder = Node3D.new()\n\t_holder.name = \"AutoPlayHolder\"\n\tget_tree().current_scene.add_child(_holder)\n\n\t# 从第二个 box 开始创建触发器（与 Unity 版一致，跳过第 0 个）\n\tfor i in range(1, boxes.size()):\n\t\tvar box := boxes[i]\n\t\tif not box is Node3D:\n\t\t\tcontinue\n\t\tvar trigger := _create_trigger(box.global_position)\n\t\t_triggers.append(trigger)\n\n\tset_holder(enabled)\n\nfunc _create_trigger(pos: Vector3) -> Area3D:\n\tvar area := Area3D.new()\n\tarea.name = \"AutoPlayTrigger\"\n\n\tvar collision := CollisionShape3D.new()\n\tvar sphere := SphereShape3D.new()\n\tsphere.radius = sqrt(0.33)\n\tcollision.shape = sphere\n\tarea.add_child(collision)\n\n\tvar script := load(\"res://#Template/[Scripts]/Auto/AutoPlay.gd\")\n\tarea.set_script(script)\n\n\tarea.global_position = pos\n\t_holder.add_child(area)\n\treturn area\n\nfunc set_holder(active: bool) -> void:\n\tif _holder:\n\t\t_holder.visible = active\n\t\tfor trigger in _triggers:\n\t\t\tif trigger is Area3D:\n\t\t\t\ttrigger.set_deferred(\"monitoring\", active)\n\t\t\t\ttrigger.set_deferred(\"monitorable\", active)",
+        "start_line": 1,
+        "end_line": 68
+      },
+      "snapshot_id": "7c415084",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778375294.227503,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_ea3826bc"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

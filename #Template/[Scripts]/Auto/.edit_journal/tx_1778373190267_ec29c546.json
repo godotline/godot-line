@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778373190267_ec29c546",
+  "status": "active",
+  "created_at": 1778373190.2677345,
+  "steps": [
+    {
+      "step_id": "step_6940deb0",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlay.gd",
+      "patch": {
+        "old_text": "var _player: Player\nvar _used: bool = false\n\nfunc _ready() -> void:\n\tif not body_entered.is_connected(_on_body_entered):\n\t\tbody_entered.connect(_on_body_entered)\n\tif not body_exited.is_connected(_on_body_exited):\n\t\tbody_exited.connect(_on_body_exited)\n\tset_process(false)\n\nfunc _on_body_entered(body: Node3D) -> void:\n\tif body is Player:\n\t\t_player = body as Player\n\t\tset_process(true)\n\nfunc _on_body_exited(body: Node3D) -> void:\n\tif body is Player and _player == body:\n\t\t_player = null\n\t\tset_process(false)\n\nfunc _process(_delta: float) -> void:\n\tif not _player or _used:\n\t\tset_process(false)\n\t\treturn\n\tvar dist_sq := global_position.distance_squared_to(_player.global_position)\n\tif dist_sq <= trigger_distance:\n\t\t_used = true\n\t\tset_process(false)\n\t\t_player.turn()",
+        "new_text": "var _player: Player\nvar _triggered: bool = false\n\nfunc _ready() -> void:\n\tif not body_entered.is_connected(_on_body_entered):\n\t\tbody_entered.connect(_on_body_entered)\n\tif not body_exited.is_connected(_on_body_exited):\n\t\tbody_exited.connect(_on_body_exited)\n\tset_process(false)\n\nfunc _on_body_entered(body: Node3D) -> void:\n\tif body is Player:\n\t\t_player = body as Player\n\t\tset_process(true)\n\nfunc _on_body_exited(body: Node3D) -> void:\n\tif body is Player and _player == body:\n\t\t_player = null\n\t\tset_process(false)\n\nfunc _process(_delta: float) -> void:\n\tif not _player or _triggered:\n\t\tset_process(false)\n\t\treturn\n\tvar dist_sq := global_position.distance_squared_to(_player.global_position)\n\tif dist_sq <= trigger_distance:\n\t\t_triggered = true\n\t\tset_process(false)\n\t\t_player.turn()",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "f62d4d1a",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778373190.2722623,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_6940deb0"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

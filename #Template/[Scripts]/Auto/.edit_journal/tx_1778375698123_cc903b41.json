@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778375698123_cc903b41",
+  "status": "active",
+  "created_at": 1778375698.1230276,
+  "steps": [
+    {
+      "step_id": "step_a10c3b5c",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\SetAutoPlay.gd",
+      "patch": {
+        "old_text": "\tplayer_instance.disallow_input = _active",
+        "new_text": "\tif Player.instance:\n\t\tPlayer.instance.disallow_input = _active",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "26688ac0",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778375698.1248896,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_a10c3b5c"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

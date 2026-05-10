@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778375692685_5f643a00",
+  "status": "active",
+  "created_at": 1778375692.6854234,
+  "steps": [
+    {
+      "step_id": "step_ea4dad2a",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Guidance\\GuidanceController.gd",
+      "patch": {
+        "old_text": "func _ready() -> void:\n\t_box_scene = load(\"res://#Template/[Resources]/GuidanceBox.tscn\")",
+        "new_text": "func _ready() -> void:\n\tInstance = self\n\t_box_scene = load(\"res://#Template/[Resources]/GuidanceBox.tscn\")",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "e913003f",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778375692.6877954,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_ea4dad2a"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

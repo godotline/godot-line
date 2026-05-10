@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778376575470_bba97462",
+  "status": "active",
+  "created_at": 1778376575.4704845,
+  "steps": [
+    {
+      "step_id": "step_e72ace1c",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "\tprint(\"[AutoPlayController] _ready, enable=\", enable)\n\n\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\tpush_warning(\"[AutoPlayController] GuidanceController 或 box_holder 未设置\")\n\t\treturn",
+        "new_text": "\tprint(\"[AutoPlayController] _ready, enable=\", enable)\n\tprint(\"[AutoPlayController] GuidanceCtrl=\", GuidanceController.Instance)\n\tprint(\"[AutoPlayController] box_holder=\", GuidanceController.Instance.box_holder if GuidanceController.Instance else \"null\")\n\n\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\tpush_warning(\"[AutoPlayController] GuidanceController 或 box_holder 未设置，延迟重试\")\n\t\t# GuidanceController 还没初始化，延迟一帧重试\n\t\tawait get_tree().process_frame\n\t\tawait get_tree().process_frame\n\t\tprint(\"[AutoPlayController] 重试 GuidanceCtrl=\", GuidanceController.Instance)\n\t\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\t\tpush_warning(\"[AutoPlayController] 重试仍失败\")\n\t\t\treturn",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "c531c6d2",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778376575.47269,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_e72ace1c"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

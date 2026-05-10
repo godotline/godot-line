@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778375316198_7c827479",
+  "status": "active",
+  "created_at": 1778375316.1980329,
+  "steps": [
+    {
+      "step_id": "step_d86af6a6",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "@tool\nclass_name AutoPlayController",
+        "new_text": "class_name AutoPlayController",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "220a7d80",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778375316.1997159,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_d86af6a6"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

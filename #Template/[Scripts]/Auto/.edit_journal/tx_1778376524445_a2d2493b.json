@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778376524445_a2d2493b",
+  "status": "active",
+  "created_at": 1778376524.4454522,
+  "steps": [
+    {
+      "step_id": "step_7200c11d",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlay.gd",
+      "patch": {
+        "old_text": "func _ready() -> void:\n\tif not body_entered.is_connected(_on_body_entered):\n\t\tbody_entered.connect(_on_body_entered)\n\tif not body_exited.is_connected(_on_body_exited):\n\t\tbody_exited.connect(_on_body_exited)\n\tset_process(false)\n\nfunc _on_body_entered(body: Node3D) -> void:\n\tif body is Player:\n\t\t_player = body as Player\n\t\tset_process(true)",
+        "new_text": "func _ready() -> void:\n\tprint(\"[AutoPlay] _ready pos=\", global_position, \" monitoring=\", monitoring, \" mask=\", collision_mask)\n\tif not body_entered.is_connected(_on_body_entered):\n\t\tbody_entered.connect(_on_body_entered)\n\tif not body_exited.is_connected(_on_body_exited):\n\t\tbody_exited.connect(_on_body_exited)\n\tset_process(false)\n\nfunc _on_body_entered(body: Node3D) -> void:\n\tprint(\"[AutoPlay] body_entered: \", body.name, \" isPlayer=\", body is Player)\n\tif body is Player:\n\t\t_player = body as Player\n\t\tset_process(true)",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "3c7fa200",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778376524.4480906,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_7200c11d"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

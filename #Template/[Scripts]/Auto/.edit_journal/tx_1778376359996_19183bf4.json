@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778376359996_19183bf4",
+  "status": "active",
+  "created_at": 1778376359.996189,
+  "steps": [
+    {
+      "step_id": "step_a015401f",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "set_holder(enabled)",
+        "new_text": "set_holder(enable)",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "0812c2ab",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778376359.9999309,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_a015401f"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

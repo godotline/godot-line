@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778377623520_71432396",
+  "status": "active",
+  "created_at": 1778377623.5209844,
+  "steps": [
+    {
+      "step_id": "step_60fe33d3",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlay.gd",
+      "patch": {
+        "old_text": "@tool\nextends BaseTrigger\n## AutoPlay - 自动转向触发器\n## 当玩家进入触发区域时自动执行转向\n\n@export var trigger_distance: float = 0.33\n\nvar _player: Player\nvar _triggered: bool = false\n\nfunc _ready() -> void:\n\tprint(\"[AutoPlay] _ready pos=\", global_position, \" monitoring=\", monitoring, \" mask=\", collision_mask)\n\tif not body_entered.is_connected(_on_body_entered):\n\t\tbody_entered.connect(_on_body_entered)\n\tif not body_exited.is_connected(_on_body_exited):\n\t\tbody_exited.connect(_on_body_exited)\n\tset_process(false)\n\nfunc _on_body_entered(body: Node3D) -> void:\n\tprint(\"[AutoPlay] body_entered: \", body.name, \" isPlayer=\", body is Player)\n\tif body is Player:\n\t\t_player = body as Player\n\t\tset_process(true)\n\nfunc _on_body_exited(body: Node3D) -> void:\n\tif body is Player and _player == body:\n\t\t_player = null\n\t\tset_process(false)\n\nfunc _process(_delta: float) -> void:\n\tif not _player or _triggered:\n\t\tset_process(false)\n\t\treturn\n\tvar dist_sq := global_position.distance_squared_to(_player.global_position)\n\tif dist_sq <= trigger_distance:\n\t\tprint(\"[AutoPlay] TURN! dist_sq=\", dist_sq)\n\t\t_triggered = true\n\t\tset_process(false)\n\t\t_player.turn()",
+        "new_text": "extends BaseTrigger\n## AutoPlay - 自动转向触发器\n## 当玩家进入触发区域时自动执行转向\n\n@export var trigger_distance: float = 0.33\n\nvar _player: Player\nvar _triggered: bool = false\n\nfunc _ready() -> void:\n\tif not body_entered.is_connected(_on_body_entered):\n\t\tbody_entered.connect(_on_body_entered)\n\tif not body_exited.is_connected(_on_body_exited):\n\t\tbody_exited.connect(_on_body_exited)\n\tset_process(false)\n\nfunc _on_body_entered(body: Node3D) -> void:\n\tif body is Player:\n\t\t_player = body as Player\n\t\tset_process(true)\n\nfunc _on_body_exited(body: Node3D) -> void:\n\tif body is Player and _player == body:\n\t\t_player = null\n\t\tset_process(false)\n\nfunc _process(_delta: float) -> void:\n\tif not _player or _triggered:\n\t\tset_process(false)\n\t\treturn\n\tvar dist_sq := global_position.distance_squared_to(_player.global_position)\n\tif dist_sq <= trigger_distance:\n\t\t_triggered = true\n\t\tset_process(false)\n\t\t_player.turn()",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "8903b18e",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778377623.523476,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_60fe33d3"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

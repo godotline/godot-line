@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778377187143_7fffde63",
+  "status": "active",
+  "created_at": 1778377187.1430767,
+  "steps": [
+    {
+      "step_id": "step_e78f53aa",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "func _ready() -> void:\n\tInstance = self\n\tprint(\"[AutoPlayController] _ready, enable=\", enable)\n\tprint(\"[AutoPlayController] GuidanceCtrl=\", GuidanceController.Instance)\n\tprint(\"[AutoPlayController] box_holder=\", GuidanceController.Instance.box_holder if GuidanceController.Instance else \"null\")\n\n\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\tpush_warning(\"[AutoPlayController] GuidanceController 或 box_holder 未设置，延迟重试\")\n\t\t# GuidanceController 还没初始化，延迟一帧重试\n\t\tawait get_tree().process_frame\n\t\tawait get_tree().process_frame\n\t\tprint(\"[AutoPlayController] 重试 GuidanceCtrl=\", GuidanceController.Instance)\n\t\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\t\tpush_warning(\"[AutoPlayController] 重试仍失败\")\n\t\t\treturn\n\n\tvar boxes := GuidanceController.Instance.box_holder.get_children()\n\tprint(\"[AutoPlayController] boxes=\", boxes.size())\n\tif boxes.is_empty():\n\t\treturn\n\n\t_holder = Node3D.new()\n\t_holder.name = \"AutoPlayHolder\"\n\tget_tree().current_scene.add_child(_holder)",
+        "new_text": "func _ready() -> void:\n\tInstance = self\n\t# 等场景所有节点 _ready() 完成后再初始化\n\tget_tree().process_frame.connect(_init_triggers, CONNECT_ONE_SHOT)\n\nfunc _init_triggers() -> void:\n\tprint(\"[AutoPlayController] enable=\", enable)\n\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\tpush_warning(\"[AutoPlayController] GuidanceController 或 box_holder 未设置\")\n\t\treturn",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "c7eec49b",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778377187.1457996,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_e78f53aa"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

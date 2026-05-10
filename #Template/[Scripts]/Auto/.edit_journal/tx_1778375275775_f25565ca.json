@@ -1,0 +1,10 @@
+{
+  "transaction_id": "tx_1778375275775_f25565ca",
+  "status": "active",
+  "created_at": 1778375275.7759976,
+  "steps": [],
+  "committed_steps": [],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

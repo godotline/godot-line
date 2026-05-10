@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778375692679_2f1102a8",
+  "status": "active",
+  "created_at": 1778375692.6790645,
+  "steps": [
+    {
+      "step_id": "step_76625a22",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Guidance\\GuidanceController.gd",
+      "patch": {
+        "old_text": "extends Node3D\nclass_name GuidanceController\n\n@export var create_boxes: bool = false",
+        "new_text": "extends Node3D\nclass_name GuidanceController\n\nstatic var Instance: GuidanceController\n\n@export var create_boxes: bool = false",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "b086ca3e",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778375692.6815345,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_76625a22"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778377198332_2076ff77",
+  "status": "active",
+  "created_at": 1778377198.3320642,
+  "steps": [
+    {
+      "step_id": "step_8367ab66",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "func _init_triggers() -> void:\n\tprint(\"[AutoPlayController] enable=\", enable)\n\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\tpush_warning(\"[AutoPlayController] GuidanceController 或 box_holder 未设置\")\n\t\treturn\n\n\t# 从第二个 box 开始创建触发器（与 Unity 版一致，跳过第 0 个）\n\tfor i in range(1, boxes.size()):",
+        "new_text": "func _init_triggers() -> void:\n\tprint(\"[AutoPlayController] enable=\", enable)\n\tif not GuidanceController.Instance or not GuidanceController.Instance.box_holder:\n\t\tpush_warning(\"[AutoPlayController] GuidanceController 或 box_holder 未设置\")\n\t\treturn\n\n\tvar boxes := GuidanceController.Instance.box_holder.get_children()\n\tprint(\"[AutoPlayController] boxes=\", boxes.size())\n\tif boxes.is_empty():\n\t\treturn\n\n\t_holder = Node3D.new()\n\t_holder.name = \"AutoPlayHolder\"\n\tget_tree().current_scene.add_child(_holder)\n\n\t# 从第二个 box 开始创建触发器（与 Unity 版一致，跳过第 0 个）\n\tfor i in range(1, boxes.size()):",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "ece72bed",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778377198.335747,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_8367ab66"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}
