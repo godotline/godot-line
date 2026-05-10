@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778376774306_723dc52f",
+  "status": "active",
+  "created_at": 1778376774.306769,
+  "steps": [
+    {
+      "step_id": "step_4083b484",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlayController.gd",
+      "patch": {
+        "old_text": "\tvar script := load(\"res://#Template/[Scripts]/Auto/AutoPlay.gd\")\n\tarea.set_script(script)\n\n\tarea.global_position = pos\n\t_holder.add_child(area)",
+        "new_text": "\tvar script := load(\"res://#Template/[Scripts]/Auto/AutoPlay.gd\")\n\tarea.set_script(script)\n\n\t_holder.add_child(area)\n\tarea.global_position = pos",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "21e85fb4",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778376774.3095238,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_4083b484"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

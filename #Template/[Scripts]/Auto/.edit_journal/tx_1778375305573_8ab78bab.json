@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778375305573_8ab78bab",
+  "status": "active",
+  "created_at": 1778375305.573358,
+  "steps": [
+    {
+      "step_id": "step_590c43e4",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\SetAutoPlay.gd",
+      "patch": {
+        "old_text": "extends Node\n## SetAutoPlay - 自动播放开关\n## 切换自动转向模式，锁定/解锁玩家输入\n\n@export var controller: AutoPlayController\n@export var active: bool = false:\n\tset(value):\n\t\tactive = value\n\t\t_apply_state()\n\nvar _player: Player\n\nfunc _ready() -> void:\n\tif Engine.is_editor_hint():\n\t\treturn\n\tawait get_tree().process_frame\n\t_player = Player.instance\n\t_apply_state()\n\nfunc toggle() -> void:\n\tactive = !active\n\nfunc _apply_state() -> void:\n\tif not controller:\n\t\treturn\n\tcontroller.set_holder(active)\n\tif _player:\n\t\t_player.disallow_input = active\n",
+        "new_text": "extends Node\n## SetAutoPlay - 自动播放开关（与 Unity 版一致）\n## 外部调用 toggle() 切换自动转向模式\n\n@export var controller: AutoPlayController\n\nvar _active: bool = false\n\nfunc toggle() -> void:\n\t_active = !_active\n\tif not controller:\n\t\treturn\n\tcontroller.set_holder(_active)\n\tif controller.player:\n\t\tcontroller.player.disallow_input = _active",
+        "start_line": 1,
+        "end_line": 30
+      },
+      "snapshot_id": "eb47974d",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778375305.5757892,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_590c43e4"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

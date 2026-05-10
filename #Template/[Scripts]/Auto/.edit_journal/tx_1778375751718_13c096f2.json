@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778375751718_13c096f2",
+  "status": "active",
+  "created_at": 1778375751.7182481,
+  "steps": [
+    {
+      "step_id": "step_46618200",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\SetAutoPlay.gd",
+      "patch": {
+        "old_text": "extends Node\nextends Node\n## SetAutoPlay - 自动播放开关（与 Unity 版一致）",
+        "new_text": "extends Node\n## SetAutoPlay - 自动播放开关（与 Unity 版一致）",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "18c1be6a",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778375751.7218764,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_46618200"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}

@@ -1,0 +1,30 @@
+{
+  "transaction_id": "tx_1778376524453_203c6200",
+  "status": "active",
+  "created_at": 1778376524.4537556,
+  "steps": [
+    {
+      "step_id": "step_085532e5",
+      "file": "D:\\Code\\GODOTLINE\\GodotLineCollection\\#Template\\[Scripts]\\Auto\\AutoPlay.gd",
+      "patch": {
+        "old_text": "\tif dist_sq <= trigger_distance:\n\t\t_triggered = true\n\t\tset_process(false)\n\t\t_player.turn()",
+        "new_text": "\tif dist_sq <= trigger_distance:\n\t\tprint(\"[AutoPlay] TURN! dist_sq=\", dist_sq)\n\t\t_triggered = true\n\t\tset_process(false)\n\t\t_player.turn()",
+        "old_start": null,
+        "old_end": null
+      },
+      "snapshot_id": "13e5e01d",
+      "status": "committed",
+      "diagnostics": [],
+      "error": null,
+      "timestamp": 1778376524.4554331,
+      "retry_count": 0,
+      "metadata": {}
+    }
+  ],
+  "committed_steps": [
+    "step_085532e5"
+  ],
+  "failed_steps": [],
+  "rollback_history": [],
+  "metadata": {}
+}
