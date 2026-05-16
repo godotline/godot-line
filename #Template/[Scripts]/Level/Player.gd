@@ -57,7 +57,7 @@ func _ready() -> void:
 	if not Engine.is_editor_hint():
 		if not LevelManager.camera_checkpoint.has_checkpoint:
 			LevelManager.reset_to_defaults()
-		
+
 		if LevelManager.is_end == true:
 			LevelManager.is_end = false
 			reload()
@@ -89,11 +89,6 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint() or not is_live:
 		return
 
-	# TODO: 不知道有没有用
-	if level_data and level_data.levelAudioClip and $MusicPlayer.playing and animation_node and animation_node.is_playing():
-		var time = $MusicPlayer.get_playback_position() + AudioServer.get_time_since_last_mix() - AudioServer.get_output_latency()
-		animation_node.seek(time, true)
-
 	var is_on_floor_now := is_on_floor() or fly
 	if is_on_floor_now and not past_is_on_floor_effect:
 		_play_land_effect()
@@ -107,10 +102,10 @@ func _process(_delta: float) -> void:
 			new_line()
 		var offset = position - past_translation
 		var distance = offset.length()
-		
+
 		line.position = past_translation + offset / 2
 		line.position.y = global_position.y
-		
+
 		line.scale = Vector3(1, 1, distance + tailScale)
 
 		var current_y := global_position.y
@@ -186,7 +181,7 @@ func new_line():
 
 	if is_on_floor() or fly:
 		floor_segment_lines.append(line)
-	
+
 	past_translation = position
 	emit_signal("new_line1")
 
@@ -208,13 +203,10 @@ func turn():
 					# Resume paused music (after revive)
 					$MusicPlayer.stream_paused = false
 				elif not $MusicPlayer.playing:
-					# Start fresh music
+					# Start fresh music with output latency compensation
 					$MusicPlayer.stream = level_data.levelAudioClip
 					var music_start_time: float = level_data.get_audio_start_time()
-					if music_start_time > 0.0:
-						$MusicPlayer.play(music_start_time)
-					else:
-						$MusicPlayer.play()
+					_start_music_with_latency(music_start_time)
 		if is_start :
 			emit_signal("onturn")
 			_currentDirection = 1 - _currentDirection
@@ -227,6 +219,16 @@ func turn():
 		past_translation = position
 		new_line()
 
+func _start_music_with_latency(music_start_time: float) -> void:
+	# 延迟音乐播放以补偿音频输出延迟（蓝牙耳机等）
+	# 动画立即播放，音乐延迟输出，使听觉与视觉同步
+	var latency := AudioServer.get_output_latency()
+	if latency > 0.0:
+		# 提前播放，让音频经过输出延迟后恰好与动画同步
+		var adjusted_time = max(music_start_time - latency, 0.0)
+		$MusicPlayer.play(adjusted_time)
+	else:
+		$MusicPlayer.play(music_start_time)
 
 
 func _on_Area_body_entered(_body: Node) -> void:
@@ -240,10 +242,10 @@ func die():
 		LevelManager.GameOverNormal(false)
 		$MusicPlayer.stop()
 		$AudioStreamPlayer.play()
-		
+
 		if not deathParticle:
 			return
-			
+
 		var forward_dir := velocity.normalized() if velocity.length() > 0.01 else Vector3.FORWARD
 		var backward_dir := -forward_dir
 
