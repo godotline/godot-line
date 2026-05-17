@@ -8,6 +8,9 @@ class_name SetActiveTrigger
 @export var active_on_awake: bool = false
 @export var actives: Array[Dictionary] = []
 
+@export_group("调试设置")
+@export var debug_mode: bool = false
+
 var _revive_states: Array[Dictionary] = []
 var _checkpoint_index: int = 0
 
@@ -37,6 +40,9 @@ func _apply_all_actives() -> void:
 				target.visible = active_state
 			elif target is CanvasItem:
 				target.visible = active_state
+			
+			if debug_mode:
+				print("[SetActiveTrigger] ", name, " 设置 ", target_path, " 可见性为 ", active_state)
 
 func _save_revive_states() -> void:
 	_revive_states.clear()
@@ -71,6 +77,5 @@ func _on_revive() -> void:
 	)
 
 func _exit_tree() -> void:
-	if Engine.is_editor_hint():
-		return
-	LevelManager.remove_revive_listener(_on_revive)
+	if not Engine.is_editor_hint():
+		LevelManager.remove_revive_listener(_on_revive)
