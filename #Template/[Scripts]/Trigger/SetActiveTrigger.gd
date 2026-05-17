@@ -8,9 +8,6 @@ class_name SetActiveTrigger
 @export var active_on_awake: bool = false
 @export var actives: Array[Dictionary] = []
 
-@export_group("调试设置")
-@export var debug_mode: bool = false
-
 var _revive_states: Array[Dictionary] = []
 var _checkpoint_index: int = 0
 
