@@ -44,29 +44,31 @@ func _save_revive_states() -> void:
 		var target_path = active_config.get("target", "")
 		var target = get_node_or_null(target_path)
 		if target:
-			var state = {
+			var original_visible = false
+			if target is Node3D:
+				original_visible = target.visible
+			elif target is CanvasItem:
+				original_visible = target.visible
+			
+			_revive_states.append({
 				"target": target_path,
-				"visible": target.visible
-			}
-			_revive_states.append(state)
+				"original_visible": original_visible,
+				"dont_revive": active_config.get("dont_revive", false)
+			})
 
 func _on_revive() -> void:
-	LevelManager.remove_revive_listener(_on_revive)
 	LevelManager.CompareCheckpointIndex(_checkpoint_index, func():
-		_restore_revive_states()
+		for state in _revive_states:
+			if not state.get("dont_revive", false):
+				var target_path = state.get("target", "")
+				var target = get_node_or_null(target_path)
+				if target:
+					var original_visible = state.get("original_visible", false)
+					if target is Node3D:
+						target.visible = original_visible
+					elif target is CanvasItem:
+						target.visible = original_visible
 	)
-
-func _restore_revive_states() -> void:
-	for state in _revive_states:
-		var target_path = state.get("target", "")
-		var target = get_node_or_null(target_path)
-		if target:
-			var visible_state = state.get("visible", true)
-			if target is Node3D:
-				target.visible = visible_state
-			elif target is CanvasItem:
-				target.visible = visible_state
-	_revive_states.clear()
 
 func _exit_tree() -> void:
 	if Engine.is_editor_hint():
