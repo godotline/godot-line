@@ -2,13 +2,14 @@
 
 ## 概览
 
-15 个触发器脚本，基于 `BaseTrigger`（Area3D）的继承体系。用于游戏关卡中的交互逻辑。
+16 个触发器脚本，基于 `BaseTrigger`（Area3D）的继承体系。用于游戏关卡中的交互逻辑。
 
 ## 继承结构
 
 ```
 BaseTrigger (Area3D)
 ├── Trigger           # 通用触发器，发射 hit_the_line 信号
+├── SetActiveTrigger  # 激活/禁用触发器
 ├── Checkpoint        # 检查点
 ├── HeartCheckpoint   # 爱心检查点
 ├── Crown             # 皇冠
