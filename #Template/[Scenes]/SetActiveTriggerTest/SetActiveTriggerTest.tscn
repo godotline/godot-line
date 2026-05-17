@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="2_camera"]
+[ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="3_ground"]
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/trigger.tscn" id="4_trigger"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/Trigger/SetActiveTrigger.gd" id="5_setactive"]
+[ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="6_checkpoint"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_target1"]
+size = Vector3(2, 2, 2)
+
+[sub_resource type="StandardMaterial3D" id="Material_red"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_target2"]
+size = Vector3(2, 2, 2)
+
+[sub_resource type="StandardMaterial3D" id="Material_blue"]
+albedo_color = Color(0, 0, 1, 1)
+
+[node name="SetActiveTriggerTest" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="BasicOBJ_Group" type="Node3D" parent="."]
+
+[node name="Player" parent="BasicOBJ_Group" instance=ExtResource("1_player")]
+
+[node name="CameraRoot" parent="BasicOBJ_Group" instance=ExtResource("2_camera")]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="BasicOBJ_Group"]
+transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
+shadow_enabled = true
+
+[node name="Scene_Group" type="Node3D" parent="."]
+
+[node name="Ground_Start" parent="Scene_Group" instance=ExtResource("3_ground")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+
+[node name="Ground_Middle" parent="Scene_Group" instance=ExtResource("3_ground")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 10)
+
+[node name="Ground_End" parent="Scene_Group" instance=ExtResource("3_ground")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 20)
+
+[node name="TargetBox1" type="MeshInstance3D" parent="Scene_Group"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 5)
+mesh = SubResource("BoxMesh_target1")
+material_override = SubResource("Material_red")
+
+[node name="TargetBox2" type="MeshInstance3D" parent="Scene_Group"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 5)
+mesh = SubResource("BoxMesh_target2")
+material_override = SubResource("Material_blue")
+
+[node name="Checkpoint1" parent="Scene_Group" instance=ExtResource("6_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
+
+[node name="SetActiveTrigger_Disable" parent="Scene_Group" instance=ExtResource("4_trigger")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 8)
+script = ExtResource("5_setactive")
+actives = [{"active": false, "target": NodePath("../TargetBox1")}]
+
+[node name="SetActiveTrigger_Enable" parent="Scene_Group" instance=ExtResource("4_trigger")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 3, 0, 12)
+script = ExtResource("5_setactive")
+actives = [{"active": true, "target": NodePath("../TargetBox1")}, {"active": false, "target": NodePath("../TargetBox2")}]
