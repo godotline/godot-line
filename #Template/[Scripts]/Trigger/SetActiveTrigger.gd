@@ -6,7 +6,7 @@ class_name SetActiveTrigger
 
 @export_group("激活设置")
 @export var active_on_awake: bool = false
-@export var actives: Array[Dictionary] = []
+@export var actives: Array[SingleActive] = []
 
 var _revive_states: Array[Dictionary] = []
 var _checkpoint_index: int = 0
@@ -29,35 +29,34 @@ func _on_triggered(_body: Node3D) -> void:
 
 func _apply_all_actives() -> void:
 	for active_config in actives:
-		var target_path = active_config.get("target", "")
-		var target = get_node_or_null(target_path)
-		if target:
-			var active_state = active_config.get("active", true)
-			if target is Node3D:
-				target.visible = active_state
-			elif target is CanvasItem:
-				target.visible = active_state
-			
-			if debug_mode:
-				print("[SetActiveTrigger] ", name, " 设置 ", target_path, " 可见性为 ", active_state)
+		if active_config and active_config.target:
+			var target = get_node_or_null(active_config.target)
+			if target:
+				if target is Node3D:
+					target.visible = active_config.active
+				elif target is CanvasItem:
+					target.visible = active_config.active
+				
+				if debug_mode:
+					print("[SetActiveTrigger] ", name, " 设置 ", active_config.target, " 可见性为 ", active_config.active)
 
 func _save_revive_states() -> void:
 	_revive_states.clear()
 	for active_config in actives:
-		var target_path = active_config.get("target", "")
-		var target = get_node_or_null(target_path)
-		if target:
-			var original_visible = false
-			if target is Node3D:
-				original_visible = target.visible
-			elif target is CanvasItem:
-				original_visible = target.visible
-			
-			_revive_states.append({
-				"target": target_path,
-				"original_visible": original_visible,
-				"dont_revive": active_config.get("dont_revive", false)
-			})
+		if active_config and active_config.target:
+			var target = get_node_or_null(active_config.target)
+			if target:
+				var original_visible = false
+				if target is Node3D:
+					original_visible = target.visible
+				elif target is CanvasItem:
+					original_visible = target.visible
+				
+				_revive_states.append({
+					"target": active_config.target,
+					"original_visible": original_visible,
+					"dont_revive": active_config.dont_revive
+				})
 
 func _on_revive() -> void:
 	LevelManager.CompareCheckpointIndex(_checkpoint_index, func():
