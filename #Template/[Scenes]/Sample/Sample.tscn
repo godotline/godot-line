@@ -13,6 +13,7 @@
 [ext_resource type="Script" uid="uid://bdbb1ogxk0fcr" path="res://#Template/[Scripts]/Trigger/JumpPredictor.gd" id="11_uo12o"]
 [ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="12_21ado"]
 [ext_resource type="Script" uid="uid://c0whny0gf5gyj" path="res://#Template/[Scripts]/Trigger/KillPlayer.gd" id="12_blh37"]
+[ext_resource type="Script" uid="uid://ct52ojgblm2io" path="res://#Template/[Scripts]/Trigger/LocalTeleportTrigger.gd" id="13_jqniq"]
 [ext_resource type="Script" uid="uid://b1m236nbmh7ke" path="res://#Template/[Scripts]/Trigger/PlayAnimator.gd" id="13_sowmv"]
 [ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="14_oqacy"]
 [ext_resource type="PackedScene" uid="uid://bnhhmjcg10054" path="res://#Template/Percentage.tscn" id="15_smra3"]
@@ -183,11 +184,24 @@ draw_preview = true
 transform = Transform3D(1.767767, 0, -2.631019, 0, 2.5, 0, 1.767767, 0, 2.631019, 4.5491443, -0.50000095, 15.75985)
 
 [node name="Trigger6" parent="." unique_id=1386365452 instance=ExtResource("7_mmp1f")]
-transform = Transform3D(1.767767, 0, -8.965092, 0, 4.1631746, 0, 1.767767, 0, 8.965092, 13.283007, -0.50000095, 11.500179)
+transform = Transform3D(1.767767, 0, -8.965092, 0, 4.1631746, 0, 1.767767, 0, 8.965092, 19.888784, -0.50000095, 4.894402)
 script = ExtResource("12_blh37")
 reason = 1
 no_revive = false
 custom_death_clip = null
+
+[node name="Trigger7" parent="." unique_id=69185947 instance=ExtResource("7_mmp1f")]
+transform = Transform3D(1.767767, 0, -8.965092, 0, 4.1631746, 0, 1.767767, 0, 8.965092, 14.302683, -0.50000095, 13.28717)
+script = ExtResource("13_jqniq")
+teleport_mode = 0
+tp_x = 10.0
+tp_y = 0.0
+tp_z = 20.0
+teleport_position = Vector3(0, 0, 0)
+target = NodePath("")
+force_camera_follow = true
+turn = true
+target_direction = 1
 
 [node name="Trigger4" parent="." unique_id=1667173945 instance=ExtResource("7_mmp1f")]
 transform = Transform3D(1.767767, 0, -2.631019, 0, 2.5, 0, 1.767767, 0, 2.631019, 12.549145, -0.50000095, 29.75985)
@@ -346,5 +360,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.495274, -0.45, 54.249584)
 
 [connection signal="triggered" from="Trigger2" to="Ground2" method="Trigger"]
 [connection signal="triggered" from="Trigger6" to="Ground2" method="Trigger"]
+[connection signal="triggered" from="Trigger7" to="Ground2" method="Trigger"]
 
 [editable path="Crown"]

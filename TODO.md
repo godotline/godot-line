@@ -6,8 +6,8 @@
 |--------|------|------|:-----:|:-----:|------|
 | P0 | Trigger | KillPlayer | ✓ | ✓ | 接触即死触发器（落水/出图/撞墙三种模式） |
 | P0 | Level | AudioManager | ✓ | ✓ | 音乐管理、音效池、音量控制、淡入淡出 |
-| P0 | Trigger | Teleport | ✓ | ⚠️ | `LocalTeleportTrigger.gd` 缺少 ForceCameraFollow、Turn 模式 |
-| P0 | Trigger | SetActive | ✓ | ⚠️ | `SetActiveTrigger.gd` 需验证 revive 恢复逻辑 |
+| P0 | Trigger | Teleport | ✓ | ✓ | Target/Position/Offset 三种模式，ForceCameraFollow，Turn 转向 |
+| P0 | Trigger | SetActive | ✓ | ✓ | `SetActiveTrigger.gd` 已验证 revive 恢复逻辑 |
 | P1 | Level | FakePlayer 系统 | ✓ | ✗ | 假线（含 FakePlayer.cs + FakePlayerTransport + FakePlayerTrigger） |
 | P1 | Trigger | FakePlayerTrigger | ✓ | ✗ | 三种模式：Turn / ChangeDirection / SetState |
 | P1 | Trigger | GravityTrigger | ✓ | ✗ | 更改场景重力 |
@@ -116,7 +116,7 @@
 
 | 类别 | 总计 | ✓ 已完成 | ⚠️ 部分/待验证 | ✗ 未实现 |
 |------|:---:|:--------:|:-------------:|:--------:|
-| Trigger | 21 | 11 | 4 | 6 |
+| Trigger | 21 | 12 | 3 | 6 |
 | Level | 7 | 3 | 0 | 4 |
 | Animator | 6 | 3 | 1 | 2 |
 | GUI | 8 | 0 | 0 | 8 |

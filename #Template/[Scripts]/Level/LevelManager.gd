@@ -254,6 +254,30 @@ static func GameOverRevive() -> void:
 ## 辅助方法
 ## ============================================================
 
+## 传送：设置玩家位置、强制相机跟随、改变朝向
+static func init_player_position(player: CharacterBody3D, position: Vector3, force_camera: bool = false, do_turn: bool = false, target_dir: Direction = Direction.First) -> void:
+	player.global_position = position
+
+	if do_turn:
+		var dir_index := 0 if target_dir == Direction.First else 1
+		player._currentDirection = dir_index
+		player.rotation_degrees = player.current_direction
+		# 转向后重新计算速度方向
+		player.velocity = player.to_global(Vector3(0, 0, 1) * player.speed) - player.global_position
+
+	player.new_line()
+
+	if force_camera:
+		var cf := CameraFollower.instance
+		if cf:
+			cf.position = position
+			cf.follow = true
+
+		var ocf := OldCameraFollower.instance
+		if ocf:
+			ocf.position = position + ocf.add_position
+			ocf.following = true
+
 static func DestroyRemain() -> void:
 	GameState = GameStatus.Waiting
 
