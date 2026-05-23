@@ -75,18 +75,18 @@ func _ready() -> void:
 		add_child(overlay)
 
 func _physics_process(delta: float) -> void:
-	if not Engine.is_editor_hint() and is_live:
+	if not Engine.is_editor_hint() and (is_live or LevelManager.GameState == LevelManager.GameStatus.Moving):
 		if not is_on_floor():
 			var gravity_strength: float = level_data.gravity.length() if level_data else 9.8
 			velocity.y -= gravity_strength * delta
 		move_and_slide()
-		if is_on_wall():
+		if is_live and is_on_wall():
 			die()
 		if fly:
 			$".".position.y = y
 
 func _process(_delta: float) -> void:
-	if Engine.is_editor_hint() or not is_live:
+	if Engine.is_editor_hint() or (not is_live and LevelManager.GameState != LevelManager.GameStatus.Moving):
 		return
 
 	var is_on_floor_now := is_on_floor() or fly
@@ -133,7 +133,7 @@ func _input(event: InputEvent) -> void:
 					loading = true
 					reload()
 			KEY_K:
-				if not Engine.is_editor_hint() and is_live:
+				if not Engine.is_editor_hint() and (is_live or LevelManager.GameState == LevelManager.GameStatus.Moving):
 					die()
 			KEY_D:
 				if OS.is_debug_build():
@@ -233,17 +233,19 @@ func _start_music_with_latency(music_start_time: float) -> void:
 
 func _on_Area_body_entered(_body: Node) -> void:
 	die()
-func die():
+func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = LevelManager.GameStatus.Died):
 	if !noclip:
 		is_live = false
-		LevelManager.GameState = LevelManager.GameStatus.Died
-		velocity = Vector3.ZERO
+		LevelManager.GameState = death_state
+		if death_state == LevelManager.GameStatus.Died:
+			velocity = Vector3.ZERO
 		if animation_node: animation_node.pause()
 		LevelManager.GameOverNormal(false)
-		$MusicPlayer.stop()
-		$AudioStreamPlayer.play()
+		AudioManager.fade_out()
+		if spawn_particles:
+			$AudioStreamPlayer.play()
 
-		if not deathParticle:
+		if not spawn_particles or not deathParticle:
 			return
 
 		var forward_dir := velocity.normalized() if velocity.length() > 0.01 else Vector3.FORWARD

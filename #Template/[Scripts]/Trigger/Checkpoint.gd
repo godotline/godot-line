@@ -270,6 +270,7 @@ func revive() -> void:
 	var music_player := main_line.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 	if music_player:
 		music_player.stop()
+		music_player.volume_db = 0.0
 		music_player.pitch_scale = 1.0
 		# Set music to checkpoint position but don't play yet
 		var music_time := LevelManager.music_checkpoint_time
