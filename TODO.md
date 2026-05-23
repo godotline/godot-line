@@ -4,14 +4,14 @@
 
 | 优先级 | 分类 | 功能 | Unity | Godot | 备注 |
 |--------|------|------|:-----:|:-----:|------|
-| P0 | Trigger | KillPlayer | ✓ | ✗ | 接触即死触发器（落水/出图/撞墙三种模式） |
-| P0 | Level | AudioManager | ✓ | ✗ | 音乐管理、音效池、音量控制、淡入淡出 |
+| P0 | Trigger | KillPlayer | ✓ | ✓ | 接触即死触发器（落水/出图/撞墙三种模式） |
+| P0 | Level | AudioManager | ✓ | ✓ | 音乐管理、音效池、音量控制、淡入淡出 |
 | P0 | Trigger | Teleport | ✓ | ⚠️ | `LocalTeleportTrigger.gd` 缺少 ForceCameraFollow、Turn 模式 |
 | P0 | Trigger | SetActive | ✓ | ⚠️ | `SetActiveTrigger.gd` 需验证 revive 恢复逻辑 |
 | P1 | Level | FakePlayer 系统 | ✓ | ✗ | 假线（含 FakePlayer.cs + FakePlayerTransport + FakePlayerTrigger） |
 | P1 | Trigger | FakePlayerTrigger | ✓ | ✗ | 三种模式：Turn / ChangeDirection / SetState |
 | P1 | Trigger | GravityTrigger | ✓ | ✗ | 更改场景重力 |
-| P1 | Trigger | KillPlayer | ✓ | ✗ | 落水/出图/撞墙死亡方式 |
+| P1 | Trigger | KillPlayer | ✓ | ✓ | 落水/出图/撞墙死亡方式（重复条目，与P0合并） |
 | P1 | Trigger | PlayAudioClip | ✓ | ✗ | 触发播放音效（支持 Trigger 和事件两种模式） |
 | P1 | Trigger | FadeOutMusic | ✓ | ✗ | 淡出背景音乐 |
 | P1 | Trigger | SetFog / FogTrigger | ✓ | ⚠️ | `FogColorChanger.gd` 是 Node3D 非 Area3D，缺少 Trigger 模式 |
@@ -44,6 +44,13 @@
 | P2 | Editor | TrailRenderer (路径高亮) | ✓ | ✗ | 编辑器内路径高亮 + 点击时间显示 |
 | P2 | Player | C 键输出音乐时间 | ✓ | ✗ | 编辑器快捷键，在控制台输出当前音乐时间 |
 | P2 | Player | 事件系统 | ✓ | ⚠️ | Player.gd 缺少部分事件（OnGameAwake, OnPlayerStart, OnLeaveGround, OnTouchGround, OnGetGem, OnPlayerJump） |
+| P1 | Player | noDeath 标志 | ✓ | ✗ | Unity KillPlayer 检查 player.noDeath 跳过死亡，Godot 无此字段 |
+| P1 | Player | Tail 对象池 | ✓ | ✗ | Unity poolSize=256 复用线段，Godot 每次 new_line() 新建 MeshInstance3D |
+| P1 | Player | Henshin 变身系统 | ✓ | ✗ | 双材质切换（characterMaterial/alphaMaterial），Godot 未实现 |
+| P1 | Player | playedAnimators / playedTimelines | ✓ | ✗ | Unity 跟踪已播放动画器/时间线用于存档恢复 |
+| P2 | Player | sceneCamera / sceneLight 引用 | ✓ | ✗ | Unity Player 持有直接引用，Godot 靠 get_first_node_in_group 查找 |
+| P2 | Player | musicVolume 独立字段 | ✓ | ✗ | Unity 有独立音量控制字段 |
+| P2 | Player | Editor 工具 | ✓ | ✗ | GetStartPosition 按钮、OnDrawGizmos 方向绘制、GetFrame FPS 计数 |
 | P3 | Level | PlayerCubes | ✓ | ✗ | 玩家轨迹方块（Godot 用 road mesh 替代） |
 | P3 | Trigger | TTFCheckPoint 系列 | ✓ | ✗ | 主题化存档点（TTFCheckPoint + TTFCheckPointGem + TTFCheckPointTrigger） |
 | P3 | Assets | 3D 模型 / 材质 | 28+ 模型, 35 材质 | 3 模型, 5 材质 | 水、自然包、云、环、BonusBox、Fragment、Heart 等 |
@@ -109,11 +116,11 @@
 
 | 类别 | 总计 | ✓ 已完成 | ⚠️ 部分/待验证 | ✗ 未实现 |
 |------|:---:|:--------:|:-------------:|:--------:|
-| Trigger | 21 | 10 | 4 | 7 |
-| Level | 7 | 2 | 0 | 5 |
+| Trigger | 21 | 11 | 4 | 6 |
+| Level | 7 | 3 | 0 | 4 |
 | Animator | 6 | 3 | 1 | 2 |
 | GUI | 8 | 0 | 0 | 8 |
-| Player | 1 | 0 | 1 | 0 |
+| Player | 9 | 0 | 1 | 8 |
 | Editor | 1 | 0 | 1 | 0 |
 | Assets | 2 | 0 | 0 | 2 |
 | **已对齐系统** | 25 | 25 | 0 | 0 |

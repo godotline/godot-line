@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/jump.gd" id="10_bmosm"]
 [ext_resource type="Script" uid="uid://bdbb1ogxk0fcr" path="res://#Template/[Scripts]/Trigger/JumpPredictor.gd" id="11_uo12o"]
 [ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="12_21ado"]
+[ext_resource type="Script" uid="uid://c0whny0gf5gyj" path="res://#Template/[Scripts]/Trigger/KillPlayer.gd" id="12_blh37"]
 [ext_resource type="Script" uid="uid://b1m236nbmh7ke" path="res://#Template/[Scripts]/Trigger/PlayAnimator.gd" id="13_sowmv"]
 [ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="14_oqacy"]
 [ext_resource type="PackedScene" uid="uid://bnhhmjcg10054" path="res://#Template/Percentage.tscn" id="15_smra3"]
@@ -181,6 +182,13 @@ draw_preview = true
 [node name="Trigger2" parent="." unique_id=322261833 instance=ExtResource("7_mmp1f")]
 transform = Transform3D(1.767767, 0, -2.631019, 0, 2.5, 0, 1.767767, 0, 2.631019, 4.5491443, -0.50000095, 15.75985)
 
+[node name="Trigger6" parent="." unique_id=1386365452 instance=ExtResource("7_mmp1f")]
+transform = Transform3D(1.767767, 0, -8.965092, 0, 4.1631746, 0, 1.767767, 0, 8.965092, 13.283007, -0.50000095, 11.500179)
+script = ExtResource("12_blh37")
+reason = 1
+no_revive = false
+custom_death_clip = null
+
 [node name="Trigger4" parent="." unique_id=1667173945 instance=ExtResource("7_mmp1f")]
 transform = Transform3D(1.767767, 0, -2.631019, 0, 2.5, 0, 1.767767, 0, 2.631019, 12.549145, -0.50000095, 29.75985)
 script = ExtResource("12_21ado")
@@ -337,5 +345,6 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 55.6
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.495274, -0.45, 54.249584)
 
 [connection signal="triggered" from="Trigger2" to="Ground2" method="Trigger"]
+[connection signal="triggered" from="Trigger6" to="Ground2" method="Trigger"]
 
 [editable path="Crown"]
