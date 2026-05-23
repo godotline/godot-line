@@ -19,8 +19,10 @@ func _ready() -> void:
 	_sprite = $"../Sprite3D"
 	_player = Player.instance
 	_trigger_effect = load("res://#Template/[Resources]/Triggered.tscn")
+	if not _player:
+		return
 	var dist_sq := global_position.distance_squared_to(_player.global_position)
-	if _player and dist_sq > appear_distance * appear_distance:
+	if dist_sq > appear_distance * appear_distance:
 		_disappear(false)
 
 func _process(_delta: float) -> void:
