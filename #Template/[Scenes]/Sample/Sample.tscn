@@ -15,6 +15,7 @@
 [ext_resource type="Script" uid="uid://c0whny0gf5gyj" path="res://#Template/[Scripts]/Trigger/KillPlayer.gd" id="12_blh37"]
 [ext_resource type="Script" uid="uid://ct52ojgblm2io" path="res://#Template/[Scripts]/Trigger/LocalTeleportTrigger.gd" id="13_jqniq"]
 [ext_resource type="Script" uid="uid://b1m236nbmh7ke" path="res://#Template/[Scripts]/Trigger/PlayAnimator.gd" id="13_sowmv"]
+[ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/FakePlayerTrigger.gd" id="14_47x6u"]
 [ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="14_oqacy"]
 [ext_resource type="PackedScene" uid="uid://bnhhmjcg10054" path="res://#Template/Percentage.tscn" id="15_smra3"]
 [ext_resource type="FontFile" uid="uid://diyv3w2nftxaw" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="16_4iu13"]
@@ -23,6 +24,7 @@
 [ext_resource type="Script" uid="uid://cgl1gfqlue3jc" path="res://#Template/[Scripts]/Auto/AutoPlayController.gd" id="19_8ar0p"]
 [ext_resource type="Script" uid="uid://cq7y41sswinln" path="res://#Template/[Scripts]/Guidance/GuidanceController.gd" id="19_cr5py"]
 [ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="20_8ar0p"]
+[ext_resource type="PackedScene" uid="uid://dbmrq55p4ik62" path="res://#Template/FakePlayer.tscn" id="23_gnlg8"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0yb4g"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -203,6 +205,24 @@ force_camera_follow = true
 turn = true
 target_direction = 1
 
+[node name="Trigger8" parent="." unique_id=1840904846 node_paths=PackedStringArray("targetPlayer") instance=ExtResource("7_mmp1f")]
+transform = Transform3D(1.767767, 0, -8.965092, 0, 4.1631746, 0, 1.767767, 0, 8.965092, 31.440472, -0.49999905, 34.428783)
+script = ExtResource("14_47x6u")
+targetPlayer = NodePath("")
+type = 2
+firstDirection = Vector3(0, 90, 0)
+secondDirection = Vector3(0, 0, 0)
+targetState = 0
+
+[node name="Trigger9" parent="." unique_id=1159553083 node_paths=PackedStringArray("targetPlayer") instance=ExtResource("7_mmp1f")]
+transform = Transform3D(1.767767, 0, -8.965092, 0, 4.1631746, 0, 1.767767, 0, 8.965092, 38.0462, -0.49999905, 18.763533)
+script = ExtResource("14_47x6u")
+targetPlayer = NodePath("")
+type = 0
+firstDirection = Vector3(0, 90, 0)
+secondDirection = Vector3(0, 0, 0)
+targetState = 0
+
 [node name="Trigger4" parent="." unique_id=1667173945 instance=ExtResource("7_mmp1f")]
 transform = Transform3D(1.767767, 0, -2.631019, 0, 2.5, 0, 1.767767, 0, 2.631019, 12.549145, -0.50000095, 29.75985)
 script = ExtResource("12_21ado")
@@ -266,6 +286,9 @@ libraries/ = SubResource("AnimationLibrary_5wtmk")
 [node name="AutoPlay" type="Node3D" parent="." unique_id=818852756]
 script = ExtResource("19_8ar0p")
 enable = false
+
+[node name="FakePlayer" parent="." unique_id=226051297 instance=ExtResource("23_gnlg8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.00756, 0, 24.731968)
 
 [node name="GuidanceBoxHolder" type="Node3D" parent="." unique_id=2033417881 node_paths=PackedStringArray("box_holder")]
 script = ExtResource("19_cr5py")

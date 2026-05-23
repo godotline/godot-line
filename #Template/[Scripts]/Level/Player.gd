@@ -4,6 +4,16 @@ class_name Player
 
 static var instance: Player
 
+## ========== 事件信号（GameEvents 系统） ==========
+signal on_game_awake			## 游戏初始化完成
+signal on_player_start			## 玩家开始移动（第一次转向）
+signal on_change_direction		## 玩家转向
+signal on_leave_ground			## 玩家离开地面
+signal on_touch_ground			## 玩家落地
+signal on_game_over				## 玩家死亡
+signal on_get_gem				## 收集宝石
+signal on_player_jump			## 玩家跳跃
+
 signal new_line1
 signal on_sky
 signal onturn
@@ -52,6 +62,10 @@ var debug := false
 @export var allowTurn := true
 @export var disallow_input := false
 
+## ========== Tail 对象池 ==========
+const TAIL_POOL_SIZE := 256
+var _tail_pool: Array[MeshInstance3D] = []
+
 func _ready() -> void:
 	instance = self
 	if not Engine.is_editor_hint():
@@ -64,6 +78,7 @@ func _ready() -> void:
 		LevelManager.load_checkpoint_to_main_line(self)
 		speed = level_data.speed
 		rotation_degrees = current_direction
+		emit_signal("on_game_awake")
 	if is_inside_tree():
 		if level_data:
 				level_data.apply_to(self, get_world_3d().space)
@@ -92,6 +107,7 @@ func _process(_delta: float) -> void:
 	var is_on_floor_now := is_on_floor() or fly
 	if is_on_floor_now and not past_is_on_floor_effect:
 		_play_land_effect()
+		emit_signal("on_touch_ground")
 	past_is_on_floor_effect = is_on_floor_now
 
 	if not line:
@@ -117,6 +133,7 @@ func _process(_delta: float) -> void:
 	else:
 		if past_is_on_floor != is_on_floor_now:
 			emit_signal("on_sky")
+			emit_signal("on_leave_ground")
 			floor_segment_lines.clear()
 	past_is_on_floor = is_on_floor_now
 
@@ -156,7 +173,25 @@ func _clear_tail() -> void:
 	var tail_holder := tree.current_scene.get_node_or_null("PlayerTailHolder") as Node3D
 	if tail_holder:
 		for child in tail_holder.get_children():
-			child.queue_free()
+			var tail := child as MeshInstance3D
+			if tail:
+				_return_to_pool(tail)
+			else:
+				child.queue_free()
+
+func _return_to_pool(tail: MeshInstance3D) -> void:
+	if tail.get_parent():
+		tail.get_parent().remove_child(tail)
+	tail.visible = false
+	if _tail_pool.size() < TAIL_POOL_SIZE:
+		_tail_pool.append(tail)
+	else:
+		tail.queue_free()
+
+func _get_from_pool() -> MeshInstance3D:
+	if _tail_pool.is_empty():
+		return MeshInstance3D.new()
+	return _tail_pool.pop_back()
 
 func _get_or_create_player_tail_holder() -> Node3D:
 	var root := tree.current_scene
@@ -170,11 +205,12 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	return tail_holder
 
 func new_line():
-	line = MeshInstance3D.new()
+	line = _get_from_pool()
 	line.mesh = mesh
 	line.position = position
-	line.rotation = rotation  # 继承当前旋转
+	line.rotation = rotation
 	line.set_surface_override_material(0, material)
+	line.visible = true
 
 	var tail_holder := _get_or_create_player_tail_holder()
 	tail_holder.add_child(line)
@@ -193,26 +229,25 @@ func _play_land_effect() -> void:
 func turn():
 	if is_on_floor() or fly:
 		if animation_node and not animation_node.is_playing():
-			# Don't reset anim_time if we're resuming from a paused state (after revive)
 			if LevelManager.line_crossing_crown == 0 and not $MusicPlayer.stream_paused:
 				LevelManager.anim_time = 0
 			animation_node.play("level")
 			animation_node.seek(LevelManager.anim_time)
 			if level_data and level_data.levelAudioClip:
 				if $MusicPlayer.stream_paused:
-					# Resume paused music (after revive)
 					$MusicPlayer.stream_paused = false
 				elif not $MusicPlayer.playing:
-					# Start fresh music with output latency compensation
 					$MusicPlayer.stream = level_data.levelAudioClip
 					var music_start_time: float = level_data.get_audio_start_time()
 					_start_music_with_latency(music_start_time)
 		if is_start :
 			emit_signal("onturn")
+			emit_signal("on_change_direction")
 			_currentDirection = 1 - _currentDirection
 			rotation_degrees = current_direction
 		else:
 			is_start = true
+			emit_signal("on_player_start")
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			rotation_degrees = current_direction
 		velocity = to_global(Vector3(0,0,1) * speed) - position
@@ -220,11 +255,8 @@ func turn():
 		new_line()
 
 func _start_music_with_latency(music_start_time: float) -> void:
-	# 延迟音乐播放以补偿音频输出延迟（蓝牙耳机等）
-	# 动画立即播放，音乐延迟输出，使听觉与视觉同步
 	var latency := AudioServer.get_output_latency()
 	if latency > 0.0:
-		# 提前播放，让音频经过输出延迟后恰好与动画同步
 		var adjusted_time = max(music_start_time - latency, 0.0)
 		$MusicPlayer.play(adjusted_time)
 	else:
@@ -237,6 +269,7 @@ func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = Le
 	if !noclip:
 		is_live = false
 		LevelManager.GameState = death_state
+		emit_signal("on_game_over")
 		if death_state == LevelManager.GameStatus.Died:
 			velocity = Vector3.ZERO
 		if animation_node: animation_node.pause()

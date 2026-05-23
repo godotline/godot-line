@@ -8,8 +8,8 @@
 | P0 | Level | AudioManager | ✓ | ✓ | 音乐管理、音效池、音量控制、淡入淡出 |
 | P0 | Trigger | Teleport | ✓ | ✓ | Target/Position/Offset 三种模式，ForceCameraFollow，Turn 转向 |
 | P0 | Trigger | SetActive | ✓ | ✓ | `SetActiveTrigger.gd` 已验证 revive 恢复逻辑 |
-| P1 | Level | FakePlayer 系统 | ✓ | ✗ | 假线（含 FakePlayer.cs + FakePlayerTransport + FakePlayerTrigger） |
-| P1 | Trigger | FakePlayerTrigger | ✓ | ✗ | 三种模式：Turn / ChangeDirection / SetState |
+| P1 | Level | FakePlayer 系统 | ✓ | ✓ | 假线（含 FakePlayer.cs + FakePlayerTransport + FakePlayerTrigger） |
+| P1 | Trigger | FakePlayerTrigger | ✓ | ✓ | 三种模式：Turn / ChangeDirection / SetState |
 | P1 | Trigger | GravityTrigger | ✓ | ✗ | 更改场景重力 |
 | P1 | Trigger | KillPlayer | ✓ | ✓ | 落水/出图/撞墙死亡方式（重复条目，与P0合并） |
 | P1 | Trigger | PlayAudioClip | ✓ | ✗ | 触发播放音效（支持 Trigger 和事件两种模式） |
@@ -33,7 +33,7 @@
 | P2 | GUI | KeyBoardFunctionsDisplay | ✓ | ✗ | 按键功能提示显示 |
 | P2 | GUI | GuidanceEnabled | ✓ | ✗ | 引导线启用按钮 |
 | P2 | GUI | HideCanvas / ShowCanvas | ✓ | ✗ | 画布显隐控制 |
-| P2 | Level | ObjectPool | ✓ | ✗ | 通用对象池（线身、粒子等复用） |
+| P2 | Level | ObjectPool | ✓ | ✓ | 通用对象池（线身、粒子等复用），含 TailPool 256 容量 |
 | P2 | Trigger | ParticleSystemPlay | ✓ | ✗ | 触发位置播放粒子效果 |
 | P2 | Trigger | Henshin | ✓ | ✗ | 变身（模型/材质切换） |
 | P2 | Trigger | AchievementTrigger | ✓ | ✗ | 成就系统触发器 |
@@ -43,9 +43,9 @@
 | P2 | Level | DisableInPlaymode | ✓ | ✗ | 运行时隐藏编辑器辅助对象 |
 | P2 | Editor | TrailRenderer (路径高亮) | ✓ | ✗ | 编辑器内路径高亮 + 点击时间显示 |
 | P2 | Player | C 键输出音乐时间 | ✓ | ✗ | 编辑器快捷键，在控制台输出当前音乐时间 |
-| P2 | Player | 事件系统 | ✓ | ⚠️ | Player.gd 缺少部分事件（OnGameAwake, OnPlayerStart, OnLeaveGround, OnTouchGround, OnGetGem, OnPlayerJump） |
+| P2 | Player | 事件系统 | ✓ | ✓ | Player.gd 信号含 OnGameAwake, OnPlayerStart, OnChangeDirection, OnLeaveGround, OnTouchGround, OnGameOver, OnGetGem, OnPlayerJump |
 | P1 | Player | noDeath 标志 | ✓ | ✗ | Unity KillPlayer 检查 player.noDeath 跳过死亡，Godot 无此字段 |
-| P1 | Player | Tail 对象池 | ✓ | ✗ | Unity poolSize=256 复用线段，Godot 每次 new_line() 新建 MeshInstance3D |
+| P1 | Player | Tail 对象池 | ✓ | ✓ | TAIL_POOL_SIZE=256，循环复用 MeshInstance3D |
 | P1 | Player | Henshin 变身系统 | ✓ | ✗ | 双材质切换（characterMaterial/alphaMaterial），Godot 未实现 |
 | P1 | Player | playedAnimators / playedTimelines | ✓ | ✗ | Unity 跟踪已播放动画器/时间线用于存档恢复 |
 | P2 | Player | sceneCamera / sceneLight 引用 | ✓ | ✗ | Unity Player 持有直接引用，Godot 靠 get_first_node_in_group 查找 |
@@ -116,11 +116,11 @@
 
 | 类别 | 总计 | ✓ 已完成 | ⚠️ 部分/待验证 | ✗ 未实现 |
 |------|:---:|:--------:|:-------------:|:--------:|
-| Trigger | 21 | 12 | 3 | 6 |
-| Level | 7 | 3 | 0 | 4 |
+| Trigger | 21 | 13 | 3 | 5 |
+| Level | 7 | 5 | 0 | 2 |
 | Animator | 6 | 3 | 1 | 2 |
 | GUI | 8 | 0 | 0 | 8 |
-| Player | 9 | 0 | 1 | 8 |
+| Player | 9 | 2 | 0 | 7 |
 | Editor | 1 | 0 | 1 | 0 |
 | Assets | 2 | 0 | 0 | 2 |
 | **已对齐系统** | 25 | 25 | 0 | 0 |
