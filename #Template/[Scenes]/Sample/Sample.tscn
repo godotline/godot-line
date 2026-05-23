@@ -237,6 +237,7 @@ libraries/ = SubResource("AnimationLibrary_5wtmk")
 
 [node name="AutoPlay" type="Node3D" parent="." unique_id=818852756]
 script = ExtResource("19_8ar0p")
+enable = false
 
 [node name="GuidanceBoxHolder" type="Node3D" parent="." unique_id=2033417881 node_paths=PackedStringArray("box_holder")]
 script = ExtResource("19_cr5py")
