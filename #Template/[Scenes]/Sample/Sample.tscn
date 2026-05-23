@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/trigger.tscn" id="7_mmp1f"]
 [ext_resource type="Script" uid="uid://cu3xuawfji3m2" path="res://#Template/[Scripts]/Trigger/EventTrigger.gd" id="8_lvlg5"]
 [ext_resource type="PackedScene" path="res://#Template/FallPredictor.tscn" id="9_j20p7"]
-[ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="10_bmosm"]
+[ext_resource type="Script" uid="uid://bpgdulyk8l2dc" path="res://#Template/[Scripts]/Trigger/jump.gd" id="10_bmosm"]
 [ext_resource type="Script" uid="uid://bdbb1ogxk0fcr" path="res://#Template/[Scripts]/Trigger/JumpPredictor.gd" id="11_uo12o"]
 [ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="12_21ado"]
 [ext_resource type="Script" uid="uid://b1m236nbmh7ke" path="res://#Template/[Scripts]/Trigger/PlayAnimator.gd" id="13_sowmv"]
@@ -235,7 +235,7 @@ mesh = SubResource("TextMesh_yearn")
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Ground3" unique_id=865217038]
 libraries/ = SubResource("AnimationLibrary_5wtmk")
 
-[node name="Node3D" type="Node3D" parent="." unique_id=818852756]
+[node name="AutoPlay" type="Node3D" parent="." unique_id=818852756]
 script = ExtResource("19_8ar0p")
 
 [node name="GuidanceBoxHolder" type="Node3D" parent="." unique_id=2033417881 node_paths=PackedStringArray("box_holder")]
@@ -286,5 +286,47 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 26.4
 
 [node name="GuidanceBox_14" parent="GuidanceBoxHolder" unique_id=1763134911 instance=ExtResource("20_8ar0p")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.200039, -0.45, 27.00003)
+
+[node name="GuidanceBox_16" parent="GuidanceBoxHolder" unique_id=1795659677 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 29.295235, -0.45, 30.649551)
+
+[node name="GuidanceBox_17" parent="GuidanceBoxHolder" unique_id=1919578051 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.09523, -0.45, 30.649551)
+
+[node name="GuidanceBox_18" parent="GuidanceBoxHolder" unique_id=179891680 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 37.09523, -0.45, 33.44955)
+
+[node name="GuidanceBox_19" parent="GuidanceBoxHolder" unique_id=1847545967 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.295227, -0.45, 33.44955)
+
+[node name="GuidanceBox_20" parent="GuidanceBoxHolder" unique_id=1385552337 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 41.295227, -0.45, 39.049545)
+
+[node name="GuidanceBox_21" parent="GuidanceBoxHolder" unique_id=1766107517 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.89523, -0.45, 39.049545)
+
+[node name="GuidanceBox_22" parent="GuidanceBoxHolder" unique_id=2052254868 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 46.89523, -0.45, 41.849545)
+
+[node name="GuidanceBox_23" parent="GuidanceBoxHolder" unique_id=2058202058 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.695244, -0.45, 41.849545)
+
+[node name="GuidanceBox_24" parent="GuidanceBoxHolder" unique_id=1615166031 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 50.695244, -0.45, 48.24956)
+
+[node name="GuidanceBox_25" parent="GuidanceBoxHolder" unique_id=268927901 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.095253, -0.45, 48.24956)
+
+[node name="GuidanceBox_26" parent="GuidanceBoxHolder" unique_id=318190821 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 53.095253, -0.45, 51.24957)
+
+[node name="GuidanceBox_27" parent="GuidanceBoxHolder" unique_id=1136888252 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.695263, -0.45, 51.24957)
+
+[node name="GuidanceBox_28" parent="GuidanceBoxHolder" unique_id=1356398853 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 55.695263, -0.45, 54.249584)
+
+[node name="GuidanceBox_29" parent="GuidanceBoxHolder" unique_id=1432202947 instance=ExtResource("20_8ar0p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.495274, -0.45, 54.249584)
 
 [connection signal="triggered" from="Trigger2" to="Ground2" method="Trigger"]

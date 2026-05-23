@@ -29,8 +29,15 @@ func _process(_delta: float) -> void:
 	if not _player:
 		return
 	var dist_sq := global_position.distance_squared_to(_player.global_position)
-	if not _triggered and dist_sq <= appear_distance * appear_distance and not _displayed:
-		_appear()
+	if _triggered:
+		pass
+	elif dist_sq <= appear_distance * appear_distance:
+		if not _displayed:
+			_appear()
+	else:
+		if _displayed:
+			_disappear(false)
+			_displayed = false
 	if not _trigger_ready and dist_sq > trigger_distance * trigger_distance:
 		_trigger_ready = true
 	if LevelManager.Clicked and not _triggered and dist_sq <= trigger_distance * trigger_distance and can_be_triggered and _trigger_ready and LevelManager.GameState == LevelManager.GameStatus.Playing and _player.is_live:
