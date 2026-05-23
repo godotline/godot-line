@@ -225,6 +225,12 @@ mesh = SubResource("TextMesh_nb4qh")
 [node name="Crown" parent="." unique_id=1805653336 instance=ExtResource("18_frkeu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3752842, 0, 3.1362076)
 
+[node name="CrownSprite" parent="Crown" index="3" unique_id=1095474833]
+transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 1.5299892, 3)
+
+[node name="Ground" parent="Crown" unique_id=759376195 instance=ExtResource("6_6gedn")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -2.9858222, -2.3841858e-07, 2.8816853)
+
 [node name="Ground3" parent="." unique_id=1230272800 instance=ExtResource("6_6gedn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5302486, 0, 26.103493)
 
@@ -331,3 +337,5 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 55.6
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.495274, -0.45, 54.249584)
 
 [connection signal="triggered" from="Trigger2" to="Ground2" method="Trigger"]
+
+[editable path="Crown"]
