@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://dbmrq55p4ik62"]
+
+[ext_resource type="Script" uid="uid://c5hmdl8wm4ukv" path="res://#Template/[Scripts]/Level/FakePlayer.gd" id="1_xljse"]
+[ext_resource type="Material" uid="uid://ktbkvswrq32a" path="res://#Template/[Materials]/Checkpoint1.tres" id="2_htf3w"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_igvb5"]
+material = ExtResource("2_htf3w")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_47x6u"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[node name="FakePlayer" type="CharacterBody3D" unique_id=226051297]
+collision_mask = 2
+script = ExtResource("1_xljse")
+characterMaterial = ExtResource("2_htf3w")
+firstDirection = Vector3(0, 0, 0)
+secondDirection = Vector3(0, 90, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1056968118]
+mesh = SubResource("BoxMesh_igvb5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1225336789]
+shape = SubResource("BoxShape3D_47x6u")

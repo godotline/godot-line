@@ -27,3 +27,5 @@ func _on_triggered(body: Node3D) -> void:
 		# 根据高度计算初速度: v = sqrt(2*g*h)
 		var jump_speed = sqrt(2 * 9.8 * height)
 		character.velocity += Vector3(0, jump_speed, 0)
+		if Player.instance and Player.instance.has_signal("on_player_jump"):
+			Player.instance.on_player_jump.emit()

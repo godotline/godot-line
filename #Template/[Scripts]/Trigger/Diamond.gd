@@ -5,6 +5,8 @@ extends Area3D
 
 func _on_Diamond_body_entered(_body: Node) -> void:
 	LevelManager.diamond += 1
+	if Player.instance and Player.instance.has_signal("on_get_gem"):
+		Player.instance.on_get_gem.emit()
 	$AnimationPlayer.play("diamond")
 	$RemainParticle.emitting = true
 	await $RemainParticle.finished
