@@ -13,35 +13,58 @@ static var Instance: GuidanceController
 var _player: CharacterBody3D
 var _boxes: Array[Node3D] = []
 var _holder: Node3D
-var _box_count: int = 0
+var _id: int = 0
 var _box_scene: PackedScene
-var _ready_done: bool = false
+var _started: bool = false
 
 func _ready() -> void:
 	Instance = self
+	_id = 0
 	_box_scene = load("res://#Template/[Resources]/GuidanceBox.tscn")
-	if box_holder:
-		for child in box_holder.get_children():
-			if child is Node3D:
-				_boxes.append(child)
-		for b in _boxes:
-			_set_color(b, guidance_color)
-	if create_lines and not _boxes.is_empty():
-		_generate_lines()
-
-func _process(_delta: float) -> void:
-	if _ready_done:
-		return
-	if not Player.instance:
-		return
-	_player = Player.instance
-	_ready_done = true
 	if create_boxes:
 		_holder = Node3D.new()
 		_holder.name = "GuidanceBoxHolder"
 		get_tree().current_scene.add_child(_holder)
-		_spawn_box(_player.global_position - Vector3(0, 0.45, 0), Vector3(0, _player.rotation_degrees.y, 0))
-	_player.onturn.connect(_on_player_turn)
+	if box_holder:
+		for child in box_holder.get_children():
+			if child is Node3D:
+				_boxes.append(child)
+	for b in _boxes:
+		_set_color(b, guidance_color)
+	if create_lines and not _boxes.is_empty():
+		_generate_lines()
+
+func _start() -> void:
+	_player = Player.instance
+	if not _player:
+		return
+	if create_boxes:
+		var box := _spawn_box(
+			_player.global_position - Vector3(0, 0.45, 0),
+			_player.firstDirection.y
+		)
+		box.name = "OriginalGuidanceBox"
+		var gb := _find_guidance_box(box)
+		if gb:
+			gb.can_be_triggered = false
+
+func _find_guidance_box(node: Node) -> GuidanceBox:
+	for child in node.get_children():
+		if child is GuidanceBox:
+			return child
+		var found := _find_guidance_box(child)
+		if found:
+			return found
+	return null
+
+func _process(_delta: float) -> void:
+	if not _player:
+		_start()
+		return
+	if not _started:
+		if create_boxes and LevelManager.GameState == LevelManager.GameStatus.Playing:
+			_player.onturn.connect(_on_player_turn)
+			_started = true
 
 func _on_player_turn() -> void:
 	if create_boxes and LevelManager.GameState == LevelManager.GameStatus.Playing:
@@ -50,24 +73,24 @@ func _on_player_turn() -> void:
 			forward_y = _player.secondDirection.y
 		else:
 			forward_y = _player.firstDirection.y
-		_spawn_box(_player.global_position - Vector3(0, 0.45, 0), Vector3(0, forward_y, 0))
+		var box := _spawn_box(
+			_player.global_position - Vector3(0, 0.45, 0),
+			forward_y
+		)
+		box.name = "GuidanceBox %d" % _id
+		_id += 1
 
-func _spawn_box(pos: Vector3, rot: Vector3) -> void:
+func _spawn_box(pos: Vector3, rot_y: float) -> Node3D:
 	var box := _box_scene.instantiate() as Node3D
 	box.global_position = pos
-	box.rotation_degrees = rot
+	box.rotation_degrees = Vector3(0, rot_y, 0)
 	_holder.add_child(box)
-	box.name = "GuidanceBox_%d" % _box_count
-	_box_count += 1
-	_set_color(box, guidance_color)
-	_boxes.append(box)
-	if box is GuidanceBox:
-		box.can_be_triggered = false
+	return box
 
 func _set_color(box: Node3D, color: Color) -> void:
-	var sprite := box.get_node_or_null("Sprite3D") as Sprite3D
-	if sprite:
-		sprite.modulate = color
+	var gb := _find_guidance_box(box)
+	if gb:
+		gb.set_color(color)
 
 func _generate_lines() -> void:
 	for i in range(_boxes.size()):
@@ -77,9 +100,12 @@ func _generate_lines() -> void:
 		var b: Node3D = _boxes[i + 1]
 		if not is_instance_valid(a) or not is_instance_valid(b):
 			continue
+		var gb := _find_guidance_box(a)
+		if gb and not gb.have_line:
+			continue
 		var midpoint := 0.5 * (a.global_position + b.global_position)
 		var dist := a.global_position.distance_to(b.global_position)
-		var line_length := dist - box_size_y - 2 * line_gap
+		var line_length := dist - 0.5 * box_size_y - 2 * line_gap
 		if line_length <= 0.0:
 			continue
 		var line := MeshInstance3D.new()

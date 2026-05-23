@@ -96,4 +96,5 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0
 texture = ExtResource("1_eani0")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1379440214]
+autoplay = "taper"
 libraries/ = SubResource("AnimationLibrary_pomia")
