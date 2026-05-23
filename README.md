@@ -1,97 +1,105 @@
-# SetActiveTrigger 移植完成
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/meny2333/godot-line)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/meny2333/GodotLineCollection)
 
-## 概述
+# Godot Line 模板
 
-成功将 Unity 的 `SetActive.cs` 脚本移植到 Godot 项目，创建了完整的激活/禁用触发器系统。
+基于 **Godot Engine 4.6** 开发的 Dancing Line 游戏模板框架。本项目抽离自 ShinnLine，向冰焰模板 3/4 对齐，旨在降低使用者的学习成本。通过本模板，您可以方便地将关卡从冰焰模板 3、4（WIP）迁移到此模板，或直接[将关卡发布到 GodotLineCollection](https://github.com/meny2333/GodotLineCollection)。
 
-## 新增文件
+![Godot Version](https://img.shields.io/badge/Godot-4.6-green.svg)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-### 1. SingleActive 资源类
-**路径：** `#Template/[Scripts]/Settings/SingleActive.gd`
+## ✨ 特性
 
-```gdscript
-@tool
-class_name SingleActive
-extends Resource
+- 🎮 **Dancing Line 核心玩法**：完整的线条游戏机制实现
+- 🔄 **高兼容性**：与冰焰模板 3/4 对齐，便于关卡迁移
+- 📦 **开箱即用**：内置完整的游戏框架和模板系统
+- 🎯 **模块化设计**：清晰的代码结构，易于扩展和定制
+- 🌐 **跨平台支持**：支持 Windows、Linux、macOS 平台
 
-@export var target: NodePath
-@export var active: bool = true
-@export var dont_revive: bool = false
+## 🚀 快速开始
+
+### 环境要求
+
+- **Godot Engine 4.6** 或更高版本
+- GDScript 编程基础（可选，用于自定义开发）
+
+### 安装步骤
+
+1. **克隆仓库**
+   ```bash
+   git clone https://github.com/meny2333/godot-line.git
+   cd godot-line
+   ```
+
+2. **在 Godot 中打开项目**
+   - 启动 Godot Engine 4.6
+   - 选择"导入"并定位到项目文件夹
+   - 等待项目扫描完成
+
+3. **运行项目**
+   - 在 Godot 编辑器中按 `F5` 运行主场景
+   - 或使用 `Main.tscn` 作为启动场景
+
+### 输入控制
+
+| 操作 | 按键 | 说明 |
+|------|------|------|
+| 转向 | 鼠标左键 / 空格 | 控制线条转向 |
+| 重试 | R | 重新开始关卡 |
+| 保存 | S | 保存当前进度 |
+| 重载 | Q | 重新加载关卡 |
+| 保存锥体 | W | 保存锥体配置 |
+
+## 📁 项目结构
+
+```
+godot-line/
+├── #Template/          # 核心模板系统
+├── addons/             # Godot 插件
+├── Main.tscn          # 主场景文件
+├── project.godot      # 项目配置文件
+└── CONTRIBUTING.md    # 贡献指南
 ```
 
-### 2. SetActiveTrigger 触发器
-**路径：** `#Template/[Scripts]/Trigger/SetActiveTrigger.gd`
+## 📖 文档
 
-功能：
-- 触发时激活/禁用指定节点
-- 支持复活时恢复状态
-- 继承 BaseTrigger 的所有功能
+详细教程和 API 文档请访问：
+👉 [https://www.cnblogs.com/mmme/p/-/tutorial](https://www.cnblogs.com/mmme/p/-/tutorial)
 
-### 3. 测试场景
-**路径：** `#Template/[Scenes]/SetActiveTriggerTest/SetActiveTriggerTest.tscn`
+## 🤝 贡献
 
-### 4. 文档
-- 设计文档：`docs/superpowers/specs/2026-05-17-setactive-trigger-design.md`
-- 实现计划：`docs/superpowers/plans/2026-05-17-setactive-trigger.md`
-- 完整总结：`docs/superpowers/2026-05-17-setactive-trigger-complete-summary.md`
+我们非常欢迎社区贡献！无论您是报告 Bug、提出功能建议，还是提交代码修复，都是对项目的宝贵支持。
 
-## 使用方法
+### 快速贡献指南
 
-### 创建 SingleActive 资源
-1. 在编辑器中右键点击 -> 新建资源
-2. 搜索 "SingleActive"
-3. 设置 target（目标节点路径）、active（激活状态）、dont_revive（是否在复活时恢复）
+1. Fork 本仓库
+2. 创建您的特性分支 (`git checkout -b GD-111`)
+3. 提交您的更改 (`git commit -m 'Add: some feature'`)
+4. 推送到分支 (`git push origin GD-111`)
+5. 创建 Pull Request
 
-### 配置 SetActiveTrigger
-1. 在场景中添加 SetActiveTrigger 节点
-2. 设置 `active_on_awake`：是否在 Start 时立即激活
-3. 设置 `one_shot`：是否只能触发一次
-4. 在 `actives` 数组中添加 SingleActive 资源
+详细的贡献指南请查阅：[CONTRIBUTING.md](./CONTRIBUTING.md)
 
-## 设计决策
+## 📧 联系方式
 
-### 1. 使用 Resource 而非 Dictionary
-- 更好的编辑器支持
-- 类型安全
-- 可复用的配置资源
+- 🐛 **问题反馈**：[GitHub Issues](https://github.com/meny2333/godot-line/issues)
+- 💬 **交流群组**：[GodotLine 模板交流群](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=NnqD9QUw7D9K3wAuCI-IT1-PNO9LB7FR&authKey=RXS5hzAQnpevmQvAZVKSt7qL9%2FDtJsvpgJmP1aWV7aC7jwlZekV8%2FW9NerB9Blqv&noverify=0&group_code=1074036493)
+- 📝 **代码规范**：遵循 [Godot GDScript 编码规范](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 
-### 2. 继承 BaseTrigger
-- 遵循现有架构
-- 自动获得 one_shot、debug_mode 等功能
-- 自动连接 body_entered 信号
+## 📄 许可证
 
-### 3. 复活恢复机制
-- 使用 LevelManager 的复活系统
-- 支持 dont_revive 选项
-- 使用 CompareCheckpointIndex 检查检查点索引
+本项目采用 [MIT License](./LICENSE) 开源协议。
 
-## 提交记录
+## 🙏 致谢
 
-1. `4e4234e` - feat: create SetActiveTrigger base structure
-2. `42c360c` - feat: implement trigger logic for SetActiveTrigger
-3. `86fe32f` - feat: implement revive recovery logic for SetActiveTrigger
-4. `5b3d279` - feat: complete SetActiveTrigger implementation with debug support
-5. `2c55a7b` - docs: add SetActiveTrigger to trigger system documentation
-6. `28036fc` - feat: add SetActiveTrigger test scene and design docs
-7. `a0ddab1` - fix: remove duplicate debug_mode definition from SetActiveTrigger
-8. `611ae4d` - chore: update project files and add SetActiveTrigger uid
-9. `6652310` - feat: add SingleActive resource class and update SetActiveTrigger to use it
-10. `ebc2a6e` - docs: add SetActiveTrigger implementation summary
+- **Godot Engine** - 强大的开源游戏引擎
+- **ShinnLine** - 原始项目来源
+- **冰焰模板** - 设计参考与对齐标准
+- https://github.com/Ironnoob73/DancingLineGodotTemplate
+- 所有贡献者和社区成员
 
-## 验证清单
+---
 
-- [x] 脚本语法正确，无错误
-- [x] 触发时正确激活/禁用节点
-- [x] 复活时正确恢复状态
-- [x] 单次触发功能正常
-- [x] 调试输出正常工作
-- [x] 文档已更新
-- [x] SingleActive 资源类已创建
-- [x] 测试场景已创建
-- [x] 代码已提交并推送到远程仓库
-
-## 下一步
-
-1. 在 Godot 编辑器中打开测试场景验证功能
-2. 根据需要调整配置
-3. 在实际关卡中使用 SetActiveTrigger
+**Made with ❤️ using Godot Engine 4.6**
