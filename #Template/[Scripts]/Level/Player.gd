@@ -157,6 +157,11 @@ func _process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
+		# StartPage 显示时，鼠标点击由 StartPage 的信号处理
+		if not is_start and event is InputEventMouseButton:
+			var page = get_node_or_null("StartPage")
+			if page and page.visible:
+				return
 		var can_turn := LevelManager.GameState == LevelManager.GameStatus.Playing or (LevelManager.GameState == LevelManager.GameStatus.Waiting and not is_start)
 		if event.is_action_pressed("turn") and is_live and allowTurn and can_turn and not disallow_input:
 			turn()
