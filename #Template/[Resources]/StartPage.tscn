@@ -8,14 +8,14 @@
 bg_color = Color(0, 0, 0, 0.39)
 
 [sub_resource type="StyleBoxFlat" id="2"]
-bg_color = Color(0.25, 0.25, 0.25)
+bg_color = Color(0.25, 0.25, 0.25, 1.0)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_left = 8
 corner_radius_bottom_right = 8
 
 [sub_resource type="StyleBoxFlat" id="3"]
-bg_color = Color(0.38, 0.38, 0.38)
+bg_color = Color(0.38, 0.38, 0.38, 1.0)
 corner_radius_top_left = 20
 corner_radius_top_right = 20
 corner_radius_bottom_left = 20
@@ -28,7 +28,7 @@ bg_color = Color(0.19, 0.19, 0.19, 0.7)
 bg_color = Color(0, 0, 0, 0.6)
 
 [sub_resource type="StyleBoxFlat" id="6"]
-bg_color = Color(0.25, 0.25, 0.25)
+bg_color = Color(0.25, 0.25, 0.25, 1.0)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_left = 8
@@ -65,7 +65,7 @@ size_flags_horizontal = 3
 text = "R: 重新开始  |  K: 快速死亡  |  D: 调试模式"
 horizontal_alignment = 1
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1.0)
 theme_override_font_sizes/font_size = 14
 
 [node name="RightArea" type="HBoxContainer" parent="UIContainer/TopBar"]
@@ -98,31 +98,31 @@ offset_bottom = -24
 [node name="center_title" type="Label" parent="UIContainer/CenterCard/VBox"]
 text = "测试场景"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(1, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1.0)
 theme_override_font_sizes/font_size = 32
 
 [node name="AuthorLabel" type="Label" parent="UIContainer/CenterCard/VBox"]
 text = "筱夕Sushi"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.8, 0.8, 0.8)
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1.0)
 theme_override_font_sizes/font_size = 20
 
 [node name="TemplateLabel" type="Label" parent="UIContainer/CenterCard/VBox"]
 text = "共舞的线模板"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1.0)
 theme_override_font_sizes/font_size = 14
 
 [node name="VersionLabel" type="Label" parent="UIContainer/CenterCard/VBox"]
 text = "基于冰焰模板 4.3.0 修改"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1.0)
 theme_override_font_sizes/font_size = 14
 
 [node name="CreditsLabel" type="Label" parent="UIContainer/CenterCard/VBox"]
 text = "作者：Max冰焰、筱夕Sushi、Quantumilk"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1.0)
 theme_override_font_sizes/font_size = 14
 
 [node name="InfoButton" type="Button" parent="UIContainer"]
@@ -190,7 +190,7 @@ theme_override_styles/panel = SubResource(6)
 [node name="about_title" type="Label" parent="UIContainer/AboutPanel/AboutCenter/AboutContent/AboutVBox"]
 text = "关卡名称"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(1, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1.0)
 theme_override_font_sizes/font_size = 24
 
 [node name="AboutSpacer1" type="Control" parent="UIContainer/AboutPanel/AboutCenter/AboutContent/AboutVBox"]
@@ -205,7 +205,7 @@ size_flags_vertical = 3
 [node name="about_credits" type="Label" parent="UIContainer/AboutPanel/AboutCenter/AboutContent/AboutVBox"]
 text = "基于冰焰模板 4.3.0 修改"
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1.0)
 theme_override_font_sizes/font_size = 14
 
 [node name="AboutCloseBtn" type="Button" parent="UIContainer/AboutPanel/AboutCenter/AboutContent/AboutVBox"]
