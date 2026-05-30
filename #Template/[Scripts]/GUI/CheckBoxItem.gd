@@ -22,7 +22,7 @@ func _init_ui(p_title: String) -> void:
 	add_child(label)
 
 func set_title(p_text: String) -> void:
-	label.text = text
+	label.text = p_text
 
 func set_is_on(value: bool) -> void:
 	checkbox.button_pressed = value
