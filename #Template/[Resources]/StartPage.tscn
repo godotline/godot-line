@@ -14,7 +14,7 @@ bg_color = Color(0.19, 0.19, 0.19, 0.7)
 bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [sub_resource type="StyleBoxFlat" id="6"]
-bg_color = Color(0.25, 0.25, 0.25, 1)
+bg_color = Color(0.2509804, 0.2509804, 0.2509804, 0.6784314)
 corner_radius_top_left = 22
 corner_radius_top_right = 22
 corner_radius_bottom_right = 22
@@ -92,15 +92,19 @@ offset_right = -20.0
 
 [node name="AntiAliasingItem" parent="UIContainer/BottomBar/HBox" unique_id=1253615044 instance=ExtResource("2")]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="QualityItem" parent="UIContainer/BottomBar/HBox" unique_id=1890975800 instance=ExtResource("2")]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="LatencyItem" parent="UIContainer/BottomBar/HBox" unique_id=83933793 instance=ExtResource("2")]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="VolumeItem" parent="UIContainer/BottomBar/HBox" unique_id=1527616958 instance=ExtResource("2")]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Sep" type="Control" parent="UIContainer/BottomBar/HBox" unique_id=1240906021]
 custom_minimum_size = Vector2(16, 0)
@@ -133,7 +137,18 @@ offset_bottom = 150.0
 theme_override_styles/panel = SubResource("6")
 
 [node name="AboutVBox" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutContent" unique_id=61138793]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -75.5
+offset_top = -43.0
+offset_right = 75.5
+offset_bottom = 43.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="about_title" type="Label" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=2001776335]
 layout_mode = 2
@@ -157,7 +172,9 @@ size_flags_vertical = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 14
-text = "基于冰焰模板 4.3.0 修改"
+text = "共舞的线模板
+基于冰焰模板 4.3.0 修改
+作者：Max冰焰、筱夕Sushi、Quantumilk"
 horizontal_alignment = 1
 
 [node name="InfoButton" type="Button" parent="UIContainer" unique_id=2029351895]

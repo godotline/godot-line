@@ -1,6 +1,3 @@
 # Ignore hidden directories (all levels)
 .*/
-
-# Ignore test reports
-reports/
-.vscode/
+docs/
