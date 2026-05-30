@@ -83,13 +83,18 @@ func _show_about() -> void:
 	_about_visible = true
 	about_panel.visible = true
 
-	var tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	const REST := -150.0
+	const SHIFT := -400.0
+	about_content.offset_top = REST + SHIFT
+	about_content.offset_bottom = -REST + SHIFT
 	about_content.rotation_degrees = 15
-	about_content.position = Vector2(0, -400)
 	about_content.modulate.a = 0.0
+
+	var tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	tween.set_parallel(true)
+	tween.tween_property(about_content, "offset_top", REST, 0.4)
+	tween.tween_property(about_content, "offset_bottom", -REST, 0.4)
 	tween.tween_property(about_content, "rotation_degrees", 0.0, 0.4)
-	tween.tween_property(about_content, "position:y", 0.0, 0.4)
 	tween.tween_property(about_content, "modulate:a", 1.0, 0.3)
 
 func _hide_about() -> void:
@@ -97,13 +102,15 @@ func _hide_about() -> void:
 		return
 	_about_visible = false
 
+	const REST := -150.0
+	const SHIFT := -400.0
 	var tween = create_tween().set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
 	tween.set_parallel(true)
+	tween.tween_property(about_content, "offset_top", REST + SHIFT, 0.3)
+	tween.tween_property(about_content, "offset_bottom", -REST + SHIFT, 0.3)
 	tween.tween_property(about_content, "rotation_degrees", -15.0, 0.3)
-	tween.tween_property(about_content, "position:y", -400.0, 0.3)
 	tween.tween_property(about_content, "modulate:a", 0.0, 0.3)
 	tween.finished.connect(_on_about_hide_finished)
-
 func _on_about_hide_finished() -> void:
 	about_panel.visible = false
 
