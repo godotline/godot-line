@@ -1,10 +1,10 @@
 extends Node
 ## SetAutoPlay - 自动播放开关（与 Unity 版一致）
-## 外部调用 toggle() 切换自动转向模式
+## 外部调用 SetAuto() 切换自动转向模式
 
 var _active: bool = false
 
-func toggle() -> void:
+func SetAuto() -> void:
 	_active = !_active
 	if not AutoPlayController.Instance:
 		return

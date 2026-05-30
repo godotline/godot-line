@@ -23,6 +23,7 @@ signal post_toggled(is_on: bool)
 @onready var volume_item: SettingItem = $UIContainer/BottomBar/HBox/VolumeItem
 @onready var shadow_toggle: CheckBoxItem = $UIContainer/BottomBar/HBox/ShadowToggle
 @onready var post_toggle: CheckBoxItem = $UIContainer/BottomBar/HBox/PostToggle
+@onready var _set_auto_play: Node = $SetAutoPlay
 
 var _about_visible: bool = false
 
@@ -233,8 +234,10 @@ func _on_info_pressed() -> void:
 	info_button_pressed.emit()
 	_toggle_about()
 
-func _on_autoplay_toggled(is_on: bool) -> void:
-	autoplay_toggled.emit(is_on)
+func _on_autoplay_toggled(_is_on: bool) -> void:
+	autoplay_toggled.emit(_is_on)
+	if _set_auto_play and _set_auto_play.has_method("SetAuto"):
+		_set_auto_play.SetAuto()
 
 func _on_shadow_toggled(is_on: bool) -> void:
 	shadow_toggled.emit(is_on)

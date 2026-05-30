@@ -1,4 +1,4 @@
-extends Node3D
+extends Area3D
 class_name GuidanceBox
 
 @export var trigger_distance: float = 1.0
@@ -15,39 +15,28 @@ var _index: int = 0
 var triggered: bool = false
 var _displayed: bool = false
 
-## 远距离检查节流（帧间隔）
-const FAR_CHECK_INTERVAL: int = 30
-const NEAR_CHECK_INTERVAL: int = 5
-
 func _ready() -> void:
 	_player = Player.instance
 	_root = $".."
 	_sprite = $"../Sprite3D"
 	_trigger_effect = load("res://#Template/[Resources]/Triggered.tscn")
-	if not _player:
-		return
+
+	# Unity: if (Distance > appearDistance) Disappear(false);
+	# Unity 的 Distance 返回 sqrMagnitude，直接对比 appearDistance（不做平方）
 	var dist_sq := global_position.distance_squared_to(_player.global_position)
-	if dist_sq > appear_distance * appear_distance:
+	if dist_sq > appear_distance:
 		_disappear(false)
-	else:
-		_appear()
 
 func _process(_delta: float) -> void:
-	if not _player:
-		return
-
-	var current_frame := Engine.get_process_frames()
-	var dist_sq := global_position.distance_squared_to(_player.global_position)
-
-	# 距离节流：远距离每 30 帧检查一次，近距离每 5 帧
-	var interval: int = FAR_CHECK_INTERVAL if dist_sq > appear_distance * appear_distance else NEAR_CHECK_INTERVAL
-	if current_frame % interval != 0:
-		return
-
-	if not triggered and dist_sq <= appear_distance * appear_distance and not _sprite.visible:
-		_appear()
-	if LevelManager.Clicked and not triggered and dist_sq <= trigger_distance * trigger_distance and can_be_triggered and LevelManager.GameState == LevelManager.GameStatus.Playing and not _player.disallow_input:
-		_trigger()
+	# Unity Update(): if (!triggered && Distance <= appearDistance && !Renderer.enabled) Appear();
+	if not triggered and not _root.visible:
+		var dist_sq := global_position.distance_squared_to(_player.global_position)
+		if dist_sq <= appear_distance:
+			_appear()
+	if LevelManager.Clicked and not triggered and can_be_triggered and LevelManager.GameState == LevelManager.GameStatus.Playing and not _player.disallow_input:
+		var dist_sq := global_position.distance_squared_to(_player.global_position)
+		if dist_sq <= trigger_distance * trigger_distance:
+			_trigger()
 
 func _trigger() -> void:
 	triggered = true
@@ -62,24 +51,21 @@ func _trigger() -> void:
 func set_color(color: Color) -> void:
 	_sprite.modulate = color
 
+# Unity: Appear() — 显示所有 SpriteRenderer（用 _root.visible 等效，且自动覆盖未来添加的子节点）
 func _appear() -> void:
 	if not _displayed:
 		_displayed = true
 		_index = LevelManager.checkpoint_count
-		_set_all_sprites_visible(true)
+		_root.visible = true
 		LevelManager.add_revive_listener(_reset_data)
 
+# Unity: Disappear(bool onlyBox)
+# false = 隐藏全部（包括连线），true = 只隐藏盒子 Sprite，连线留着
 func _disappear(only_box: bool) -> void:
 	if only_box:
 		_sprite.visible = false
 	else:
-		_set_all_sprites_visible(false)
-
-func _set_all_sprites_visible(visible: bool) -> void:
-	for child in _root.get_children():
-		if child is Sprite3D:
-			child.visible = visible
-	_sprite.visible = visible
+		_root.visible = false
 
 func _reset_data() -> void:
 	LevelManager.remove_revive_listener(_reset_data)
