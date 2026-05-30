@@ -86,6 +86,7 @@ func _build_center_card(parent: Control) -> void:
 	center_card = Panel.new()
 	center_card.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 
+	center_card.custom_minimum_size = Vector2(440, 200)
 	var card_style = StyleBoxFlat.new()
 	card_style.bg_color = Color(0.25, 0.25, 0.25)
 	card_style.corner_radius_top_left = 8
@@ -278,6 +279,9 @@ func hide_animated() -> void:
 	if not visible:
 		return
 
+	# Block input during animation
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	var tween = create_tween().set_parallel()
 
 	if top_bar and is_instance_valid(top_bar):
@@ -301,13 +305,14 @@ func hide_animated() -> void:
 		tween.tween_property(main_panel, "modulate:a", 0.0, 0.45)
 
 	tween.finished.connect(_on_hide_finished)
+	tween.killed.connect(queue_free)
 
 func _on_hide_finished() -> void:
 	queue_free()
 
 func set_info_card(config: Dictionary) -> void:
 	if config.has("title"):
-		var title_node = center_card.find_child("center_title", true, false)
+		var title_node = center_card.find_child("center_title", true)
 		if title_node is Label:
 			title_node.text = config["title"]
 
@@ -327,11 +332,11 @@ func get_setting(key: String):
 	return null
 
 func set_about_content(title: String, authors: Array, credits: String) -> void:
-	var title_node = about_panel.find_child("about_title", true, false)
+	var title_node = about_panel.find_child("about_title", true)
 	if title_node is Label:
 		title_node.text = title
 
-	var author_container = about_panel.find_child("about_authors", true, false)
+	var author_container = about_panel.find_child("about_authors", true)
 	if author_container:
 		for child in author_container.get_children():
 			child.queue_free()
@@ -341,7 +346,7 @@ func set_about_content(title: String, authors: Array, credits: String) -> void:
 			lbl.add_theme_font_size_override("font_size", 16)
 			author_container.add_child(lbl)
 
-	var credits_node = about_panel.find_child("about_credits", true, false)
+	var credits_node = about_panel.find_child("about_credits", true)
 	if credits_node is Label:
 		credits_node.text = credits
 
