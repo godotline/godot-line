@@ -227,7 +227,6 @@ func _build_about_panel(parent: Control) -> void:
 	content_style.corner_radius_bottom_left = 8
 	content_style.corner_radius_bottom_right = 8
 	content.add_theme_stylebox_override("panel", content_style)
-	about_panel.add_child(content)
 
 	# Use a container for centering
 	var center_ctrl = CenterContainer.new()
