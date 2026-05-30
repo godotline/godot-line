@@ -276,6 +276,7 @@ func turn():
 		velocity = to_global(Vector3(0, 0, 1) * speed) - position
 		past_translation = position
 		new_line()
+		_play_music_from_level_data()
 	else:
 		# —— 首次转向（游戏启动）——
 		is_start = true
@@ -310,6 +311,7 @@ func _play_music_from_level_data() -> void:
 		return
 	if $MusicPlayer.stream_paused:
 		$MusicPlayer.stream_paused = false
+		$MusicPlayer.volume_db = linear_to_db(max(music_volume, 0.001))
 	elif not $MusicPlayer.playing:
 		$MusicPlayer.stream = level_data.levelAudioClip
 		var start_time: float = level_data.get_audio_start_time()
