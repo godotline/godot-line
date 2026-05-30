@@ -38,7 +38,7 @@ func _ready() -> void:
 
 	latency_item.set_title("音画延迟")
 	latency_item.set_mode(SettingItem.Mode.LATENCY)
-	latency_item.set_range(0.0, 5.0, 0.01)
+	latency_item.set_range(-5.0, 5.0, 0.01)
 	latency_item.set_value(0.0)
 
 	volume_item.set_title("音量大小")
