@@ -135,38 +135,42 @@ anchor_bottom = 1.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("5")
 
-[node name="AboutCenter" type="CenterContainer" parent="UIContainer/AboutPanel" unique_id=111979065]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
 
-[node name="AboutContent" type="Panel" parent="UIContainer/AboutPanel/AboutCenter" unique_id=370199598]
-custom_minimum_size = Vector2(480, 300)
-layout_mode = 2
+[node name="AboutContent" type="Panel" parent="UIContainer/AboutPanel" unique_id=370199598]
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = -150.0
+offset_right = 240.0
+offset_bottom = 150.0
 theme_override_styles/panel = SubResource("6")
 
-[node name="AboutVBox" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutCenter/AboutContent" unique_id=61138793]
+[node name="AboutVBox" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutContent" unique_id=61138793]
 layout_mode = 0
 
-[node name="about_title" type="Label" parent="UIContainer/AboutPanel/AboutCenter/AboutContent/AboutVBox" unique_id=2001776335]
+[node name="about_title" type="Label" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=2001776335]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 24
 text = "关卡名称"
 horizontal_alignment = 1
 
-[node name="AboutSpacer1" type="Control" parent="UIContainer/AboutPanel/AboutCenter/AboutContent/AboutVBox" unique_id=1414067686]
+[node name="AboutSpacer1" type="Control" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=1414067686]
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 
-[node name="about_authors" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutCenter/AboutContent/AboutVBox" unique_id=835000038]
+[node name="about_authors" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=835000038]
 layout_mode = 2
 
-[node name="AboutSpacer2" type="Control" parent="UIContainer/AboutPanel/AboutCenter/AboutContent/AboutVBox" unique_id=1535750752]
+[node name="AboutSpacer2" type="Control" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=1535750752]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="about_credits" type="Label" parent="UIContainer/AboutPanel/AboutCenter/AboutContent/AboutVBox" unique_id=2627800]
+[node name="about_credits" type="Label" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=2627800]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 14
@@ -175,4 +179,4 @@ horizontal_alignment = 1
 
 [connection signal="gui_input" from="UIContainer/MainPanel" to="." method="_on_background_click"]
 [connection signal="pressed" from="UIContainer/InfoButton" to="." method="_on_info_pressed"]
-[connection signal="gui_input" from="UIContainer/AboutPanel/AboutCenter/AboutContent" to="." method="_on_about_click"]
+[connection signal="gui_input" from="UIContainer/AboutPanel/AboutContent" to="." method="_on_about_click"]
