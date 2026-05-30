@@ -180,8 +180,9 @@ func get_setting(key: String):
 
 # === Internal handlers ===
 
-func _on_about_close() -> void:
-	_hide_about()
+func _on_about_click(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_hide_about()
 
 func _on_setting_changed(value, key: String) -> void:
 	setting_changed.emit(key, value)
