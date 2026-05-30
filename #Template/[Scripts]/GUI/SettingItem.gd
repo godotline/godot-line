@@ -91,11 +91,16 @@ func set_title(text: String) -> void:
 
 func set_mode(mode: int) -> void:
 	_mode = mode
-	var has_coarse = (_mode == Mode.LATENCY)
-	arrow_coarse_left.visible = has_coarse
-	arrow_fine_left.visible = has_coarse
-	arrow_fine_right.visible = has_coarse
-	arrow_coarse_right.visible = has_coarse
+	var is_latency = (_mode == Mode.LATENCY)
+	arrow_coarse_left.visible = is_latency
+	arrow_fine_left.visible = is_latency
+	arrow_fine_right.visible = is_latency
+	arrow_coarse_right.visible = is_latency
+	# In LATENCY mode, fine arrows replace the regular arrows
+	arrow_left.visible = not is_latency
+	arrow_right.visible = not is_latency
+	if is_latency and _suffix == "":
+		_suffix = "ms"
 
 func set_options(options: Array) -> void:
 	_options = options
