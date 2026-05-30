@@ -68,6 +68,9 @@ var music_delay: float = 0.0
 ## 音量 (0.0~1.0)
 var music_volume: float = 1.0
 
+## 标记首次启动延迟是否已应用（复活时不重置，对齐 Unity gameStarts）
+var _delay_applied := false
+
 ## ========== Tail 对象池 ==========
 const TAIL_POOL_SIZE := 256
 var _tail_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
@@ -286,7 +289,14 @@ func turn():
 		emit_signal("on_player_start")
 		rotation_degrees = current_direction
 
-		if music_delay > 0:
+		if _delay_applied:
+			_play_music_from_level_data()
+			LevelManager.GameState = LevelManager.GameStatus.Playing
+			velocity = to_global(Vector3(0, 0, 1) * speed) - position
+			past_translation = position
+			new_line()
+		elif music_delay > 0:
+			_delay_applied = true
 			# 正值：线立即移动，音乐延后播放（对齐 Unity delay > 0 分支）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
@@ -294,10 +304,12 @@ func turn():
 			new_line()
 			get_tree().create_timer(music_delay).timeout.connect(_play_music_from_level_data)
 		elif music_delay < 0:
+			_delay_applied = true
 			# 负值：音乐立即播放，线原地不动等待后移动（对齐 Unity delay < 0 分支）
 			_play_music_from_level_data()
 			get_tree().create_timer(-music_delay).timeout.connect(_start_game_after_delay)
 		else:
+			_delay_applied = true
 			# 零值：音画同步启动（原行为）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
