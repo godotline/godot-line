@@ -306,7 +306,6 @@ func hide_animated() -> void:
 		tween.tween_property(main_panel, "modulate:a", 0.0, 0.45)
 
 	tween.finished.connect(_on_hide_finished)
-	tween.killed.connect(queue_free)
 
 func _on_hide_finished() -> void:
 	queue_free()
