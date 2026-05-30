@@ -322,9 +322,9 @@ func _play_music_from_level_data() -> void:
 ## music_volume: 用户手动调节的音量
 func _play_music(start_time: float) -> void:
 	$MusicPlayer.volume_db = linear_to_db(max(music_volume, 0.001))
-	var latency := AudioServer.get_output_latency()
+	var latency: float = AudioServer.get_output_latency()
 	if latency > 0.0:
-		var adjusted_time := max(start_time - latency, 0.0)
+		var adjusted_time: float = max(start_time - latency, 0.0)
 		$MusicPlayer.play(adjusted_time)
 	else:
 		$MusicPlayer.play(start_time)
