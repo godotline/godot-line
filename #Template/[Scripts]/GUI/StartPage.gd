@@ -62,9 +62,6 @@ func _ready() -> void:
 	shadow_toggle.toggled.connect(_on_shadow_toggled)
 	post_toggle.toggled.connect(_on_post_toggled)
 
-	# About starts visible
-	about_panel.visible = true
-	_about_visible = true
 
 # === Background click ===
 
