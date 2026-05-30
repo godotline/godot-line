@@ -62,6 +62,12 @@ var debug := false
 @export var allowTurn := true
 @export var disallow_input := false
 
+## 音画延迟补偿（秒），用户可配置。与 AudioServer.get_output_latency() 独立并存。
+var music_delay: float = 0.0
+
+## 音量 (0.0~1.0)
+var music_volume: float = 1.0
+
 ## ========== Tail 对象池 ==========
 const TAIL_POOL_SIZE := 256
 var _tail_pool: Array[MeshInstance3D] = []
@@ -88,6 +94,14 @@ func _ready() -> void:
 	if debug_overlay_scene:
 		var overlay := debug_overlay_scene.instantiate()
 		add_child(overlay)
+
+	# 实例化 StartPage（启动界面）
+	var start_page_scene := load("res://#Template/[Resources]/StartPage.tscn") as PackedScene
+	if start_page_scene and not Engine.is_editor_hint():
+		var page := start_page_scene.instantiate()
+		add_child(page)
+		page.set_setting("latency", music_delay)
+		page.set_setting("volume", music_volume)
 
 func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint() and (is_live or LevelManager.GameState == LevelManager.GameStatus.Moving):
@@ -247,6 +261,12 @@ func turn():
 			rotation_degrees = current_direction
 		else:
 			is_start = true
+
+			# 隐藏 StartPage
+			var page := get_node_or_null("StartPage")
+			if page and page is CanvasLayer:
+				page.hide_animated()
+
 			emit_signal("on_player_start")
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			rotation_degrees = current_direction
