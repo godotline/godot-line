@@ -56,7 +56,6 @@ func _ready() -> void:
 	autoplay_check.toggled.connect(_on_autoplay_toggled)
 	shadow_toggle.toggled.connect(_on_shadow_toggled)
 	post_toggle.toggled.connect(_on_post_toggled)
-	info_btn.pressed.connect(_on_info_pressed)
 
 # === Background click ===
 
