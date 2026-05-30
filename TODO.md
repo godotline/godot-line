@@ -29,7 +29,7 @@
 | P2 | GUI | LoadingPage | ✓ | ✗ | 加载页面 UI |
 | P2 | GUI | LevelUI | ✓ | ✗ | 关卡内 UI（包含游戏内信息显示） |
 | P2 | GUI | SetQuality | ✓ | ⚠️ | UI 完成，信号接口暴露，待接入 QualitySettings |
-| P2 | GUI | SetLatency | ✓ | ⚠️ | UI 完成，信号接口暴露，待接入音乐延迟/音量 |
+| P2 | GUI | SetLatency | ✓ | ✓ | UI 完成，延迟语义对齐 Unity StartGame，ConfigFile 持久化 |
 | P2 | GUI | KeyBoardFunctionsDisplay | ✓ | ✓ | 顶部提示栏 "R/K/D" 快捷键显示 |
 | P2 | GUI | GuidanceEnabled | ✓ | ✗ | 引导线启用按钮 |
 | P2 | GUI | HideCanvas / ShowCanvas | ✓ | ✓ | About 面板动画显隐（ShowCanvas/HideCanvas 等效） |
