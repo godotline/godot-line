@@ -84,7 +84,7 @@ func _show_about() -> void:
 	about_panel.visible = true
 
 	const REST := -150.0
-	const SHIFT := -400.0
+	const SHIFT := 400.0
 	about_content.offset_top = REST + SHIFT
 	about_content.offset_bottom = -REST + SHIFT
 	about_content.rotation_degrees = 15
@@ -103,7 +103,7 @@ func _hide_about() -> void:
 	_about_visible = false
 
 	const REST := -150.0
-	const SHIFT := -400.0
+	const SHIFT := 400.0
 	var tween = create_tween().set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
 	tween.set_parallel(true)
 	tween.tween_property(about_content, "offset_top", REST + SHIFT, 0.3)
