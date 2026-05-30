@@ -1,5 +1,5 @@
 @tool
-extends HBoxContainer
+extends VBoxContainer
 class_name SettingItem
 
 enum Mode { CYCLIC, RANGE, LATENCY }
@@ -8,6 +8,7 @@ signal value_changed(value)
 
 # Visual elements
 var title_label: Label
+var _controls_hbox: HBoxContainer
 var arrow_coarse_left: Button
 var arrow_fine_left: Button
 var arrow_left: Button
@@ -28,59 +29,69 @@ var _suffix: String = ""
 var _title_text: String = ""
 
 func _init(p_title: String = ""):
+	size_flags_horizontal = Control.SIZE_EXPAND | Control.SIZE_FILL
 	_init_ui(p_title)
 
 func _init_ui(p_title: String) -> void:
+	# Row 1: title
 	title_label = Label.new()
 	title_label.text = p_title
-	title_label.add_theme_font_size_override("font_size", 14)
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_label.add_theme_font_size_override("font_size", 15)
+	title_label.add_theme_color_override("font_color", Color(1, 1, 1))
 	add_child(title_label)
+
+	# Row 2: controls
+	_controls_hbox = HBoxContainer.new()
+	_controls_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	add_child(_controls_hbox)
 
 	# Latency coarse/fine arrows (hidden by default)
 	arrow_coarse_left = Button.new()
 	arrow_coarse_left.text = "<<"
 	arrow_coarse_left.flat = true
 	arrow_coarse_left.visible = false
-	add_child(arrow_coarse_left)
+	_controls_hbox.add_child(arrow_coarse_left)
 	arrow_coarse_left.pressed.connect(_on_arrow_left_coarse)
 
 	arrow_fine_left = Button.new()
 	arrow_fine_left.text = "<"
 	arrow_fine_left.flat = true
 	arrow_fine_left.visible = false
-	add_child(arrow_fine_left)
+	_controls_hbox.add_child(arrow_fine_left)
 	arrow_fine_left.pressed.connect(_on_arrow_left_fine)
 
 	arrow_left = Button.new()
-	arrow_left.text = "<"
+	arrow_left.text = "◄"
 	arrow_left.flat = true
-	add_child(arrow_left)
+	_controls_hbox.add_child(arrow_left)
 	arrow_left.pressed.connect(_on_arrow_left)
 
 	value_label = Label.new()
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	value_label.custom_minimum_size = Vector2(60, 0)
-	value_label.add_theme_font_size_override("font_size", 14)
-	add_child(value_label)
+	value_label.add_theme_font_size_override("font_size", 13)
+	value_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	_controls_hbox.add_child(value_label)
 
 	arrow_right = Button.new()
-	arrow_right.text = ">"
+	arrow_right.text = "►"
 	arrow_right.flat = true
-	add_child(arrow_right)
+	_controls_hbox.add_child(arrow_right)
 	arrow_right.pressed.connect(_on_arrow_right)
 
 	arrow_fine_right = Button.new()
 	arrow_fine_right.text = ">"
 	arrow_fine_right.flat = true
 	arrow_fine_right.visible = false
-	add_child(arrow_fine_right)
+	_controls_hbox.add_child(arrow_fine_right)
 	arrow_fine_right.pressed.connect(_on_arrow_right_fine)
 
 	arrow_coarse_right = Button.new()
 	arrow_coarse_right.text = ">>"
 	arrow_coarse_right.flat = true
 	arrow_coarse_right.visible = false
-	add_child(arrow_coarse_right)
+	_controls_hbox.add_child(arrow_coarse_right)
 	arrow_coarse_right.pressed.connect(_on_arrow_right_coarse)
 
 	_update_display()

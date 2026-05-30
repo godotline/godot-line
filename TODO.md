@@ -31,6 +31,7 @@
 | P2 | GUI | SetQuality | ✓ | ⚠️ | UI 完成，信号接口暴露，待接入 QualitySettings |
 | P2 | GUI | SetLatency | ✓ | ✓ | UI 完成，延迟语义对齐 Unity StartGame，ConfigFile 持久化 |
 | P2 | GUI | KeyBoardFunctionsDisplay | ✓ | ✓ | 顶部提示栏 "R/K/D" 快捷键显示 |
+| P2 | GUI | SettingItem 排版优化 | — | ✓ | 两行排版（标题在上，◄ 数值 ► 在下），◄/► 箭头符号 |
 | P2 | GUI | GuidanceEnabled | ✓ | ✗ | 引导线启用按钮 |
 | P2 | GUI | HideCanvas / ShowCanvas | ✓ | ✓ | About 面板动画显隐（ShowCanvas/HideCanvas 等效） |
 | P2 | Level | ObjectPool | ✓ | ✓ | 通用对象池（线身、粒子等复用），含 TailPool 256 容量 |
@@ -119,7 +120,7 @@
 | Trigger | 21 | 13 | 3 | 5 |
 | Level | 7 | 5 | 0 | 2 |
 | Animator | 6 | 3 | 1 | 2 |
-| GUI | 8 | 4 | 2 | 2 |
+| GUI | 9 | 5 | 2 | 2 |
 | Player | 9 | 3 | 0 | 6 |
 | Editor | 1 | 0 | 1 | 0 |
 | Assets | 2 | 0 | 0 | 2 |
