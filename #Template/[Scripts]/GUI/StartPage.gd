@@ -12,10 +12,10 @@ signal post_toggled(is_on: bool)
 @onready var _ui_container: Control = $UIContainer
 @onready var main_panel: Panel = $UIContainer/MainPanel
 @onready var top_bar: HBoxContainer = $UIContainer/TopBar
-@onready var center_card: Panel = $UIContainer/CenterCard
 @onready var info_btn: Button = $UIContainer/InfoButton
 @onready var bottom_bar: Panel = $UIContainer/BottomBar
 @onready var about_panel: Panel = $UIContainer/AboutPanel
+@onready var about_content: Panel = $UIContainer/AboutPanel/AboutCenter/AboutContent
 @onready var autoplay_check: CheckBoxItem = $UIContainer/TopBar/RightArea/AutoPlayToggle
 @onready var antialiasing_item: SettingItem = $UIContainer/BottomBar/HBox/AntiAliasingItem
 @onready var quality_item: SettingItem = $UIContainer/BottomBar/HBox/QualityItem
@@ -23,6 +23,8 @@ signal post_toggled(is_on: bool)
 @onready var volume_item: SettingItem = $UIContainer/BottomBar/HBox/VolumeItem
 @onready var shadow_toggle: CheckBoxItem = $UIContainer/BottomBar/HBox/ShadowToggle
 @onready var post_toggle: CheckBoxItem = $UIContainer/BottomBar/HBox/PostToggle
+
+var _about_visible: bool = false
 
 func _ready() -> void:
 	antialiasing_item.set_title("抗锯齿")
@@ -49,6 +51,9 @@ func _ready() -> void:
 	autoplay_check.label.add_theme_color_override("font_color", Color(1, 0, 0))
 	autoplay_check.label.add_theme_font_size_override("font_size", 16)
 
+	shadow_toggle.set_title("阴影")
+	post_toggle.set_title("后处理")
+
 	antialiasing_item.value_changed.connect(_on_setting_changed.bind("antialiasing"))
 	quality_item.value_changed.connect(_on_setting_changed.bind("quality"))
 	latency_item.value_changed.connect(_on_setting_changed.bind("latency"))
@@ -57,11 +62,53 @@ func _ready() -> void:
 	shadow_toggle.toggled.connect(_on_shadow_toggled)
 	post_toggle.toggled.connect(_on_post_toggled)
 
+	# About starts visible
+	about_panel.visible = true
+	_about_visible = true
+
 # === Background click ===
 
 func _on_background_click(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		start_requested.emit()
+
+# === About show/hide animation ===
+
+func _toggle_about() -> void:
+	if _about_visible:
+		_hide_about()
+	else:
+		_show_about()
+
+func _show_about() -> void:
+	if _about_visible:
+		return
+	_about_visible = true
+	about_panel.visible = true
+
+	var tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	about_content.rotation_degrees = 15
+	about_content.position = Vector2(0, -400)
+	about_content.modulate.a = 0.0
+	tween.set_parallel(true)
+	tween.tween_property(about_content, "rotation_degrees", 0.0, 0.4)
+	tween.tween_property(about_content, "position:y", 0.0, 0.4)
+	tween.tween_property(about_content, "modulate:a", 1.0, 0.3)
+
+func _hide_about() -> void:
+	if not _about_visible:
+		return
+	_about_visible = false
+
+	var tween = create_tween().set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
+	tween.set_parallel(true)
+	tween.tween_property(about_content, "rotation_degrees", -15.0, 0.3)
+	tween.tween_property(about_content, "position:y", -400.0, 0.3)
+	tween.tween_property(about_content, "modulate:a", 0.0, 0.3)
+	tween.finished.connect(_on_about_hide_finished)
+
+func _on_about_hide_finished() -> void:
+	about_panel.visible = false
 
 # === Public API ===
 
@@ -80,10 +127,9 @@ func hide_animated() -> void:
 		tween.tween_property(top_bar, "offset_top", -top_bar.size.y - 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 		tween.tween_property(top_bar, "modulate:a", 0.0, 0.35)
 
-	if center_card and is_instance_valid(center_card):
-		var screen_h = get_viewport().get_visible_rect().size.y
-		tween.tween_property(center_card, "position:y", screen_h + 100, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
-		tween.tween_property(center_card, "modulate:a", 0.0, 0.35)
+	if about_content and is_instance_valid(about_content):
+		tween.tween_property(about_content, "modulate:a", 0.0, 0.35)
+		tween.tween_property(about_content, "position:y", get_viewport().get_visible_rect().size.y + 100, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 
 	if bottom_bar and is_instance_valid(bottom_bar):
 		tween.tween_property(bottom_bar, "offset_top", get_viewport().get_visible_rect().size.y + 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
@@ -101,11 +147,24 @@ func hide_animated() -> void:
 func _on_hide_finished() -> void:
 	queue_free()
 
-func set_info_card(config: Dictionary) -> void:
-	if config.has("title"):
-		var title_node = center_card.find_child("center_title", true)
-		if title_node is Label:
-			title_node.text = config["title"]
+func set_about_content(title: String, authors: Array, credits: String) -> void:
+	var title_node = about_content.find_child("about_title", true)
+	if title_node is Label:
+		title_node.text = title
+
+	var author_container = about_content.find_child("about_authors", true)
+	if author_container:
+		for child in author_container.get_children():
+			child.queue_free()
+		for author in authors:
+			var lbl = Label.new()
+			lbl.text = str(author)
+			lbl.add_theme_font_size_override("font_size", 16)
+			author_container.add_child(lbl)
+
+	var credits_node = about_content.find_child("about_credits", true)
+	if credits_node is Label:
+		credits_node.text = credits
 
 func set_setting(key: String, value) -> void:
 	match key:
@@ -122,25 +181,6 @@ func get_setting(key: String):
 		"volume": return volume_item.get_value()
 	return null
 
-func set_about_content(title: String, authors: Array, credits: String) -> void:
-	var title_node = about_panel.find_child("about_title", true)
-	if title_node is Label:
-		title_node.text = title
-
-	var author_container = about_panel.find_child("about_authors", true)
-	if author_container:
-		for child in author_container.get_children():
-			child.queue_free()
-		for author in authors:
-			var lbl = Label.new()
-			lbl.text = str(author)
-			lbl.add_theme_font_size_override("font_size", 16)
-			author_container.add_child(lbl)
-
-	var credits_node = about_panel.find_child("about_credits", true)
-	if credits_node is Label:
-		credits_node.text = credits
-
 # === Internal handlers ===
 
 func _on_setting_changed(value, key: String) -> void:
@@ -148,7 +188,7 @@ func _on_setting_changed(value, key: String) -> void:
 
 func _on_info_pressed() -> void:
 	info_button_pressed.emit()
-	_show_about()
+	_toggle_about()
 
 func _on_autoplay_toggled(is_on: bool) -> void:
 	autoplay_toggled.emit(is_on)
@@ -158,11 +198,3 @@ func _on_shadow_toggled(is_on: bool) -> void:
 
 func _on_post_toggled(is_on: bool) -> void:
 	post_toggled.emit(is_on)
-
-func _show_about() -> void:
-	if about_panel:
-		about_panel.visible = true
-
-func _on_about_close() -> void:
-	if about_panel:
-		about_panel.visible = false
