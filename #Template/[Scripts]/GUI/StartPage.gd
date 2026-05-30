@@ -180,6 +180,9 @@ func get_setting(key: String):
 
 # === Internal handlers ===
 
+func _on_about_close() -> void:
+	_hide_about()
+
 func _on_setting_changed(value, key: String) -> void:
 	setting_changed.emit(key, value)
 
