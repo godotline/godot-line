@@ -18,14 +18,14 @@ corner_radius_bottom_left = 20
 bg_color = Color(0.19, 0.19, 0.19, 0.7)
 
 [sub_resource type="StyleBoxFlat" id="5"]
-bg_color = Color(0, 0, 0, 0.6)
+bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [sub_resource type="StyleBoxFlat" id="6"]
 bg_color = Color(0.25, 0.25, 0.25, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
 
 [node name="StartPage" type="CanvasLayer" unique_id=1577292833]
 layer = 2
@@ -67,7 +67,6 @@ size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
 text = "R: 重新开始  |  K: 快速死亡  |  D: 调试模式"
-horizontal_alignment = 1
 
 [node name="RightArea" type="HBoxContainer" parent="UIContainer/TopBar" unique_id=162991083]
 layout_mode = 2
@@ -128,17 +127,14 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="AboutPanel" type="Panel" parent="UIContainer" unique_id=651998823]
-visible = false
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("5")
 
-
 [node name="AboutContent" type="Panel" parent="UIContainer/AboutPanel" unique_id=370199598]
 layout_mode = 0
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
