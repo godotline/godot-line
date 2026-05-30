@@ -1,7 +1,7 @@
 extends Node
 class_name AutoPlayController
-## AutoPlayController - 自动转向控制器
-## 运行时在 GuidanceBox 位置自动生成触发器（与 Unity 版一致）
+## AutoPlayController - 自动转向控制器（与 Unity 版一致）
+## 运行时在 GuidanceBox 位置自动创建 Box 触发器，默认隐藏
 
 static var Instance: AutoPlayController
 
@@ -12,7 +12,7 @@ var _triggers: Array[Area3D] = []
 
 func _ready() -> void:
 	Instance = self
-	# 等场景所有节点 _ready() 完成后再初始化
+	# 等场景所有节点 _ready() 完成后再初始化（与 Unity 版一致，确保 GuidanceController 已就绪）
 	get_tree().process_frame.connect(_init_triggers, CONNECT_ONE_SHOT)
 
 func _init_triggers() -> void:
@@ -33,19 +33,20 @@ func _init_triggers() -> void:
 		var box := boxes[i]
 		if not box is Node3D:
 			continue
-		var trigger := _create_trigger(box.global_position)
+		var trigger := _create_trigger(box.global_position, i)
 		_triggers.append(trigger)
 
 	set_holder(enable)
 
-func _create_trigger(pos: Vector3) -> Area3D:
+func _create_trigger(pos: Vector3, index: int) -> Area3D:
 	var area := Area3D.new()
-	area.name = "AutoPlayTrigger"
+	area.name = "AutoPlayTrigger %d" % index
+	area.collision_mask = 1  # 检测 Player（layer 1），对齐 Unity 的 CompareTag("Player")
 
 	var collision := CollisionShape3D.new()
-	var sphere := SphereShape3D.new()
-	sphere.radius = sqrt(0.33)
-	collision.shape = sphere
+	var box := BoxShape3D.new()
+	box.size = Vector3(4, 4, 4)  # 对齐 Unity CreateTrigger(PrimitiveType.Cube, scale=4)
+	collision.shape = box
 	area.add_child(collision)
 
 	var script := load("res://#Template/[Scripts]/Auto/AutoPlay.gd")

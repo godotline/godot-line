@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://urm8r3g8vfda" path="res://#Template/[Scripts]/GUI/StartPage.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://b62xyfh7pvccw" path="res://#Template/[Resources]/SettingItem.tscn" id="2"]
 [ext_resource type="PackedScene" uid="uid://checkitem" path="res://#Template/[Resources]/CheckBoxItem.tscn" id="3"]
+[ext_resource type="Script" uid="uid://cpt228wqyq445" path="res://#Template/[Scripts]/Auto/SetAutoPlay.gd" id="4"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(0, 0, 0, 0)
@@ -189,6 +190,9 @@ offset_bottom = -89.0
 grow_vertical = 0
 theme_override_styles/normal = SubResource("3")
 text = "i"
+
+[node name="SetAutoPlay" type="Node" parent="." unique_id=1734727122]
+script = ExtResource("4")
 
 [connection signal="gui_input" from="UIContainer/MainPanel" to="." method="_on_background_click"]
 [connection signal="gui_input" from="UIContainer/AboutPanel/AboutContent" to="." method="_on_about_click"]
