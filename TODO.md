@@ -25,14 +25,14 @@
 | P1 | Animator | TimerAmbient (环境光) | ✓ | ✗ | 时间驱动的环境光动画 |
 | P1 | Animator | TimerFog (雾气) | ✓ | ⚠️ | `FogColorChanger.gd` 只改颜色，缺少 Start/End 动画 |
 | P1 | Animator | TimerImageColor | ✓ | ✗ | 时间驱动的 Image 颜色动画 |
-| P2 | GUI | StartPage | ✓ | ✗ | 开始页面 UI |
+| P2 | GUI | StartPage | ✓ | ✓ | 开始页面 UI（含 About 面板动画） |
 | P2 | GUI | LoadingPage | ✓ | ✗ | 加载页面 UI |
 | P2 | GUI | LevelUI | ✓ | ✗ | 关卡内 UI（包含游戏内信息显示） |
-| P2 | GUI | SetQuality | ✓ | ✗ | 画质设置菜单 |
-| P2 | GUI | SetLatency | ✓ | ✗ | 延迟设置菜单 |
-| P2 | GUI | KeyBoardFunctionsDisplay | ✓ | ✗ | 按键功能提示显示 |
+| P2 | GUI | SetQuality | ✓ | ⚠️ | UI 完成，信号接口暴露，待接入 QualitySettings |
+| P2 | GUI | SetLatency | ✓ | ⚠️ | UI 完成，信号接口暴露，待接入音乐延迟/音量 |
+| P2 | GUI | KeyBoardFunctionsDisplay | ✓ | ✓ | 顶部提示栏 "R/K/D" 快捷键显示 |
 | P2 | GUI | GuidanceEnabled | ✓ | ✗ | 引导线启用按钮 |
-| P2 | GUI | HideCanvas / ShowCanvas | ✓ | ✗ | 画布显隐控制 |
+| P2 | GUI | HideCanvas / ShowCanvas | ✓ | ✓ | About 面板动画显隐（ShowCanvas/HideCanvas 等效） |
 | P2 | Level | ObjectPool | ✓ | ✓ | 通用对象池（线身、粒子等复用），含 TailPool 256 容量 |
 | P2 | Trigger | ParticleSystemPlay | ✓ | ✗ | 触发位置播放粒子效果 |
 | P2 | Trigger | Henshin | ✓ | ✗ | 变身（模型/材质切换） |
@@ -49,7 +49,7 @@
 | P1 | Player | Henshin 变身系统 | ✓ | ✗ | 双材质切换（characterMaterial/alphaMaterial），Godot 未实现 |
 | P1 | Player | playedAnimators / playedTimelines | ✓ | ✗ | Unity 跟踪已播放动画器/时间线用于存档恢复 |
 | P2 | Player | sceneCamera / sceneLight 引用 | ✓ | ✗ | Unity Player 持有直接引用，Godot 靠 get_first_node_in_group 查找 |
-| P2 | Player | musicVolume 独立字段 | ✓ | ✗ | Unity 有独立音量控制字段 |
+| P2 | Player | musicVolume 独立字段 | ✓ | ✓ | `music_volume` 和 `music_delay` 已添加到 Player.gd |
 | P2 | Player | Editor 工具 | ✓ | ✗ | GetStartPosition 按钮、OnDrawGizmos 方向绘制、GetFrame FPS 计数 |
 | P3 | Level | PlayerCubes | ✓ | ✗ | 玩家轨迹方块（Godot 用 road mesh 替代） |
 | P3 | Trigger | TTFCheckPoint 系列 | ✓ | ✗ | 主题化存档点（TTFCheckPoint + TTFCheckPointGem + TTFCheckPointTrigger） |
@@ -119,8 +119,8 @@
 | Trigger | 21 | 13 | 3 | 5 |
 | Level | 7 | 5 | 0 | 2 |
 | Animator | 6 | 3 | 1 | 2 |
-| GUI | 8 | 0 | 0 | 8 |
-| Player | 9 | 2 | 0 | 7 |
+| GUI | 8 | 4 | 2 | 2 |
+| Player | 9 | 3 | 0 | 6 |
 | Editor | 1 | 0 | 1 | 0 |
 | Assets | 2 | 0 | 0 | 2 |
 | **已对齐系统** | 25 | 25 | 0 | 0 |
