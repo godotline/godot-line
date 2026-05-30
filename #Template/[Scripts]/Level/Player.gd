@@ -102,6 +102,10 @@ func _ready() -> void:
 		add_child(page)
 		page.set_setting("latency", music_delay)
 		page.set_setting("volume", music_volume)
+		page.start_requested.connect(_on_start_from_startpage)
+
+func _on_start_from_startpage() -> void:
+	turn()
 
 func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint() and (is_live or LevelManager.GameState == LevelManager.GameStatus.Moving):

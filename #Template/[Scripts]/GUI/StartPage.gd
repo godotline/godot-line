@@ -33,7 +33,7 @@ func _ready() -> void:
 func _build_ui() -> void:
 	_ui_container = Control.new()
 	_ui_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_ui_container.mouse_filter = Control.MOUSE_FILTER_PASS
+	_ui_container.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(_ui_container)
 
 	# Background overlay
@@ -42,7 +42,6 @@ func _build_ui() -> void:
 	var bg_style = StyleBoxFlat.new()
 	bg_style.bg_color = Color(0, 0, 0, 0.39)
 	main_panel.add_theme_stylebox_override("panel", bg_style)
-	main_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ui_container.add_child(main_panel)
 
 	_build_top_bar(_ui_container)
@@ -50,6 +49,9 @@ func _build_ui() -> void:
 	_build_info_button(_ui_container)
 	_build_bottom_bar(_ui_container)
 	_build_about_panel(_ui_container)
+
+	# Click on background starts game
+	main_panel.gui_input.connect(_on_background_click)
 
 func _build_top_bar(parent: Control) -> void:
 	top_bar = HBoxContainer.new()
@@ -269,6 +271,12 @@ func _build_about_panel(parent: Control) -> void:
 	close_btn.text = "关闭"
 	vbox.add_child(close_btn)
 	close_btn.pressed.connect(_on_about_close)
+
+# === Background click ===
+
+func _on_background_click(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		start_requested.emit()
 
 # === Public API ===
 
