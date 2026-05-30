@@ -281,7 +281,7 @@ func hide_animated() -> void:
 		return
 
 	# Block input during animation
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ui_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var tween = create_tween().set_parallel()
 
