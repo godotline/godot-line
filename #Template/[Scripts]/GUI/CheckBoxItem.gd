@@ -14,14 +14,14 @@ func _init_ui(p_title: String) -> void:
 	checkbox = CheckBox.new()
 	checkbox.flat = true
 	add_child(checkbox)
-	checkbox.toggled.connect(_on_toggled)
+	checkbox.toggled.connect(toggled.emit)
 
 	label = Label.new()
 	label.text = p_title
 	label.add_theme_font_size_override("font_size", 14)
 	add_child(label)
 
-func set_title(text: String) -> void:
+func set_title(p_text: String) -> void:
 	label.text = text
 
 func set_is_on(value: bool) -> void:
@@ -29,6 +29,3 @@ func set_is_on(value: bool) -> void:
 
 func get_is_on() -> bool:
 	return checkbox.button_pressed
-
-func _on_toggled(is_on: bool) -> void:
-	emit_signal("toggled", is_on)
