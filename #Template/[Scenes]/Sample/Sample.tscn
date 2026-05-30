@@ -205,19 +205,17 @@ force_camera_follow = true
 turn = true
 target_direction = 1
 
-[node name="Trigger8" parent="." unique_id=1840904846 node_paths=PackedStringArray("targetPlayer") instance=ExtResource("7_mmp1f")]
+[node name="Trigger8" parent="." unique_id=1840904846 instance=ExtResource("7_mmp1f")]
 transform = Transform3D(1.767767, 0, -8.965092, 0, 4.1631746, 0, 1.767767, 0, 8.965092, 31.440472, -0.49999905, 34.428783)
 script = ExtResource("14_47x6u")
-targetPlayer = NodePath("")
 type = 2
 firstDirection = Vector3(0, 90, 0)
 secondDirection = Vector3(0, 0, 0)
 targetState = 0
 
-[node name="Trigger9" parent="." unique_id=1159553083 node_paths=PackedStringArray("targetPlayer") instance=ExtResource("7_mmp1f")]
+[node name="Trigger9" parent="." unique_id=1159553083 instance=ExtResource("7_mmp1f")]
 transform = Transform3D(1.767767, 0, -8.965092, 0, 4.1631746, 0, 1.767767, 0, 8.965092, 38.0462, -0.49999905, 18.763533)
 script = ExtResource("14_47x6u")
-targetPlayer = NodePath("")
 type = 0
 firstDirection = Vector3(0, 90, 0)
 secondDirection = Vector3(0, 0, 0)
@@ -271,7 +269,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3752842, 0, 3.1362076)
 transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 1.5299892, 3)
 
 [node name="Ground" parent="Crown" unique_id=759376195 instance=ExtResource("6_6gedn")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -2.9858222, -2.3841858e-07, 2.8816853)
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -2.9858222, 2.7784956, 2.8816853)
 
 [node name="Ground3" parent="." unique_id=1230272800 instance=ExtResource("6_6gedn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5302486, 0, 26.103493)

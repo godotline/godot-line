@@ -7,7 +7,6 @@
 material = ExtResource("2_htf3w")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_47x6u"]
-size = Vector3(0.5, 0.5, 0.5)
 
 [node name="FakePlayer" type="CharacterBody3D" unique_id=226051297]
 collision_mask = 2
