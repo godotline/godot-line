@@ -123,7 +123,10 @@ func hide_animated() -> void:
 	if not visible:
 		return
 
-	_ui_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# 让所有子节点无视鼠标事件，确保事件穿透到 3D 场景
+	for child in _ui_container.get_children():
+		if child is Control:
+			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var tween = create_tween().set_parallel()
 
