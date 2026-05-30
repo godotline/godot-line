@@ -98,11 +98,17 @@ func _ready() -> void:
 	# 实例化 StartPage（启动界面）
 	var start_page_scene := load("res://#Template/[Resources]/StartPage.tscn") as PackedScene
 	if start_page_scene and not Engine.is_editor_hint():
+		# 加载持久化的音画延迟/音量设置（对齐 Unity PlayerPrefs）
+		var saved := SetLatency.load_settings()
+		music_delay = saved.delay
+		music_volume = saved.volume
+
 		var page := start_page_scene.instantiate()
 		add_child(page)
 		page.set_setting("latency", music_delay)
 		page.set_setting("volume", music_volume)
 		page.start_requested.connect(_on_start_from_startpage)
+		page.setting_changed.connect(_on_setting_changed)
 
 func _on_start_from_startpage() -> void:
 	turn()
@@ -251,47 +257,83 @@ func _play_land_effect() -> void:
 		land_effect.emitting = true
 
 func turn():
-	if is_on_floor() or fly:
-		if animation_node and not animation_node.is_playing():
-			if LevelManager.line_crossing_crown == 0 and not $MusicPlayer.stream_paused:
-				LevelManager.anim_time = 0
-			animation_node.play("level")
-			animation_node.seek(LevelManager.anim_time)
-			if level_data and level_data.levelAudioClip:
-				if $MusicPlayer.stream_paused:
-					$MusicPlayer.stream_paused = false
-				elif not $MusicPlayer.playing:
-					$MusicPlayer.stream = level_data.levelAudioClip
-					var music_start_time: float = level_data.get_audio_start_time()
-					_start_music_with_latency(music_start_time)
-		if is_start :
-			emit_signal("onturn")
-			emit_signal("on_change_direction")
-			_currentDirection = 1 - _currentDirection
-			rotation_degrees = current_direction
-		else:
-			is_start = true
+	if not (is_on_floor() or fly):
+		return
 
-			# 隐藏 StartPage
-			var page := get_node_or_null("StartPage")
-			if page and page is CanvasLayer:
-				page.hide_animated()
+	# 动画设置 — 所有路径都立即执行
+	if animation_node and not animation_node.is_playing():
+		if LevelManager.line_crossing_crown == 0 and not $MusicPlayer.stream_paused:
+			LevelManager.anim_time = 0
+		animation_node.play("level")
+		animation_node.seek(LevelManager.anim_time)
 
-			emit_signal("on_player_start")
-			LevelManager.GameState = LevelManager.GameStatus.Playing
-			rotation_degrees = current_direction
-		velocity = to_global(Vector3(0,0,1) * speed) - position
+	if is_start:
+		# 常规转向
+		emit_signal("onturn")
+		emit_signal("on_change_direction")
+		_currentDirection = 1 - _currentDirection
+		rotation_degrees = current_direction
+		velocity = to_global(Vector3(0, 0, 1) * speed) - position
 		past_translation = position
 		new_line()
+	else:
+		# —— 首次转向（游戏启动）——
+		is_start = true
+		var page := get_node_or_null("StartPage")
+		if page and page is CanvasLayer:
+			page.hide_animated()
+		emit_signal("on_player_start")
+		rotation_degrees = current_direction
 
-func _start_music_with_latency(music_start_time: float) -> void:
+		if music_delay > 0:
+			# 正值：线立即移动，音乐延后播放（对齐 Unity delay > 0 分支）
+			LevelManager.GameState = LevelManager.GameStatus.Playing
+			velocity = to_global(Vector3(0, 0, 1) * speed) - position
+			past_translation = position
+			new_line()
+			get_tree().create_timer(music_delay).timeout.connect(_play_music_from_level_data)
+		elif music_delay < 0:
+			# 负值：音乐立即播放，线原地不动等待后移动（对齐 Unity delay < 0 分支）
+			_play_music_from_level_data()
+			get_tree().create_timer(-music_delay).timeout.connect(_start_game_after_delay)
+		else:
+			# 零值：音画同步启动（原行为）
+			LevelManager.GameState = LevelManager.GameStatus.Playing
+			velocity = to_global(Vector3(0, 0, 1) * speed) - position
+			past_translation = position
+			new_line()
+			_play_music_from_level_data()
+
+## 从 level_data 启动音乐播放（处理 stream_paused / not playing 两种情况）
+func _play_music_from_level_data() -> void:
+	if not level_data or not level_data.levelAudioClip:
+		return
+	if $MusicPlayer.stream_paused:
+		$MusicPlayer.stream_paused = false
+	elif not $MusicPlayer.playing:
+		$MusicPlayer.stream = level_data.levelAudioClip
+		var start_time: float = level_data.get_audio_start_time()
+		_play_music(start_time)
+
+## 播放音乐，补偿系统音频延迟（AudioServer）并应用用户音量设置
+## latency: AudioServer.get_output_latency() — 系统硬件延迟自动补偿
+## music_volume: 用户手动调节的音量
+func _play_music(start_time: float) -> void:
+	$MusicPlayer.volume_db = linear_to_db(max(music_volume, 0.001))
 	var latency := AudioServer.get_output_latency()
 	if latency > 0.0:
-		var adjusted_time = max(music_start_time - latency, 0.0)
+		var adjusted_time := max(start_time - latency, 0.0)
 		$MusicPlayer.play(adjusted_time)
 	else:
-		$MusicPlayer.play(music_start_time)
+		$MusicPlayer.play(start_time)
 
+
+## music_delay < 0 时：timer 回调，启动游戏移动（对齐 Unity delay < 0 分支的 yield 之后逻辑）
+func _start_game_after_delay() -> void:
+	LevelManager.GameState = LevelManager.GameStatus.Playing
+	velocity = to_global(Vector3(0, 0, 1) * speed) - position
+	past_translation = position
+	new_line()
 
 func _on_Area_body_entered(_body: Node) -> void:
 	if not is_live:
@@ -337,3 +379,15 @@ func _rand_dir() -> Vector3:
 
 func _random_rotation() -> Vector3:
 	return Vector3(randf_range(0, 360), randf_range(0, 360), randf_range(0, 360))
+
+## StartPage 设置变化回调：更新 Player 字段 + 立即持久化 + 实时应用音量
+## 对齐 Unity SetLatency.cs 的 AddLatency/SubtractLatency/AddVolume/SubtractVolume + SetText + PlayerPrefs.SetFloat
+func _on_setting_changed(key: String, value) -> void:
+	match key:
+		"latency":
+			music_delay = value
+		"volume":
+			music_volume = value
+			if $MusicPlayer.playing:
+				$MusicPlayer.volume_db = linear_to_db(max(music_volume, 0.001))
+	SetLatency.save_settings(music_delay, music_volume)
