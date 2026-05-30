@@ -104,9 +104,6 @@ func _ready() -> void:
 		page.set_setting("volume", music_volume)
 		page.start_requested.connect(_on_start_from_startpage)
 
-	if not Engine.is_editor_hint():
-		move_and_slide()
-
 func _on_start_from_startpage() -> void:
 	turn()
 
