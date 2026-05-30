@@ -55,10 +55,15 @@ StartPage (CanvasLayer)                      ← 始终覆盖在 3D 场景上方
 │   │   values = ["低", "中", "高", "极高"]
 │   │
 │   ├── 音画延迟 (SettingItem)               ← ◀◀  60ms  ▶▶
-│   │   粗调 ±10，细调 ±1，单位 "ms"
+│   │   存储: Player.music_delay (float, 秒, 默认 0.0)
+│   │   显示: round(delay * 1000) + "ms" (整数毫秒)
+│   │   粗调 ±10ms (0.01s)，细调 ±1ms (0.001s)
+│   │   无 clamping（同 Unity 行为）
 │   │
 │   ├── 音量大小 (SettingItem)               ← ◀  100%  ▶
-│   │   values = 0~100, step=1
+│   │   存储: Player.music_volume (float, 0.0~1.0, 默认 1.0)
+│   │   显示: round(volume * 100) + "%"
+│   │   步进 ±1 (内部 ±0.1)，clamp [0, 1]
 │   │
 │   ├── shadow_toggle (CheckBoxItem)         ← ☐ 阴影
 │   └── post_toggle (CheckBoxItem)           ← ☐ 后处理
@@ -84,23 +89,38 @@ StartPage (CanvasLayer)                      ← 始终覆盖在 3D 场景上方
 ```
 SettingItem (HBoxContainer)
 ├── title_label (Label)                      ← 设置项名称（如"抗锯齿"）
-├── arrow_left (Button, flat)                ← "<" 字符
+├── fine_adjust (HBoxContainer)              ← 仅延迟项：粗调用 ±10
+│   ├── arrow_coarse_left (Button, flat)     ← "<<" 或 "<"
+│   └── arrow_fine_left (Button, flat)       ← "<"（仅延迟项）
+├── arrow_left (Button, flat)                ← "<" 字符（通用）
 ├── value_label (Label, center)              ← 当前值
-├── arrow_right (Button, flat)               ← ">" 字符
-└── (延迟项额外：sub_left + sub_right)
+├── arrow_right (Button, flat)               ← ">" 字符（通用）
+├── fine_adjust_right (HBoxContainer)        ← 仅延迟项
+│   ├── arrow_fine_right (Button, flat)      ← ">"
+│   └── arrow_coarse_right (Button, flat)    ← ">>" 或 ">"
 ```
+
+**SettingItem 有两种模式**：
+
+| 模式 | 适用 | 箭头行为 |
+|------|------|---------|
+| `cyclic`（循环） | 抗锯齿、画质等级 | ◀ ▶ 循环切换 options 列表 |
+| `range`（数值范围） | 音量大小 | ◀ ▶ 按 step 增减，clamp 到 [min, max] |
+| `latency`（延迟特殊模式） | 音画延迟 | ◀◀ ◀ ▶ ▶▶ 四级箭头：粗调 ±10ms，细调 ±1ms |
 
 **SettingItem.gd 接口**：
 ```gdscript
 signal value_changed(value)                   # 值变化时发出
-signal arrow_pressed(direction: int)           # -1 = 左, 1 = 右（用于延迟的粗调/微调区分）
 
 # 方法
-func set_options(options: Array)               # 设置可选值列表（循环切换用）
+func set_options(options: Array)               # 循环模式：设置可选值列表
 func set_value(val)                            # 设置当前值
 func get_value() -> Variant                    # 获取当前值
-func set_range(min_val, max_val, step)         # 设置范围（非循环模式）
+func set_range(min_val: float, max_val: float, step: float)
+                                               # range/latency 模式：设置范围和步进
 func set_suffix(text: String)                  # 设置后缀（"ms", "%"）
+func set_title(text: String)                   # 设置标题
+func set_mode(mode: int)                       # cyclic / range / latency
 ```
 
 #### CheckBoxItem.tscn (HBoxContainer)
@@ -129,7 +149,7 @@ func get_is_on() -> bool
 | `start_requested` | — | 游戏开始（玩家点击，StartPage 准备隐藏）|
 | `info_button_pressed` | — | 信息按钮 (i) 点击 |
 | `autoplay_toggled` | is_on: bool | 自动播放开关变化 |
-| `setting_changed` | key: String, value | 任意设置项变化 |
+| `setting_changed` | key: String, value | 任意设置项变化，key = "antialiasing"/"quality"/"latency"/"volume" |
 | `shadow_toggled` | is_on: bool | 阴影开关变化 |
 | `post_toggled` | is_on: bool | 后处理开关变化 |
 
@@ -143,6 +163,19 @@ func get_is_on() -> bool
 | `set_setting(key: String, value)` | 编程设置某个值 |
 | `get_setting(key: String) -> Variant` | 获取当前值 |
 | `set_about_content(title: String, authors: Array[String], credits: String)` | 设置 About 面板内容 |
+
+## Player.gd 新增变量
+
+对应 Unity 的 `Player.Instance.musicDelay` 和 `Player.Instance.musicVolume`：
+
+```gdscript
+# 音画延迟（秒），默认 0.0。用户可配置的额外延迟补偿。
+# 与 AudioServer.get_output_latency() 是不同概念，两者独立存在。
+var music_delay: float = 0.0
+
+# 音量 (0.0~1.0)，默认 1.0
+var music_volume: float = 1.0
+```
 
 ## 集成方式
 
