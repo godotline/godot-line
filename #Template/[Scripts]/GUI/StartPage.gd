@@ -15,7 +15,7 @@ signal post_toggled(is_on: bool)
 @onready var info_btn: Button = $UIContainer/InfoButton
 @onready var bottom_bar: Panel = $UIContainer/BottomBar
 @onready var about_panel: Panel = $UIContainer/AboutPanel
-@onready var about_content: Panel = $UIContainer/AboutPanel/AboutCenter/AboutContent
+@onready var about_content: Panel = $UIContainer/AboutPanel/AboutContent
 @onready var autoplay_check: CheckBoxItem = $UIContainer/TopBar/RightArea/AutoPlayToggle
 @onready var antialiasing_item: SettingItem = $UIContainer/BottomBar/HBox/AntiAliasingItem
 @onready var quality_item: SettingItem = $UIContainer/BottomBar/HBox/QualityItem
