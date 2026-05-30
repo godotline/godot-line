@@ -105,15 +105,17 @@ func _build_center_card(parent: Control) -> void:
 
 	# Info labels
 	var lines = [
-		{text = "测试场景", size = 32, color = Color(1, 1, 1)},
-		{text = "筱夕Sushi", size = 20, color = Color(0.8, 0.8, 0.8)},
-		{text = "共舞的线模板", size = 14, color = Color(0.7, 0.7, 0.7)},
-		{text = "基于冰焰模板 4.3.0 修改", size = 14, color = Color(0.7, 0.7, 0.7)},
-		{text = "作者：Max冰焰、筱夕Sushi、Quantumilk", size = 14, color = Color(0.7, 0.7, 0.7)},
+		{text = "测试场景", size = 32, color = Color(1, 1, 1), name = "center_title"},
+		{text = "筱夕Sushi", size = 20, color = Color(0.8, 0.8, 0.8), name = "center_author"},
+		{text = "共舞的线模板", size = 14, color = Color(0.7, 0.7, 0.7), name = ""},
+		{text = "基于冰焰模板 4.3.0 修改", size = 14, color = Color(0.7, 0.7, 0.7), name = ""},
+		{text = "作者：Max冰焰、筱夕Sushi、Quantumilk", size = 14, color = Color(0.7, 0.7, 0.7), name = ""},
 	]
 	for info in lines:
 		var lbl = Label.new()
 		lbl.text = info.text
+		if "name" in info and info.name:
+			lbl.name = info.name
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl.add_theme_font_size_override("font_size", info.size)
 		lbl.add_theme_color_override("font_color", info.color)
@@ -292,8 +294,8 @@ func hide_animated() -> void:
 		tween.tween_property(bottom_bar, "modulate:a", 0.0, 0.35)
 
 	if info_btn and is_instance_valid(info_btn):
-		tween.tween_property(info_btn, "offset_left", -60, 0.35).set_ease(Tween.EASE_IN_OUT)
-		tween.tween_property(info_btn, "modulate:a", 0.0, 0.35)
+		tween.tween_property(info_btn, "offset_left", -60, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+		tween.tween_property(info_btn, "modulate:a", 0.0, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 
 	if main_panel and is_instance_valid(main_panel):
 		tween.tween_property(main_panel, "modulate:a", 0.0, 0.45)
@@ -305,7 +307,7 @@ func _on_hide_finished() -> void:
 
 func set_info_card(config: Dictionary) -> void:
 	if config.has("title"):
-		var title_node = center_card.find_child("about_title", true, false)
+		var title_node = center_card.find_child("center_title", true, false)
 		if title_node is Label:
 			title_node.text = config["title"]
 
