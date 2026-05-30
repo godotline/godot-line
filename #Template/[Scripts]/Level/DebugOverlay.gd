@@ -2,6 +2,7 @@ extends CanvasLayer
 class_name DebugOverlay
 
 var _label: Label
+var _previous_debug: bool = false
 
 func _ready() -> void:
 	layer = 100
@@ -17,9 +18,32 @@ func _ready() -> void:
 	_label.add_theme_constant_override("shadow_offset_y", 1)
 	add_child(_label)
 
+	# 用定时器轮询 debug 状态开关，避免 _process 空跑
+	var poll := get_tree().create_timer(0.5)
+	poll.timeout.connect(_poll_debug)
+	set_process(false)
+
+func _poll_debug() -> void:
+	if not is_instance_valid(self):
+		return
+	if not Player.instance:
+		# 继续轮询直至 Player 就绪
+		var poll := get_tree().create_timer(0.5)
+		poll.timeout.connect(_poll_debug)
+		return
+	var debug_on := Player.instance.debug
+	if debug_on != _previous_debug:
+		_previous_debug = debug_on
+		set_process(debug_on)
+		visible = debug_on
+	# 继续轮询
+	var poll := get_tree().create_timer(0.5)
+	poll.timeout.connect(_poll_debug)
+
 func _process(_delta: float) -> void:
 	if not Player.instance or not Player.instance.debug:
 		visible = false
+		set_process(false)
 		return
 	visible = true
 	_update_label()

@@ -62,6 +62,38 @@ func _ready() -> void:
 	shadow_toggle.toggled.connect(_on_shadow_toggled)
 	post_toggle.toggled.connect(_on_post_toggled)
 
+	# 从 Player.level_data 读取关卡信息，填充关于页面（与 Unity 版 StartPage 一致）
+	_populate_about_from_level_data()
+
+func _populate_about_from_level_data() -> void:
+	# Player 使用 class_name + static var instance 模式
+	var player := Player.instance if Player.instance != null else null
+	if not player or not player.level_data:
+		return
+	var ld: LevelData = player.level_data
+
+	# 设置标题
+	var title_node = about_content.find_child("about_title", true)
+	if title_node is Label:
+		title_node.text = ld.levelTitle
+
+	# 设置作者列表（带可点击 URL，与 Unity 版 StartPage 一致）
+	var author_container = about_content.find_child("about_authors", true)
+	if author_container:
+		for child in author_container.get_children():
+			child.queue_free()
+		for a in ld.authors:
+			var btn := Button.new()
+			btn.text = a.name
+			btn.flat = true
+			btn.add_theme_font_size_override("font_size", 16)
+			if a.page_url:
+				btn.pressed.connect(_open_author_url.bind(a.page_url))
+			author_container.add_child(btn)
+
+static func _open_author_url(url: String) -> void:
+	OS.shell_open(url)
+
 
 # === Background click ===
 

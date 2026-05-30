@@ -293,6 +293,8 @@ func _start_music_with_latency(music_start_time: float) -> void:
 
 
 func _on_Area_body_entered(_body: Node) -> void:
+	if not is_live:
+		return
 	die()
 func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = LevelManager.GameStatus.Died):
 	if !noclip:

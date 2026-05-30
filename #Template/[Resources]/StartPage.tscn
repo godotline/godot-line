@@ -5,14 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://checkitem" path="res://#Template/[Resources]/CheckBoxItem.tscn" id="3"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
-bg_color = Color(0, 0, 0, 0.39)
-
-[sub_resource type="StyleBoxFlat" id="3"]
-bg_color = Color(0.38, 0.38, 0.38, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+bg_color = Color(0, 0, 0, 0)
 
 [sub_resource type="StyleBoxFlat" id="4"]
 bg_color = Color(0.19, 0.19, 0.19, 0.7)
@@ -26,6 +19,13 @@ corner_radius_top_left = 22
 corner_radius_top_right = 22
 corner_radius_bottom_right = 22
 corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="3"]
+bg_color = Color(0.38, 0.38, 0.38, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="StartPage" type="CanvasLayer" unique_id=1577292833]
 layer = 2
@@ -75,20 +75,6 @@ alignment = 2
 [node name="AutoPlayToggle" parent="UIContainer/TopBar/RightArea" unique_id=325619222 instance=ExtResource("3")]
 layout_mode = 2
 
-[node name="InfoButton" type="Button" parent="UIContainer" unique_id=2029351895]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = -1.0
-offset_top = -129.0
-offset_right = 39.0
-offset_bottom = -89.0
-grow_vertical = 0
-theme_override_styles/normal = SubResource("3")
-text = "i"
-flat = true
-
 [node name="BottomBar" type="Panel" parent="UIContainer" unique_id=1447155151]
 layout_mode = 0
 anchor_top = 1.0
@@ -127,6 +113,7 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="AboutPanel" type="Panel" parent="UIContainer" unique_id=651998823]
+visible = false
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -152,7 +139,7 @@ layout_mode = 0
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 24
-text = "关卡名称"
+text = "测试场景"
 horizontal_alignment = 1
 
 [node name="AboutSpacer1" type="Control" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=1414067686]
@@ -173,6 +160,19 @@ theme_override_font_sizes/font_size = 14
 text = "基于冰焰模板 4.3.0 修改"
 horizontal_alignment = 1
 
+[node name="InfoButton" type="Button" parent="UIContainer" unique_id=2029351895]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -1.0
+offset_top = -129.0
+offset_right = 39.0
+offset_bottom = -89.0
+grow_vertical = 0
+theme_override_styles/normal = SubResource("3")
+text = "i"
+
 [connection signal="gui_input" from="UIContainer/MainPanel" to="." method="_on_background_click"]
-[connection signal="pressed" from="UIContainer/InfoButton" to="." method="_on_info_pressed"]
 [connection signal="gui_input" from="UIContainer/AboutPanel/AboutContent" to="." method="_on_about_click"]
+[connection signal="pressed" from="UIContainer/InfoButton" to="." method="_on_info_pressed"]

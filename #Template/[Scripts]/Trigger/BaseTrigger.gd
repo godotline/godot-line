@@ -22,13 +22,13 @@ func _setup_trigger() -> void:
 		_signal_connected = true
 
 func _on_body_entered(body: Node3D) -> void:
+	if one_shot and _used:
+		if debug_mode:
+			print("[BaseTrigger] ", name, " 已触发过，忽略 (one_shot)")
+		return
 	if body is CharacterBody3D:
-		if one_shot and _used:
-			if debug_mode:
-				print("[BaseTrigger] ", name, " 已触发过，忽略 (one_shot)")
-			return
 		_used = true
-		
+
 		if debug_mode:
 			print("[BaseTrigger] ", name, " 被触发")
 		triggered.emit()

@@ -15,6 +15,10 @@ var _index: int = 0
 var triggered: bool = false
 var _displayed: bool = false
 
+## 远距离检查节流（帧间隔）
+const FAR_CHECK_INTERVAL: int = 30
+const NEAR_CHECK_INTERVAL: int = 5
+
 func _ready() -> void:
 	_player = Player.instance
 	_root = $".."
@@ -31,7 +35,15 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if not _player:
 		return
+
+	var current_frame := Engine.get_process_frames()
 	var dist_sq := global_position.distance_squared_to(_player.global_position)
+
+	# 距离节流：远距离每 30 帧检查一次，近距离每 5 帧
+	var interval: int = FAR_CHECK_INTERVAL if dist_sq > appear_distance * appear_distance else NEAR_CHECK_INTERVAL
+	if current_frame % interval != 0:
+		return
+
 	if not triggered and dist_sq <= appear_distance * appear_distance and not _sprite.visible:
 		_appear()
 	if LevelManager.Clicked and not triggered and dist_sq <= trigger_distance * trigger_distance and can_be_triggered and LevelManager.GameState == LevelManager.GameStatus.Playing and not _player.disallow_input:
@@ -39,6 +51,7 @@ func _process(_delta: float) -> void:
 
 func _trigger() -> void:
 	triggered = true
+	set_process(false)
 	_disappear(true)
 	var effect := _trigger_effect.instantiate() as Node3D
 	get_tree().current_scene.add_child(effect)
@@ -72,6 +85,7 @@ func _reset_data() -> void:
 	LevelManager.remove_revive_listener(_reset_data)
 	_displayed = false
 	triggered = false
+	set_process(true)
 	_disappear(false)
 
 func _on_taper_entered(body: Node3D) -> void:
