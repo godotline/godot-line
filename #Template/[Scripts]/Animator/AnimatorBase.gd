@@ -22,6 +22,7 @@ var _is_playing = false
 var _initialized = false
 var _finished = false
 var _trigger_index := -1
+var _cached_music_player: AudioStreamPlayer = null
 
 signal on_animation_start
 signal on_animation_end
@@ -68,11 +69,12 @@ func _process(_delta: float) -> void:
 		return
 	if LevelManager.GameState != LevelManager.GameStatus.Playing:
 		return
-	var player := Player.instance
-	if not player:
-		return
-	var music_player := player.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-	if music_player and music_player.playing and music_player.get_playback_position() > trigger_time:
+	# 懒加载缓存 MusicPlayer（_ready 时 Player 可能还没就绪）
+	if not _cached_music_player:
+		var player := Player.instance
+		if player:
+			_cached_music_player = player.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+	if _cached_music_player and _cached_music_player.playing and _cached_music_player.get_playback_position() > trigger_time:
 		Trigger()
 
 func _notification(what):

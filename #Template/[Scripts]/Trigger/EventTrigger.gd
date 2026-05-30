@@ -42,9 +42,9 @@ func _on_body_entered(body: Node3D) -> void:
 		return
 	if not invoke_on_click:
 		_invoke()
-	else:
+	elif not _waiting_click:
 		_waiting_click = true
-		if Player.instance and Player.instance.has_signal("onturn"):
+		if Player.instance and Player.instance.has_signal("onturn") and not Player.instance.onturn.is_connected(_on_player_turn):
 			Player.instance.onturn.connect(_on_player_turn)
 
 func _on_body_exited(body: Node3D) -> void:
@@ -55,13 +55,15 @@ func _on_body_exited(body: Node3D) -> void:
 	if invoke_on_awake or not invoke_on_click:
 		return
 	if _waiting_click and Player.instance and Player.instance.has_signal("onturn"):
-		Player.instance.onturn.disconnect(_on_player_turn)
+		if Player.instance.onturn.is_connected(_on_player_turn):
+			Player.instance.onturn.disconnect(_on_player_turn)
 	_waiting_click = false
 
 func _on_player_turn() -> void:
 	if _waiting_click:
 		if Player.instance and Player.instance.has_signal("onturn"):
-			Player.instance.onturn.disconnect(_on_player_turn)
+			if Player.instance.onturn.is_connected(_on_player_turn):
+				Player.instance.onturn.disconnect(_on_player_turn)
 		_waiting_click = false
 		_invoke()
 
@@ -80,18 +82,18 @@ func _invoke() -> void:
 func _invoke_targets() -> void:
 	if debug_mode:
 		print("[EventTrigger] %s 调用 %d 个目标" % [name, target_nodes.size()])
-	
+
 	for i in range(target_nodes.size()):
 		var node: Node = target_nodes[i]
 		if node == null:
 			push_warning("[EventTrigger] 目标节点 #%d 为空，跳过" % i)
 			continue
-		
+
 		# 获取方法名，如果索引越界则使用默认值 "Trigger"
 		var method: String = "Trigger"
 		if i < target_methods.size() and target_methods[i] != "":
 			method = target_methods[i]
-		
+
 		if node.has_method(method):
 			if debug_mode:
 				print("[EventTrigger]   -> %s.%s()" % [node.name, method])

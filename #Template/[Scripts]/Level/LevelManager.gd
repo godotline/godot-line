@@ -21,11 +21,22 @@ enum Direction {
 static var GameState: GameStatus = GameStatus.Waiting
 static var get_input := true
 
+## 帧缓存 — Clicked 状态（每帧只计算一次）
+static var _clicked_cached: bool = false
+static var _clicked_frame: int = -1
+
 static var Clicked: bool:
 	get:
-		if get_input:
-			return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_key_pressed(KEY_SPACE) or Input.is_key_pressed(KEY_ENTER) or Input.is_key_pressed(KEY_KP_ENTER)
-		return false
+		if not get_input:
+			return false
+		var current_frame := Engine.get_process_frames()
+		if current_frame != _clicked_frame:
+			_clicked_cached = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) \
+				or Input.is_key_pressed(KEY_SPACE) \
+				or Input.is_key_pressed(KEY_ENTER) \
+				or Input.is_key_pressed(KEY_KP_ENTER)
+			_clicked_frame = current_frame
+		return _clicked_cached
 
 static var DefaultGravity: Vector3:
 	get:

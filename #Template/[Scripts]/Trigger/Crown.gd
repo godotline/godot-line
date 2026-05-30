@@ -32,6 +32,7 @@ func _on_checkpoint_body_entered(body: Node3D) -> void:
 	if not body is Player:
 		return
 	used = true
+	set_process(false)
 	_take_crown()
 	_enter_trigger(body)
 
@@ -65,9 +66,9 @@ func _take_crown() -> void:
 	)
 
 func _crown_mesh_shrink() -> void:
-	#var tw := create_tween()
-	#tw.tween_property(_crown_mesh, "scale", Vector3.ZERO, crown_shrink_duration)
-	$Crown.queue_free()
+	if _crown_mesh:
+		_crown_mesh.queue_free()
+		_crown_mesh = null
 
 func _crown_sprite_fade() -> void:
 	var tw := create_tween()
