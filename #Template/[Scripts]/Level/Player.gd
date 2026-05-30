@@ -70,7 +70,7 @@ var music_volume: float = 1.0
 
 ## ========== Tail 对象池 ==========
 const TAIL_POOL_SIZE := 256
-var _tail_pool: Array[MeshInstance3D] = []
+var _tail_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
 
 func _ready() -> void:
 	instance = self
@@ -206,15 +206,16 @@ func _return_to_pool(tail: MeshInstance3D) -> void:
 	if tail.get_parent():
 		tail.get_parent().remove_child(tail)
 	tail.visible = false
-	if _tail_pool.size() < TAIL_POOL_SIZE:
-		_tail_pool.append(tail)
+	if not _tail_pool.is_full():
+		_tail_pool.add(tail)
 	else:
 		tail.queue_free()
 
 func _get_from_pool() -> MeshInstance3D:
-	if _tail_pool.is_empty():
+	var tail := _tail_pool.pop() as MeshInstance3D
+	if not tail:
 		return MeshInstance3D.new()
-	return _tail_pool.pop_back()
+	return tail
 
 func _get_or_create_player_tail_holder() -> Node3D:
 	var root := tree.current_scene
