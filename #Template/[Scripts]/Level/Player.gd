@@ -104,6 +104,9 @@ func _ready() -> void:
 		page.set_setting("volume", music_volume)
 		page.start_requested.connect(_on_start_from_startpage)
 
+	if not Engine.is_editor_hint():
+		move_and_slide()
+
 func _on_start_from_startpage() -> void:
 	turn()
 
@@ -112,6 +115,7 @@ func _physics_process(delta: float) -> void:
 		if not is_on_floor():
 			var gravity_strength: float = level_data.gravity.length() if level_data else 9.8
 			velocity.y -= gravity_strength * delta
+		if not Engine.is_editor_hint():
 		move_and_slide()
 		if is_live and is_on_wall():
 			die()
