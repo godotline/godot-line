@@ -16,55 +16,80 @@ signal post_toggled(is_on: bool)
 @onready var bottom_bar: Panel = $UIContainer/BottomBar
 @onready var about_panel: Panel = $UIContainer/AboutPanel
 @onready var about_content: Panel = $UIContainer/AboutPanel/AboutContent
-@onready var autoplay_check: CheckBoxItem = $UIContainer/TopBar/RightArea/AutoPlayToggle
-@onready var antialiasing_item: SettingItem = $UIContainer/BottomBar/HBox/AntiAliasingItem
-@onready var quality_item: SettingItem = $UIContainer/BottomBar/HBox/QualityItem
-@onready var latency_item: SettingItem = $UIContainer/BottomBar/HBox/LatencyItem
-@onready var volume_item: SettingItem = $UIContainer/BottomBar/HBox/VolumeItem
-@onready var shadow_toggle: CheckBoxItem = $UIContainer/BottomBar/HBox/ShadowToggle
-@onready var post_toggle: CheckBoxItem = $UIContainer/BottomBar/HBox/PostToggle
+# Setting item mode constants
+const MODE_CYCLIC = 0
+const MODE_RANGE = 1
+const MODE_LATENCY = 2
+
 @onready var _set_auto_play: Node = $SetAutoPlay
+
+# Inlined checkbox item references
+@onready var autoplay_checkbox: CheckBox = $UIContainer/RightArea/AutoPlayToggle/CheckBox
+@onready var autoplay_label: Label = $UIContainer/RightArea/AutoPlayToggle/ItemLabel
+@onready var shadow_checkbox: CheckBox = $UIContainer/BottomBar/HBox/ShadowToggle/CheckBox
+@onready var shadow_label: Label = $UIContainer/BottomBar/HBox/ShadowToggle/ItemLabel
+@onready var post_checkbox: CheckBox = $UIContainer/BottomBar/HBox/PostToggle/CheckBox
+@onready var post_label: Label = $UIContainer/BottomBar/HBox/PostToggle/ItemLabel
+
+# Setting item state dictionary: key -> state
+var _setting_states: Dictionary = {}
 
 var _about_visible: bool = false
 
 func _ready() -> void:
-	antialiasing_item.set_title("抗锯齿")
-	antialiasing_item.set_mode(SettingItem.Mode.CYCLIC)
-	antialiasing_item.set_options(["Off", "x2", "x4", "x8"])
-
-	quality_item.set_title("画质等级")
-	quality_item.set_mode(SettingItem.Mode.CYCLIC)
-	quality_item.set_options(["低", "中", "高", "极高"])
-	quality_item.set_value("中")
-
-	latency_item.set_title("音画延迟")
-	latency_item.set_mode(SettingItem.Mode.LATENCY)
-	latency_item.set_range(-5.0, 5.0, 0.01)
-	latency_item.set_value(0.0)
-
-	volume_item.set_title("音量大小")
-	volume_item.set_mode(SettingItem.Mode.RANGE)
-	volume_item.set_range(0.0, 1.0, 0.1)
-	volume_item.set_value(1.0)
-	volume_item.set_suffix("%")
-
-	autoplay_check.set_title("AUTOPLAY")
-	autoplay_check.label.add_theme_color_override("font_color", Color(1, 0, 0))
-	autoplay_check.label.add_theme_font_size_override("font_size", 16)
-
-	shadow_toggle.set_title("阴影")
-	post_toggle.set_title("后处理")
-
-	antialiasing_item.value_changed.connect(_on_setting_changed.bind("antialiasing"))
-	quality_item.value_changed.connect(_on_setting_changed.bind("quality"))
-	latency_item.value_changed.connect(_on_setting_changed.bind("latency"))
-	volume_item.value_changed.connect(_on_setting_changed.bind("volume"))
-	autoplay_check.toggled.connect(_on_autoplay_toggled)
-	shadow_toggle.toggled.connect(_on_shadow_toggled)
-	post_toggle.toggled.connect(_on_post_toggled)
-
+	_init_setting_states()
 	# 从 Player.level_data 读取关卡信息，填充关于页面（与 Unity 版 StartPage 一致）
 	_populate_about_from_level_data()
+
+func _init_setting_states() -> void:
+	# --- AntiAliasing (CYCLIC) ---
+	var aa = _create_setting_state("antialiasing", $UIContainer/BottomBar/HBox/AntiAliasingItem)
+	aa.mode = MODE_CYCLIC
+	aa.options = ["Off", "x2", "x4", "x8"]
+	aa.index = 0
+	_update_setting_display(aa)
+
+	# --- Quality (CYCLIC) ---
+	var ql = _create_setting_state("quality", $UIContainer/BottomBar/HBox/QualityItem)
+	ql.mode = MODE_CYCLIC
+	ql.options = ["低", "中", "高", "极高"]
+	ql.index = 1
+	_update_setting_display(ql)
+
+	# --- Latency (LATENCY) ---
+	var lt = _create_setting_state("latency", $UIContainer/BottomBar/HBox/LatencyItem)
+	lt.mode = MODE_LATENCY
+	lt.min_val = -5.0
+	lt.max_val = 5.0
+	lt.step = 0.01
+	lt.value = 0.0
+	lt.suffix = "ms"
+	lt.arrow_left.visible = false
+	lt.arrow_right.visible = false
+	lt.arrow_coarse_left.visible = true
+	lt.arrow_fine_left.visible = true
+	lt.arrow_coarse_right.visible = true
+	lt.arrow_fine_right.visible = true
+	_update_setting_display(lt)
+
+	# --- Volume (RANGE) ---
+	var vl = _create_setting_state("volume", $UIContainer/BottomBar/HBox/VolumeItem)
+	vl.mode = MODE_RANGE
+	vl.min_val = 0.0
+	vl.max_val = 1.0
+	vl.step = 0.1
+	vl.value = 1.0
+	vl.suffix = "%"
+	_update_setting_display(vl)
+
+	# --- Checkbox items ---
+	autoplay_label.text = "AUTOPLAY"
+	autoplay_label.add_theme_color_override("font_color", Color(1, 0, 0))
+	autoplay_label.add_theme_font_size_override("font_size", 16)
+
+	autoplay_checkbox.toggled.connect(_on_autoplay_toggled)
+	shadow_checkbox.toggled.connect(_on_shadow_toggled)
+	post_checkbox.toggled.connect(_on_post_toggled)
 
 func _populate_about_from_level_data() -> void:
 	# Player 使用 class_name + static var instance 模式
@@ -207,28 +232,124 @@ func set_about_content(title: String, authors: Array, credits: String) -> void:
 		credits_node.text = credits
 
 func set_setting(key: String, value) -> void:
-	match key:
-		"antialiasing": antialiasing_item.set_value(value)
-		"quality": quality_item.set_value(value)
-		"latency": latency_item.set_value(value)
-		"volume": volume_item.set_value(value)
+	if not _setting_states.has(key):
+		return
+	var state = _setting_states[key]
+	if state.mode == MODE_CYCLIC:
+		var idx = state.options.find(value)
+		if idx >= 0:
+			state.index = idx
+		elif state.options.size() > 0:
+			push_warning("StartPage.set_setting: value '%s' not found in options" % str(value))
+	else:
+		state.value = clampf(value, state.min_val, state.max_val)
+	_update_setting_display(state)
 
 func get_setting(key: String):
-	match key:
-		"antialiasing": return antialiasing_item.get_value()
-		"quality": return quality_item.get_value()
-		"latency": return latency_item.get_value()
-		"volume": return volume_item.get_value()
+	if _setting_states.has(key):
+		return _get_setting_value(_setting_states[key])
 	return null
+
+func _create_setting_state(key: String, root: VBoxContainer) -> Dictionary:
+	var state = {
+		key = key,
+		root = root,
+		title_label = root.get_node("TitleLabel"),
+		value_label = root.get_node("Controls/ValueLabel"),
+		arrow_left = root.get_node("Controls/ArrowLeft"),
+		arrow_right = root.get_node("Controls/ArrowRight"),
+		arrow_coarse_left = root.get_node("Controls/ArrowCoarseLeft"),
+		arrow_fine_left = root.get_node("Controls/ArrowFineLeft"),
+		arrow_coarse_right = root.get_node("Controls/ArrowCoarseRight"),
+		arrow_fine_right = root.get_node("Controls/ArrowFineRight"),
+		mode = MODE_CYCLIC,
+		options = [],
+		index = 0,
+		value = 0.0,
+		min_val = 0.0, max_val = 100.0, step = 1.0,
+		suffix = "",
+	}
+	_setting_states[key] = state
+
+	state.arrow_left.pressed.connect(_on_setting_left.bind(state))
+	state.arrow_right.pressed.connect(_on_setting_right.bind(state))
+	state.arrow_coarse_left.pressed.connect(_on_setting_coarse_left.bind(state))
+	state.arrow_fine_left.pressed.connect(_on_setting_fine_left.bind(state))
+	state.arrow_coarse_right.pressed.connect(_on_setting_coarse_right.bind(state))
+	state.arrow_fine_right.pressed.connect(_on_setting_fine_right.bind(state))
+
+	return state
+
+func _update_setting_display(state: Dictionary) -> void:
+	match state.mode:
+		MODE_CYCLIC:
+			state.value_label.text = str(state.options[state.index]) if state.options.size() > 0 else ""
+		MODE_RANGE, MODE_LATENCY:
+			var display_val = state.value
+			if state.suffix == "ms":
+				display_val = round(state.value * 1000)
+			elif state.suffix == "%":
+				display_val = round(state.value * 100)
+			state.value_label.text = str(display_val) + state.suffix
+
+func _get_setting_value(state: Dictionary):
+	if state.mode == MODE_CYCLIC:
+		return state.options[state.index] if state.options.size() > 0 else null
+	return state.value
+
+# === Arrow button handlers ===
+
+func _on_setting_left(state: Dictionary) -> void:
+	match state.mode:
+		MODE_CYCLIC:
+			if state.options.size() == 0:
+				return
+			state.index = (state.index - 1 + state.options.size()) % state.options.size()
+		MODE_RANGE, MODE_LATENCY:
+			state.value = clampf(state.value - state.step, state.min_val, state.max_val)
+	setting_changed.emit(state.key, _get_setting_value(state))
+	_update_setting_display(state)
+
+func _on_setting_right(state: Dictionary) -> void:
+	match state.mode:
+		MODE_CYCLIC:
+			if state.options.size() == 0:
+				return
+			state.index = (state.index + 1) % state.options.size()
+		MODE_RANGE, MODE_LATENCY:
+			state.value = clampf(state.value + state.step, state.min_val, state.max_val)
+	setting_changed.emit(state.key, _get_setting_value(state))
+	_update_setting_display(state)
+
+func _on_setting_fine_left(state: Dictionary) -> void:
+	if state.mode == MODE_LATENCY:
+		state.value = max(state.min_val, state.value - 0.001)
+		setting_changed.emit(state.key, state.value)
+		_update_setting_display(state)
+
+func _on_setting_fine_right(state: Dictionary) -> void:
+	if state.mode == MODE_LATENCY:
+		state.value = min(state.max_val, state.value + 0.001)
+		setting_changed.emit(state.key, state.value)
+		_update_setting_display(state)
+
+func _on_setting_coarse_left(state: Dictionary) -> void:
+	if state.mode == MODE_LATENCY:
+		state.value = max(state.min_val, state.value - 0.01)
+		setting_changed.emit(state.key, state.value)
+		_update_setting_display(state)
+
+func _on_setting_coarse_right(state: Dictionary) -> void:
+	if state.mode == MODE_LATENCY:
+		state.value = min(state.max_val, state.value + 0.01)
+		setting_changed.emit(state.key, state.value)
+		_update_setting_display(state)
 
 # === Internal handlers ===
 
 func _on_about_click(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_hide_about()
-
-func _on_setting_changed(value, key: String) -> void:
-	setting_changed.emit(key, value)
 
 func _on_info_pressed() -> void:
 	info_button_pressed.emit()

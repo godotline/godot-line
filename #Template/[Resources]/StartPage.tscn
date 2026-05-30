@@ -1,15 +1,15 @@
 [gd_scene format=3 uid="uid://startpage"]
 
 [ext_resource type="Script" uid="uid://urm8r3g8vfda" path="res://#Template/[Scripts]/GUI/StartPage.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://b62xyfh7pvccw" path="res://#Template/[Resources]/SettingItem.tscn" id="2"]
-[ext_resource type="PackedScene" uid="uid://checkitem" path="res://#Template/[Resources]/CheckBoxItem.tscn" id="3"]
-[ext_resource type="Script" uid="uid://cpt228wqyq445" path="res://#Template/[Scripts]/Auto/SetAutoPlay.gd" id="4"]
+[ext_resource type="Script" uid="uid://cpt228wqyq445" path="res://#Template/[Scripts]/Auto/SetAutoPlay.gd" id="2"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(0, 0, 0, 0)
 
 [sub_resource type="StyleBoxFlat" id="4"]
 bg_color = Color(0.19, 0.19, 0.19, 0.7)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
 
 [sub_resource type="StyleBoxFlat" id="5"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -22,11 +22,9 @@ corner_radius_bottom_right = 22
 corner_radius_bottom_left = 22
 
 [sub_resource type="StyleBoxFlat" id="3"]
-bg_color = Color(0.38, 0.38, 0.38, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+bg_color = Color(0.38039216, 0.38039216, 0.38039216, 0.5254902)
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
 
 [node name="StartPage" type="CanvasLayer" unique_id=1577292833]
 layer = 2
@@ -47,34 +45,46 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_styles/panel = SubResource("1")
 
+[node name="RightArea" type="HBoxContainer" parent="UIContainer" unique_id=162991083]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -55.5
+offset_right = 55.5
+offset_bottom = 40.0
+grow_horizontal = 2
+alignment = 2
+
+[node name="AutoPlayToggle" type="HBoxContainer" parent="UIContainer/RightArea" unique_id=235974998]
+layout_mode = 2
+
+[node name="CheckBox" type="CheckBox" parent="UIContainer/RightArea/AutoPlayToggle" unique_id=1675355245]
+layout_mode = 2
+flat = true
+
+[node name="ItemLabel" type="Label" parent="UIContainer/RightArea/AutoPlayToggle" unique_id=1399267776]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 16
+text = "AUTOPLAY"
+
 [node name="TopBar" type="HBoxContainer" parent="UIContainer" unique_id=96717573]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 16.0
-offset_top = 16.0
+offset_top = 36.0
 offset_right = -16.0
 offset_bottom = 56.0
 grow_horizontal = 2
-grow_vertical = 0
-
-[node name="LeftSpacer" type="Control" parent="UIContainer/TopBar" unique_id=223344556]
-layout_mode = 2
-size_flags_horizontal = 3
 
 [node name="HintLabel" type="Label" parent="UIContainer/TopBar" unique_id=1657515663]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 6
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
 text = "R: 重新开始  |  K: 快速死亡  |  D: 调试模式"
-
-[node name="RightArea" type="HBoxContainer" parent="UIContainer/TopBar" unique_id=162991083]
-layout_mode = 2
-alignment = 2
-
-[node name="AutoPlayToggle" parent="UIContainer/TopBar/RightArea" unique_id=325619222 instance=ExtResource("3")]
-layout_mode = 2
 
 [node name="BottomBar" type="Panel" parent="UIContainer" unique_id=1447155151]
 layout_mode = 0
@@ -91,31 +101,263 @@ anchor_bottom = 1.0
 offset_left = 20.0
 offset_right = -20.0
 
-[node name="AntiAliasingItem" parent="UIContainer/BottomBar/HBox" unique_id=1253615044 instance=ExtResource("2")]
+[node name="AntiAliasingItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=87616723]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+
+[node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/AntiAliasingItem" unique_id=666338461]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "抗锯齿"
+horizontal_alignment = 1
+
+[node name="Controls" type="HBoxContainer" parent="UIContainer/BottomBar/HBox/AntiAliasingItem" unique_id=1314049537]
+layout_mode = 2
+alignment = 1
+
+[node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1102256506]
+visible = false
+layout_mode = 2
+text = "<<"
+flat = true
+
+[node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=141123282]
+visible = false
+layout_mode = 2
+text = "<"
+flat = true
+
+[node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1671055612]
+layout_mode = 2
+text = "◄"
+flat = true
+
+[node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1021863229]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "Off"
+horizontal_alignment = 1
+
+[node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1830302213]
+layout_mode = 2
+text = "►"
+flat = true
+
+[node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=2005454214]
+visible = false
+layout_mode = 2
+text = ">"
+flat = true
+
+[node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=731316818]
+visible = false
+layout_mode = 2
+text = ">>"
+flat = true
+
+[node name="QualityItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=2077653218]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 
-[node name="QualityItem" parent="UIContainer/BottomBar/HBox" unique_id=1890975800 instance=ExtResource("2")]
+[node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/QualityItem" unique_id=1216785956]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "画质等级"
+horizontal_alignment = 1
+
+[node name="Controls" type="HBoxContainer" parent="UIContainer/BottomBar/HBox/QualityItem" unique_id=795772962]
+layout_mode = 2
+alignment = 1
+
+[node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=374645834]
+visible = false
+layout_mode = 2
+text = "<<"
+flat = true
+
+[node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=726645966]
+visible = false
+layout_mode = 2
+text = "<"
+flat = true
+
+[node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1253007165]
+layout_mode = 2
+text = "◄"
+flat = true
+
+[node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1811727225]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "中"
+horizontal_alignment = 1
+
+[node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=240866013]
+layout_mode = 2
+text = "►"
+flat = true
+
+[node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=484715634]
+visible = false
+layout_mode = 2
+text = ">"
+flat = true
+
+[node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1341994536]
+visible = false
+layout_mode = 2
+text = ">>"
+flat = true
+
+[node name="LatencyItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1619395701]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 
-[node name="LatencyItem" parent="UIContainer/BottomBar/HBox" unique_id=83933793 instance=ExtResource("2")]
+[node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/LatencyItem" unique_id=1986991335]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "音画延迟"
+horizontal_alignment = 1
+
+[node name="Controls" type="HBoxContainer" parent="UIContainer/BottomBar/HBox/LatencyItem" unique_id=1357306656]
+layout_mode = 2
+alignment = 1
+
+[node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1834214201]
+layout_mode = 2
+text = "<<"
+flat = true
+
+[node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1113184714]
+layout_mode = 2
+text = "<"
+flat = true
+
+[node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1747806464]
+visible = false
+layout_mode = 2
+text = "◄"
+flat = true
+
+[node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=719853010]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "0.0ms"
+horizontal_alignment = 1
+
+[node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1256156666]
+visible = false
+layout_mode = 2
+text = "►"
+flat = true
+
+[node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=732235424]
+layout_mode = 2
+text = ">"
+flat = true
+
+[node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=204037458]
+layout_mode = 2
+text = ">>"
+flat = true
+
+[node name="VolumeItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=814000201]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 
-[node name="VolumeItem" parent="UIContainer/BottomBar/HBox" unique_id=1527616958 instance=ExtResource("2")]
+[node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/VolumeItem" unique_id=1454086533]
 layout_mode = 2
-size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "音量大小"
+horizontal_alignment = 1
 
-[node name="Sep" type="Control" parent="UIContainer/BottomBar/HBox" unique_id=1240906021]
+[node name="Controls" type="HBoxContainer" parent="UIContainer/BottomBar/HBox/VolumeItem" unique_id=516728100]
+layout_mode = 2
+alignment = 1
+
+[node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1691003379]
+visible = false
+layout_mode = 2
+text = "<<"
+flat = true
+
+[node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1958315036]
+visible = false
+layout_mode = 2
+text = "<"
+flat = true
+
+[node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1425491818]
+layout_mode = 2
+text = "◄"
+flat = true
+
+[node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1695563518]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "100.0%"
+horizontal_alignment = 1
+
+[node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1931182474]
+layout_mode = 2
+text = "►"
+flat = true
+
+[node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=603818232]
+visible = false
+layout_mode = 2
+text = ">"
+flat = true
+
+[node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1011048075]
+visible = false
+layout_mode = 2
+text = ">>"
+flat = true
+
+[node name="Sep" type="Control" parent="UIContainer/BottomBar/HBox" unique_id=504125627]
 custom_minimum_size = Vector2(16, 0)
 layout_mode = 2
 
-[node name="ShadowToggle" parent="UIContainer/BottomBar/HBox" unique_id=36800834 instance=ExtResource("3")]
+[node name="ShadowToggle" type="HBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1645999694]
 layout_mode = 2
 
-[node name="PostToggle" parent="UIContainer/BottomBar/HBox" unique_id=508862726 instance=ExtResource("3")]
+[node name="CheckBox" type="CheckBox" parent="UIContainer/BottomBar/HBox/ShadowToggle" unique_id=1507293345]
 layout_mode = 2
+flat = true
+
+[node name="ItemLabel" type="Label" parent="UIContainer/BottomBar/HBox/ShadowToggle" unique_id=851565371]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "阴影"
+
+[node name="PostToggle" type="HBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1124031244]
+layout_mode = 2
+
+[node name="CheckBox" type="CheckBox" parent="UIContainer/BottomBar/HBox/PostToggle" unique_id=302988651]
+layout_mode = 2
+flat = true
+
+[node name="ItemLabel" type="Label" parent="UIContainer/BottomBar/HBox/PostToggle" unique_id=2081490737]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "后处理"
 
 [node name="AboutPanel" type="Panel" parent="UIContainer" unique_id=651998823]
 visible = false
@@ -184,15 +426,17 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = -1.0
-offset_top = -129.0
-offset_right = 39.0
+offset_top = -134.0
+offset_right = 73.0
 offset_bottom = -89.0
 grow_vertical = 0
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("3")
-text = "i"
+text = "i  "
+alignment = 2
 
 [node name="SetAutoPlay" type="Node" parent="." unique_id=1734727122]
-script = ExtResource("4")
+script = ExtResource("2")
 
 [connection signal="gui_input" from="UIContainer/MainPanel" to="." method="_on_background_click"]
 [connection signal="gui_input" from="UIContainer/AboutPanel/AboutContent" to="." method="_on_about_click"]
