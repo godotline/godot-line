@@ -17,7 +17,7 @@ var arrow_fine_right: Button
 var arrow_coarse_right: Button
 
 # State
-var _mode: int = Mode.CYCLIC
+var _mode: Mode = Mode.CYCLIC
 var _options: Array = []
 var _current_index: int = 0
 var _min_val: float = 0.0
@@ -89,7 +89,7 @@ func set_title(text: String) -> void:
 	_title_text = text
 	title_label.text = text
 
-func set_mode(mode: int) -> void:
+func set_mode(mode: Mode) -> void:
 	_mode = mode
 	var is_latency = (_mode == Mode.LATENCY)
 	arrow_coarse_left.visible = is_latency
@@ -101,6 +101,7 @@ func set_mode(mode: int) -> void:
 	arrow_right.visible = not is_latency
 	if is_latency and _suffix == "":
 		_suffix = "ms"
+	_update_display()
 
 func set_options(options: Array) -> void:
 	_options = options
@@ -112,6 +113,8 @@ func set_value(val) -> void:
 		var idx = _options.find(val)
 		if idx >= 0:
 			_current_index = idx
+		elif _options.size() > 0:
+			push_warning("SettingItem.set_value: value '%s' not found in options, keeping current" % str(val))
 	else:
 		_current_value = clampf(val, _min_val, _max_val)
 	_update_display()
@@ -145,6 +148,8 @@ func _update_display() -> void:
 
 func _on_arrow_left() -> void:
 	if _mode == Mode.CYCLIC:
+		if _options.size() == 0:
+			return
 		_current_index = (_current_index - 1 + _options.size()) % _options.size()
 	else:
 		_current_value = clampf(_current_value - _step, _min_val, _max_val)
@@ -153,6 +158,8 @@ func _on_arrow_left() -> void:
 
 func _on_arrow_right() -> void:
 	if _mode == Mode.CYCLIC:
+		if _options.size() == 0:
+			return
 		_current_index = (_current_index + 1) % _options.size()
 	else:
 		_current_value = clampf(_current_value + _step, _min_val, _max_val)
@@ -161,24 +168,24 @@ func _on_arrow_right() -> void:
 
 func _on_arrow_left_fine() -> void:
 	if _mode == Mode.LATENCY:
-		_current_value = max(0.0, _current_value - 0.001)
+		_current_value = max(_min_val, _current_value - 0.001)
 		emit_signal("value_changed", get_value())
 		_update_display()
 
 func _on_arrow_right_fine() -> void:
 	if _mode == Mode.LATENCY:
-		_current_value += 0.001
+		_current_value = min(_max_val, _current_value + 0.001)
 		emit_signal("value_changed", get_value())
 		_update_display()
 
 func _on_arrow_left_coarse() -> void:
 	if _mode == Mode.LATENCY:
-		_current_value = max(0.0, _current_value - 0.01)
+		_current_value = max(_min_val, _current_value - 0.01)
 		emit_signal("value_changed", get_value())
 		_update_display()
 
 func _on_arrow_right_coarse() -> void:
 	if _mode == Mode.LATENCY:
-		_current_value += 0.01
+		_current_value = min(_max_val, _current_value + 0.01)
 		emit_signal("value_changed", get_value())
 		_update_display()
