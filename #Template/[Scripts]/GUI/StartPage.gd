@@ -10,6 +10,7 @@ signal shadow_toggled(is_on: bool)
 signal post_toggled(is_on: bool)
 
 # UI section references (for animation)
+var _ui_container: Control
 var main_panel: Panel
 var top_bar: HBoxContainer
 var center_card: Panel
@@ -30,10 +31,10 @@ func _ready() -> void:
 	_build_ui()
 
 func _build_ui() -> void:
-	var container = Control.new()
-	container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	container.mouse_filter = Control.MOUSE_FILTER_PASS
-	add_child(container)
+	_ui_container = Control.new()
+	_ui_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_ui_container.mouse_filter = Control.MOUSE_FILTER_PASS
+	add_child(_ui_container)
 
 	# Background overlay
 	main_panel = Panel.new()
@@ -42,13 +43,13 @@ func _build_ui() -> void:
 	bg_style.bg_color = Color(0, 0, 0, 0.39)
 	main_panel.add_theme_stylebox_override("panel", bg_style)
 	main_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	container.add_child(main_panel)
+	_ui_container.add_child(main_panel)
 
-	_build_top_bar(container)
-	_build_center_card(container)
-	_build_info_button(container)
-	_build_bottom_bar(container)
-	_build_about_panel(container)
+	_build_top_bar(_ui_container)
+	_build_center_card(_ui_container)
+	_build_info_button(_ui_container)
+	_build_bottom_bar(_ui_container)
+	_build_about_panel(_ui_container)
 
 func _build_top_bar(parent: Control) -> void:
 	top_bar = HBoxContainer.new()
@@ -58,7 +59,7 @@ func _build_top_bar(parent: Control) -> void:
 
 	# Left spacer
 	var left = Control.new()
-	left.size_flags_horizontal = SIZE_EXPAND_FILL
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_bar.add_child(left)
 
 	# Center keyboard hints
@@ -67,13 +68,13 @@ func _build_top_bar(parent: Control) -> void:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 14)
 	hint.add_theme_color_override("font_color", Color(1, 1, 1))
-	hint.size_flags_horizontal = SIZE_EXPAND_FILL
+	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_bar.add_child(hint)
 
 	# Right: Autoplay toggle
 	var right = HBoxContainer.new()
-	right.size_flags_horizontal = SIZE_EXPAND_FILL
-	right.alignment = BOX_ALIGNMENT_END
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.alignment = BoxContainer.ALIGNMENT_END
 	top_bar.add_child(right)
 
 	autoplay_check = CheckBoxItem.new("AUTOPLAY")
@@ -251,11 +252,11 @@ func _build_about_panel(parent: Control) -> void:
 
 	var author_container = VBoxContainer.new()
 	author_container.name = "about_authors"
-	author_container.alignment = BOX_ALIGNMENT_CENTER
+	author_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_child(author_container)
 
 	var spacer2 = Control.new()
-	spacer2.size_flags_vertical = SIZE_EXPAND_FILL
+	spacer2.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(spacer2)
 
 	var credits_label = Label.new()
@@ -289,12 +290,12 @@ func hide_animated() -> void:
 		tween.tween_property(top_bar, "modulate:a", 0.0, 0.35)
 
 	if center_card and is_instance_valid(center_card):
-		var screen_h = get_viewport_rect().size.y
+		var screen_h = get_viewport().get_visible_rect().size.y
 		tween.tween_property(center_card, "position:y", screen_h + 100, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 		tween.tween_property(center_card, "modulate:a", 0.0, 0.35)
 
 	if bottom_bar and is_instance_valid(bottom_bar):
-		tween.tween_property(bottom_bar, "offset_top", get_viewport_rect().size.y + 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+		tween.tween_property(bottom_bar, "offset_top", get_viewport().get_visible_rect().size.y + 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 		tween.tween_property(bottom_bar, "modulate:a", 0.0, 0.35)
 
 	if info_btn and is_instance_valid(info_btn):
