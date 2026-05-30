@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://startpage"]
+
+[ext_resource type="Script" path="res://#Template/[Scripts]/GUI/StartPage.gd" id="1"]
+
+[node name="StartPage" type="CanvasLayer"]
+script = ExtResource("1")
+layer = 2
