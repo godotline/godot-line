@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://checkitem"]
+
+[ext_resource type="Script" path="res://#Template/[Scripts]/GUI/CheckBoxItem.gd" id="1"]
+
+[node name="CheckBoxItem" type="HBoxContainer"]
+script = ExtResource("1")
