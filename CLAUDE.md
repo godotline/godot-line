@@ -11,8 +11,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Open `project.godot` in Godot Engine 4.6, press F5 to run
 - Sample scene: `#Template/[Scenes]/Sample/Sample.tscn`
 - Default export scene: `#Template/[Scenes]/DefaultScene/Default.tscn`
-- Input: Mouse click / Space = turn, R = retry, K = die, D = toggle debug overlay
+- Editor plugin enabled: `addons/template/plugin.cfg`
 - No automated test suite exists; testing is manual via the editor
+
+### Input Reference
+
+| Key | Action |
+|-----|--------|
+| Mouse click / Space | Turn |
+| R | Retry |
+| K | Die (triggers death) |
+| D | Toggle debug overlay (FPS, position, game state, diamonds, crowns, camera) |
+| S | Save procedural road geometry to `res://Roads.tscn` |
+| Q | Reload scene |
+| W | Save taper (savetaper action) |
+
+### Editor Tool Workflow
+
+Both **NoteReader** and **BeatmapReader** use the same `@tool` pattern:
+1. Attach the script to any node in your scene (or a new empty node)
+2. Set exported parameters in the Inspector (`.osu` file path, route config, etc.)
+3. Tick the **execute** checkbox — the getter always returns `false` but the setter triggers generation
+4. Delete the node after generation completes
+
+## Core Gameplay
+
+The player (a `CharacterBody3D`) auto-moves along a **line** in 3D space, switching between two alternating forward directions (`forward1` → `forward2` → `forward1` ...). Each mouse click or Space press toggles the direction. The game is about timing these turns correctly.
+
+- **RoadMaker** (Node3D child of the main line): procedurally generates floor segments (`StaticBody3D`) between successive player positions in `_physics_process()`. Road segments scale to fill the gap between position changes. The generated road can be saved to a scene via the S key (`RoadMaker.save()` → `res://Roads.tscn`).
+- **Triggers** (Area3D-based): placed along the path, detect when the player passes through them. `Trigger` emits `hit_the_line` on contact. Specialized triggers modify camera, speed, fog, colors, play animations, teleport, etc.
+- **AutoPlayController**: generates turn triggers at runtime from `GuidanceBox` positions (data-driven auto-play).
+- **Collision layers**: Player (layer 1) collides with BaseFloor (layer 2, `collision_mask`) and BaseWall (layer 3, via an Area3D child with `collision_mask = 4`).
 
 ## Core Architecture
 
@@ -49,13 +78,34 @@ Many key nodes use `class_name` + `static var instance` + `instance = self` in `
 ### Trigger System (Area3D-based)
 
 - **BaseTrigger** (class_name, extends Area3D): base with `one_shot` support, `triggered` signal, `_on_triggered()` virtual
-- **Trigger**: emits `hit_the_line` signal
-- Specialized triggers: `CameraTrigger`, `CameraShakeTrigger`, `ChangeSpeedTrigger`, `ChangeTurn`, `Jump`, `EventTrigger`, `LocalTeleportTrigger`, `FogColorChanger`, `customanimplay`, `PlayAnimator`, `PyramidTrigger`
+- **Trigger**: emits `hit_the_line` signal on player contact
+- **Checkpoint** / **Crown** / **HeartCheckpoint**: capture/restore full game state on revive
+- **Diamond**: collectible counting toward `LevelManager.diamond`
+- **ChangeTurn**: changes the player's turn direction
+- **ChangeSpeedTrigger**: modifies player movement speed
+- **Jump**: applies an upward impulse to the player
+- **JumpPredictor / FallPredictor**: helper triggers for jump/fall trajectory visualization
+- **CameraTrigger / CameraShakeTrigger**: camera position/rotation changes and shake effects
+- **FogColorChanger**: modifies fog color/atmosphere
+- **EventTrigger**: invokes a configurable event/callable
+- **LocalTeleportTrigger / FakePlayerTransport**: teleport the player or a fake-player indicator
+- **FakePlayerTrigger**: spawns/manages a fake player for visual guidance
+- **KillPlayer**: triggers death (also bound to the K key)
+- **customanimplay / PlayAnimator**: triggers animation playback
+- **PyramidTrigger / Pyramid**: generates pyramid-shaped geometry as obstacles
 
 ### Camera Systems (two coexist)
 
 - **CameraFollower** (new): Node3D hierarchy (CameraRoot > Rotator > Scale > Camera3D), Tween-based transitions, shake support
 - **OldCameraFollower** (legacy): simpler follow with slerp/lerp, `RotateMode` enum
+
+### RoadMaker (Procedural Road Generation)
+
+Extends Node3D, attached as child of the main line. Generates floor segments in real-time:
+- `new_line1` signal from parent → starts a new road segment
+- `on_sky` signal from parent → stops generating (sets `road = null`)
+- Each physics frame: positions and scales a single `StaticBody3D` to bridge the gap between past and current position
+- Press **S** to pack all generated roads into `res://Roads.tscn` via `ResourceSaver.save()`
 
 ### Animator System
 
@@ -64,9 +114,18 @@ Many key nodes use `class_name` + `static var instance` + `instance = self` in `
 
 ### Auto Play & Guidance
 
-- **AutoPlayController**: generates triggers at runtime from GuidanceBox positions
+- **AutoPlayController**: generates turn triggers at runtime from GuidanceBox positions (data-driven auto-play)
 - **GuidanceController**: spawns guidance boxes along the player path
-- **NoteReader / BeatmapReader** (editor tools): import `.osu` beatmap files to generate level geometry
+- **SetAutoPlay**: teleports the player through a level while recording their inputs
+
+### Beatmap Import (.osu → Level Geometry)
+
+Two `@tool` editor-only scripts convert [osu!](https://osu.ppy.sh/) beatmap files into level geometry:
+
+- **NoteReader**: Parses `.osu` hit times → generates road segments (BoxMesh) + optional auto-play Area3D triggers along alternating directions. Configurable speed, road width, colors, and trigger size.
+- **BeatmapReader**: Parses `.osu` hit times → generates a sequence of **GuidanceBox** instances. Reads `Player` parameters (speed, direction, position) from the scene or uses manual overrides. Creates a `GuidelineTapHolder-BeatmapCreated` container node.
+
+Both use the **`@export var execute: bool` checkbox pattern** (getter returns `false`, setter triggers generation when set to `true`).
 
 ### Event System
 
@@ -116,3 +175,8 @@ Triggers and animators register with this to reset on revive. They also check `L
 - The `LevelManager` is `RefCounted` (not Node), so it has no `_ready()`, no tree access — use `Player.instance.get_tree()` instead
 - Crown cost: revive at a checkpoint consumes 1 crown (`LevelManager.crown -= 1`)
 - New camera (CameraFollower) and old camera (OldCameraFollower) are mutually exclusive per checkpoint, selected by `UsingOldCameraFollower` on the Checkpoint node
+- **RoadMaker**: `new_road()` must be called via signal before `_physics_process()` starts tracking, otherwise road stays null and nothing generates
+- **SetMaterialColor.gd**: part of the checkpoint restore chain — restores material colors on revive; changes trigger on `revive_notification`
+- **`@export var execute: bool`** with a getter returning `false` is used by editor tools (NoteReader, BeatmapReader) as a one-shot trigger. The setter runs the generation, and the getter always shows unchecked.
+- **The `_delay_applied` flag**: music delay must only be applied once on revive; guard with a flag to prevent re-application if `revive()` is called multiple times
+- **Jolt Physics** (`physics/3d/physics_engine="Jolt Physics"`) runs physics on a separate thread (`3d/run_on_separate_thread=true`) — be mindful of thread safety when accessing physics state from non-physics callbacks
