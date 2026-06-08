@@ -55,6 +55,8 @@ var is_start := false
 var tailScale = 1
 var _last_floor_y := 0.0
 var floor_segment_lines: Array[MeshInstance3D] = []
+var _floor_y_update_timer := 0.0
+const FLOOR_Y_UPDATE_INTERVAL := 0.05  # 每 0.05 秒统一更新一次，避免每帧遍历
 
 var start_transform = transform
 var loading := false
@@ -153,10 +155,13 @@ func _process(_delta: float) -> void:
 
 		var current_y := global_position.y
 		if abs(current_y - _last_floor_y) > 0.001:
-			for segment in floor_segment_lines:
-				if is_instance_valid(segment):
-					segment.global_position.y = current_y
-			_last_floor_y = current_y
+			_floor_y_update_timer += _delta
+			if _floor_y_update_timer >= FLOOR_Y_UPDATE_INTERVAL:
+				_floor_y_update_timer = 0.0
+				for segment in floor_segment_lines:
+					if is_instance_valid(segment):
+						segment.global_position.y = current_y
+				_last_floor_y = current_y
 	else:
 		if past_is_on_floor != is_on_floor_now:
 			emit_signal("on_sky")
