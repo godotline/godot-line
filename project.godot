@@ -16,8 +16,8 @@ warnings/check_invalid_track_paths=false
 
 config/name="GodotLine"
 config/features=PackedStringArray("4.6")
-boot_splash/show_image=false
 run/delta_smoothing=false
+boot_splash/show_image=false
 
 [debug]
 

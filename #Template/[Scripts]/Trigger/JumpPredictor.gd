@@ -54,7 +54,7 @@ var _line_mesh: MeshInstance3D
 
 func _ready() -> void:
 	top_level = true
-	
+
 	if not Engine.is_editor_hint() and show_in_game:
 		_start_simulation()
 	elif Engine.is_editor_hint() and draw_preview:
@@ -67,9 +67,7 @@ func _check_parent() -> void:
 		var script = parent.get_script()
 		if script and script.resource_path.ends_with("Jump.gd"):
 			_jump_node = parent
-			print("[JumpPredictor] 找到Jump节点: ", parent.name)
 			return
-	print("[JumpPredictor] 父节点不是Area3D或没有Jump.gd脚本")
 
 func _connect_to_jump() -> void:
 	if _jump_node:
