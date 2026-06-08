@@ -16,11 +16,11 @@ func is_full() -> bool:
 func add(obj: Node) -> void:
 	_pool.append(obj)
 
-## 取出最早放入的对象（队列头部）
+## 取出最近放入的对象（栈顶）—— O(1) 避免 pop_front 的 O(n) 移动
 func pop() -> Node:
 	if _pool.is_empty():
 		return null
-	return _pool.pop_front()
+	return _pool.pop_back()
 
 ## 清空并销毁所有对象
 func destroy_all() -> void:
