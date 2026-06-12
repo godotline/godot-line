@@ -1,33 +1,22 @@
 # Trigger 组件化重构方案
 
-## 目标
+## 核心思路
 
-将当前单体 Trigger 脚本重构为组件模式，无向后兼容，直接修改现有代码。
+不引入新的 Behavior 类，直接让现有 Trigger 脚本支持两种模式：
+1. **独立模式**：作为 BaseTrigger 直接使用
+2. **组件模式**：作为子节点挂载到其他 BaseTrigger 下
 
 ## 架构设计
 
 ```
-BaseTrigger (Area3D) — 纯容器
-├── TriggerBehavior (Node3D) — 行为组件基类
-│   ├── CheckpointBehavior
-│   ├── CameraBehavior
-│   ├── FogBehavior
-│   ├── LightBehavior
-│   ├── AmbientBehavior
-│   ├── MaterialColorBehavior
-│   ├── KillBehavior
-│   ├── JumpBehavior
-│   ├── DiamondBehavior
-│   ├── TriggerSignalBehavior
-│   ├── CrownBehavior
-│   ├── HeartCheckpointBehavior
-│   └── ...
-└── 视觉子节点（粒子、模型、动画）
+BaseTrigger (Area3D) — 容器，收集子 BaseTrigger 并分发
+├── Checkpoint (BaseTrigger) — 组件模式：禁用自身碰撞，只响应父级分发
+├── CameraTrigger (BaseTrigger) — 组件模式
+├── FogTrigger (BaseTrigger) — 组件模式
+└── KillPlayer (BaseTrigger) — 组件模式
 ```
 
-## 核心改动
-
-### 1. BaseTrigger — 纯容器
+## BaseTrigger 改动
 
 ```gdscript
 extends Area3D
@@ -40,16 +29,24 @@ signal triggered(body: Node3D)
 @export var require_playing: bool = true
 
 var _used: bool = false
-var _behaviors: Array[TriggerBehavior] = []
+var _behaviors: Array[BaseTrigger] = []
+var _is_behavior: bool = false  # 是否作为组件模式运行
 
 func _ready() -> void:
+    # 如果父节点是 BaseTrigger，则以组件模式运行
+    if get_parent() is BaseTrigger:
+        _is_behavior = true
+        monitoring = false      # 禁用碰撞检测
+        monitorable = false
+        return
+    
     body_entered.connect(_on_body_entered)
     _collect_behaviors()
 
 func _collect_behaviors() -> void:
     _behaviors.clear()
     for child in get_children():
-        if child is TriggerBehavior:
+        if child is BaseTrigger:
             _behaviors.append(child)
 
 func _on_body_entered(body: Node3D) -> void:
@@ -59,287 +56,110 @@ func _on_body_entered(body: Node3D) -> void:
     
     _used = true
     triggered.emit(body)
+    
+    # 分发给所有子组件
     for behavior in _behaviors:
-        behavior.trigger(body)
-
-func refresh_behaviors() -> void:
-    _collect_behaviors()
-```
-
-### 2. TriggerBehavior — 行为基类
-
-```gdscript
-extends Node3D
-class_name TriggerBehavior
-
-var _triggered: bool = false
-var _checkpoint_index: int = 0
-
-func trigger(body: Node3D) -> void:
-    _triggered = true
-    _checkpoint_index = LevelManager.checkpoint_count
+        behavior._on_triggered(body)
+    
+    # 自身的触发逻辑
     _on_triggered(body)
 
 func _on_triggered(_body: Node3D) -> void:
     pass
-
-func _on_revive() -> void:
-    pass
 ```
 
-## 行为组件拆分
+## 各 Trigger 改动
 
-### CheckpointBehavior — 检查点核心逻辑
+### 原则
 
-从 `Checkpoint.gd` 拆出，只负责：
-- 记录玩家状态（位置、方向、动画进度）
-- 记录音乐位置
-- revive 时恢复玩家状态
+每个 Trigger 脚本保持不变，只是：
+1. 可以作为独立 BaseTrigger 使用
+2. 可以作为子节点挂载到其他 BaseTrigger（自动进入组件模式）
+
+### Checkpoint
+
+当前代码已经支持，无需改动。作为组件时：
+- 父级 BaseTrigger 检测碰撞
+- 父级调用 `Checkpoint._on_triggered()`
+- Checkpoint 执行状态记录逻辑
+
+### KillPlayer
+
+当前代码已经支持，无需改动。
+
+### Diamond
+
+需要小改：组件模式下不能依赖自身的 `body_entered` 信号。
 
 ```gdscript
-extends TriggerBehavior
-class_name CheckpointBehavior
+# 当前问题：Diamond 有自己的碰撞检测和动画播放
+# 组件模式下：碰撞由父级处理，Diamond 只负责收集逻辑
 
-@export var AutoRecord: bool = false
-@export var GameTime: float = 0.0
-@export var PlayerSpeed: float = 12.0
-@export var direction: Direction = Direction.First
-
-signal on_revive
-
-var _track_progress: float = 0.0
-var _player_first_direction: Vector3
-var _player_second_direction: Vector3
-
-func _on_triggered(body: Node3D) -> void:
-    # 记录玩家状态到 LevelManager
-
-func revive() -> void:
-    # 恢复玩家状态
+func _on_triggered(_body: Node3D) -> void:
+    if _collected: return
+    _collected = true
+    LevelManager.diamond += 1
+    # 播放动画（从父节点查找）
+    ...
 ```
 
-### CameraBehavior — 相机设置
+## 使用方式
 
-从 `Checkpoint.gd` 拆出，只负责：
-- 捕获相机设置（offset, rotation, fov）
-- revive 时恢复相机
+### 独立使用（不变）
 
-```gdscript
-extends TriggerBehavior
-class_name CameraBehavior
-
-@export var UsingOldCameraFollower: bool = false
-@export var camera_new: CameraSettings
-@export var camera_old: OldCameraSettings
-@export var manual: bool = false
-
-func _on_triggered(body: Node3D) -> void:
-    # 捕获当前相机设置
-
-func _on_revive() -> void:
-    # 恢复相机设置
+```
+[KillPlayer] (BaseTrigger)
+  └── CollisionShape3D
 ```
 
-### FogBehavior — 雾设置
+### 组合使用（新）
 
-```gdscript
-extends TriggerBehavior
-class_name FogBehavior
-
-@export var fog: FogSettings
-@export var manual: bool = false
-
-func _on_triggered(body: Node3D) -> void:
-    # 捕获当前雾设置
-
-func _on_revive() -> void:
-    # 恢复雾设置
+```
+[BaseTrigger] (容器)
+  ├── Checkpoint (组件模式)
+  ├── CameraTrigger (组件模式)
+  ├── FogTrigger (组件模式)
+  └── CollisionShape3D
 ```
 
-### LightBehavior — 光照设置
+编辑器操作：
+1. 创建 BaseTrigger 作为容器
+2. 添加子节点，选择需要的 Trigger 类型
+3. 子 Trigger 自动进入组件模式（禁用碰撞，只响应父级分发）
 
-```gdscript
-extends TriggerBehavior
-class_name LightBehavior
+## 拆分 Checkpoint
 
-@export var light: LightSettings
-@export var manual: bool = false
+当前 Checkpoint 包含太多职责，拆分为多个独立 Trigger：
 
-func _on_triggered(body: Node3D) -> void:
-    # 捕获当前光照设置
+| 新 Trigger | 职责 |
+|------------|------|
+| Checkpoint | 只负责记录/恢复玩家状态 |
+| CameraTrigger | 只负责相机设置捕获/恢复 |
+| FogTrigger | 只负责雾设置捕获/恢复 |
+| LightTrigger | 只负责光照设置捕获/恢复 |
+| AmbientTrigger | 只负责环境光设置 |
+| MaterialColorTrigger | 只负责材质颜色 |
 
-func _on_revive() -> void:
-    # 恢复光照设置
+拆分后，完整检查点的组合：
 ```
-
-### AmbientBehavior — 环境光设置
-
-```gdscript
-extends TriggerBehavior
-class_name AmbientBehavior
-
-@export var ambient: AmbientSettings
-@export var manual: bool = false
-
-func _on_triggered(body: Node3D) -> void:
-    # 捕获当前环境光设置
-
-func _on_revive() -> void:
-    # 恢复环境光设置
+[BaseTrigger]
+  ├── Checkpoint
+  ├── CameraTrigger
+  ├── FogTrigger
+  └── RevivePosition
 ```
-
-### MaterialColorBehavior — 材质颜色
-
-```gdscript
-extends TriggerBehavior
-class_name MaterialColorBehavior
-
-@export var colors_auto: Array[SingleColor] = []
-@export var colors_manual: Array[SingleColor] = []
-
-func _on_triggered(body: Node3D) -> void:
-    # 应用颜色
-
-func _on_revive() -> void:
-    # 恢复颜色
-```
-
-### KillBehavior — 已存在
-
-从 `KillPlayer.gd` 拆出，保持现有实现。
-
-### JumpBehavior — 已存在
-
-从 `jump.gd` 拆出，保持现有实现。
-
-### DiamondBehavior — 已存在
-
-从 `Diamond.gd` 拆出，保持现有实现。
-
-### TriggerSignalBehavior — 已存在
-
-从 `Trigger.gd` 拆出，保持现有实现。
-
-### CrownBehavior — 皇冠特效
-
-从 `Crown.gd` 拆出，只负责：
-- 皇冠粒子动画
-- 皇冠网格缩放/消失
-
-```gdscript
-extends TriggerBehavior
-class_name CrownBehavior
-
-@export var aura_color: Color
-@export var aura_duration: float = 1.25
-
-var _crown_mesh: MeshInstance3D
-var _crown_sprite: Sprite3D
-var _aura_particles: GPUParticles3D
-
-func _on_triggered(body: Node3D) -> void:
-    # 播放皇冠特效
-```
-
-### HeartCheckpointBehavior — 爱心旋转
-
-从 `HeartCheckpoint.gd` 拆出，只负责：
-- 爱心旋转动画
-- 触发时的缩放动画
-
-```gdscript
-extends TriggerBehavior
-class_name HeartCheckpointBehavior
-
-@export var rotator: Node3D
-
-func _on_triggered(body: Node3D) -> void:
-    # 播放爱心旋转动画
-```
-
-## 删除的文件
-
-| 文件 | 原因 |
-|------|------|
-| `Checkpoint.gd` | 拆分为 CheckpointBehavior + CameraBehavior + ... |
-| `Crown.gd` | 拆分为 CheckpointBehavior + CrownBehavior |
-| `HeartCheckpoint.gd` | 拆分为 CheckpointBehavior + HeartCheckpointBehavior |
-| `KillPlayer.gd` | 替换为 KillBehavior |
-| `jump.gd` | 替换为 JumpBehavior |
-| `Diamond.gd` | 替换为 DiamondBehavior |
-| `Trigger.gd` | 替换为 TriggerSignalBehavior |
-| `ChangeSpeedTrigger.gd` | 替换为 ChangeSpeedBehavior |
-| `ChangeTurn.gd` | 替换为 ChangeTurnBehavior |
-| `EventTrigger.gd` | 替换为 EventBehavior |
-| `FogColorChanger.gd` | 替换为 FogChangeBehavior |
-| `SetActiveTrigger.gd` | 替换为 SetActiveBehavior |
-| `SetMaterialColor.gd` | 替换为 MaterialColorBehavior |
-| `LocalTeleportTrigger.gd` | 替换为 TeleportBehavior |
-| `FakePlayerTransport.gd` | 替换为 FakePlayerTransportBehavior |
-| `FakePlayerTrigger.gd` | 替换为 FakePlayerTriggerBehavior |
-| `PlayAnimator.gd` | 替换为 PlayAnimatorBehavior |
-| `customanimplay.gd` | 替换为 PlayAnimatorBehavior |
-| `Pyramid.gd` | 替换为 PyramidBehavior |
-| `PyramidTrigger.gd` | 替换为 PyramidBehavior |
-
-## 保留的文件
-
-| 文件 | 原因 |
-|------|------|
-| `BaseTrigger.gd` | 重构为纯容器 |
-| `FallPredictor.gd` | 工具类，不是触发器 |
-| `JumpPredictor.gd` | 工具类，不是触发器 |
-
-## 场景文件更新
-
-所有 `.tscn` 文件需要更新：
-1. 旧的 `Checkpoint` 节点 → `BaseTrigger` + 子节点 `CheckpointBehavior` + `CameraBehavior` + ...
-2. 旧的 `KillPlayer` 节点 → `BaseTrigger` + 子节点 `KillBehavior`
-3. 依此类推
 
 ## 实施步骤
 
-1. ✅ 重构 BaseTrigger 为纯容器
-2. 确保 TriggerBehavior 基类完整
-3. 实现 CheckpointBehavior（最复杂）
-4. 实现 CameraBehavior / FogBehavior / LightBehavior / AmbientBehavior
-5. 实现 MaterialColorBehavior
-6. 实现 CrownBehavior / HeartCheckpointBehavior
-7. 删除旧的单体 Trigger 脚本
-8. 更新所有 .tscn 场景文件
-9. 测试验证
+1. 修改 BaseTrigger — 支持组件模式（_is_behavior）
+2. 拆分 Checkpoint 为多个独立 Trigger
+3. 修改 Diamond 等需要适配的 Trigger
+4. 删除 Behavior/ 文件夹（不使用）
+5. 更新场景文件
 
-## 编辑器使用示例
+## 优势
 
-```
-# 简单检查点
-[BaseTrigger]
-  └── CheckpointBehavior
-
-# 完整检查点（带相机和雾）
-[BaseTrigger]
-  ├── CheckpointBehavior
-  ├── CameraBehavior
-  ├── FogBehavior
-  └── RevivePosition (Marker3D)
-
-# 皇冠检查点
-[BaseTrigger]
-  ├── CheckpointBehavior
-  ├── CameraBehavior
-  ├── CrownBehavior
-  ├── Crown (MeshInstance3D)
-  ├── CrownSprite (Sprite3D)
-  └── FX_CrownAura (GPUParticles3D)
-
-# 杀死玩家
-[BaseTrigger]
-  └── KillBehavior
-
-# 钻石收集
-[BaseTrigger]
-  ├── DiamondBehavior
-  ├── Diamond (MeshInstance3D)
-  ├── AnimationPlayer
-  └── RemainParticle (GPUParticles3D)
-```
+1. **无新类**：复用现有 Trigger 脚本
+2. **向后兼容**：独立使用的场景无需修改
+3. **灵活组合**：编辑器中拖拽组合
+4. **渐进迁移**：可以逐步从独立模式迁移到组件模式
