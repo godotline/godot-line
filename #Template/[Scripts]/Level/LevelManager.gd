@@ -94,7 +94,7 @@ static var percent := 0
 static var line_crossing_crown := 0
 static var crowns := [0, 0, 0]
 static var is_relive := false
-static var diamond := 0
+static var gem := 0
 static var crown := 0
 static var current_checkpoint: Node = null
 static var checkpoint_count := 0
@@ -213,7 +213,7 @@ static func reset_to_defaults() -> void:
 	line_crossing_crown = 0
 	crowns = [0, 0, 0]
 	is_relive = false
-	diamond = 0
+	gem = 0
 	crown = 0
 	checkpoint_count = 0
 	GameState = GameStatus.Waiting

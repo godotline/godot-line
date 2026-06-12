@@ -68,7 +68,7 @@ func _update_label() -> void:
 	lines.append("线的坐标: (%.2f, %.2f, %.2f)" % [p.position.x, p.position.y, p.position.z])
 	lines.append("线的朝向: (%.1f, %.1f, %.1f)" % [p.rotation_degrees.x, p.rotation_degrees.y, p.rotation_degrees.z])
 
-	lines.append("已获取方块数量: %d" % 	LevelManager.diamond)
+	lines.append("已获取宝石数量: %d" % 	LevelManager.gem)
 	lines.append("已获取皇冠数量: %d/3" % 	LevelManager.crown)
 
 	var cam := OldCameraFollower.instance
