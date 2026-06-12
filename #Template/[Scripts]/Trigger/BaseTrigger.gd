@@ -14,16 +14,17 @@ signal triggered(body: Node3D)
 @export var debug_mode: bool = false
 
 var _used: bool = false
-var _behaviors: Array[TriggerBehavior] = []
+var _behaviors: Array[Node] = []
 
 func _ready() -> void:
-	body_entered.connect(_on_body_entered)
+	if not body_entered.is_connected(_on_body_entered):
+		body_entered.connect(_on_body_entered)
 	_collect_behaviors()
 
 func _collect_behaviors() -> void:
 	_behaviors.clear()
 	for child in get_children():
-		if child is TriggerBehavior:
+		if child.has_method("trigger"):
 			_behaviors.append(child)
 
 func _on_body_entered(body: Node3D) -> void:
@@ -35,13 +36,13 @@ func _on_body_entered(body: Node3D) -> void:
 		return
 	if not body is CharacterBody3D:
 		return
-	
+
 	_used = true
 	if debug_mode:
 		print("[BaseTrigger] ", name, " 被触发")
-	
+
 	triggered.emit(body)
-	
+
 	for behavior in _behaviors:
 		if is_instance_valid(behavior):
 			behavior.trigger(body)

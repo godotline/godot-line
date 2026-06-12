@@ -1,11 +1,18 @@
-# Trigger 组件化重构方案
+# Trigger 系统架构（当前状态）
 
-## 核心思路
+## 概述
 
-- **BaseTrigger**：纯容器，负责碰撞检测 + 分发
-- **所有 Trigger**：纯组件，`extends Node3D`，只能作为 BaseTrigger 的子节点
+当前 Trigger 系统有三种共存模式，处于渐进式重构中：
 
-## BaseTrigger
+| 模式 | 基类 | 碰撞由谁处理 | 文件数 |
+|------|------|-------------|--------|
+| **纯组件** | `extends Node3D` | 父节点 BaseTrigger | 3 |
+| **自容器** | `extends BaseTrigger` (即 Area3D) | 自身继承 BaseTrigger | 9 |
+| **旧模式** | `extends Area3D` | 自身处理 body_entered | 8 |
+
+## BaseTrigger（容器）
+
+纯组件模式的容器节点。负责碰撞检测，分发给子组件（通过鸭子类型 `has_method("trigger")` 识别）。
 
 ```gdscript
 extends Area3D
@@ -13,8 +20,12 @@ class_name BaseTrigger
 
 signal triggered(body: Node3D)
 
+@export_group("触发器设置")
 @export var one_shot: bool = false
 @export var require_playing: bool = true
+
+@export_group("调试设置")
+@export var debug_mode: bool = false
 
 var _used: bool = false
 var _behaviors: Array[Node] = []
@@ -26,103 +37,233 @@ func _ready() -> void:
 func _collect_behaviors() -> void:
     _behaviors.clear()
     for child in get_children():
-        if child.has_method("_on_triggered"):
+        if child.has_method("trigger"):
             _behaviors.append(child)
 
 func _on_body_entered(body: Node3D) -> void:
-    if one_shot and _used: return
-    if require_playing and LevelManager.GameState != LevelManager.GameStatus.Playing: return
-    if not body is CharacterBody3D: return
-    
+    if one_shot and _used:
+        if debug_mode:
+            print("[BaseTrigger] ", name, " 已触发过")
+        return
+    if require_playing and LevelManager.GameState != LevelManager.GameStatus.Playing:
+        return
+    if not body is CharacterBody3D:
+        return
+
     _used = true
+    if debug_mode:
+        print("[BaseTrigger] ", name, " 被触发")
+
     triggered.emit(body)
-    
+
     for behavior in _behaviors:
-        behavior._on_triggered(body)
+        if is_instance_valid(behavior):
+            behavior.trigger(body)
+
+## 重新收集行为组件
+func refresh_behaviors() -> void:
+    _collect_behaviors()
 ```
 
-## 各 Trigger 改动
+**关键接口**：BaseTrigger 对子组件调用 `trigger(body)`，通过 `child.has_method("trigger")` 识别子组件。
 
-### 改为 extends Node3D
+## 模式一：纯组件（`extends Node3D`）
+
+这些是纯逻辑组件，不处理碰撞。作为 BaseTrigger 的子节点放置，依赖父节点 BaseTrigger 分发 `trigger(body)` 调用。
+
+**当前使用此模式的文件**：
+
+| 文件 | 入口方法 | 备注 |
+|------|---------|------|
+| `Jump.gd` | `trigger(body)` | 施加向上速度，触发 `on_player_jump` 信号；含 `_update_predictor()` 刷新 JumpPredictor/FallPredictor |
+| `Pyramid.gd` | 无（管理节点） | `class_name Pyramid`，由 PyramidTrigger 调用 `pyramid.trigger(type)` |
+| `FogColorChanger.gd` | `_on_body_entered(body)` | 用 Tween 过渡雾色 |
+
+> **注意**：FogColorChanger 的入口方法名为 `_on_body_entered(body)`，与 BaseTrigger 调用的 `trigger(body)` 不一致，需要修复。
+
+### Jump.gd 示例
 
 ```gdscript
-# Before
-extends BaseTrigger
-class_name Checkpoint
-
-# After
+@tool
 extends Node3D
-class_name Checkpoint
+
+signal height_changed(new_height: float)
+
+@export var height: float = 1.0:
+    set(value):
+        height = value
+        height_changed.emit(value)
+        if Engine.is_editor_hint():
+            _update_predictor()
+
+func _ready() -> void:
+    if Engine.is_editor_hint():
+        _update_predictor()
+
+## 由父节点 BaseTrigger 调用的入口方法
+func trigger(body: Node3D) -> void:
+    var character := body as CharacterBody3D
+    if character:
+        var jump_speed = sqrt(2 * 9.8 * height)
+        character.velocity += Vector3(0, jump_speed, 0)
+        if Player.instance and Player.instance.has_signal("on_player_jump"):
+            Player.instance.on_player_jump.emit()
+
+## 通知子 JumpPredictor/FallPredictor 刷新预览
+func _update_predictor() -> void:
+    for child in get_children():
+        if child is JumpPredictor:
+            child._redraw()
+        if child is FallPredictor:
+            child._draw_line()
 ```
 
-### 删除碰撞相关代码
+## 模式二：自容器（`extends BaseTrigger`）
 
-- `body_entered` 信号处理
-- `monitoring` / `monitorable` 属性
-- `_on_body_entered()` 方法
-- `one_shot` / `require_playing` 属性
-- `_ready()` 中的 `super._ready()` 调用
+这些触发器继承 BaseTrigger，也即自身就是 Area3D 容器。它们复用 BaseTrigger 的碰撞检测和分发逻辑，通过覆写 `_on_triggered(body)` 实现业务逻辑。
 
-### 保留
+**注意**：此类触发器**不是**纯组件，不能作为其他 BaseTrigger 的子组件使用。它们是独立的 Area3D 节点，自带碰撞体。
 
-- `_on_triggered(body)` 方法
-- 所有业务逻辑
+**当前使用此模式的文件**：
 
-## 需要修改的文件
+| 文件 | class_name | 备注 |
+|------|-----------|------|
+| `KillPlayer.gd` | — | 三种死亡模式：Hit / Drowned / Border |
+| `ChangeTurn.gd` | — | 切换 `_currentDirection` |
+| `ChangeSpeedTrigger.gd` | — | 修改 `body.speed` |
+| `LocalTeleportTrigger.gd` | `LocalTeleportTrigger` | 三种传送模式：Offset / Position / Target |
+| `SetActiveTrigger.gd` | `SetActiveTrigger` | 激活/禁用指定节点，支持复活恢复 |
+| `SetMaterialColor.gd` | `SetMaterialColor` | 通过 material_override + Tween 改变材质颜色 |
+| `PyramidTrigger.gd` | — | 调用父节点 Pyramid 的 `trigger(type)` |
+| `customanimplay.gd` | — | 播放 AnimationPlayer 动画，含编辑器预览按钮 |
+| `#TimeLine_ExpandTrack/PropertyModifierTrigger.gd` | `PropertyModifierTrigger` | 通用属性修改，支持 Tween 和复活恢复 |
 
-| 文件 | 改动 |
+### KillPlayer.gd 示例
+
+```gdscript
+@tool
+extends BaseTrigger
+
+enum DieReason { Hit, Drowned, Border }
+
+@export var reason: DieReason = DieReason.Drowned
+@export var no_revive: bool = false
+@export var custom_death_clip: AudioStream
+
+func _on_triggered(body: Node3D) -> void:
+    if LevelManager.GameState != LevelManager.GameStatus.Playing:
+        return
+    var player := body as Player
+    if player and player.is_live:
+        if no_revive:
+            LevelManager.checkpoint_count = 0
+            LevelManager.crown = 0
+        _play_death_sound()
+        match reason:
+            DieReason.Hit:
+                player.die(true, LevelManager.GameStatus.Died)
+            DieReason.Drowned, DieReason.Border:
+                player.die(false, LevelManager.GameStatus.Moving)
+```
+
+## 模式三：旧模式（`extends Area3D`）
+
+这些触发器自行管理碰撞检测（直接连接 `body_entered`），尚未迁移到组件模式。
+
+**当前使用此模式的文件**：
+
+| 文件 | class_name | 碰撞入口 | 备注 |
+|------|-----------|---------|------|
+| `Checkpoint.gd` | `Checkpoint` | `_on_checkpoint_body_entered` | 存档点，捕获/恢复全量游戏状态 |
+| `Crown.gd` | — | `_on_checkpoint_body_entered` | extends Checkpoint，皇冠收集动画 |
+| `HeartCheckpoint.gd` | — | `_on_checkpoint_body_entered` | extends Checkpoint，带动画存档点 |
+| `Diamond.gd` | — | `_on_Diamond_body_entered` | 钻石收集，`LevelManager.diamond += 1` |
+| `EventTrigger.gd` | `EventTrigger` | `_on_body_entered` | 可配置多目标/多方法调用，支持 onclick 模式 |
+| `FakePlayerTransport.gd` | `FakePlayerTransport` | `_on_body_entered` | 传送 FakePlayer |
+| `FakePlayerTrigger.gd` | `FakePlayerTrigger` | `_on_body_entered` | 控制 FakePlayer 转向/方向/状态 |
+| `PlayAnimator.gd` | — | `_on_body_entered` | 播放 AnimationPlayer，支持复活恢复进度 |
+
+### Checkpoint.gd 复杂度说明
+
+Checkpoint 是面积最大、逻辑最复杂的旧模式触发器（~300 行）。它：
+- 捕获摄像机（新旧两套系统）、雾、光、环境光、材质颜色
+- 保存玩家方向、动画进度、重力
+- `revive()` 方法恢复全部状态，包括音乐 seek + pause、动画 seek + pause
+- 通过 `LevelManager.save_checkpoint()` / `load_checkpoint_to_main_line()` 持久化位置
+
+迁移 Checkpoint 需要特别谨慎，因为 Crown、HeartCheckpoint 都继承它。
+
+## 不涉及的文件（工具类）
+
+| 文件 | 基类 | 用途 |
+|------|------|------|
+| `FallPredictor.gd` | `extends Node3D` | 跳跃下落轨迹预测可视化 |
+| `JumpPredictor.gd` | `extends Node3D` | 跳跃轨迹预测可视化 |
+
+## 已删除的文件
+
+| 文件 | 说明 |
 |------|------|
-| BaseTrigger.gd | 改为纯容器 |
-| Checkpoint.gd | extends Node3D，删除碰撞代码 |
-| Crown.gd | extends Checkpoint（不变） |
-| HeartCheckpoint.gd | extends Checkpoint（不变） |
-| KillPlayer.gd | extends Node3D，删除碰撞代码 |
-| jump.gd | extends Node3D，删除碰撞代码 |
-| Diamond.gd | extends Node3D，删除碰撞代码 |
-| Trigger.gd | extends Node3D，删除碰撞代码 |
-| ChangeSpeedTrigger.gd | extends Node3D，删除碰撞代码 |
-| ChangeTurn.gd | extends Node3D，删除碰撞代码 |
-| EventTrigger.gd | extends Node3D，删除碰撞代码 |
-| FogColorChanger.gd | extends Node3D，删除碰撞代码 |
-| SetActiveTrigger.gd | extends Node3D，删除碰撞代码 |
-| SetMaterialColor.gd | extends Node3D，删除碰撞代码 |
-| LocalTeleportTrigger.gd | extends Node3D，删除碰撞代码 |
-| FakePlayerTransport.gd | extends Node3D，删除碰撞代码 |
-| FakePlayerTrigger.gd | extends Node3D，删除碰撞代码 |
-| PlayAnimator.gd | extends Node3D，删除碰撞代码 |
-| customanimplay.gd | extends Node3D，删除碰撞代码 |
-| Pyramid.gd | extends Node3D，删除碰撞代码 |
-| PyramidTrigger.gd | extends Node3D，删除碰撞代码 |
+| `Trigger.gd` | 原基础触发器（`hit_the_line` 信号），已被 BaseTrigger 替代 |
+| `jump.gd` | 已重构为 `Jump.gd`（从 Area3D 迁移到 Node3D 纯组件） |
 
-## 不涉及的文件
+## 组件约定
 
-- FallPredictor.gd — 工具类，不是触发器
-- JumpPredictor.gd — 工具类，不是触发器
+BaseTrigger 通过 `child.has_method("trigger")` 识别子组件（鸭子类型），并调用 `trigger(body)`。子组件需定义：
 
-## 使用方式
+```gdscript
+func trigger(body: Node3D) -> void:
+    pass
+```
+
+## 场景结构示例
+
+### 纯组件模式（模式一）
 
 ```
-# 简单检查点
+# 跳跃触发器
 [BaseTrigger]
-  ├── Checkpoint
+  ├── Jump (Node3D)
   └── CollisionShape3D
 
-# 皇冠检查点
+# 雾色变化
 [BaseTrigger]
-  ├── Crown
-  ├── Crown (MeshInstance3D)
-  ├── CrownSprite (Sprite3D)
-  ├── FX_CrownAura (GPUParticles3D)
+  ├── FogColorChanger (Node3D)
+  └── CollisionShape3D
+```
+
+### 自容器模式（模式二）
+
+```
+# 死亡区域 — 自身就是完整触发器
+[KillPlayer (extends BaseTrigger)]
   └── CollisionShape3D
 
-# 杀死玩家
-[BaseTrigger]
-  ├── KillPlayer
+# 传送触发器
+[LocalTeleportTrigger (extends BaseTrigger)]
   └── CollisionShape3D
 
-# 钻石收集
-[BaseTrigger]
-  ├── Diamond
+# 金字塔 — 管理节点 + 子触发器组合
+[Pyramid (Node3D)]
+  ├── Left (MeshInstance3D)
+  ├── Right (MeshInstance3D)
+  ├── PyramidTrigger (extends BaseTrigger)  ← 子触发器
+  │   └── CollisionShape3D
+  └── PyramidTrigger2 (extends BaseTrigger) ← 子触发器
+      └── CollisionShape3D
+```
+
+### 旧模式（模式三）
+
+```
+# 存档点 — 自身处理碰撞
+[Checkpoint (extends Area3D)]
+  ├── RevivePosition (Node3D)
+  ├── MeshInstance3D
+  └── CollisionShape3D
+
+# 钻石 — 自身处理碰撞
+[Diamond (extends Area3D)]
   ├── MeshInstance3D
   ├── AnimationPlayer
   ├── RemainParticle (GPUParticles3D)
