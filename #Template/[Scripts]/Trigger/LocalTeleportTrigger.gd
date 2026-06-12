@@ -1,4 +1,6 @@
 extends BaseTrigger
+## @deprecated: 推荐使用 TeleportBehavior 作为 BaseTrigger 的子节点
+## LocalTeleportTrigger - 传送触发器（向后兼容包装）
 class_name LocalTeleportTrigger
 
 enum TeleportMode {

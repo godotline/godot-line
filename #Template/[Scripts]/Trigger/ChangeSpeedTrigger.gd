@@ -1,7 +1,7 @@
 @tool
 extends BaseTrigger
-## ChangeSpeedTrigger - 速度改变触发器
-## 当玩家进入时改变其移动速度
+## @deprecated: 推荐使用 ChangeSpeedBehavior 作为 BaseTrigger 的子节点
+## ChangeSpeedTrigger - 速度改变触发器（向后兼容包装）
 
 @export var new_speed: float = 12.0
 

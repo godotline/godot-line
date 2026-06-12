@@ -1,4 +1,7 @@
-extends Area3D
+extends BaseTrigger
+## @deprecated: 推荐使用 CheckpointBehavior 作为 BaseTrigger 的子节点
+## Checkpoint - 检查点（向后兼容包装）
+
 class_name Checkpoint
 
 enum Direction { First, Second }
@@ -46,16 +49,22 @@ var _player_second_direction: Vector3 = Vector3.ZERO
 var _revive_position: Node3D
 
 func _ready() -> void:
+	require_playing = false  # 检查点需要在任何状态下触发
+
+	# 断开场景中的旧信号连接（如 _on_checkpoint_body_entered / _on_Crown_body_entered）
+	# 使用 BaseTrigger 的信号链：body_entered → _on_body_entered → _on_triggered()
+	for conn in body_entered.get_connections():
+		var method := conn["callable"].get_method()
+		if method == "_on_checkpoint_body_entered" or method == "_on_Crown_body_entered":
+			body_entered.disconnect(conn["callable"])
+
+	super._ready()
+
 	_revive_position = get_node_or_null("RevivePosition")
 	if _revive_position:
 		_revive_position.visible = false
 
-	if not body_entered.is_connected(_on_checkpoint_body_entered):
-		body_entered.connect(_on_checkpoint_body_entered)
-
-func _on_checkpoint_body_entered(body: Node3D) -> void:
-	if used:
-		return
+func _on_triggered(body: Node3D) -> void:
 	_enter_trigger(body)
 
 func _enter_trigger(body: Node3D) -> void:

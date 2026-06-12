@@ -1,5 +1,7 @@
 @tool
 extends BaseTrigger
+## @deprecated: 推荐使用 MaterialColorBehavior 作为 BaseTrigger 的子节点
+## SetMaterialColor - 材质颜色变化触发器（向后兼容包装）
 class_name SetMaterialColor
 
 

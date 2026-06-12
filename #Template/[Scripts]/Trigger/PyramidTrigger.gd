@@ -1,6 +1,6 @@
 extends BaseTrigger
-## PyramidTrigger - 金字塔子触发器
-## 碰撞后调用父节点Pyramid的trigger方法
+## @deprecated: 此脚本保持向后兼容，推荐使用 Behavior 组合模式
+## PyramidTrigger - 金字塔子触发器（向后兼容包装）
 
 @export var type: Pyramid.TriggerType = Pyramid.TriggerType.Open
 

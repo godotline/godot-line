@@ -1,10 +1,11 @@
 @tool
-extends Area3D
+extends BaseTrigger
+## @deprecated: 推荐使用 EventBehavior 作为 BaseTrigger 的子节点
+## EventTrigger - 事件触发器（向后兼容包装）
+
 class_name EventTrigger
 
 ## 事件触发器 - 可配置多个目标节点和方法
-
-signal triggered
 
 @export_group("触发目标")
 ## 目标节点列表
@@ -16,27 +17,30 @@ signal triggered
 @export var invoke_on_awake: bool = false
 @export var invoke_on_click: bool = false
 
-@export_group("调试")
-@export var debug_mode: bool = false
-
 var _invoked: bool = false
 var _waiting_click: bool = false
 var _trigger_index: int = -1
 
 func _ready() -> void:
+	# 先断开场景中的旧 body_entered 连接，避免与 BaseTrigger 链冲突
+	for conn in body_entered.get_connections():
+		if conn["callable"].get_method() == "_on_body_entered":
+			body_entered.disconnect(conn["callable"])
+
+	super._ready()
+
 	if Engine.is_editor_hint():
 		return
-	if not body_entered.is_connected(_on_body_entered):
-		body_entered.connect(_on_body_entered)
+
+	# body_exited 仍需要手动连接（BaseTrigger 不处理退出）
 	if not body_exited.is_connected(_on_body_exited):
 		body_exited.connect(_on_body_exited)
+
 	if invoke_on_awake:
 		_invoke()
 
-func _on_body_entered(body: Node3D) -> void:
+func _on_triggered(_body: Node3D) -> void:
 	if Engine.is_editor_hint():
-		return
-	if not body is CharacterBody3D:
 		return
 	if invoke_on_awake or _invoked:
 		return

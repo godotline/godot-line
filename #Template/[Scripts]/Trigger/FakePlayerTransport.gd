@@ -1,5 +1,7 @@
 @tool
 class_name FakePlayerTransport
+## @deprecated: 此脚本保持向后兼容
+## FakePlayerTransport - 假线传送触发器（向后兼容包装）
 extends Area3D
 
 ## 假线传送触发器 — 当玩家进入时传送 FakePlayer（与 Unity FakePlayerTransport.cs 一致）

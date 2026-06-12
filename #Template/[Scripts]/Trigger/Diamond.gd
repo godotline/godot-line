@@ -1,11 +1,20 @@
 @tool
-extends Area3D
+extends BaseTrigger
+## @deprecated: 推荐使用 DiamondBehavior 作为 BaseTrigger 的子节点
+## Diamond - 钻石收集物（向后兼容包装）
 
 @export var speed := 1.0
 
 var _collected := false
 
-func _on_Diamond_body_entered(_body: Node) -> void:
+func _ready() -> void:
+	super._ready()
+	# 断开场景中的旧连接，使用 BaseTrigger 的信号链
+	for conn in body_entered.get_connections():
+		if conn["callable"].get_method() == "_on_Diamond_body_entered":
+			body_entered.disconnect(conn["callable"])
+
+func _on_triggered(_body: Node3D) -> void:
 	if _collected:
 		return
 	_collected = true

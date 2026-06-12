@@ -1,7 +1,7 @@
 @tool
 extends BaseTrigger
-## Trigger - 通用触发器
-## 发射 hit_the_line 信号，供其他节点监听
+## @deprecated: 推荐使用 TriggerSignalBehavior 作为 BaseTrigger 的子节点
+## Trigger - 通用触发器（向后兼容包装）
 
 signal hit_the_line
 

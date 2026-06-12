@@ -1,7 +1,7 @@
 @tool
 extends BaseTrigger
-## ChangeTurnTrigger - 转向改变触发器
-## 当玩家进入时切换其转向状态
+## @deprecated: 推荐使用 ChangeTurnBehavior 作为 BaseTrigger 的子节点
+## ChangeTurnTrigger - 转向改变触发器（向后兼容包装）
 
 func _on_triggered(body: Node3D) -> void:
 	# 检查 body 是否有 _currentDirection 属性

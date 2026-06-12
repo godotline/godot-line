@@ -1,5 +1,7 @@
 @tool
 class_name FakePlayerTrigger
+## @deprecated: 此脚本保持向后兼容
+## FakePlayerTrigger - 假线控制触发器（向后兼容包装）
 extends Area3D
 
 ## 假线控制触发器 — Turn / ChangeDirection / SetState（与 Unity FakePlayerTrigger.cs 一致）

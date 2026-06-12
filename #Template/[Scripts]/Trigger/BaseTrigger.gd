@@ -13,6 +13,7 @@ signal triggered(body: Node3D)
 var _used: bool = false
 var _signal_connected: bool = false
 var _behaviors: Array[BaseTrigger] = []
+var _behavior_nodes: Array[TriggerBehavior] = []
 var _is_behavior: bool = false
 
 func _ready() -> void:
@@ -27,9 +28,12 @@ func _ready() -> void:
 
 func _collect_behaviors() -> void:
 	_behaviors.clear()
+	_behavior_nodes.clear()
 	for child in get_children():
 		if child is BaseTrigger:
 			_behaviors.append(child)
+		elif child is TriggerBehavior:
+			_behavior_nodes.append(child)
 
 func _setup_trigger() -> void:
 	if not _signal_connected:
@@ -53,10 +57,15 @@ func _on_body_entered(body: Node3D) -> void:
 	
 	triggered.emit(body)
 	
-	## 依次调用所有子行为组件
+	## 依次调用所有子 BaseTrigger 行为组件（向后兼容）
 	for behavior in _behaviors:
 		if is_instance_valid(behavior):
 			behavior._on_triggered(body)
+	
+	## 依次调用所有 TriggerBehavior 行为组件（新组合模式）
+	for behavior in _behavior_nodes:
+		if is_instance_valid(behavior):
+			behavior.trigger(body)
 	
 	_on_triggered(body)
 

@@ -1,4 +1,6 @@
 extends Checkpoint
+## @deprecated: 推荐使用 CheckpointBehavior + 自定义粒子效果作为 BaseTrigger 的子节点
+## Crown - 皇冠检查点（向后兼容包装）
 
 @export var aura_color: Color = Color(1, 0.972549, 0, 1)
 @export var aura_duration: float = 1.25
@@ -26,7 +28,8 @@ func _process(delta: float) -> void:
 func _init_particles() -> void:
 	pass
 
-func _on_checkpoint_body_entered(body: Node3D) -> void:
+## 覆盖 _on_triggered，先执行皇冠特效再调用超类的检查点逻辑
+func _on_triggered(body: Node3D) -> void:
 	if used:
 		return
 	if not body is Player:
@@ -34,7 +37,7 @@ func _on_checkpoint_body_entered(body: Node3D) -> void:
 	used = true
 	set_process(false)
 	_take_crown()
-	_enter_trigger(body)
+	super._on_triggered(body)
 
 func _take_crown() -> void:
 	if not _aura_particles or not _crown_mesh or not _crown_sprite:

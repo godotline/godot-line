@@ -1,7 +1,7 @@
 @tool
 extends BaseTrigger
-## JumpTrigger - 跳跃触发器
-## 当玩家进入时给予垂直方向的速度跳跃
+## @deprecated: 推荐使用 JumpBehavior 作为 BaseTrigger 的子节点
+## JumpTrigger - 跳跃触发器（向后兼容包装）
 
 signal height_changed(new_height: float)
 

@@ -1,7 +1,7 @@
 @tool
 extends BaseTrigger
-## CustomAnimPlayTrigger - 自定义动画播放触发器
-## 当玩家进入时播放一个或多个 AnimationPlayer 的动画
+## @deprecated: 推荐使用 PlayAnimatorBehavior 作为 BaseTrigger 的子节点
+## CustomAnimPlayTrigger - 自定义动画播放触发器（向后兼容包装）
 
 @export var animations: Array[AnimationPlayer] = []
 @export var animation_names: Array[StringName] = []

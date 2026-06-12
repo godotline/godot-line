@@ -1,4 +1,6 @@
-extends Area3D
+extends BaseTrigger
+## @deprecated: 推荐使用 PlayAnimatorBehavior 作为 BaseTrigger 的子节点
+## PlayAnimator - 动画播放器触发器（向后兼容包装）
 
 @export var animators: Array[NodePath] = []
 @export var dont_revive: bool = false
@@ -13,6 +15,14 @@ var _last_checkpoint_count := 0
 var _waiting_to_resume := false
 
 func _ready() -> void:
+	require_playing = false  # PlayAnimator 允许在非 Playing 状态触发
+	# 断开场景中的旧 body_entered 连接
+	for conn in body_entered.get_connections():
+		if conn["callable"].get_method() == "_on_body_entered":
+			body_entered.disconnect(conn["callable"])
+
+	super._ready()
+
 	_last_checkpoint_count = LevelManager.checkpoint_count
 	for path in animators:
 		var node = get_node_or_null(path)
@@ -36,7 +46,7 @@ func _process(_delta: float) -> void:
 				_animation_players[i].play()
 		_waiting_to_resume = false
 
-func _on_body_entered(body: Node3D) -> void:
+func _on_triggered(body: Node3D) -> void:
 	if not body is CharacterBody3D:
 		return
 	if LevelManager.GameState == LevelManager.GameStatus.Waiting or LevelManager.GameState == LevelManager.GameStatus.Died:

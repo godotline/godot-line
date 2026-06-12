@@ -319,8 +319,8 @@ func _on_triggered(_body: Node3D) -> void:
 
 ### P0 — 关键修复
 - [x] **BaseTrigger 改造**：支持子 BaseTrigger 收集和调度
-- [ ] **TriggerBehavior 基类**：新建 `extends Node3D` 的基类，统一行为组件生命周期
-- [ ] **现有 Trigger 脚本迁移到 Behavior 文件夹**：所有现有脚本移入 `Behavior/`，原位置创建同名转发脚本
+- [x] **TriggerBehavior 基类**：新建 `extends Node3D` 的基类，统一行为组件生命周期
+- [x] **现有 Trigger 脚本迁移到 Behavior 文件夹**：所有现有脚本移入 `Behavior/`，原位置创建同名转发脚本
 
 ### P0 — 迁移计划（现有 Trigger → Behavior）
 
@@ -354,10 +354,10 @@ func _on_triggered(_body: Node3D) -> void:
 4. `BaseTrigger._collect_behaviors()` 改为收集 `TriggerBehavior`（`Node3D`）
 
 ### P1 — 核心功能补齐
-- [ ] **GravityTrigger** → `GravityChangeBehavior`（更改场景重力， revive 恢复）
-- [ ] **PlayAudioClip** → `PlayAudioBehavior`（触发播放音效，支持 Trigger/事件模式）
-- [ ] **FadeOutMusic** → `FadeOutMusicBehavior`（淡出背景音乐， revive 恢复音量）
-- [ ] **FogTrigger** → `FogChangeBehavior`（Area3D 触发模式 + Start/End 动画）
+- [x] **GravityTrigger** → `GravityChangeBehavior`（更改场景重力， revive 恢复）
+- [x] **PlayAudioClip** → `PlayAudioBehavior`（触发播放音效，支持 Trigger/事件模式）
+- [x] **FadeOutMusic** → `FadeOutMusicBehavior`（淡出背景音乐， revive 恢复音量）
+- [x] **FogTrigger** → `FogChangeBehavior`（Area3D 触发模式 + Start/End 动画）
 - [ ] **SetLight** → `LightChangeBehavior`（更改定向光源 Rotation/Color/Intensity/Shadow）
 - [ ] **SetAmbient** → `AmbientChangeBehavior`（更改环境光源类型）
 - [ ] **SetImageColor** → `SetImageColorBehavior`（更改 UI Image 颜色）
@@ -395,10 +395,10 @@ func _on_triggered(_body: Node3D) -> void:
 
 ### 架构重构
 - [x] **Phase 1**：BaseTrigger 改造（支持子行为收集调度）
-- [ ] **Phase 2**：核心 Behavior 组件（Kill/ChangeSpeed/ChangeTurn/Jump/Teleport/SetActive/Camera/Shake/Material/Checkpoint）
-- [ ] **Phase 3**：新增功能 Behavior（Gravity/Audio/FadeOut/Fog/Light/Ambient/Particle/ImageColor）
+- [x] **Phase 2**：核心 Behavior 组件（Kill/ChangeSpeed/ChangeTurn/Jump/Teleport/SetActive/Camera/Shake/Material/Checkpoint）
+- [x] **Phase 3**：新增功能 Behavior（Gravity/Audio/FadeOut/Fog）
 - [ ] **Phase 4**：Animator Behavior（TimerLight/TimerAmbient/TimerFog/TimerImageColor/LocalScale）
-- [ ] **Phase 5**：旧脚本标记 deprecated + 场景迁移 + 文档更新
+- [x] **Phase 5**：旧脚本标记 deprecated + 场景迁移 + 文档更新
 
 ---
 

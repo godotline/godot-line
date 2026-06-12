@@ -1,4 +1,6 @@
 extends Checkpoint
+## @deprecated: 推荐使用 CheckpointBehavior + 自定义旋转效果作为 BaseTrigger 的子节点
+## HeartCheckpoint - 爱心检查点（向后兼容包装）
 
 @export var rotator: Node3D
 
@@ -7,10 +9,6 @@ var _core: Node3D
 
 func _ready() -> void:
 	super._ready()
-	# Reconnect to our own override
-	if body_entered.is_connected(_on_checkpoint_body_entered):
-		body_entered.disconnect(_on_checkpoint_body_entered)
-	body_entered.connect(_on_checkpoint_body_entered)
 	if not rotator:
 		rotator = get_node_or_null("Rotator")
 	if rotator:
@@ -23,16 +21,11 @@ func _process(delta: float) -> void:
 	if _core:
 		_core.rotate_y(delta * deg_to_rad(60.0))
 
-func _on_checkpoint_body_entered(body: Node3D) -> void:
+## 覆盖 _on_triggered，先执行旋转动画再调用超类的检查点逻辑
+func _on_triggered(body: Node3D) -> void:
 	if used:
 		return
 	if rotator:
 		var tw := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 		tw.tween_property(rotator, "scale", Vector3.ONE, 0.5)
-	_enter_trigger(body)
-
-func _on_Crown_body_entered(_line) -> void:
-	if used:
-		return
-	#$AnimationPlayer.play("crown")
-	await $AnimationPlayer.animation_finished
+	super._on_triggered(body)

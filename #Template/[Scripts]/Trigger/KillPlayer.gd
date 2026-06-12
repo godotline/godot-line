@@ -1,8 +1,8 @@
 @tool
 extends BaseTrigger
-## KillPlayer - 接触即死触发器
+## @deprecated: 推荐使用 KillBehavior 作为 BaseTrigger 的子节点
+## KillPlayer - 接触即死触发器（向后兼容包装）
 ## 当玩家进入触发区域时立即死亡
-## 三种模式：Hit（撞墙）/ Drowned（落水）/ Border（出图）
 
 enum DieReason {
 	Hit,       # 撞墙 — 播放碎片特效 + Hit 音效
