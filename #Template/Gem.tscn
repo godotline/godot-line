@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://cl2ga7ac0dg54"]
 
 [ext_resource type="ArrayMesh" uid="uid://c4vryn6nsdwar" path="res://#Template/[Resources]/Models/Diamond.obj" id="1"]
-[ext_resource type="Script" uid="uid://c2hh2qljydhbm" path="res://#Template/[Scripts]/Trigger/Diamond.gd" id="2"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/Trigger/Gem.gd" id="2"]
 [ext_resource type="Material" uid="uid://yr2s0ybyebck" path="res://#Template/[Materials]/Diamond.tres" id="3_lsh75"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_v601g"]
@@ -123,4 +123,4 @@ fixed_fps = 0
 process_material = SubResource("ParticleProcessMaterial_x612y")
 draw_pass_1 = SubResource("ArrayMesh_hjqfc")
 
-[connection signal="body_entered" from="." to="." method="_on_Diamond_body_entered"]
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

@@ -21,7 +21,7 @@ func visible() -> void:
 	一 = true
 	if LevelManager.is_relive == true:
 		LevelManager.crown -= 1
-	$diamond.text = str(LevelManager.diamond,"/10")
+	$diamond.text = str(LevelManager.gem,"/10")
 	$title.text = levelname
 	_update_crown_display(LevelManager.crown)
 	$".".visible = true
@@ -47,7 +47,7 @@ func _on_back_pressed() -> void:
 	LevelManager.is_end = false
 	LevelManager.is_relive = false
 	LevelManager.camera_checkpoint.restore_pending = false
-	LevelManager.diamond = 0
+	LevelManager.gem = 0
 	LevelManager.crown = 0
 	LevelManager.percent = 0
 

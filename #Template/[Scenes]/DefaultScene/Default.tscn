@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_5eet3"]
 [ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/DefaultScene/Default.tres" id="2_dmxrr"]
 [ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_dj80y"]
+[ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Gem.tscn" id="4_dj80y"]
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="6_0os2y"]
 [ext_resource type="Script" uid="uid://dljvwhsb4mc0x" path="res://#Template/[Scripts]/Trigger/FogColorChanger.gd" id="8_ys6ci"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="9_cr5py"]
@@ -63,5 +64,8 @@ transform = Transform3D(4.2346315, 0, 1.8258529, 0, 2.5, 0, -4.527601, 0, 1.7077
 [node name="Jump" type="Node3D" parent="Trigger" unique_id=1582838911]
 script = ExtResource("8_ys6ci")
 target_fog_color = Color(0, 0, 0, 1)
+
+[node name="Diamond" parent="." unique_id=149611988 instance=ExtResource("4_dj80y")]
+transform = Transform3D(2, 0, 5.9604645e-08, 5.9604645e-08, 2, 5.9604645e-08, 5.9604645e-08, 0, 2, 1.1694752, 0.15720963, 1.7570919)
 
 [editable path="BasicOBJ_Group/CameraRoot"]
