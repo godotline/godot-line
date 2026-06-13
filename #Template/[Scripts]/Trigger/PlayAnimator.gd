@@ -1,9 +1,11 @@
-extends Area3D
+extends Node3D
 
-@export var animators: Array[NodePath] = []
+## 动画播放触发器 - 纯组件模式
+## 作为 BaseTrigger 的子节点，依赖父节点处理碰撞
+
+@export var animators: Array[AnimationPlayer] = []
 @export var dont_revive: bool = false
 
-var _animation_players: Array[AnimationPlayer] = []
 var _played: Array[bool] = []
 var _finished: Array[bool] = []
 var _progress: Array[float] = []
@@ -14,42 +16,46 @@ var _waiting_to_resume := false
 
 func _ready() -> void:
 	_last_checkpoint_count = LevelManager.checkpoint_count
-	for path in animators:
-		var node = get_node_or_null(path)
-		if node is AnimationPlayer:
-			_animation_players.append(node)
-			node.speed_scale = 0.0
-			_played.append(false)
-			_finished.append(false)
-			_progress.append(0.0)
-			_play_state.append(false)
+	for player in animators:
+		if player:
+			player.speed_scale = 0.0
+		_played.append(false)
+		_finished.append(false)
+		_progress.append(0.0)
+		_play_state.append(false)
 
 func _process(_delta: float) -> void:
 	if LevelManager.checkpoint_count > _last_checkpoint_count:
 		_trigger_index = LevelManager.checkpoint_count
-		for i in _animation_players.size():
+		for i in animators.size():
 			_get_state(i)
 		_last_checkpoint_count = LevelManager.checkpoint_count
 	if _waiting_to_resume and LevelManager.GameState == LevelManager.GameStatus.Playing:
-		for i in _animation_players.size():
-			if _play_state[i]:
-				_animation_players[i].play()
+		for i in animators.size():
+			if _play_state[i] and is_instance_valid(animators[i]):
+				animators[i].play()
 		_waiting_to_resume = false
 
-func _on_body_entered(body: Node3D) -> void:
-	if not body is CharacterBody3D:
-		return
+## 由父节点 BaseTrigger 调用的入口方法
+func trigger(_body: Node3D) -> void:
 	if LevelManager.GameState == LevelManager.GameStatus.Waiting or LevelManager.GameState == LevelManager.GameStatus.Died:
 		return
-	for i in _animation_players.size():
+	for i in animators.size():
 		if not _finished[i]:
 			_play(i)
+			_play_state[i] = true
+	if _trigger_index < 0:
+		_trigger_index = LevelManager.checkpoint_count
 	if not dont_revive:
 		LevelManager.remove_revive_listener(_on_revive)
 		LevelManager.add_revive_listener(_on_revive)
 
 func _play(index: int) -> void:
-	var player = _animation_players[index]
+	if index >= animators.size():
+		return
+	var player = animators[index]
+	if not is_instance_valid(player):
+		return
 	player.speed_scale = 1.0
 	for anim_name in player.get_animation_list():
 		if anim_name != "RESET":
@@ -59,10 +65,18 @@ func _play(index: int) -> void:
 	_finished[index] = true
 
 func _stop(index: int) -> void:
-	_animation_players[index].stop()
+	if index >= animators.size():
+		return
+	var player = animators[index]
+	if is_instance_valid(player):
+		player.stop()
 
 func _get_state(index: int) -> void:
-	var player = _animation_players[index]
+	if index >= animators.size():
+		return
+	var player = animators[index]
+	if not is_instance_valid(player):
+		return
 	var anim_name = player.current_animation
 	if anim_name != "":
 		var anim = player.get_animation(anim_name)
@@ -71,11 +85,15 @@ func _get_state(index: int) -> void:
 	_play_state[index] = _played[index]
 
 func _set_state(index: int) -> void:
-	var player = _animation_players[index]
+	if index >= animators.size():
+		return
+	var player = animators[index]
+	if not is_instance_valid(player):
+		return
 	var anim_name = ""
-	for name in player.get_animation_list():
-		if name != "RESET":
-			anim_name = name
+	for _name in player.get_animation_list():
+		if _name != "RESET":
+			anim_name = _name
 			break
 	if anim_name != "":
 		player.play(anim_name)
@@ -86,11 +104,27 @@ func _set_state(index: int) -> void:
 	_played[index] = _play_state[index]
 
 func _on_revive() -> void:
+	if not is_instance_valid(self):
+		return
 	LevelManager.remove_revive_listener(_on_revive)
-	for i in _animation_players.size():
+
+	for i in animators.size():
+		if _play_state[i] and is_instance_valid(animators[i]):
+			var player = animators[i]
+			if player.is_playing():
+				var _name = player.current_animation
+				if _name != "":
+					var anim = player.get_animation(name)
+					if anim and anim.get_length() > 0:
+						_progress[i] = player.current_animation_position / anim.get_length()
+
+	for i in animators.size():
 		_seek_and_pause(i)
+
 	LevelManager.CompareCheckpointIndex(_trigger_index, func():
-		for i in _animation_players.size():
+		if not is_instance_valid(self):
+			return
+		for i in animators.size():
 			if not dont_revive:
 				_finished[i] = false
 		_waiting_to_resume = true
@@ -98,11 +132,15 @@ func _on_revive() -> void:
 	)
 
 func _seek_and_pause(index: int) -> void:
-	var player = _animation_players[index]
+	if index >= animators.size():
+		return
+	var player = animators[index]
+	if not is_instance_valid(player):
+		return
 	var anim_name = ""
-	for name in player.get_animation_list():
-		if name != "RESET":
-			anim_name = name
+	for _name in player.get_animation_list():
+		if _name != "RESET":
+			anim_name = _name
 			break
 	if anim_name != "":
 		player.play(anim_name)

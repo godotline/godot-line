@@ -76,7 +76,11 @@ static func remove_revive_listener(callable: Callable) -> void:
 static func emit_revive() -> void:
 	var listeners_snapshot = _revive_listeners.duplicate()
 	for listener in listeners_snapshot:
-		listener.call()
+		if listener.is_valid():
+			listener.call()
+		else:
+			# 移除无效的 listener
+			_revive_listeners.erase(listener)
 
 static func reset_revive_listeners() -> void:
 	_revive_listeners.clear()

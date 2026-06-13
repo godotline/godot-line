@@ -67,10 +67,14 @@ func _apply_change() -> void:
 		print("[PropertyModifierTrigger] ", name, " 设置: ", target_node, ".", property_name, " = ", new_value)
 
 func _on_revive() -> void:
+	if not is_instance_valid(self):
+		return
 	if dont_revive:
 		return
 
 	LevelManager.CompareCheckpointIndex(_checkpoint_index, func():
+		if not is_instance_valid(self):
+			return
 		var target = get_node_or_null(target_node)
 		if target and not property_name.is_empty() and _original_value != null:
 			target.set(property_name, _original_value)
