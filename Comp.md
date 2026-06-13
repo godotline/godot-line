@@ -6,9 +6,9 @@
 
 | 模式 | 基类 | 碰撞由谁处理 | 文件数 |
 |------|------|-------------|--------|
-| **纯组件** | `extends Node3D` | 父节点 BaseTrigger | 5 |
+| **纯组件** | `extends Node3D` | 父节点 BaseTrigger | 6 |
 | **自容器** | `extends BaseTrigger` (即 Area3D) | 自身继承 BaseTrigger | 9 |
-| **旧模式** | `extends Area3D` | 自身处理 body_entered | 6 (+2 继承 Checkpoint) |
+| **旧模式** | `extends Area3D` | 自身处理 body_entered | 5 (+2 继承 Checkpoint) |
 
 ## BaseTrigger（容器）
 
@@ -18,11 +18,16 @@
 extends Area3D
 class_name BaseTrigger
 
+## BaseTrigger - 触发器容器
+## 负责碰撞检测和分发给子 TriggerBehavior 组件
+
 signal triggered(body: Node3D)
+signal exited(body: Node3D)  # 新增：玩家离开区域信号
 
 @export_group("触发器设置")
 @export var one_shot: bool = false
 @export var require_playing: bool = true
+@export var track_exit: bool = false  # 新增：是否追踪离开事件
 
 @export_group("调试设置")
 @export var debug_mode: bool = false
@@ -31,7 +36,11 @@ var _used: bool = false
 var _behaviors: Array[Node] = []
 
 func _ready() -> void:
-    body_entered.connect(_on_body_entered)
+    if not body_entered.is_connected(_on_body_entered):
+        body_entered.connect(_on_body_entered)
+    if track_exit:
+        if not body_exited.is_connected(_on_body_exited):
+            body_exited.connect(_on_body_exited)
     _collect_behaviors()
 
 func _collect_behaviors() -> void:
@@ -60,12 +69,25 @@ func _on_body_entered(body: Node3D) -> void:
         if is_instance_valid(behavior):
             behavior.trigger(body)
 
+## 新增：离开区域处理
+func _on_body_exited(body: Node3D) -> void:
+    if not body is CharacterBody3D:
+        return
+    if debug_mode:
+        print("[BaseTrigger] ", name, " 玩家离开")
+
+    exited.emit(body)
+
+    for behavior in _behaviors:
+        if is_instance_valid(behavior) and behavior.has_method("on_exit"):
+            behavior.on_exit(body)
+
 ## 重新收集行为组件
 func refresh_behaviors() -> void:
     _collect_behaviors()
 ```
 
-**关键接口**：BaseTrigger 对子组件调用 `trigger(body)`，通过 `child.has_method("trigger")` 识别子组件。
+**关键接口**：BaseTrigger 对子组件调用 `trigger(body)`，通过 `child.has_method("trigger")` 识别子组件。如果 `track_exit=true`，还会对子组件调用 `on_exit(body)`（通过 `child.has_method("on_exit")` 识别）。
 
 ## 模式一：纯组件（`extends Node3D`）
 
@@ -80,6 +102,7 @@ func refresh_behaviors() -> void:
 | `Pyramid.gd` | `Pyramid` | 无（管理节点） | 由 PyramidTrigger 调用 `pyramid.trigger(type)` |
 | `JumpPredictor.gd` | `JumpPredictor` | 无（工具类） | 跳跃轨迹预测可视化 |
 | `FallPredictor.gd` | `FallPredictor` | 无（工具类） | 跳跃下落轨迹预测可视化 |
+| `EventTrigger.gd` | — | `trigger(body)` + `on_exit(body)` | 可配置多目标/多方法调用，支持 onclick 模式 |
 
 ### Jump.gd 示例
 
@@ -178,7 +201,6 @@ func _on_triggered(body: Node3D) -> void:
 | `Crown.gd` | — | 继承 Checkpoint | 皇冠收集动画 |
 | `HeartCheckpoint.gd` | — | 继承 Checkpoint | 带动画存档点 |
 | `Gem.gd` | — | `_on_body_entered` | 宝石收集，支持 fake 属性和复活恢复 |
-| `EventTrigger.gd` | `EventTrigger` | `_on_body_entered` | 可配置多目标/多方法调用，支持 onclick 模式 |
 | `FakePlayerTransport.gd` | `FakePlayerTransport` | `_on_body_entered` | 传送 FakePlayer |
 | `FakePlayerTrigger.gd` | `FakePlayerTrigger` | `_on_body_entered` | 控制 FakePlayer 转向/方向/状态 |
 | `PlayAnimator.gd` | — | `_on_body_entered` | 播放 AnimationPlayer，支持复活恢复进度 |
@@ -202,6 +224,13 @@ func trigger(body: Node3D) -> void:
     pass
 ```
 
+如果需要处理离开事件（`track_exit=true`），子组件还需定义：
+
+```gdscript
+func on_exit(body: Node3D) -> void:
+    pass
+```
+
 ## 场景结构示例
 
 ### 纯组件模式（模式一）
@@ -215,6 +244,11 @@ func trigger(body: Node3D) -> void:
 # 雾色变化
 [BaseTrigger]
   ├── FogColorChanger (Node3D)
+  └── CollisionShape3D
+
+# 事件触发器（需要 track_exit=true）
+[BaseTrigger (track_exit=true)]
+  ├── EventTrigger (Node3D)
   └── CollisionShape3D
 ```
 

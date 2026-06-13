@@ -7,8 +7,10 @@
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="6_0os2y"]
 [ext_resource type="Script" uid="uid://dljvwhsb4mc0x" path="res://#Template/[Scripts]/Trigger/FogColorChanger.gd" id="8_ys6ci"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="9_cr5py"]
+[ext_resource type="Script" uid="uid://cu3xuawfji3m2" path="res://#Template/[Scripts]/Trigger/EventTrigger.gd" id="9_nb4qh"]
 [ext_resource type="Texture2D" uid="uid://bokq00qv7ojs5" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="10_8ar0p"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="11_jhod5"]
+[ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="11_ymsgx"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
@@ -65,7 +67,20 @@ transform = Transform3D(4.2346315, 0, 1.8258529, 0, 2.5, 0, -4.527601, 0, 1.7077
 script = ExtResource("8_ys6ci")
 target_fog_color = Color(0, 0, 0, 1)
 
+[node name="Node3D" type="Node3D" parent="Trigger" unique_id=627851164 node_paths=PackedStringArray("target_nodes")]
+script = ExtResource("9_nb4qh")
+target_nodes = [NodePath("../../Diamond/MeshInstance3D")]
+target_methods = Array[String](["Trigger"])
+invoke_on_awake = true
+debug_mode = true
+
 [node name="Diamond" parent="." unique_id=149611988 instance=ExtResource("4_dj80y")]
 transform = Transform3D(2, 0, 5.9604645e-08, 5.9604645e-08, 2, 5.9604645e-08, 5.9604645e-08, 0, 2, 1.1694752, 0.15720963, 1.7570919)
+fake = true
+
+[node name="MeshInstance3D" parent="Diamond" index="1" unique_id=996011055]
+script = ExtResource("11_ymsgx")
+end_offset = Vector3(0, 1.612018, 0)
 
 [editable path="BasicOBJ_Group/CameraRoot"]
+[editable path="Diamond"]

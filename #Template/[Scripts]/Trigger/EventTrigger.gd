@@ -1,10 +1,8 @@
 @tool
-extends Area3D
-class_name EventTrigger
+extends Node3D
 
 ## 事件触发器 - 可配置多个目标节点和方法
-
-signal triggered
+## 纯组件模式：作为 BaseTrigger 的子节点，依赖父节点处理碰撞
 
 @export_group("触发目标")
 ## 目标节点列表
@@ -26,18 +24,11 @@ var _trigger_index: int = -1
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
-	if not body_entered.is_connected(_on_body_entered):
-		body_entered.connect(_on_body_entered)
-	if not body_exited.is_connected(_on_body_exited):
-		body_exited.connect(_on_body_exited)
 	if invoke_on_awake:
 		_invoke()
 
-func _on_body_entered(body: Node3D) -> void:
-	if Engine.is_editor_hint():
-		return
-	if not body is CharacterBody3D:
-		return
+## 由父节点 BaseTrigger 调用的入口方法
+func trigger(body: Node3D) -> void:
 	if invoke_on_awake or _invoked:
 		return
 	if not invoke_on_click:
@@ -47,11 +38,8 @@ func _on_body_entered(body: Node3D) -> void:
 		if Player.instance and Player.instance.has_signal("onturn") and not Player.instance.onturn.is_connected(_on_player_turn):
 			Player.instance.onturn.connect(_on_player_turn)
 
-func _on_body_exited(body: Node3D) -> void:
-	if Engine.is_editor_hint():
-		return
-	if not body is CharacterBody3D:
-		return
+## 由父节点 BaseTrigger 调用的离开方法
+func on_exit(body: Node3D) -> void:
 	if invoke_on_awake or not invoke_on_click:
 		return
 	if _waiting_click and Player.instance and Player.instance.has_signal("onturn"):
@@ -74,7 +62,6 @@ func _invoke() -> void:
 	_trigger_index = LevelManager.checkpoint_count
 	if debug_mode:
 		print("[EventTrigger] %s 触发 (checkpoint: %d)" % [name, _trigger_index])
-	triggered.emit()
 	_invoke_targets()
 	LevelManager.add_revive_listener(_on_revive)
 
