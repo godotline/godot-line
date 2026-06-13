@@ -1,4 +1,3 @@
-@tool
 extends Node3D
 ## FogColorChanger - 雾色变化组件
 ## 由父节点 BaseTrigger 触发，用 Tween 过渡场景环境雾色

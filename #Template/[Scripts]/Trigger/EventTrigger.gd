@@ -89,8 +89,12 @@ func _invoke_targets() -> void:
 			push_warning("[EventTrigger] 节点 '%s' 没有方法 '%s'" % [node.name, method])
 
 func _on_revive() -> void:
+	if not is_instance_valid(self):
+		return
 	LevelManager.remove_revive_listener(_on_revive)
 	LevelManager.CompareCheckpointIndex(_trigger_index, func():
+		if not is_instance_valid(self):
+			return
 		_invoked = false
 		_waiting_click = false
 	)

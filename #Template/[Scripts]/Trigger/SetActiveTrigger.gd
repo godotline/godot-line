@@ -59,7 +59,11 @@ func _save_revive_states() -> void:
 				})
 
 func _on_revive() -> void:
+	if not is_instance_valid(self):
+		return
 	LevelManager.CompareCheckpointIndex(_checkpoint_index, func():
+		if not is_instance_valid(self):
+			return
 		for state in _revive_states:
 			if not state.get("dont_revive", false):
 				var target_path = state.get("target", "")

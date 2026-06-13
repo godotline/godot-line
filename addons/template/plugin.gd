@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const WELCOME_URL := "https://github.com/meny2333/GodotLineCollection"
+const WELCOME_URL := "https://www.cnblogs.com/mmme/p/-/tutorial"
 const MARKER_PATH := "user://.first_run_welcome_done"
 
 var _menu_button: MenuButton

@@ -3,14 +3,12 @@
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_5eet3"]
 [ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/DefaultScene/Default.tres" id="2_dmxrr"]
 [ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_dj80y"]
-[ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Gem.tscn" id="4_dj80y"]
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="6_0os2y"]
-[ext_resource type="Script" uid="uid://dljvwhsb4mc0x" path="res://#Template/[Scripts]/Trigger/FogColorChanger.gd" id="8_ys6ci"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="9_cr5py"]
-[ext_resource type="Script" uid="uid://cu3xuawfji3m2" path="res://#Template/[Scripts]/Trigger/EventTrigger.gd" id="9_nb4qh"]
 [ext_resource type="Texture2D" uid="uid://bokq00qv7ojs5" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="10_8ar0p"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="11_jhod5"]
-[ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="11_ymsgx"]
+[ext_resource type="Script" uid="uid://b1m236nbmh7ke" path="res://#Template/[Scripts]/Trigger/PlayAnimator.gd" id="12_ymsgx"]
+[ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="13_yearn"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
@@ -25,6 +23,43 @@ length = 130.0
 _data = {
 &"RESET": SubResource("Animation_wkp8b"),
 &"level": SubResource("3")
+}
+
+[sub_resource type="Animation" id="Animation_dj80y"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(4.4969263, 0, 4.374485)]
+}
+
+[sub_resource type="Animation" id="Animation_hta2p"]
+resource_name = "new_animation"
+length = 3.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.4, 2.9666667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(4.4969263, 0, 4.374485), Vector3(8.108386, 0, 9.695503), Vector3(3.9837084, 4.7683716e-07, 14.005822)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_nb4qh"]
+_data = {
+&"RESET": SubResource("Animation_dj80y"),
+&"new_animation": SubResource("Animation_hta2p")
 }
 
 [node name="LevelHolder" type="Node3D" unique_id=542804875]
@@ -60,27 +95,20 @@ crown_no_light = ExtResource("10_8ar0p")
 [node name="Ground" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("11_jhod5")]
 transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -1, 0)
 
-[node name="Trigger" parent="." unique_id=608483111 instance=ExtResource("6_0os2y")]
-transform = Transform3D(4.2346315, 0, 1.8258529, 0, 2.5, 0, -4.527601, 0, 1.7077066, 3.4334273, -0.5, 4.045533)
+[node name="Ground" parent="Scene_Group" unique_id=1080893231 instance=ExtResource("11_jhod5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.4969263, 0, 4.374485)
 
-[node name="Jump" type="Node3D" parent="Trigger" unique_id=1582838911]
-script = ExtResource("8_ys6ci")
-target_fog_color = Color(0, 0, 0, 1)
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Scene_Group/Ground" unique_id=2061085675]
+libraries/ = SubResource("AnimationLibrary_nb4qh")
 
-[node name="Node3D" type="Node3D" parent="Trigger" unique_id=627851164 node_paths=PackedStringArray("target_nodes")]
-script = ExtResource("9_nb4qh")
-target_nodes = [NodePath("../../Diamond/MeshInstance3D")]
-target_methods = Array[String](["Trigger"])
-invoke_on_awake = true
-debug_mode = true
+[node name="Trigger" parent="Scene_Group" unique_id=608483111 instance=ExtResource("6_0os2y")]
+transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 2.2444015, -0.5, 2.7034848)
 
-[node name="Diamond" parent="." unique_id=149611988 instance=ExtResource("4_dj80y")]
-transform = Transform3D(2, 0, 5.9604645e-08, 5.9604645e-08, 2, 5.9604645e-08, 5.9604645e-08, 0, 2, 1.1694752, 0.15720963, 1.7570919)
-fake = true
+[node name="Node3D" type="Node3D" parent="Scene_Group/Trigger" unique_id=277403828 node_paths=PackedStringArray("animators")]
+script = ExtResource("12_ymsgx")
+animators = [NodePath("../../Ground/AnimationPlayer")]
 
-[node name="MeshInstance3D" parent="Diamond" index="1" unique_id=996011055]
-script = ExtResource("11_ymsgx")
-end_offset = Vector3(0, 1.612018, 0)
+[node name="Crown" parent="Scene_Group" unique_id=1805653336 instance=ExtResource("13_yearn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5075054, 0, 8.703337)
 
 [editable path="BasicOBJ_Group/CameraRoot"]
-[editable path="Diamond"]

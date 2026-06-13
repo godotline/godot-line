@@ -6,9 +6,9 @@
 
 | 模式 | 基类 | 碰撞由谁处理 | 文件数 |
 |------|------|-------------|--------|
-| **纯组件** | `extends Node3D` | 父节点 BaseTrigger | 6 |
+| **纯组件** | `extends Node3D` | 父节点 BaseTrigger | 7 |
 | **自容器** | `extends BaseTrigger` (即 Area3D) | 自身继承 BaseTrigger | 9 |
-| **旧模式** | `extends Area3D` | 自身处理 body_entered | 5 (+2 继承 Checkpoint) |
+| **旧模式** | `extends Area3D` | 自身处理 body_entered | 4 (+2 继承 Checkpoint) |
 
 ## BaseTrigger（容器）
 
@@ -103,6 +103,7 @@ func refresh_behaviors() -> void:
 | `JumpPredictor.gd` | `JumpPredictor` | 无（工具类） | 跳跃轨迹预测可视化 |
 | `FallPredictor.gd` | `FallPredictor` | 无（工具类） | 跳跃下落轨迹预测可视化 |
 | `EventTrigger.gd` | — | `trigger(body)` + `on_exit(body)` | 可配置多目标/多方法调用，支持 onclick 模式 |
+| `PlayAnimator.gd` | — | `trigger(body)` | 播放 AnimationPlayer，支持复活恢复进度 |
 
 ### Jump.gd 示例
 
@@ -203,7 +204,6 @@ func _on_triggered(body: Node3D) -> void:
 | `Gem.gd` | — | `_on_body_entered` | 宝石收集，支持 fake 属性和复活恢复 |
 | `FakePlayerTransport.gd` | `FakePlayerTransport` | `_on_body_entered` | 传送 FakePlayer |
 | `FakePlayerTrigger.gd` | `FakePlayerTrigger` | `_on_body_entered` | 控制 FakePlayer 转向/方向/状态 |
-| `PlayAnimator.gd` | — | `_on_body_entered` | 播放 AnimationPlayer，支持复活恢复进度 |
 
 ### Checkpoint.gd 复杂度说明
 
@@ -249,6 +249,11 @@ func on_exit(body: Node3D) -> void:
 # 事件触发器（需要 track_exit=true）
 [BaseTrigger (track_exit=true)]
   ├── EventTrigger (Node3D)
+  └── CollisionShape3D
+
+# 动画播放触发器
+[BaseTrigger]
+  ├── PlayAnimator (Node3D)
   └── CollisionShape3D
 ```
 
