@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://dup02jc1bhxfc"]
 
-[ext_resource type="Script" uid="uid://cl7pyxuxgg61g" path="res://#Template/[Scripts]/Trigger/HeartCheckpoint.gd" id="1_oq3w0"]
+[ext_resource type="Script" uid="uid://cl7pyxuxgg61g" path="res://#Template/[Scripts]/Trigger/Single/HeartCheckpoint.gd" id="1_oq3w0"]
 [ext_resource type="Material" uid="uid://ktbkvswrq32a" path="res://#Template/[Materials]/Checkpoint1.tres" id="2_oq3w0"]
 
 [sub_resource type="BoxShape3D" id="2"]

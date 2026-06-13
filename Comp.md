@@ -98,12 +98,19 @@ func refresh_behaviors() -> void:
 | 文件 | class_name | 入口方法 | 备注 |
 |------|-----------|---------|------|
 | `Jump.gd` | — | `trigger(body)` | 施加向上速度，触发 `on_player_jump` 信号；含 `_update_predictor()` 刷新 JumpPredictor/FallPredictor |
-| `FogColorChanger.gd` | — | `trigger(body)` | 用 Tween 过渡雾色 |
+| `SetFog.gd` | — | `trigger(body)` | 用 Tween 过渡雾设置，使用 FogSettings 资源 |
 | `Pyramid.gd` | `Pyramid` | 无（管理节点） | 由 PyramidTrigger 调用 `pyramid.trigger(type)` |
 | `JumpPredictor.gd` | `JumpPredictor` | 无（工具类） | 跳跃轨迹预测可视化 |
 | `FallPredictor.gd` | `FallPredictor` | 无（工具类） | 跳跃下落轨迹预测可视化 |
 | `EventTrigger.gd` | — | `trigger(body)` + `on_exit(body)` | 可配置多目标/多方法调用，支持 onclick 模式 |
 | `PlayAnimator.gd` | — | `trigger(body)` | 播放 AnimationPlayer，支持复活恢复进度 |
+| `SetActiveTrigger.gd` | — | `trigger(body)` | 激活/禁用指定节点，支持复活恢复 |
+| `customanimplay.gd` | — | `trigger(body)` | 播放 AnimationPlayer 动画，含编辑器预览按钮 |
+| `SetMaterialColor.gd` | — | `trigger(body)` | 通过 material_override + Tween 改变材质颜色 |
+| `Teleport.gd` | — | `trigger(body)` | 两种传送模式：Target / Position |
+| `KillPlayer.gd` | — | `trigger(body)` | 三种死亡模式：Hit / Drowned / Border |
+| `ChangeDirection.gd` | — | `trigger(body)` | 两种模式：Direction / Turn |
+| `ChangeSpeedTrigger.gd` | — | `trigger(body)` | 修改 `body.speed` |
 
 ### Jump.gd 示例
 
@@ -152,14 +159,7 @@ func _update_predictor() -> void:
 
 | 文件 | class_name | 备注 |
 |------|-----------|------|
-| `KillPlayer.gd` | — | 三种死亡模式：Hit / Drowned / Border |
-| `ChangeTurn.gd` | — | 切换 `_currentDirection` |
-| `ChangeSpeedTrigger.gd` | — | 修改 `body.speed` |
-| `LocalTeleportTrigger.gd` | `LocalTeleportTrigger` | 三种传送模式：Offset / Position / Target |
-| `SetActiveTrigger.gd` | `SetActiveTrigger` | 激活/禁用指定节点，支持复活恢复 |
-| `SetMaterialColor.gd` | `SetMaterialColor` | 通过 material_override + Tween 改变材质颜色 |
 | `PyramidTrigger.gd` | — | 调用父节点 Pyramid 的 `trigger(type)` |
-| `customanimplay.gd` | — | 播放 AnimationPlayer 动画，含编辑器预览按钮 |
 | `#TimeLine_ExpandTrack/PropertyModifierTrigger.gd` | `PropertyModifierTrigger` | 通用属性修改，支持 Tween 和复活恢复 |
 
 ### KillPlayer.gd 示例
@@ -198,12 +198,14 @@ func _on_triggered(body: Node3D) -> void:
 
 | 文件 | class_name | 碰撞入口 | 备注 |
 |------|-----------|---------|------|
-| `Checkpoint.gd` | `Checkpoint` | `_on_checkpoint_body_entered` | 存档点，捕获/恢复全量游戏状态 |
-| `Crown.gd` | — | 继承 Checkpoint | 皇冠收集动画 |
-| `HeartCheckpoint.gd` | — | 继承 Checkpoint | 带动画存档点 |
 | `Gem.gd` | — | `_on_body_entered` | 宝石收集，支持 fake 属性和复活恢复 |
-| `FakePlayerTransport.gd` | `FakePlayerTransport` | `_on_body_entered` | 传送 FakePlayer |
-| `FakePlayerTrigger.gd` | `FakePlayerTrigger` | `_on_body_entered` | 控制 FakePlayer 转向/方向/状态 |
+| `Checkpoint.gd` | `Checkpoint` | `_on_checkpoint_body_entered` | 存档点，捕获/恢复全量游戏状态（符合单一职责，无需迁移） |
+| `Crown.gd` | — | 继承 Checkpoint | 皇冠收集动画（符合单一职责，无需迁移） |
+| `HeartCheckpoint.gd` | — | 继承 Checkpoint | 带动画存档点（符合单一职责，无需迁移） |
+| `FakePlayerTransport.gd` | `FakePlayerTransport` | `_on_body_entered` | 传送 FakePlayer（半成品，暂时忽略） |
+| `FakePlayerTrigger.gd` | `FakePlayerTrigger` | `_on_body_entered` | 控制 FakePlayer 转向/方向/状态（半成品，暂时忽略） |
+
+**注**：Gem、Checkpoint、Crown、HeartCheckpoint 均符合单一职责，无需迁移到组件模式。FakePlayer 相关触发器为半成品，暂不处理。旧模式触发器已全部确认，Trigger 系统重构完成。
 
 ### Checkpoint.gd 复杂度说明
 
@@ -243,7 +245,7 @@ func on_exit(body: Node3D) -> void:
 
 # 雾色变化
 [BaseTrigger]
-  ├── FogColorChanger (Node3D)
+  ├── SetFog (Node3D)
   └── CollisionShape3D
 
 # 事件触发器（需要 track_exit=true）
@@ -264,8 +266,9 @@ func on_exit(body: Node3D) -> void:
 [KillPlayer (extends BaseTrigger)]
   └── CollisionShape3D
 
-# 传送触发器
-[LocalTeleportTrigger (extends BaseTrigger)]
+# 传送触发器（纯组件模式）
+[BaseTrigger]
+  ├── Teleport (Node3D)
   └── CollisionShape3D
 
 # 金字塔 — 管理节点 + 子触发器组合
