@@ -4,7 +4,6 @@
 [ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/DefaultScene/Default.tres" id="2_dmxrr"]
 [ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_dj80y"]
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="6_0os2y"]
-[ext_resource type="Script" uid="uid://ct52ojgblm2io" path="res://#Template/[Scripts]/Trigger/Teleport.gd" id="8_dj80y"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="9_cr5py"]
 [ext_resource type="Texture2D" uid="uid://bokq00qv7ojs5" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="10_8ar0p"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="11_jhod5"]
@@ -105,14 +104,6 @@ libraries/ = SubResource("AnimationLibrary_nb4qh")
 
 [node name="Trigger" parent="Scene_Group" unique_id=608483111 instance=ExtResource("6_0os2y")]
 transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 2.2444015, -0.5, 2.7034848)
-
-[node name="Node3D" type="Node3D" parent="Scene_Group/Trigger" unique_id=277403828 node_paths=PackedStringArray("target")]
-script = ExtResource("8_dj80y")
-type = 1
-target = NodePath("../../Dest")
-teleport_position = Vector3(5, 0, 0)
-turn = true
-target_direction = 1
 
 [node name="Crown" parent="Scene_Group" unique_id=1805653336 instance=ExtResource("13_yearn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5075054, 0, 8.703337)

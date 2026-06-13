@@ -53,10 +53,6 @@ var past_is_on_floor_effect := false
 
 var is_start := false
 var tailScale = 1
-var _last_floor_y := 0.0
-var floor_segment_lines: Array[MeshInstance3D] = []
-var _floor_y_update_timer := 0.0
-const FLOOR_Y_UPDATE_INTERVAL := 0.05  # 每 0.05 秒统一更新一次，避免每帧遍历
 
 var start_transform = transform
 var loading := false
@@ -93,7 +89,6 @@ func _ready() -> void:
 	if is_inside_tree():
 		if level_data:
 				level_data.apply_to(self, get_world_3d().space)
-		_last_floor_y = global_position.y
 
 	var debug_overlay_scene := load("res://#Template/[Resources]/DebugOverlay.tscn") as PackedScene
 	if debug_overlay_scene:
@@ -149,24 +144,11 @@ func _process(_delta: float) -> void:
 		var distance = offset.length()
 
 		line.position = past_translation + offset / 2
-		line.position.y = global_position.y
-
 		line.scale = Vector3(1, 1, distance + tailScale)
-
-		var current_y := global_position.y
-		if abs(current_y - _last_floor_y) > 0.001:
-			_floor_y_update_timer += _delta
-			if _floor_y_update_timer >= FLOOR_Y_UPDATE_INTERVAL:
-				_floor_y_update_timer = 0.0
-				for segment in floor_segment_lines:
-					if is_instance_valid(segment):
-						segment.global_position.y = current_y
-				_last_floor_y = current_y
 	else:
 		if past_is_on_floor != is_on_floor_now:
 			emit_signal("on_sky")
 			emit_signal("on_leave_ground")
-			floor_segment_lines.clear()
 	past_is_on_floor = is_on_floor_now
 
 func _input(event: InputEvent) -> void:
@@ -206,7 +188,6 @@ func reload() -> void:
 func _clear_tail() -> void:
 	line = null
 	past_translation = position
-	floor_segment_lines.clear()
 	var tail_holder := tree.current_scene.get_node_or_null("PlayerTailHolder") as Node3D
 	if tail_holder:
 		for child in tail_holder.get_children():
@@ -252,9 +233,6 @@ func new_line():
 
 	var tail_holder := _get_or_create_player_tail_holder()
 	tail_holder.add_child(line)
-
-	if is_on_floor() or fly:
-		floor_segment_lines.append(line)
 
 	past_translation = position
 	emit_signal("new_line1")
