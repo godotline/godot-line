@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://brdmblcywuklx"]
 
 [ext_resource type="Script" uid="uid://lvagihw0v4wd" path="res://#Template/[Scripts]/Level/Player.gd" id="1"]
-[ext_resource type="AudioStream" uid="uid://dg4noxkxcgbfj" path="res://#Template/[Resources]/Hit.wav" id="2"]
+[ext_resource type="AudioStream" uid="uid://84k3myx63ukq" path="res://#Template/[Resources]/Hit.wav" id="2"]
 [ext_resource type="PackedScene" uid="uid://bvchtbimvb182" path="res://#Template/[Resources]/DeathParticle.tscn" id="2_jntxg"]
 [ext_resource type="Material" uid="uid://jitnvfywue03" path="res://#Template/[Materials]/MainPlayer.tres" id="4_osvj6"]
 

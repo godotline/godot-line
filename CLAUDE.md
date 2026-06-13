@@ -81,14 +81,14 @@ Many key nodes use `class_name` + `static var instance` + `instance = self` in `
 - **Trigger**: emits `hit_the_line` signal on player contact
 - **Checkpoint** / **Crown** / **HeartCheckpoint**: capture/restore full game state on revive
 - **Diamond**: collectible counting toward `LevelManager.diamond`
-- **ChangeTurn**: changes the player's turn direction
+- **ChangeDirection**: changes the player's direction or turn
 - **ChangeSpeedTrigger**: modifies player movement speed
 - **Jump**: applies an upward impulse to the player
 - **JumpPredictor / FallPredictor**: helper triggers for jump/fall trajectory visualization
 - **CameraTrigger / CameraShakeTrigger**: camera position/rotation changes and shake effects
-- **FogColorChanger**: modifies fog color/atmosphere
+- **SetFog**: modifies fog settings using FogSettings resource
 - **EventTrigger**: invokes a configurable event/callable
-- **LocalTeleportTrigger / FakePlayerTransport**: teleport the player or a fake-player indicator
+- **Teleport / FakePlayerTransport**: teleport the player or a fake-player indicator
 - **FakePlayerTrigger**: spawns/manages a fake player for visual guidance
 - **KillPlayer**: triggers death (also bound to the K key)
 - **customanimplay / PlayAnimator**: triggers animation playback
@@ -152,7 +152,7 @@ Triggers and animators register with this to reset on revive. They also check `L
 #Template/
   [Scripts]/
     Level/         — Player.gd, LevelManager.gd, gameui.gd, RoadMaker.gd, death_particle.gd, Percentage.gd, DebugOverlay.gd
-    Trigger/       — BaseTrigger.gd, Trigger.gd, Checkpoint.gd, Crown.gd, HeartCheckpoint.gd, Jump.gd, ChangeTurn.gd, ... (14+)
+    Trigger/       — BaseTrigger.gd, Trigger.gd, Checkpoint.gd, Crown.gd, HeartCheckpoint.gd, Jump.gd, ChangeDirection.gd, ... (14+)
     CameraScripts/ — CameraFollower.gd, OldCameraFollower.gd, CameraTrigger.gd, CameraShakeTrigger.gd, FogTrigger.gd, CamTargetPoint.gd
     Animator/      — AnimatorBase.gd, PosAnimator.gd, LocalPosAnimator.gd, LocalRotAnimator.gd, MovingPosMax.gd
     Auto/          — AutoPlay.gd, AutoPlayController.gd, SetAutoPlay.gd

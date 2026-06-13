@@ -1,12 +1,13 @@
 [gd_scene format=3 uid="uid://dqvgfuneewf1j"]
 
 [ext_resource type="ArrayMesh" uid="uid://cnq7qr81j0cvw" path="res://#Template/[Resources]/Models/PerfactCrown.obj" id="1"]
-[ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Trigger/Crown.gd" id="2"]
+[ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Trigger/Single/Crown.gd" id="2"]
 [ext_resource type="Texture2D" uid="uid://dkh4268rrxtoj" path="res://#Template/[Resources]/PCrownT.png" id="3_ctg82"]
 [ext_resource type="Texture2D" uid="uid://bb36l0chn1l3s" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="5_dklm7"]
 [ext_resource type="Texture2D" uid="uid://c6y2vppvx5060" path="res://#Template/[Resources]/BlackCrown_Light.png" id="6_8wqky"]
 [ext_resource type="Texture2D" uid="uid://mj12gw3q1d3w" path="res://#Template/[Resources]/FX_CrownCircle.png" id="7_circle"]
 [ext_resource type="Texture2D" uid="uid://c4rc47thiqgln" path="res://#Template/[Resources]/Spirit.png" id="8_spirit"]
+
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qoafd"]
 albedo_color = Color(1, 1, 0, 1)

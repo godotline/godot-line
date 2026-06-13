@@ -17,7 +17,7 @@
 | P1 | Trigger | GravityTrigger | ✓ | ✗ | **未实现** — 更改场景重力 |
 | P1 | Trigger | PlayAudioClip | ✓ | ✗ | **未实现** — 触发播放音效（支持 Trigger 和事件两种模式） |
 | P1 | Trigger | FadeOutMusic | ✓ | ✗ | **未实现** — 淡出背景音乐（AudioManager 已有 fade_out，缺 Trigger 封装） |
-| P1 | Trigger | SetFog / FogTrigger | ✓ | ⚠️ | `FogColorChanger.gd` 是 Node3D 非 Area3D，缺少 Trigger 模式；缺 Start/End 动画 |
+| P1 | Trigger | SetFog / FogTrigger | ✓ | ✓ | `SetFog.gd` 已使用 FogSettings 资源 |
 | P1 | Trigger | SetLight | ✓ | ✗ | **未实现** — 更改定向光源（Rotation/Color/Intensity/ShadowStrength） |
 | P1 | Trigger | SetAmbient | ✓ | ✗ | **未实现** — 更改环境光源类型 |
 | P1 | Trigger | SetImageColor | ✓ | ✗ | **未实现** — 更改 UI Image 颜色 |
@@ -26,7 +26,7 @@
 | P1 | Animator | LocalScaleAnimator | ✓ | ✗ | **未实现** — 缩放时间动画 |
 | P1 | Animator | TimerLight (定向光源) | ✓ | ✗ | **未实现** — 时间驱动的光源动画 |
 | P1 | Animator | TimerAmbient (环境光) | ✓ | ✗ | **未实现** — 时间驱动的环境光动画 |
-| P1 | Animator | TimerFog (雾气) | ✓ | ⚠️ | `FogColorChanger.gd` 只改颜色，缺 Start/End 动画 |
+| P1 | Animator | TimerFog (雾气) | ✓ | ✓ | `SetFog.gd` 已支持完整雾设置 |
 | P1 | Animator | TimerImageColor | ✓ | ✗ | **未实现** — 时间驱动的 Image 颜色动画 |
 | P2 | GUI | StartPage | ✓ | ✓ | 开始页面 UI（含 About 面板动画） |
 | P2 | GUI | LoadingPage | ✓ | ✗ | **未实现** — 加载页面 UI |

@@ -1,8 +1,9 @@
 [gd_scene format=4 uid="uid://cl2ga7ac0dg54"]
 
-[ext_resource type="ArrayMesh" uid="uid://c4vryn6nsdwar" path="res://#Template/[Resources]/Models/Diamond.obj" id="1"]
-[ext_resource type="Script" path="res://#Template/[Scripts]/Trigger/Gem.gd" id="2"]
+[ext_resource type="ArrayMesh" uid="uid://dug07r8y5fnwl" path="res://#Template/[Resources]/Models/Diamond.obj" id="1"]
+[ext_resource type="Script" uid="uid://bd13q1s154gh4" path="res://#Template/[Scripts]/Trigger/Single/Gem.gd" id="2"]
 [ext_resource type="Material" uid="uid://yr2s0ybyebck" path="res://#Template/[Materials]/Diamond.tres" id="3_lsh75"]
+
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_v601g"]
 

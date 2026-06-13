@@ -1,7 +1,5 @@
 @tool
-extends BaseTrigger
-class_name SetMaterialColor
-
+extends Node3D
 
 @export var colors: Array[SingleColor] = []
 @export var duration: float = 2.0
@@ -11,7 +9,7 @@ class_name SetMaterialColor
 @export var target_mesh: MeshInstance3D
 
 
-func _on_triggered(_body: Node3D) -> void:
+func trigger(_body: Node3D) -> void:
 	for sc in colors:
 		_apply_color(sc, _body)
 

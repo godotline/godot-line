@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b5hb8j8w782ki"]
 
-[ext_resource type="Script" uid="uid://bb5lh2cc1yfy4" path="res://#Template/[Scripts]/Trigger/BaseTrigger.gd" id="1_hpm7v"]
+[ext_resource type="Script" uid="uid://bb5lh2cc1yfy4" path="res://#Template/[Scripts]/Trigger/Single/BaseTrigger.gd" id="1_hpm7v"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_e2kce"]
 
