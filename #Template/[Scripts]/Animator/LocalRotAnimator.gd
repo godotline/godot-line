@@ -1,12 +1,12 @@
-# roter.gd
+# LocalRotAnimator.gd — 组件模式，tween 父节点的 global rotation (degrees)
 @tool
 extends AnimatorBase
 
-func _get_value() -> Vector3:
-	return rotation_degrees
+func _get_value(target: Node3D) -> Vector3:
+	return target.global_rotation_degrees
 
-func _set_value(_value: Vector3) -> void:
-	rotation_degrees = _value
+func _set_value(target: Node3D, value: Vector3) -> void:
+	target.global_rotation_degrees = value
 
 func _get_property_name() -> String:
-	return "rotation_degrees"
+	return "global_rotation_degrees"
