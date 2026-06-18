@@ -24,7 +24,7 @@ func _ready() -> void:
 	if create_boxes:
 		_holder = Node3D.new()
 		_holder.name = "GuidanceBoxHolder"
-		get_tree().current_scene.add_child(_holder)
+		get_tree().current_scene.add_child.call_deferred(_holder)
 	if box_holder:
 		for child in box_holder.get_children():
 			if child is Node3D:
@@ -39,6 +39,8 @@ func _start() -> void:
 	if not _player:
 		return
 	if create_boxes:
+		if not _holder or not _holder.is_inside_tree():
+			return
 		var box := _spawn_box(
 			_player.global_position - Vector3(0, 0.45, 0),
 			_player.firstDirection.y
@@ -82,9 +84,9 @@ func _on_player_turn() -> void:
 
 func _spawn_box(pos: Vector3, rot_y: float) -> Node3D:
 	var box := _box_scene.instantiate() as Node3D
+	_holder.add_child(box)
 	box.global_position = pos
 	box.rotation_degrees = Vector3(0, rot_y, 0)
-	_holder.add_child(box)
 	return box
 
 func _set_color(box: Node3D, color: Color) -> void:
