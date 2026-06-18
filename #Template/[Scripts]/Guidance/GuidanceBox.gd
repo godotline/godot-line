@@ -49,6 +49,12 @@ func _trigger() -> void:
 	effect.queue_free()
 
 func set_color(color: Color) -> void:
+	if not _sprite:
+		_sprite = $"../Sprite3D"
+		# If still null, warn and skip
+		if not _sprite:
+			push_warning("GuidanceBox: Sprite3D not found at ../Sprite3D")
+			return
 	_sprite.modulate = color
 
 # Unity: Appear() — 显示所有 SpriteRenderer（用 _root.visible 等效，且自动覆盖未来添加的子节点）
