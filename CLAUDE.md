@@ -87,7 +87,7 @@ The trigger system was progressively refactored. Three modes coexist (detailed i
 
 These have a `func trigger(body: Node3D)` method called by the parent **BaseTrigger** node via duck typing (`child.has_method("trigger")`). They do NOT handle collision themselves. Optionally support `func on_exit(body: Node3D)` when parent has `track_exit = true`.
 
-Files: `Jump.gd`, `SetFog.gd`, `EventTrigger.gd`, `PlayAnimator.gd`, `SetActive.gd`, `SetMaterialColor.gd`, `Teleport.gd`, `KillPlayer.gd`, `ChangeDirection.gd`, `Speed.gd`, `JumpPredictor.gd`, `FallPredictor.gd`
+Files: `Jump.gd`, `SetFog.gd`, `EventTrigger.gd`, `PlayAnimator.gd`, `SetActive.gd`, `SetMaterialColor.gd`, `Teleport.gd`, `KillPlayer.gd`, `ChangeDirection.gd`, `Speed.gd`, `JumpPredictor.gd`, `FallPredictor.gd`, `CameraTrigger.gd`
 
 **Scene structure**: `[BaseTrigger (Area3D)] → [Component (Node3D)] + [CollisionShape3D]`
 
@@ -101,7 +101,7 @@ Files: `PyramidTrigger.gd`, `PropertyModifierTrigger.gd`, `OldCameraShakeTrigger
 
 These manage their own collision via `body_entered` signal. Kept because they fulfill single-responsibility roles where migration adds no value.
 
-Files: `BaseTrigger.gd`, `Checkpoint.gd`, `Crown.gd`, `HeartCheckpoint.gd`, `Gem.gd`, `CameraTrigger.gd`, `OldCameraTrigger.gd`, `CameraShakeTrigger.gd`, `FakePlayerTransport.gd`, `FakePlayerTrigger.gd`
+Files: `BaseTrigger.gd`, `Checkpoint.gd`, `Crown.gd`, `HeartCheckpoint.gd`, `Gem.gd`, `OldCameraTrigger.gd`, `CameraShakeTrigger.gd`, `FakePlayerTransport.gd`, `FakePlayerTrigger.gd`
 
 **Key principle**: When adding a new trigger, use **Mode 1** (pure component). Place it as a child of a `BaseTrigger` node. The component needs only a `trigger(body)` method.
 
@@ -136,7 +136,7 @@ Files: `BaseTrigger.gd`, `Checkpoint.gd`, `Crown.gd`, `HeartCheckpoint.gd`, `Gem
 
 ### Camera Systems (two coexist)
 
-- **CameraFollower** (new): Node3D hierarchy (CameraRoot > Rotator > Scale > Camera3D), Tween-based transitions, shake support. Triggered by `CameraTrigger` / `CameraShakeTrigger`.
+- **CameraFollower** (new): Node3D hierarchy (CameraRoot > Rotator > Scale > Camera3D), Tween-based transitions, shake support. Triggered by `CameraTrigger` (pure component, child of BaseTrigger) / `CameraShakeTrigger`.
 - **OldCameraFollower** (legacy): simpler follow with slerp/lerp, `RotateMode` enum. Triggered by `OldCameraTrigger` / `OldCameraShakeTrigger`.
 - New and old camera are mutually exclusive per checkpoint, selected by `UsingOldCameraFollower` on the Checkpoint node.
 - `CameraColorFromSprite`: samples camera background color from a texture.
