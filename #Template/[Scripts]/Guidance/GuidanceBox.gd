@@ -28,14 +28,19 @@ func _ready() -> void:
 		_disappear(false)
 
 func _process(_delta: float) -> void:
+	if triggered:
+		return
+
+	# 合并两次距离计算为一次（性能优化：distance_squared_to 是关键热点）
+	var dist_sq := global_position.distance_squared_to(_player.global_position)
+
 	# Unity Update(): if (!triggered && Distance <= appearDistance && !Renderer.enabled) Appear();
-	if not triggered and not _root.visible:
-		var dist_sq := global_position.distance_squared_to(_player.global_position)
-		if dist_sq <= appear_distance:
-			_appear()
-	if LevelManager.Clicked and not triggered and can_be_triggered and LevelManager.GameState == LevelManager.GameStatus.Playing and not _player.disallow_input:
-		var dist_sq := global_position.distance_squared_to(_player.global_position)
-		if dist_sq <= trigger_distance * trigger_distance:
+	if not _displayed and dist_sq <= appear_distance:
+		_appear()
+
+	# 触发检测：仅在点击时才检查近距离
+	if LevelManager.Clicked and can_be_triggered and dist_sq <= trigger_distance * trigger_distance:
+		if LevelManager.GameState == LevelManager.GameStatus.Playing and not _player.disallow_input:
 			_trigger()
 
 func _trigger() -> void:

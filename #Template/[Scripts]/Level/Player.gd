@@ -11,6 +11,7 @@ signal on_change_direction		## 玩家转向
 signal on_leave_ground			## 玩家离开地面
 signal on_touch_ground			## 玩家落地
 signal on_game_over				## 玩家死亡
+signal on_game_end				## 游戏结束（死亡或完成）
 signal on_get_gem				## 收集宝石
 signal on_player_jump			## 玩家跳跃
 

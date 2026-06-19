@@ -20,6 +20,8 @@ func _ready() -> void:
 		_init_particles()
 
 func _process(delta: float) -> void:
+	if not visible:
+		return
 	if _crown_mesh:
 		_crown_mesh.rotate_y(delta)
 
