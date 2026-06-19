@@ -20,10 +20,6 @@ run/delta_smoothing=false
 boot_splash/show_image=false
 config/icon="res://icon.png"
 
-[autoload]
-
-MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
-
 [debug]
 
 shapes/collision/shape_color=Color(0, 0.6, 0.69803923, 1)
@@ -59,3 +55,4 @@ turn={
 [rendering]
 
 renderer/rendering_method="mobile"
+occlusion_culling/use_occlusion_culling=true
