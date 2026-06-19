@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://c2knagjv8p2jm"
+
+[deps]
+
+files=["res://addons/godot_mcp/translations/tool_descriptions.en.translation", "res://addons/godot_mcp/translations/tool_descriptions.zh.translation"]
+
+source_file="res://addons/godot_mcp/translations/tool_descriptions.csv"
+dest_files=["res://addons/godot_mcp/translations/tool_descriptions.en.translation", "res://addons/godot_mcp/translations/tool_descriptions.zh.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

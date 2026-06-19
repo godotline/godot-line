@@ -41,5 +41,8 @@ func _on_revive() -> void:
 	LevelManager.remove_revive_listener(_on_revive)
 
 func _process(delta: float) -> void:
-	if not Engine.is_editor_hint():
-		rotate_y(delta * speed)
+	if Engine.is_editor_hint():
+		return
+	if not visible:
+		return
+	rotate_y(delta * speed)

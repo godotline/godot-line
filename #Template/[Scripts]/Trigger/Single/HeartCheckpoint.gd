@@ -18,6 +18,8 @@ func _ready() -> void:
 		_core = rotator.get_node_or_null("Core")
 
 func _process(delta: float) -> void:
+	if not visible:
+		return
 	if _frame:
 		_frame.rotate_y(delta * deg_to_rad(-18.0))
 	if _core:

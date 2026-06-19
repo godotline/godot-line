@@ -258,12 +258,16 @@ static func GameOverNormal(complete: bool) -> void:
 	if GameState == GameStatus.Died or GameState == GameStatus.Completed or GameState == GameStatus.Moving:
 		if Player.instance and Player.instance.has_method("get_block_count"):
 			pass
-		# 触发UI显示，由gameui.gd监听is_end
+		# 触发UI显示，由gameui.gd监听on_game_end信号
 		is_end = true
+		if Player.instance:
+			Player.instance.on_game_end.emit()
 
 static func GameOverRevive() -> void:
 	if GameState == GameStatus.Died or GameState == GameStatus.Moving:
 		is_end = true
+		if Player.instance:
+			Player.instance.on_game_end.emit()
 
 ## ============================================================
 ## 辅助方法

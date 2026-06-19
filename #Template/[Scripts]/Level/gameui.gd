@@ -9,15 +9,18 @@ const CROWN_ANIMS: Array[String] = ["", "1crown", "2crown", "3crown"]
 func _ready() -> void:
 	levelname = Player.instance.level_data.levelTitle
 	$".".visible = false
+	set_process(false)  ## 信号驱动，不需要轮询
 
-func _process(_delta: float) -> void:
-	if not 一:
-		if Player.instance and not Player.instance.is_live:
-			visible()
-		if LevelManager.is_end:
-			visible()
+	# 连接 Player 游戏结束信号（信号驱动，替代轮询）
+	if Player.instance:
+		Player.instance.on_game_end.connect(_on_game_end)
 
-func visible() -> void:
+func _on_game_end() -> void:
+	_show_ui()
+
+func _show_ui() -> void:
+	if 一:
+		return
 	一 = true
 	if LevelManager.is_relive == true:
 		LevelManager.crown -= 1

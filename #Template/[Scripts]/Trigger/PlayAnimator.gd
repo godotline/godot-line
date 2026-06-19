@@ -13,9 +13,11 @@ var _play_state: Array[bool] = []
 var _trigger_index := -1
 var _last_checkpoint_count := 0
 var _waiting_to_resume := false
+var _process_enabled := false  ## 是否需要 _process 轮询
 
 func _ready() -> void:
 	_last_checkpoint_count = LevelManager.checkpoint_count
+	set_process(false)  ## 默认关闭，避免空跑
 	for player in animators:
 		if player:
 			player.speed_scale = 0.0
@@ -25,16 +27,24 @@ func _ready() -> void:
 		_play_state.append(false)
 
 func _process(_delta: float) -> void:
+	var should_disable := true
+
 	if LevelManager.checkpoint_count > _last_checkpoint_count:
 		_trigger_index = LevelManager.checkpoint_count
 		for i in animators.size():
 			_get_state(i)
 		_last_checkpoint_count = LevelManager.checkpoint_count
+
 	if _waiting_to_resume and LevelManager.GameState == LevelManager.GameStatus.Playing:
 		for i in animators.size():
 			if _play_state[i] and is_instance_valid(animators[i]):
 				animators[i].play()
 		_waiting_to_resume = false
+	elif _waiting_to_resume:
+		should_disable = false  ## 还在等待恢复，继续轮询
+
+	if should_disable:
+		set_process(false)  ## 工作完成，关闭 _process
 
 ## 由父节点 BaseTrigger 调用的入口方法
 func trigger(_body: Node3D) -> void:
@@ -44,6 +54,7 @@ func trigger(_body: Node3D) -> void:
 		if not _finished[i]:
 			_play(i)
 			_play_state[i] = true
+	set_process(true)  ## 触发后启用 _process 监听 checkpoint 变化
 	if _trigger_index < 0:
 		_trigger_index = LevelManager.checkpoint_count
 	if not dont_revive:
@@ -128,6 +139,7 @@ func _on_revive() -> void:
 			if not dont_revive:
 				_finished[i] = false
 		_waiting_to_resume = true
+		set_process(true)  ## 复活后启用 _process 等待恢复
 		LevelManager.add_revive_listener(_on_revive)
 	)
 
