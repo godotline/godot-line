@@ -64,6 +64,7 @@ func _ready() -> void:
 	_tail_holder = Node3D.new()
 	_tail_holder.name = name + "-TailHolder"
 	get_tree().current_scene.add_child.call_deferred(_tail_holder)
+	add_to_group("fake_players")
 
 	if createTurnTrigger:
 		_trigger_holder = Node3D.new()
@@ -208,7 +209,7 @@ func set_reset_data(data: Dictionary) -> void:
 	speed = data.get("speed", 12.0)
 	global_position = data.get("position", startPosition)
 	rotation_degrees = data.get("rotation", firstDirection)
-	state = State.Moving if data.get("playing", false) else State.Stopped
+	state = State.Stopped  # 复活后强制停止，等待玩家启动
 	clear_pool()
 	_create_tail()
 
