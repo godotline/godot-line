@@ -44,6 +44,7 @@ var _trigger_id: int = 0
 
 var _previous_frame_is_grounded: bool = true
 var _last_key_state: bool = false
+var _last_clicked_state: bool = false
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -142,8 +143,11 @@ func _process(_delta: float) -> void:
 					_create_turn_trigger()
 				_last_key_state = key_pressed
 			else:
-				if LevelManager.Clicked:
+				var clicked := LevelManager.Clicked
+				if clicked and not _last_clicked_state:
+					turn()
 					_create_turn_trigger()
+				_last_clicked_state = clicked
 
 func turn() -> void:
 	rotation_degrees = secondDirection if rotation_degrees.is_equal_approx(firstDirection) else firstDirection
