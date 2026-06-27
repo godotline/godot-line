@@ -42,6 +42,7 @@ var _track_progress: float = 0.0
 var _scene_gravity: Vector3 = Vector3.ZERO
 var _player_first_direction: Vector3 = Vector3.ZERO
 var _player_second_direction: Vector3 = Vector3.ZERO
+var _fake_players_data: Array[Dictionary] = []
 
 var _revive_position: Node3D
 
@@ -109,6 +110,14 @@ func _enter_trigger(body: Node3D) -> void:
 		LevelManager.save_checkpoint(body, OldCameraFollower.instance, _revive_position)
 	else:
 		LevelManager.save_checkpoint(body, null, _revive_position)
+
+	# Save FakePlayer states
+	_fake_players_data.clear()
+	var fake_players := body.get_tree().get_nodes_in_group("fake_players")
+	for fp in fake_players:
+		var fake := fp as FakePlayer
+		if fake:
+			_fake_players_data.append(fake.get_reset_data())
 
 func _capture_fog() -> void:
 	var env := get_viewport().get_world_3d().environment
@@ -265,6 +274,13 @@ func revive() -> void:
 		s.apply()
 	for s in material_colors_manual:
 		s.apply()
+
+	# Restore FakePlayers
+	var fake_players := main_line.get_tree().get_nodes_in_group("fake_players")
+	for i in range(min(fake_players.size(), _fake_players_data.size())):
+		var fake := fake_players[i] as FakePlayer
+		if fake and _fake_players_data[i].get("playing", false):
+			fake.set_reset_data(_fake_players_data[i])
 
 	# Restore music to checkpoint position (paused, waiting for player to start)
 	var music_player := main_line.get_node_or_null("MusicPlayer") as AudioStreamPlayer
