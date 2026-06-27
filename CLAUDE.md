@@ -187,19 +187,19 @@ Two `@tool` editor-only scripts convert [osu!](https://osu.ppy.sh/) beatmap file
 ```
 #Template/
   [Scripts]/
-    Level/         — Player.gd, LevelManager.gd, AudioManager.gd, ObjectPool.gd, SetLatency.gd, RoadMaker.gd, gameui.gd, death_particle.gd, DebugOverlay.gd, Percentage.gd, FakePlayer.gd
-    Trigger/
-      Single/          — BaseTrigger.gd, Checkpoint.gd, Crown.gd, HeartCheckpoint.gd, Gem.gd, Pyramid.gd, PyramidTrigger.gd
-      (root)           — Jump.gd, ChangeDirection.gd, Speed.gd, KillPlayer.gd, Teleport.gd, SetFog.gd, SetActive.gd, SetMaterialColor.gd, EventTrigger.gd, PlayAnimator.gd, JumpPredictor.gd, FallPredictor.gd, FakePlayerTransport.gd, FakePlayerTrigger.gd
-      #TimeLine_ExpandTrack/ — PropertyModifierTrigger.gd
-    CameraScripts/ — CameraFollower.gd, OldCameraFollower.gd, CameraTrigger.gd, OldCameraTrigger.gd, CameraShakeTrigger.gd, OldCameraShakeTrigger.gd, CameraColorFromSprite.gd
-    Animator/      — AnimatorBase.gd, PosAnimator.gd, LocalPosAnimator.gd, LocalRotAnimator.gd, LocalScaleAnimator.gd, MovingPosMax.gd
-    Auto/          — AutoPlay.gd, AutoPlayController.gd, SetAutoPlay.gd
-    Guidance/      — GuidanceController.gd, GuidanceBox.gd
-    Editor/        — BeatmapReader.gd, NoteReader.gd
-    Settings/      — LevelData.gd, CameraSettings.gd, FogSettings.gd, LightSettings.gd, AmbientSettings.gd, OldCameraSettings.gd, SingleColor.gd, SingleActive.gd, AuthorInfo.gd
-    PortTookits/   — addcol.gd, addtap.gd, alladdcol.gd, animationcut.gd, animfix.gd, animloop.gd (Unity→Godot migration)
-    GUI/           — StartPage.gd
+	Level/         — Player.gd, LevelManager.gd, AudioManager.gd, ObjectPool.gd, SetLatency.gd, RoadMaker.gd, gameui.gd, death_particle.gd, DebugOverlay.gd, Percentage.gd, FakePlayer.gd
+	Trigger/
+	  Single/          — BaseTrigger.gd, Checkpoint.gd, Crown.gd, HeartCheckpoint.gd, Gem.gd, Pyramid.gd, PyramidTrigger.gd
+	  (root)           — Jump.gd, ChangeDirection.gd, Speed.gd, KillPlayer.gd, Teleport.gd, SetFog.gd, SetActive.gd, SetMaterialColor.gd, EventTrigger.gd, PlayAnimator.gd, JumpPredictor.gd, FallPredictor.gd, FakePlayerTransport.gd, FakePlayerTrigger.gd
+	  #TimeLine_ExpandTrack/ — PropertyModifierTrigger.gd
+	CameraScripts/ — CameraFollower.gd, OldCameraFollower.gd, CameraTrigger.gd, OldCameraTrigger.gd, CameraShakeTrigger.gd, OldCameraShakeTrigger.gd, CameraColorFromSprite.gd
+	Animator/      — AnimatorBase.gd, PosAnimator.gd, LocalPosAnimator.gd, LocalRotAnimator.gd, LocalScaleAnimator.gd, MovingPosMax.gd
+	Auto/          — AutoPlay.gd, AutoPlayController.gd, SetAutoPlay.gd
+	Guidance/      — GuidanceController.gd, GuidanceBox.gd
+	Editor/        — BeatmapReader.gd, NoteReader.gd
+	Settings/      — LevelData.gd, CameraSettings.gd, FogSettings.gd, LightSettings.gd, AmbientSettings.gd, OldCameraSettings.gd, SingleColor.gd, SingleActive.gd, AuthorInfo.gd
+	PortTookits/   — addcol.gd, addtap.gd, alladdcol.gd, animationcut.gd, animfix.gd, animloop.gd (Unity→Godot migration)
+	GUI/           — StartPage.gd
   [Scenes]/        — Sample/Sample.tscn, DefaultScene/Default.tscn
   [Resources]/     — Textures, models, shaders, UI assets, level data .tres files
   [Materials]/.tres files

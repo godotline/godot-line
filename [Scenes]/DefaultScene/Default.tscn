@@ -1,19 +1,20 @@
 [gd_scene format=3 uid="uid://bm1086mivcf7v"]
 
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_5eet3"]
-[ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/DefaultScene/Default.tres" id="2_dmxrr"]
+[ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://[Scenes]/DefaultScene/Default.tres" id="2_dmxrr"]
 [ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_dj80y"]
 [ext_resource type="Script" uid="uid://cq7y41sswinln" path="res://#Template/[Scripts]/Guidance/GuidanceController.gd" id="3_ymsgx"]
-[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="6_0os2y"]
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/trigger.tscn" id="6_0os2y"]
 [ext_resource type="Script" uid="uid://cgl1gfqlue3jc" path="res://#Template/[Scripts]/Auto/AutoPlayController.gd" id="7_mcu0o"]
 [ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="7_nb4qh"]
 [ext_resource type="Script" uid="uid://cq3coymowo07g" path="res://#Template/[Scripts]/Animator/LocalScaleAnimator.gd" id="8_ymsgx"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="9_cr5py"]
 [ext_resource type="Texture2D" uid="uid://bokq00qv7ojs5" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="10_8ar0p"]
-[ext_resource type="Script" uid="uid://cu3xuawfji3m2" path="res://#Template/[Scripts]/Trigger/EventTrigger.gd" id="10_yearn"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="11_jhod5"]
+[ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/FakePlayerTrigger.gd" id="12_m4gqm"]
 [ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="13_mcu0o"]
 [ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="13_yearn"]
+[ext_resource type="PackedScene" uid="uid://dbmrq55p4ik62" path="res://#Template/FakePlayer.tscn" id="15_ejndh"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
@@ -84,21 +85,23 @@ script = ExtResource("8_ymsgx")
 start_value = Vector3(1, 1, 1)
 end_offset = Vector3(1, 5, 3)
 
-[node name="Trigger" parent="Scene_Group" unique_id=608483111 instance=ExtResource("6_0os2y")]
+[node name="Trigger" parent="Scene_Group" unique_id=608483111 node_paths=PackedStringArray("targetPlayer") instance=ExtResource("6_0os2y")]
 transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 2.2444015, -0.5, 2.7034848)
+script = ExtResource("12_m4gqm")
+targetPlayer = NodePath("../../FakePlayer")
+type = 2
+firstDirection = Vector3(0, 90, 0)
+secondDirection = Vector3(0, 0, 0)
+targetState = 0
 
-[node name="Node3D" type="Node3D" parent="Scene_Group/Trigger" unique_id=228533025 node_paths=PackedStringArray("target_nodes")]
-script = ExtResource("10_yearn")
-target_nodes = [NodePath("../../Ground/Node3D")]
-target_methods = Array[String](["Trigger"])
-
-[node name="Trigger2" parent="Scene_Group" unique_id=883697632 instance=ExtResource("6_0os2y")]
-transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 4.17069, -0.5, 4.629773)
-
-[node name="Node3D" type="Node3D" parent="Scene_Group/Trigger2" unique_id=1749778193 node_paths=PackedStringArray("target_nodes")]
-script = ExtResource("10_yearn")
-target_nodes = [NodePath("../../Ground/Node3D2")]
-target_methods = Array[String](["Trigger"])
+[node name="Trigger2" parent="Scene_Group" unique_id=237830721 node_paths=PackedStringArray("targetPlayer") instance=ExtResource("6_0os2y")]
+transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, -0.26624966, -0.5, -4.2847214)
+script = ExtResource("12_m4gqm")
+targetPlayer = NodePath("../../FakePlayer")
+type = 0
+firstDirection = Vector3(0, 90, 0)
+secondDirection = Vector3(0, 0, 0)
+targetState = 0
 
 [node name="Crown" parent="Scene_Group" unique_id=1805653336 instance=ExtResource("13_yearn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5075054, 0, 8.703337)
@@ -146,5 +149,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.00002, -0.45, 29.800041)
 
 [node name="GuidanceBox 12" parent="GuidanceBoxHolder" unique_id=48732490 instance=ExtResource("13_mcu0o")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 24.00002, -0.45, 32.800053)
+
+[node name="FakePlayer" parent="." unique_id=226051297 instance=ExtResource("15_ejndh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1317198, 0, 7.029239)
+startPosition = Vector3(-1.1317198, 0, 7.029239)
+createTurnTrigger = false
+synchronismWithPlayer = true
 
 [editable path="BasicOBJ_Group/CameraRoot"]
