@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="9_cr5py"]
 [ext_resource type="Texture2D" uid="uid://bokq00qv7ojs5" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="10_8ar0p"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="11_jhod5"]
-[ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/FakePlayerTrigger.gd" id="12_m4gqm"]
+[ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/Single/FakePlayerTrigger.gd" id="12_m4gqm"]
 [ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="13_mcu0o"]
 [ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="13_yearn"]
 [ext_resource type="PackedScene" uid="uid://dbmrq55p4ik62" path="res://#Template/FakePlayer.tscn" id="15_ejndh"]
@@ -153,7 +153,7 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 24.0
 [node name="FakePlayer" parent="." unique_id=226051297 instance=ExtResource("15_ejndh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1317198, 0, 7.029239)
 startPosition = Vector3(-1.1317198, 0, 7.029239)
+isWall = true
 createTurnTrigger = false
-synchronismWithPlayer = true
 
 [editable path="BasicOBJ_Group/CameraRoot"]
