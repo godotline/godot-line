@@ -21,10 +21,8 @@ var _index: int = 0
 var _connected: bool = false
 
 func _ready() -> void:
-	if not _connected:
-		if not body_entered.is_connected(_on_body_entered):
-			body_entered.connect(_on_body_entered)
-		_connected = true
+	if Engine.is_editor_hint():
+		return
 
 func _on_body_entered(body: Node3D) -> void:
 	if not targetPlayer:
@@ -43,7 +41,7 @@ func _on_body_entered(body: Node3D) -> void:
 
 			SetType.SetState:
 				targetPlayer.state = targetState
-				targetPlayer.playing = targetState == FakePlayer.State.Moving
+				targetPlayer.playing = (targetState == FakePlayer.State.Moving)
 
 	# Turn 由假线或障碍物触发
 	if is_fake_player or is_obstacle:
