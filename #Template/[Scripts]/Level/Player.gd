@@ -34,6 +34,7 @@ var current_direction: Vector3:
 @export var animation:NodePath
 @export var is_turn := false
 @export var is_end := false
+@export var tail_holder: Node3D
 
 @onready var mesh:Mesh = $MeshInstance3D.mesh
 @onready var past_translation := position
@@ -189,14 +190,14 @@ func reload() -> void:
 func _clear_tail() -> void:
 	line = null
 	past_translation = position
-	var tail_holder := tree.current_scene.get_node_or_null("PlayerTailHolder") as Node3D
-	if tail_holder:
-		for child in tail_holder.get_children():
-			var tail := child as MeshInstance3D
-			if tail:
-				_return_to_pool(tail)
-			else:
-				child.queue_free()
+	if not tail_holder:
+		tail_holder = tree.current_scene.get_node_or_null("PlayerTailHolder") as Node3D
+	for child in tail_holder.get_children():
+		var tail := child as MeshInstance3D
+		if tail:
+			_return_to_pool(tail)
+		else:
+			child.queue_free()
 
 func _return_to_pool(tail: MeshInstance3D) -> void:
 	if tail.get_parent():
