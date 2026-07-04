@@ -1,0 +1,227 @@
+{
+  "repo_notes": [
+    {
+      "content": "关键纠正：1) Sample 场景不存在，仅有 [Scenes]/DefaultScene/Default.tscn。2) #Template/[Scenes]/ 子目录不存在，.tscn 直接在 #Template/ 根。3) addons/mpm_importer/ 不存在（仅 godot_mcp/ 和 template/）。4) openspec/ 和 .qoder/ 不存在（.opencode/）。5) FogColorChanger.gd、customanimplay.gd、Trigger.gd、ChangeSpeedTrigger.gd、SetActiveTrigger.gd、LocalTeleportTrigger.gd、ChangeTurn.gd 均已删除或重命名。6) PropertyModifierTrigger.gd 和 #TimeLine_ExpandTrack/ 不存在。7) 引擎版本 Godot 4.7（project.godot），非 4.6。"
+    },
+    {
+      "content": "触发系统三种模式共存：纯组件（extends Node3D，实现 trigger(body)，BaseTrigger 子节点）、自包含（extends BaseTrigger，重写 _on_triggered）、旧模式（extends Area3D，自行 body_entered）。BaseTrigger 通过 duck typing 分发，非虚方法。新增触发器用模式 1。"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "GodotLine 高层介绍 — Dancing Line 游戏模板定位、核心特性（Godot 4.7、Jolt Physics 独立线程、mobile 渲染器、与 Unity 冰焰模板兼容）、项目结构、入门指引。链接到所有主要子章节。",
+      "page_notes": [
+        {
+          "content": "project.godot config/features=4.7。physics_engine=Jolt Physics，3d/run_on_separate_thread=true。renderer=mobile。"
+        },
+        {
+          "content": "无 Sample.tscn；仅 Default.tscn。CLAUDE.md 仍写 4.6 — 过时。"
+        }
+      ]
+    },
+    {
+      "title": "Getting Started",
+      "purpose": "环境要求（Godot 4.7、Jolt Physics）、导入步骤、输入控制（project.godot 仅定义 turn action = 鼠标左键+空格；Player.gd _input 中 R=重载、K=死亡、D=调试覆盖切换仅 OS.is_debug_build；RoadMaker._input 监听 save 导出 Roads.tscn）、#Template/ 整体文件布局。",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "默认场景：[Scenes]/DefaultScene/Default.tscn（不在 #Template/[Scenes]/）。"
+        }
+      ]
+    },
+    {
+      "title": "Project Structure",
+      "purpose": "仓库布局：#Template/ 子目录（[Scripts] 10 个子目录、[Resources] 含 LevelData/Models/ui/、[Materials]、[Music]）、addons/（godot_mcp/、template/）。.tscn 直接在 #Template/ 根（Player.tscn、Pyramid.tscn 等 12 个）。唯一场景文件夹在仓库根：[Scenes]/DefaultScene/。无 openspec/、无 .qoder/、无 mpm_importer/。",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "方括号目录名约定（[Scripts] 等）。.opencode/ 存在。"
+        }
+      ]
+    },
+    {
+      "title": "Core Architecture",
+      "purpose": "核心系统概述：LevelManager 静态类（RefCounted）、Player 单例（CharacterBody3D）、AudioManager/SetLatency 单例（RefCounted）、ObjectPool 通用池、DebugOverlay（class_name CanvasLayer layer=100，Player._ready 动态实例化，D 键切换，定时器轮询避免空跑，显示 FPS/音乐进度/GameState/线坐标线朝向/gem/crown/相机参数）。链接到子系统子页面。",
+      "page_notes": [
+        {
+          "content": "DebugOverlay 在此页内描述，非独立页面。"
+        }
+      ]
+    },
+    {
+      "title": "LevelManager",
+      "purpose": "LevelManager.gd 深入：extends RefCounted（非 Node）。GameStatus 枚举（Waiting/Playing/Moving/Died/Completed）、Direction 枚举（First/Second）。检查点数据全套字段（main_line_transform、revive_position、is_turn、player_direction_index、player_first/second_direction、anim_time、music_checkpoint_time、is_end、percent、line_crossing_crown、crowns[3]、is_relive、gem、crown、current_checkpoint、checkpoint_count、player_speed、gravity）。camera_checkpoint 字典。静态方法：save_checkpoint/load_checkpoint_to_main_line/load_to_camera_follower/reset_to_defaults/reset_camera_checkpoint。复活监听器模式（add/remove_revive_listener、emit_revive）。GameOverNormal(complete) 计算 percent（complete=true→100，否则按音乐进度）；GameOverRevive。辅助：Clicked 帧缓存、init_player_position、CompareCheckpointIndex、GetColorByContent。",
+      "parent": "Core Architecture",
+      "page_notes": [
+        {
+          "content": "GameOverNormal/Revive 触发 Player.on_game_end 信号，由 gameui 监听。"
+        }
+      ]
+    },
+    {
+      "title": "LevelData and Settings Resources",
+      "purpose": "LevelData.gd（@tool Resource）全面参考：导出 saveID/levelTitleKey/speed/timeScale/gravity/playerHeadBoxColliderSize/levelAudioClip/useCustomLevelTime/levelTotalTime/haveMultipleAudio/audioClips/colors(Array[SingleColor])/levelTitle/authors(Array[AuthorInfo])。apply_to(main_line: Player, space_rid: RID) 注入物理+调 SingleColor.apply()+_apply_time_scale_to_music(MusicPlayer pitch_scale)+_apply_player_collider_size。get_audio_start_time() 返回 max(music_checkpoint_time, anim_time, 0)。Default.tres。同时汇总 #Template/[Scripts]/Settings/ 下 8 个 Resource 类：CameraSettings（offset/rotation/scale/fov/follow/distance — 新相机用）、OldCameraSettings（同结构 — 旧相机用）、FogSettings（use_fog/fog_color/start/end）、LightSettings（rotation/color/intensity/shadow_strength）、AmbientSettings（EnvironmentLightingType{Skybox,Color,Gradient}+intensity+各颜色）、SingleColor（material/color/has_emission/intensity+apply()+apply_tweened()）、SingleActive（target/active/dont_revive — SetActive.gd 用）、AuthorInfo（name/page_url — StartPage 和 LevelData.authors 用）。",
+      "parent": "Core Architecture",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Player Character",
+      "purpose": "Player 系统概述 — CharacterBody3D 玩家实体、移动模型、信号列表（on_game_awake/on_player_start/on_change_direction/on_leave_ground/on_touch_ground/on_game_over/on_game_end/on_get_gem/on_player_jump/new_line1/on_sky/onturn）、尾迹生成、生命周期。链接到子页面。",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Movement and Physics",
+      "purpose": "Player.gd 详细：turn() 切换 _currentDirection 索引（1-_currentDirection）、rotation_degrees=current_direction、velocity 重算。首次转向 is_start 三分支 music_delay（>0 线先动音乐延后/<0 音乐先播线延后/0 同步），_delay_applied 防重入。die(spawn_particles, death_state) 8 个 RigidBody3D 碎片粒子。_physics_process gravity→move_and_slide→is_on_wall death。碰撞层 Player=1（mask 2=BaseFloor）、Area3D 子 mask 4=BaseWall。音乐→动画同步（AnimationPlayer seek to anim_time）。StartPage 集成：_ready 实例化 StartPage.tscn，加载 SetLatency 持久化设置（music_delay/music_volume），连接 start_requested→turn()、setting_changed→_on_setting_changed→SetLatency.save_settings。",
+      "parent": "Player Character",
+      "page_notes": [
+        {
+          "content": "StartPage 集成在此描述要点，UI 细节见 HUD 子页面。"
+        }
+      ]
+    },
+    {
+      "title": "Trail Generation (RoadMaker)",
+      "purpose": "RoadMaker.gd：监听 new_line1（new_road）和 on_sky（完成路段）信号。视觉/碰撞分离架构：StaticBody3D（base_floor PackedScene），_road_visuals 缓存 MeshInstance3D（每帧视觉缩放不触发物理重建）、_road_collisions 缓存 CollisionShape3D（中途 disabled，仅 _finalize_previous_road 一次性设 BoxShape3D.size=abs(offset)+Vector3(road_width,1,road_width) 并启用）。on_sky 调 _finalize_previous_road+road=null。save() 导出 Roads.tscn。Player.gd 有独立拖尾系统（ObjectPool 256 复用 MeshInstance3D），与 RoadMaker 分离。",
+      "parent": "Player Character",
+      "page_notes": [
+        {
+          "content": "Player 拖尾 vs RoadMaker 路面是两套独立机制。"
+        }
+      ]
+    },
+    {
+      "title": "HUD, StartPage and Game UI",
+      "purpose": "gameui.gd + GAMEUI.tscn：信号驱动（Player.on_game_end→_on_game_end→_show_ui），显示 gem(N/10)/levelTitle/crown 评级（CROWN_ANIMS 数组 1crown/2crown/3crown）。按钮：_on_back_pressed（quit+重置）、_on_revive_pressed（current_checkpoint.revive()，crown>0 时 is_relive=true）、_on_gamereplay_pressed（Player.reload+reset_to_defaults）。crown 扣减在 Checkpoint.revive() 内。StartPage.gd（class_name CanvasLayer @tool）+ StartPage.tscn（Player._ready 动态实例化）：启动封面（点击→Player.turn()）、关卡信息（从 level_data 读 levelTitle/authors 生成可点击作者按钮）、设置面板（AAF Cyclic Off/x2/x4/x8、Quality 低/中/高/极高、latency -5~5s 含粗调/细调、volume 0~100%）、AutoPlay CheckBox→SetAutoPlay.SetAuto()、Shadow/Post Toggle。关于面板动画（TRANS_CUBIC+15° 旋转+alpha）。hide_animated() 退场→queue_free。信号 start_requested/setting_changed/autoload_toggled 等。",
+      "parent": "Player Character",
+      "page_notes": [
+        {
+          "content": "setting_changed 被 Player._on_setting_changed 处理：latency→music_delay、volume→music_volume+实时应用+SetLatency.save_settings。"
+        }
+      ]
+    },
+    {
+      "title": "Auto Play and Guidance",
+      "purpose": "AutoPlay.gd（extends Area3D）：_physics_process 用 distance_squared_to（TRIGGER_DISTANCE_SQ=0.33）检测玩家接近→player.turn()。AutoPlayController.gd（class_name, static var Instance）：_ready 等一帧后从 GuidanceController.Instance.box_holder 读取 GuidanceBox 位置，为每个（跳过第 0 个）创建 AutoPlay.gd Area3D 触发器（BoxShape3D 4x4x4）。SetAutoPlay.gd（SetAuto() 切换 _active→AutoPlayController.set_holder(visible/monitoring)+Player.disallow_input）。GuidanceController.gd（class_name, static var Instance）：两种模式 — create_boxes=true 跟随 Player.on_player_start/onturn 自动生成盒；或手动放盒到 box_holder。create_lines 生成连接线 mesh。GuidanceBox.gd（class_name extends Area3D）：trigger_distance/appear_distance 平方距离优化、_appear()/_disappear(only_box) 控制 Sprite、_trigger() 生成 Triggered.tscn 特效、复活监听 _reset_data。",
+      "parent": "Player Character",
+      "page_notes": [
+        {
+          "content": "AutoPlayController 依赖 GuidanceController.Instance.box_holder — 运行时依赖。"
+        }
+      ]
+    },
+    {
+      "title": "FakePlayer System",
+      "purpose": "FakePlayer.gd（class_name extends CharacterBody3D @tool, Level/）：State 枚举{Moving,Stopped}；speed/firstDirection/secondDirection/startPosition/isWall（true→碰撞层 BaseWall=3，真玩家碰撞死亡）/createTurnTrigger/synchronismWithPlayer（同步真实玩家点击）或独立 createKey(默认 P)/triggerRotation/triggerScale。独立尾迹系统（_tail_holder/_tail_pool Array[MeshInstance3D]/_create_tail 几何切角 tail_half=0.5*tan(angle*0.5)）。 FakePlayer.tscn(#Template/)。控制触发器 FakePlayerTrigger.gd（class_name extends Area3D @tool, Trigger/Single/）：SetType{Turn,ChangeDirection,SetState}；Turn 由假线/障碍物触发，ChangeDirection/SetState 由真实玩家触发。传送触发器 FakePlayerTransport.gd（class_name extends Area3D @tool, Trigger/）：TransportType{Transform,Vector3}+tpToPlayer+offset。Default.tscn 中 FakePlayer 实例 isWall=true synchronismWithPlayer=true。",
+      "parent": "Player Character",
+      "page_notes": [
+        {
+          "content": "FakePlayerTrigger 在 Trigger/Single/，FakePlayerTransport 在 Trigger/ — 均旧模式 extends Area3D。"
+        }
+      ]
+    },
+    {
+      "title": "Camera System",
+      "purpose": "两代摄像机全览。CameraFollower 新（CameraFollower.gd class_name extends Node3D, static var instance）：_ready 按名查找 Rotator→Scale→Camera3D 层级。follow_speed Vector3(1.2,3.0,6.0)、follow_rotation Quaternion(-45°Y)。_process 旋转平移+smooth 变换基。trigger(offset,rotation,scale,fov,duration,trans,ease,callback) 分发 _set_offset/_set_rotation/_set_scale/_set_fov Tween。do_shake(power,duration) ramp_up+ramp_down seq。kill_all()/kill_all_camera_tweens()/reset_shake()。OldCameraFollower 旧（class_name extends Node3D, static var instance）：RotateMode 枚举{Fast,FastBeyond360,WorldAxisAdd,LocalAxisAdd}。导出 player/add_position/rotation_offset/distance_from_object/follow_speed/following。_process slerp+lerp_angle。_apply_state_checkpoint 检查点恢复。lerp_to() 手动过渡。CameraTrigger.gd 新（纯组件 extends Node3D, BaseTrigger 子节点）：导出 offset/camera_rotation/camera_scale/field_of_view/follow/duration/transition_type/ease_type/use_time/trigger_time；trigger→CameraFollower.trigger。OldCameraTrigger.gd 旧（extends Area3D）：toggle 对 active_*/new_* 属性+RotateMode+need_time，_tween 管道直接修补 OldCameraFollower。CameraShakeTrigger.gd（extends Area3D class_name）调 CameraFollower.do_shake。OldCameraShakeTrigger.gd（extends BaseTrigger）camera_parent+计时器抖动。CameraColorFromSprite.gd（class_name extends Node）从 TextureRect 采样主色→camera.environment 背景色。新旧互斥由 Checkpoint.UsingOldCameraFollower 决定。FogColorChanger.gd 不存在 — 雾过渡是 SetFog.gd。",
+      "page_notes": [
+        {
+          "content": "CameraFollower+OldCameraFollower+所有 Trigger/Effect 合并为单页。"
+        }
+      ]
+    },
+    {
+      "title": "Trigger System",
+      "purpose": "基于 BaseTrigger（Area3D class_name）的模块化触发架构。BaseTrigger 处理碰撞、emit triggered(body)、duck typing 分发到子 trigger(body)/on_exit(body)。导出 one_shot/require_playing/track_exit/debug_mode。三种模式：1) 纯组件（extends Node3D, trigger(body), BaseTrigger 子节点）；2) 自包含（extends BaseTrigger, 重写 _on_triggered）；3) 旧模式（extends Area3D, 自行 body_entered）。trigger.tscn 是可复用 BaseTrigger 原场景。链接到子页面。",
+      "page_notes": [
+        {
+          "content": "新增触发器用模式 1。BaseTrigger 自动收集子行为。"
+        }
+      ]
+    },
+    {
+      "title": "Collectibles: Crown and Gem",
+      "purpose": "Crown.gd（extends Checkpoint）：aura_color/aura_duration/aura_extra_time/crown_shrink_duration+粒子动画（aura restart/crown_mesh queue_free/crown_sprite alpha 淡出→light_texture 替换→淡入）。CrownCheckPoint.tscn。Gem.gd（文件名 Gem.gd 非 Diamond.gd, Trigger/Single/, extends Area3D @tool）：_on_body_entered→LevelManager.gem+=1+emit on_get_gem+diamond 动画+RemainParticle+复活监听 _on_revive。Gem.tscn（#Template/，根名 Diamond，[Resources]/Models/Diamond.obj）。Diamond.tres 材质。HeartCheckpoint.gd（extends Checkpoint）：Frame -18°/s、Core +60°/s；rotator scale TRANS_BACK EASE_OUT。",
+      "parent": "Trigger System",
+      "page_notes": [
+        {
+          "content": "字段是 LevelManager.gem（非 .diamond）。"
+        }
+      ]
+    },
+    {
+      "title": "Checkpoint System",
+      "purpose": "Checkpoint.gd（extends Area3D class_name）：AutoRecord/PlayerSpeed/UsingOldCameraFollower（新旧相机互斥）/direction(Direction 决定恢复朝向)。子资源：camera_new(CameraSettings)+camera_old(OldCameraSettings)+manual_camera；fog(FogSettings)+manual_fog；light(LightSettings)+manual_light；ambient(AmbientSettings)+manual_ambient；material_colors_auto/manual(Array[SingleColor])。_enter_trigger：current_checkpoint=self、checkpoint_count++、自动捕获相机/雾/光/环境、LevelManager.save_checkpoint、保存 FakePlayer 数据。revive()：crown=max(crown-1,0)、load_checkpoint_to_main_line、清尾迹、Engine.time_scale=1.0、kill Tweens、恢复相机/雾/光/环境/FakePlayer/音乐(stop+stream_paused)/动画(seek+pause)、GameState→Waiting、emit_revive+on_revive。",
+      "parent": "Trigger System",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Movement Triggers",
+      "purpose": "Speed.gd（纯组件, 原 ChangeSpeedTrigger.gd）：new_speed 设 body.speed+重同步水平速度。Teleport.gd（纯组件, 原 LocalTeleportTrigger.gd）：TeleportType{Target,Position}+turn+target_direction→LevelManager.init_player_position。ChangeDirection.gd（纯组件, 原 ChangeTurn.gd）：ChangeType{Direction,Turn}。jump.gd（纯组件 @tool, 小写 j）：height→jump_speed=sqrt(2*9.8*height)+emit on_player_jump+height_changed 信号通知 JumpPredictor。KillPlayer.gd（纯组件 @tool）：DieReason{Hit,Drowned,Border}+no_revive+custom_death_clip+AudioManager.play_clip。",
+      "parent": "Trigger System",
+      "page_notes": [
+        {
+          "content": "已重命名：ChangeSpeedTrigger→Speed、LocalTeleportTrigger→Teleport、ChangeTurn→ChangeDirection。"
+        }
+      ]
+    },
+    {
+      "title": "Ending Sequence (Pyramid)",
+      "purpose": "Pyramid.gd（class_name Pyramid extends Node3D）+ PyramidTrigger.gd（extends BaseTrigger 自容器）。TriggerType{Open,Final,Waiting,Stop}。_open_door Tween 左半 x→-width(1.8)/右半→+width 2.0s+注册 _reset_door 复活监听器。_final 停 OldCameraFollower.following+GameState→Moving。_waiting Timer→_complete。_stop GameState→Completed+velocity=0。_complete GameOverNormal(true)。_reset_door 重置 Left/Right z=0（开门动 x 但重置 z — 注意）。PyramidTrigger._on_triggered 转发父 Pyramid.trigger(type)+可选 change_direction。Pyramid.tscn 4 个 PyramidTrigger 实例。",
+      "parent": "Trigger System",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Special Effect Triggers and EventTrigger",
+      "purpose": "PlayAnimator.gd（纯组件 extends Node3D）：animators Array[AnimationPlayer]+dont_revive+_played/_finished/_progress 状态+_process 轮询 checkpoint_count 变化+trigger() 播放非 RESET 动画+_waiting_to_resume 复活后恢复+_seek_and_pause。已删除并合并：customanimplay.gd（并入 PlayAnimator）、Trigger.gd（被 BaseTrigger 取代）。SetFog.gd（纯组件, 非 FogColorChanger.gd）：fog_settings(FogSettings)+duration+ease/trans—create_tween 过渡 env 雾属性。EventTrigger.gd（纯组件 @tool extends Node3D, BaseTrigger 子节点）：三模式（默认 trigger 立即 _invoke/invoke_on_awake _ready/invoke_on_click 等 Player.onturn）+target_nodes Array[Node]+target_methods Array[String] duck-typing+CompareCheckpointIndex 复活恢复+on_exit 断开 click。JumpPredictor.gd（@tool 纯组件 class_name）：编辑器跳跃轨迹 ImmediateMesh 预览。FallPredictor.gd（@tool 纯组件 class_name）：坠落轨迹预览。",
+      "parent": "Trigger System",
+      "page_notes": [
+        {
+          "content": "已删除：customanimplay.gd、Trigger.gd、FogColorChanger.gd（由 SetFog.gd 替代）。"
+        }
+      ]
+    },
+    {
+      "title": "Animator System",
+      "purpose": "基于属性 Tween 动画系统。AnimatorBase.gd（class_name AnimatorBase extends Node3D @tool）：TransformType 枚举{New,Add}；Trigger() 生命周期（_is_playing 守卫+_trigger_index+on_animation_start/_end 信号+复活监听器）；target=get_parent()；target_value 按 TransformType 算；虚方法 _get_value/_set_value/_get_property_name；导出 start_value/end_offset/duration/TransitionType/EaseType/triggered_by_time/trigger_time/dont_revive；_on_revive 由 CompareCheckpointIndex 恢复；编辑器工具按钮（get/set_start/end_action/play_action）。具体实现：LocalPosAnimator.gd（position）、LocalRotAnimator.gd（rotation_degrees）、LocalScaleAnimator.gd（scale）、PosAnimator.gd（全局 position）、MovingPosMax.gd（@tool extends BaseTrigger 自容器，非 AnimatorBase 子类）：animated_object/target_positions Array[Vector3]/move_durations/wait_times/duration/transition_type；hit_the_line 信号 _ready 连 play_sequence；_on_triggered emit hit_the_line→play_sequence 分段 Tween（tween_property global_position+tween_interval wait_time）；on_animation_start/_end 信号+预览工具按钮。",
+      "page_notes": [
+        {
+          "content": "AnimatorBase+具体实现合并为单页。MovingPosMax 是 BaseTrigger 子类非 AnimatorBase 子类。"
+        }
+      ]
+    },
+    {
+      "title": "Level Design and Scene Composition",
+      "purpose": "如何用模板组装关卡。[Scenes]/DefaultScene/Default.tscn 分步导览：LevelHolder 根（Node3D）。BasicOBJ_Group：Player.tscn（animation=../AnimationPlayer, level_data=Default.tres）、CameraRoot.tscn（CameraFollower 新架构 Rotator→Scale→Camera3D, Camera3D.environment 带雾 — 无独立 WorldEnvironment 节点）、AnimationPlayer（AudioStreamPlayer 子节点, level 动画 130.0 单位）、DirectionalLight3D（shadow, scene_light group）、gameui.tscn、guide（GuidanceController.gd, box_holder→GuidanceBoxHolder）、auto（AutoPlayController.gd）。Scene_Group：两个 Ground.tscn（100,1,100 和单位）、Node3D（LocalPosAnimator）、Node3D2（LocalScaleAnimator）、两个 trigger.tscn+FakePlayerTrigger 脚本、CrownCheckPoint.tscn。顶层：GuidanceBoxHolder（OriginalGuidanceBox+12 GuidanceBox）、FakePlayer.tscn（isWall=true synchronismWithPlayer=true）。环境几何体：Ground.tscn（StaticBody3D layer=2=BaseFloor, 无 BaseFloor.tscn/BaseWall.tscn）、trigger.tscn（BaseTrigger 容器原场景）、[Materials] 6 个 .tres、Gem.tscn（Diamond.obj）、CrownCheckPoint/HeartCheckPoint/FakePlayer.tscn、Percentage.tscn/Percentage.gd 编辑器进度标记工具、[Resources]/Models/（HalfPyramid/Diamond/PerfactCrown.obj）、LandEffect GPUParticles3D。",
+      "page_notes": [
+        {
+          "content": "Default Walkthrough+Environmental Geometry 合并为单页。无 WorldEnvironment 节点；雾在 Camera3D.environment。无 DebugOverlay（由 Player._ready 动态加载）。"
+        }
+      ]
+    },
+    {
+      "title": "Editor Tools and Extensions",
+      "purpose": "编辑器工具全览。addons/template/plugin.gd（@tool EditorPlugin）+plugin.cfg：_enter_tree 添加 Template>Tutorial MenuButton 到工具栏+首次运行检测（user://.first_run_welcome_done 标记）→OS.shell_open（cnblogs 教程 URL）；_exit_tree 清理。Beatmap 导入：NoteReader.gd（extends Node @tool, Editor/）—@export_file(\"*.osu\") beatmap_file+路线配置 speed/forward1/forward2/start_position+路面生成 make_road/road_width/road_scene/road_color+自动播放 auto_play/trigger_size+execute 勾选触发（getter 恒返 false setter 执行）→解析 .osu [HitObjects] 生成路面段+可选 Area3D 触发器。BeatmapReader.gd（extends Node @tool, Editor/）—beatmap_file+offset+guidance_box_scene 默认 GuidanceBox.tscn+Player 覆盖（speed/direction/start overrides）+execute→生成 GuidanceBox 序列到 GuidelineTapHolder-BeatmapCreated 容器。PortTookits/ 脚本：addcol.gd/addtap.gd/alladdcol.gd/animationcut.gd/animfix.gd/animloopfix.gd（Unity→Godot 迁移辅助，@tool+execute 模式）。注意：无 mpm_importer/ 插件、无 openspec/ 工作流、无 PortTookits/Editor/ 子目录、无 C# 导出脚本。",
+      "page_notes": [
+        {
+          "content": "Editor Plugin+Beatmap Import+PortTookits 合并为单页。"
+        }
+      ]
+    }
+  ]
+}
