@@ -190,8 +190,7 @@ func reload() -> void:
 func _clear_tail() -> void:
 	line = null
 	past_translation = position
-	if not tail_holder:
-		tail_holder = tree.current_scene.get_node_or_null("PlayerTailHolder") as Node3D
+	tail_holder = _get_or_create_player_tail_holder()
 	for child in tail_holder.get_children():
 		var tail := child as MeshInstance3D
 		if tail:
@@ -217,13 +216,14 @@ func _get_from_pool() -> MeshInstance3D:
 func _get_or_create_player_tail_holder() -> Node3D:
 	var root := tree.current_scene
 
-	var tail_holder := root.get_node_or_null("PlayerTailHolder") as Node3D
-	if not tail_holder:
-		tail_holder = Node3D.new()
-		tail_holder.name = "PlayerTailHolder"
-		root.add_child(tail_holder)
+	var holder := root.get_node_or_null("PlayerTailHolder") as Node3D
+	if not holder:
+		holder = Node3D.new()
+		holder.name = "PlayerTailHolder"
+		root.add_child(holder)
 
-	return tail_holder
+	tail_holder = holder
+	return holder
 
 func new_line():
 	line = _get_from_pool()
