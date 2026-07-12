@@ -142,8 +142,8 @@ static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, r
 		anim_time = main_line.animation_node.current_animation_position
 
 	if camera_follower:
-		camera_checkpoint.offset = camera_follower.position - main_line.position
-		camera_checkpoint.rotation_degrees = camera_follower.rotation_degrees
+		camera_checkpoint.offset = camera_follower.add_position
+		camera_checkpoint.rotation_degrees = camera_follower.rotation_offset
 		camera_checkpoint.rotation_offset = camera_follower.rotation_offset
 		camera_checkpoint.distance = camera_follower.distance_from_object
 		camera_checkpoint.follow_speed = camera_follower.follow_speed
@@ -287,15 +287,15 @@ static func init_player_position(player: CharacterBody3D, position: Vector3, for
 	player.new_line()
 
 	if force_camera:
-		var cf := CameraFollower.instance
+		var cf = CameraFollower.instance
 		if cf:
 			cf.position = position
 			cf.follow = true
 
-		var ocf := OldCameraFollower.instance
+		var ocf = OldCameraFollower.instance
 		if ocf:
-			ocf.position = position + ocf.add_position
-			ocf.following = true
+			ocf.global_position = position
+			ocf.follow = true
 
 static func DestroyRemain() -> void:
 	GameState = GameStatus.Waiting
