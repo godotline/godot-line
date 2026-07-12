@@ -10,6 +10,8 @@ func _ready() -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if body is CharacterBody3D:
-		var follower = CameraFollower.instance
+		var follower: Node = CameraFollower.instance
+		if not follower:
+			follower = OldCameraFollower.instance
 		if follower:
 			follower.do_shake(power, duration)
