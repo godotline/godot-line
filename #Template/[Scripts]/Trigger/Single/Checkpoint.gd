@@ -67,20 +67,11 @@ func _enter_trigger(body: Node3D) -> void:
 	# Capture camera settings
 	if not manual_camera:
 		if not UsingOldCameraFollower:
-			var cf := CameraFollower.instance
-			if cf and cf.rotator:
-				camera_new.offset = cf.rotator.position
-				camera_new.rotation = cf.rotator.rotation_degrees
-				if cf.camera:
-					camera_new.fov = cf.camera.fov
-				camera_new.follow = cf.follow
+			if CameraFollower.instance:
+				camera_new = camera_new.get_camera()
 		else:
-			var ocf := OldCameraFollower.instance
-			if ocf:
-				camera_old.offset = ocf.add_position
-				camera_old.rotation = ocf.rotation_degrees
-				camera_old.distance = ocf.distance_from_object
-				camera_old.follow = ocf.following
+			if OldCameraFollower.instance:
+				camera_old = camera_old.get_camera()
 
 	if not manual_fog:
 		_capture_fog()
@@ -153,20 +144,11 @@ func _capture_ambient() -> void:
 
 func _restore_camera() -> void:
 	if not UsingOldCameraFollower:
-		var cf := CameraFollower.instance
-		if cf and cf.rotator:
-			cf.rotator.position = camera_new.offset
-			cf.rotator.rotation_degrees = camera_new.rotation
-			if cf.camera:
-				cf.camera.fov = camera_new.fov
-			cf.follow = camera_new.follow
+		if CameraFollower.instance:
+			camera_new.set_camera()
 	else:
-		var ocf := OldCameraFollower.instance
-		if ocf:
-			ocf.add_position = camera_old.offset
-			ocf.rotation_degrees = camera_old.rotation
-			ocf.distance_from_object = camera_old.distance
-			ocf.following = camera_old.follow
+		if OldCameraFollower.instance:
+			camera_old.set_camera()
 
 func _restore_fog() -> void:
 	var env := get_viewport().get_world_3d().environment
@@ -239,24 +221,22 @@ func revive() -> void:
 
 	# Restore camera
 	if not UsingOldCameraFollower:
-		var cf := CameraFollower.instance
+		var cf = CameraFollower.instance
 		if cf:
 			cf.kill_all_camera_tweens()
 			cf.reset_shake()
-			cf.position = main_line.position + camera_new.offset
-			if cf.rotator:
-				cf.rotator.rotation_degrees = camera_new.rotation
-			if cf.camera:
-				cf.camera.fov = camera_new.fov
-			cf.follow = camera_new.follow
+			camera_new.set_camera()
 	else:
-		var ocf := OldCameraFollower.instance
+		var ocf = OldCameraFollower.instance
 		if ocf:
+			ocf.kill_all()
+			ocf.reset_shake()
 			LevelManager.load_to_camera_follower(ocf)
-			ocf.position = main_line.position + ocf.add_position
-			ocf.rotation_degrees = LevelManager.camera_checkpoint.rotation_degrees
+			ocf.global_position = main_line.global_position
+			if ocf.rotator:
+				ocf.rotator.rotation_degrees = LevelManager.camera_checkpoint.rotation_degrees
 			ocf._checkpoint_applied = false
-			ocf.following = true
+			ocf.follow = true
 			ocf._is_rotating = false
 
 	# Restore settings
