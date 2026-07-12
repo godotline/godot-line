@@ -12,8 +12,12 @@ extends Node3D
 
 @export_group("Animation")
 @export var duration: float = 2.0
+@export var use_curve: bool = false
 @export var transition_type: Tween.TransitionType = Tween.TRANS_SINE
 @export var ease_type: Tween.EaseType = Tween.EASE_IN_OUT
+@export var curve: Curve
+@export var rotation_mode: CameraFollower.RotateMode = CameraFollower.RotateMode.FAST_BEYOND_360
+@export var can_be_triggered: bool = true
 
 @export_group("时间判定")
 @export var use_time: bool = false
@@ -42,11 +46,15 @@ func _process(_delta: float) -> void:
 func trigger(_body: Node3D) -> void:
 	if use_time:
 		return
-	_apply_camera()
+	if can_be_triggered:
+		_apply_camera()
 
 ## 公开方法：手动触发
 func trigger_manually() -> void:
-	_apply_camera()
+	# Mirrors CameraTrigger.Trigger(): manual invocation is used when collision
+	# triggering has been disabled.
+	if not can_be_triggered:
+		_apply_camera()
 
 func _apply_camera() -> void:
 	if not _follower:
@@ -56,6 +64,16 @@ func _apply_camera() -> void:
 		return
 
 	_follower.follow = follow
-	_follower.trigger(offset, camera_rotation, camera_scale, field_of_view, duration, transition_type, ease_type, func() -> void:
-		on_finished.emit()
+	_follower.trigger(
+		offset,
+		camera_rotation,
+		camera_scale,
+		field_of_view,
+		duration,
+		transition_type,
+		ease_type,
+		rotation_mode,
+		func() -> void: on_finished.emit(),
+		use_curve,
+		curve
 	)
