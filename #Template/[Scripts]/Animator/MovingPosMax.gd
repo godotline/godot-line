@@ -1,5 +1,5 @@
 @tool
-extends BaseTrigger
+extends Node3D
 ## MovingPosMaxTrigger - 序列位置移动触发器
 ## 当玩家进入时,让目标物体沿路径点序列移动
 ## 支持设置多个路径点、不同的移动时间和等待时间
@@ -21,19 +21,14 @@ extends BaseTrigger
 ## 自定义触发信号(保留向后兼容)
 signal on_animation_start
 signal on_animation_end
-signal hit_the_line
 
-# ---------- 工具按钮 ----------
-@export_tool_button("抓取当前为起点") var set_start_action = func():
-	var target = animated_object if animated_object else self
-	print("当前起点(节点世界坐标): ", target.global_position)
-
-@export_tool_button("抓取当前为终点") var set_end_action = func():
+@export_tool_button("抓取路径点") var set_end_action = func():
 	var target = animated_object if animated_object else self
 	target_positions.append(target.global_position)
 	move_durations.append(duration)
 	wait_times.append(0.0)
 	print("终点已添加: ", target_positions[-1])
+	notify_property_list_changed()
 
 @export_tool_button("预览播放") var preview_play_action = func():
 	if Engine.is_editor_hint():
@@ -42,19 +37,12 @@ signal hit_the_line
 # ---------- 核心逻辑 ----------
 
 func _ready() -> void:
-	# 调用父类的 _ready (处理网格隐藏和信号连接)
-	super._ready()
-	
-	# 编辑器模式下跳过游戏逻辑
 	if Engine.is_editor_hint():
 		return
-	
-	# 连接自定义信号
-	hit_the_line.connect(play_sequence)
 
-func _on_triggered(_body: Node3D) -> void:
-	# 发射自定义信号(供其他脚本监听)
-	hit_the_line.emit()
+## 由父节点 BaseTrigger 调用的入口方法
+func trigger(_body: Node3D) -> void:
+	play_sequence()
 
 func play_sequence() -> void:
 	if target_positions.is_empty():
