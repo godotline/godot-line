@@ -33,4 +33,4 @@ func _on_body_entered(body: Node3D) -> void:
 			shake_timer = shake_duration
 			set_process(true)  ## 开始震动，启用 _process
 		else:
-			print("Camera parent未指定")
+			push_error("OldCameraShakeTrigger.gd: camera_parent 未指定")

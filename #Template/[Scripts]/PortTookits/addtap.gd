@@ -9,6 +9,9 @@ var add_action = func():
 	# 遍历每个子节点，在其位置添加新的taper实例
 	for child in children:
 		var child_node = GuideTap.instantiate()
+		if not child_node:
+			push_error("addtap.gd: GuideTap 场景未指定，无法实例化")
+			return
 		
 		# 如果实例已经有父节点，先移除（安全措施）
 		if child_node.get_parent():
