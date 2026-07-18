@@ -37,4 +37,8 @@ func _on_Crown_body_entered(_line) -> void:
 	if used:
 		return
 	#$AnimationPlayer.play("crown")
-	await $AnimationPlayer.animation_finished
+	var anim_player := get_node_or_null("AnimationPlayer")
+	if anim_player:
+		await anim_player.animation_finished
+	else:
+		push_error("HeartCheckpoint.gd: AnimationPlayer 子节点未找到")

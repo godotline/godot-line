@@ -93,6 +93,9 @@ func Trigger():
 	if not dont_revive and not Engine.is_editor_hint():
 		LevelManager.add_revive_listener(_on_revive)
 	var target = get_parent()
+	if not target:
+		push_error("AnimatorBase.gd: 父节点为空，无法播放动画")
+		return
 	_set_value(target, start_value)
 	var tween = create_tween()
 	var target_value = end_offset
@@ -109,7 +112,11 @@ func Trigger():
 func _on_revive() -> void:
 	LevelManager.remove_revive_listener(_on_revive)
 	LevelManager.CompareCheckpointIndex(_trigger_index, func():
-		_set_value(get_parent(), start_value)
+		var target = get_parent()
+		if not target:
+			push_error("AnimatorBase.gd: 父节点为空，无法恢复动画状态")
+			return
+		_set_value(target, start_value)
 		_is_playing = false
 		_finished = false
 	)

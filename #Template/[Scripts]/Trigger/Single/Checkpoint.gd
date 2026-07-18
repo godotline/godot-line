@@ -57,6 +57,9 @@ func _ready() -> void:
 func _on_checkpoint_body_entered(body: Node3D) -> void:
 	if used:
 		return
+	if not body is Player:
+		push_error("Checkpoint.gd: 进入触发器的不是 Player 类型，无法保存检查点")
+		return
 	_enter_trigger(body)
 
 func _enter_trigger(body: Node3D) -> void:
@@ -225,6 +228,7 @@ func revive() -> void:
 		if cf:
 			cf.kill_all_camera_tweens()
 			cf.reset_shake()
+			cf.global_position = main_line.global_position
 			camera_new.set_camera()
 	else:
 		var ocf = OldCameraFollower.instance
