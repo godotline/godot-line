@@ -19,21 +19,21 @@ signal new_line1
 signal on_sky
 signal onturn
 
-@onready var y = $".".position.y
+@onready var y: float = $".".position.y
 var speed:float
-@export var firstDirection := Vector3(0, 0, 0)
-@export var secondDirection := Vector3(0, 90, 0)
+@export var firstDirection: Vector3 = Vector3(0, 0, 0)
+@export var secondDirection: Vector3 = Vector3(0, 90, 0)
 var _currentDirection := 0
 
 var current_direction: Vector3:
 	get:
 		return secondDirection if _currentDirection == 1 else firstDirection
 
-@export var fly := false
-@export var noclip := false
+@export var fly: bool = false
+@export var noclip: bool = false
 @export var animation:NodePath
-@export var is_turn := false
-@export var is_end := false
+@export var is_turn: bool = false
+@export var is_end: bool = false
 @export var tail_holder: Node3D
 
 @onready var mesh:Mesh = $MeshInstance3D.mesh
@@ -54,13 +54,13 @@ var past_is_on_floor := false
 var past_is_on_floor_effect := false
 
 var is_start := false
-var tailScale = 1
+var tailScale: int = 1
 
-var start_transform = transform
+var start_transform: Transform3D = transform
 var loading := false
 var debug := false
-@export var allowTurn := true
-@export var disallow_input := false
+@export var allowTurn: bool = true
+@export var disallow_input: bool = false
 
 ## 音画延迟补偿（秒），用户可配置。与 AudioServer.get_output_latency() 独立并存。
 var music_delay: float = 0.0
@@ -145,8 +145,8 @@ func _process(_delta: float) -> void:
 	if is_on_floor_now:
 		if past_is_on_floor != is_on_floor_now:
 			new_line()
-		var offset = position - past_translation
-		var distance = offset.length()
+		var offset: Vector3 = position - past_translation
+		var distance: float = offset.length()
 
 		line.position = past_translation + offset / 2
 		line.scale = Vector3(1, 1, distance + tailScale)
@@ -160,7 +160,7 @@ func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
 		# StartPage 显示时，鼠标点击由 StartPage 的信号处理
 		if not is_start and event is InputEventMouseButton:
-			var page = get_node_or_null("StartPage")
+			var page: CanvasLayer = get_node_or_null("StartPage") as CanvasLayer
 			if page and page.visible:
 				return
 		var can_turn := LevelManager.GameState == LevelManager.GameStatus.Playing or (LevelManager.GameState == LevelManager.GameStatus.Waiting and not is_start)
@@ -228,7 +228,7 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	tail_holder = holder
 	return holder
 
-func new_line():
+func new_line() -> void:
 	line = _get_from_pool()
 	line.mesh = mesh
 	line.position = position
@@ -247,7 +247,7 @@ func _play_land_effect() -> void:
 		land_effect.restart()
 		land_effect.emitting = true
 
-func turn():
+func turn() -> void:
 	if not (is_on_floor() or fly):
 		return
 
@@ -363,12 +363,12 @@ func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = Le
 		for i in 8:
 			var deathParticle_instance: RigidBody3D = deathParticle.instantiate()
 			deathParticle_instance.add_to_group("death_particles")
-			var parent = get_parent()
+			var parent: Node = get_parent()
 			if not parent:
 				push_error("Player.gd: 不在场景树中，无法生成死亡粒子")
 				return
 			parent.add_child(deathParticle_instance)
-			var death_mesh = deathParticle_instance.get_node_or_null("MeshInstance3D")
+			var death_mesh: MeshInstance3D = deathParticle_instance.get_node_or_null("MeshInstance3D") as MeshInstance3D
 			if death_mesh:
 				death_mesh.mesh = mesh
 				death_mesh.material_override = material

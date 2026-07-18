@@ -27,7 +27,7 @@ func trigger(_body: Node3D) -> void:
 func _apply_all_actives() -> void:
 	for active_config in actives:
 		if active_config and active_config.target:
-			var target = get_node_or_null(active_config.target)
+			var target: Node = get_node_or_null(active_config.target)
 			if target:
 				if target is Node3D:
 					target.visible = active_config.active
@@ -38,9 +38,9 @@ func _save_revive_states() -> void:
 	_revive_states.clear()
 	for active_config in actives:
 		if active_config and active_config.target:
-			var target = get_node_or_null(active_config.target)
+			var target: Node = get_node_or_null(active_config.target)
 			if target:
-				var original_visible = false
+				var original_visible: bool = false
 				if target is Node3D:
 					original_visible = target.visible
 				elif target is CanvasItem:
@@ -60,10 +60,10 @@ func _on_revive() -> void:
 			return
 		for state in _revive_states:
 			if not state.get("dont_revive", false):
-				var target_path = state.get("target", "")
-				var target = get_node_or_null(target_path)
+				var target_path: NodePath = state.get("target", NodePath(""))
+				var target: Node = get_node_or_null(target_path)
 				if target:
-					var original_visible = state.get("original_visible", false)
+					var original_visible: bool = state.get("original_visible", false)
 					if target is Node3D:
 						target.visible = original_visible
 					elif target is CanvasItem:

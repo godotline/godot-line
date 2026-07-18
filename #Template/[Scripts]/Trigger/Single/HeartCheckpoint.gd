@@ -33,7 +33,7 @@ func _on_checkpoint_body_entered(body: Node3D) -> void:
 		tw.tween_property(rotator, "scale", Vector3.ONE, 0.5)
 	_enter_trigger(body)
 
-func _on_Crown_body_entered(_line) -> void:
+func _on_Crown_body_entered(_line: Node3D) -> void:
 	if used:
 		return
 	#$AnimationPlayer.play("crown")

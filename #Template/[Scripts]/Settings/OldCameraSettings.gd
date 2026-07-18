@@ -10,9 +10,9 @@ extends Resource
 
 
 ## Returns the same state captured by Unity OldCameraSettings.GetCamera().
-func get_camera():
-	var settings = duplicate()
-	var follower = OldCameraFollower.instance
+func get_camera() -> OldCameraSettings:
+	var settings: OldCameraSettings = duplicate()
+	var follower: OldCameraFollower = OldCameraFollower.instance
 	if not follower:
 		return settings
 	if follower.rotator:
@@ -29,7 +29,7 @@ func get_camera():
 
 ## Restores the same state restored by Unity OldCameraSettings.SetCamera().
 func set_camera() -> void:
-	var follower = OldCameraFollower.instance
+	var follower: OldCameraFollower = OldCameraFollower.instance
 	if not follower:
 		return
 	if follower.rotator:

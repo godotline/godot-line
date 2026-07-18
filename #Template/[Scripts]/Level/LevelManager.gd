@@ -74,7 +74,7 @@ static func remove_revive_listener(callable: Callable) -> void:
 	_revive_listeners.erase(callable)
 
 static func emit_revive() -> void:
-	var listeners_snapshot = _revive_listeners.duplicate()
+	var listeners_snapshot: Array[Callable] = _revive_listeners.duplicate()
 	for listener in listeners_snapshot:
 		if listener.is_valid():
 			listener.call()
@@ -87,7 +87,8 @@ static func reset_revive_listeners() -> void:
 
 ## ========== 持久化检查点数据 ==========
 
-static var main_line_transform
+## 检查点尚未建立时为空，建立后保存主线变换。
+static var main_line_transform: Variant = null
 static var revive_position := Vector3.ZERO
 static var is_turn := false
 static var player_direction_index := 0
@@ -250,11 +251,11 @@ static func GameOverNormal(complete: bool) -> void:
 	if complete:
 		percent = 100
 	elif Player.instance:
-		var p = Player.instance
-		var music_player = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+		var p: Player = Player.instance
+		var music_player: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 		if music_player and music_player.stream:
-			var total_sec = p.level_data.levelTotalTime if p.level_data and p.level_data.useCustomLevelTime else music_player.stream.get_length()
-			var current_sec = music_player.get_playback_position()
+			var total_sec: float = p.level_data.levelTotalTime if p.level_data and p.level_data.useCustomLevelTime else music_player.stream.get_length()
+			var current_sec: float = music_player.get_playback_position()
 			percent = int((current_sec / total_sec) * 100) if total_sec > 0 else 0
 
 	if GameState == GameStatus.Died or GameState == GameStatus.Completed or GameState == GameStatus.Moving:
@@ -289,12 +290,12 @@ static func init_player_position(player: CharacterBody3D, position: Vector3, for
 	player.new_line()
 
 	if force_camera:
-		var cf = CameraFollower.instance
+		var cf: CameraFollower = CameraFollower.instance
 		if cf:
 			cf.position = position
 			cf.follow = true
 
-		var ocf = OldCameraFollower.instance
+		var ocf: OldCameraFollower = OldCameraFollower.instance
 		if ocf:
 			ocf.global_position = position
 			ocf.follow = true

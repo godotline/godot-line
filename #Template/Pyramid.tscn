@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" uid="uid://bijrilva7k3km" path="res://#Template/[Resources]/Models/HalfPyramid.obj" id="1_ajvws"]
 [ext_resource type="Script" uid="uid://ctksyy3gv3pwu" path="res://#Template/[Scripts]/Trigger/Single/Pyramid.gd" id="1_oowoy"]
-[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/trigger.tscn" id="2_tulby"]
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="2_tulby"]
 [ext_resource type="Script" uid="uid://dtj3e2vqksb8s" path="res://#Template/[Scripts]/Trigger/PyramidTrigger.gd" id="6_pyrtr"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oowoy"]

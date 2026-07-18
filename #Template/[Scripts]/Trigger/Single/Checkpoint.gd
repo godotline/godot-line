@@ -224,14 +224,14 @@ func revive() -> void:
 
 	# Restore camera
 	if not UsingOldCameraFollower:
-		var cf = CameraFollower.instance
+		var cf: CameraFollower = CameraFollower.instance
 		if cf:
 			cf.kill_all_camera_tweens()
 			cf.reset_shake()
 			cf.global_position = main_line.global_position
 			camera_new.set_camera()
 	else:
-		var ocf = OldCameraFollower.instance
+		var ocf: OldCameraFollower = OldCameraFollower.instance
 		if ocf:
 			ocf.kill_all()
 			ocf.reset_shake()

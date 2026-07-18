@@ -11,7 +11,7 @@ extends Resource
 ## Returns a snapshot of the active follower, matching CameraSettings.GetCamera.
 func get_camera() -> CameraSettings:
 	var settings := CameraSettings.new()
-	var follower = CameraFollower.instance
+	var follower: CameraFollower = CameraFollower.instance
 	if not follower:
 		return settings
 
@@ -29,7 +29,7 @@ func get_camera() -> CameraSettings:
 ## Restores the active follower, including the shake offset reset performed by
 ## CameraSettings.SetCamera in Unity.
 func set_camera() -> void:
-	var follower = CameraFollower.instance
+	var follower: CameraFollower = CameraFollower.instance
 	if not follower:
 		return
 

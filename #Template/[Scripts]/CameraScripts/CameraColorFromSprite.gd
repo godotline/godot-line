@@ -57,7 +57,7 @@ func _get_main_color(image: Image) -> Color:
 	var max_count := 0
 	
 	for key in color_count:
-		var data = color_count[key]
+		var data: Dictionary = color_count[key]
 		if data["count"] > max_count:
 			max_count = data["count"]
 			main_color = data["color"]
