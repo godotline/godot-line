@@ -51,9 +51,7 @@ func _waiting() -> void:
 	get_tree().create_timer(waiting_time).timeout.connect(_complete)
 
 func _stop() -> void:
-	LevelManager.GameState = LevelManager.GameStatus.Completed
-	if Player.instance:
-		Player.instance.velocity = Vector3.ZERO
+	stop_player()
 
 func _complete() -> void:
 	print("关卡结束")

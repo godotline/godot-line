@@ -1,6 +1,6 @@
-extends BaseTrigger
+extends Node3D
 ## PyramidTrigger - 金字塔子触发器
-## 碰撞后调用父节点Pyramid的trigger方法
+## 作为 BaseTrigger 的子组件，碰撞后调用父节点 Pyramid 的 trigger 方法
 
 @export var type: Pyramid.TriggerType = Pyramid.TriggerType.Open
 
@@ -8,10 +8,10 @@ extends BaseTrigger
 @export var change_direction := false
 @export var final_direction := Vector3.ZERO
 
-func _on_triggered(_body: Node3D) -> void:
-	var pyramid := get_parent() as Pyramid
+func trigger(_body: Node3D) -> void:
+	var pyramid := get_parent().get_parent() as Pyramid
 	if not pyramid:
-		push_error("PyramidTrigger.gd: 父节点不是 Pyramid，无法触发")
+		push_error("PyramidTrigger.gd: BaseTrigger 的父节点不是 Pyramid，无法触发")
 		return
 	pyramid.trigger(type)
 	if type == Pyramid.TriggerType.Final and change_direction:
