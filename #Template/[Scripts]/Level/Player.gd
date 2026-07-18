@@ -85,7 +85,10 @@ func _ready() -> void:
 			LevelManager.is_end = false
 			reload()
 		LevelManager.load_checkpoint_to_main_line(self)
-		speed = level_data.speed
+		if not level_data:
+			push_error("Player.gd: level_data 未设置，无法应用速度")
+		else:
+			speed = level_data.speed
 		rotation_degrees = current_direction
 		emit_signal("on_game_awake")
 	if is_inside_tree():
@@ -360,9 +363,17 @@ func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = Le
 		for i in 8:
 			var deathParticle_instance: RigidBody3D = deathParticle.instantiate()
 			deathParticle_instance.add_to_group("death_particles")
-			get_parent().add_child(deathParticle_instance)
-			deathParticle_instance.get_node("MeshInstance3D").mesh = mesh
-			deathParticle_instance.get_node("MeshInstance3D").material_override = material
+			var parent = get_parent()
+			if not parent:
+				push_error("Player.gd: 不在场景树中，无法生成死亡粒子")
+				return
+			parent.add_child(deathParticle_instance)
+			var death_mesh = deathParticle_instance.get_node_or_null("MeshInstance3D")
+			if death_mesh:
+				death_mesh.mesh = mesh
+				death_mesh.material_override = material
+			else:
+				push_error("Player.gd: 死亡粒子实例缺少 MeshInstance3D 子节点")
 			deathParticle_instance.global_position = global_position
 			deathParticle_instance.linear_damp = 0.5
 			var random_rot := _random_rotation()

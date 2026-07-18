@@ -13,8 +13,11 @@
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/trigger.tscn" id="11_mq52h"]
 [ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/Single/FakePlayerTrigger.gd" id="12_1fvat"]
 [ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="13_hkwba"]
+[ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Pyramid.tscn" id="14_emri0"]
 [ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="14_y8kmt"]
+[ext_resource type="PackedScene" uid="uid://car71stqmy3mh" path="res://#Template/Obstacle.tscn" id="15_6gt33"]
 [ext_resource type="PackedScene" uid="uid://dbmrq55p4ik62" path="res://#Template/FakePlayer.tscn" id="15_fmoim"]
+[ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Gem.tscn" id="16_s0yhu"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
@@ -69,7 +72,7 @@ script = ExtResource("7_fmbnj")
 [node name="Scene_001" type="Node3D" parent="Scene_Group" unique_id=514366687]
 
 [node name="Ground" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("8_lthrg")]
-transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -1, 0)
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 300, 0, -1, 0)
 
 [node name="Ground" parent="Scene_Group" unique_id=1080893231 instance=ExtResource("8_lthrg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2214155, 0, 3.9591422)
@@ -105,6 +108,16 @@ targetState = 0
 
 [node name="Crown" parent="Scene_Group" unique_id=1805653336 instance=ExtResource("13_hkwba")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5075054, 0, 8.703337)
+AutoRecord = true
+
+[node name="Pyramid" parent="Scene_Group" unique_id=1497290031 instance=ExtResource("14_emri0")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 34.11758, -0.28812617, 150.99106)
+
+[node name="Obstacle" parent="Scene_Group" unique_id=359263919 instance=ExtResource("15_6gt33")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 14.330317, 38.845993, 0.5, 32.94414)
+
+[node name="Obstacle2" parent="Scene_Group" unique_id=298826961 instance=ExtResource("15_6gt33")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 14.330317, 29.313358, 0.5, 43.874218)
 
 [node name="GuidanceBoxHolder" type="Node3D" parent="." unique_id=684718765]
 
@@ -155,5 +168,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1317198, 0, 7.029239)
 startPosition = Vector3(-1.1317198, 0, 7.029239)
 isWall = true
 synchronismWithPlayer = true
+
+[node name="Diamond" parent="." unique_id=149611988 instance=ExtResource("16_s0yhu")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 1.282222, 0.15721083, 5.000017)
 
 [editable path="BasicOBJ_Group/CameraRoot"]

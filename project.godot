@@ -20,6 +20,10 @@ run/delta_smoothing=false
 boot_splash/show_image=false
 config/icon="res://icon.png"
 
+[autoload]
+
+MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
+
 [debug]
 
 gdscript/warnings/enable=false

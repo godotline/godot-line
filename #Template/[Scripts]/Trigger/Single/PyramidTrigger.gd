@@ -10,8 +10,10 @@ extends BaseTrigger
 
 func _on_triggered(_body: Node3D) -> void:
 	var pyramid := get_parent() as Pyramid
-	if pyramid:
-		pyramid.trigger(type)
+	if not pyramid:
+		push_error("PyramidTrigger.gd: 父节点不是 Pyramid，无法触发")
+		return
+	pyramid.trigger(type)
 	if type == Pyramid.TriggerType.Final and change_direction:
 		var player := Player.instance
 		if player:

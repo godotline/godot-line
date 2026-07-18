@@ -54,7 +54,10 @@ func get_audio_start_time() -> float:
 ## 应用时间缩放到音乐播放器
 func _apply_time_scale_to_music(main_line: Player) -> void:
 	if main_line and main_line.has_node("MusicPlayer"):
-		var music_player: AudioStreamPlayer = main_line.get_node("MusicPlayer")
+		var music_player: AudioStreamPlayer = main_line.get_node_or_null("MusicPlayer")
+		if not music_player:
+			push_error("LevelData.gd: MusicPlayer 节点未找到，无法应用时间缩放")
+			return
 		music_player.pitch_scale = timeScale
 
 
@@ -66,6 +69,9 @@ func get_time_scale() -> float:
 ## 应用玩家碰撞体大小
 func _apply_player_collider_size(main_line: Player) -> void:
 	if main_line.has_node("CollisionShape3D"):
-		var collider: CollisionShape3D = main_line.get_node("CollisionShape3D")
+		var collider: CollisionShape3D = main_line.get_node_or_null("CollisionShape3D")
+		if not collider:
+			push_error("LevelData.gd: CollisionShape3D 节点未找到，无法应用碰撞体大小")
+			return
 		if collider.shape is BoxShape3D:
 			(collider.shape as BoxShape3D).size = playerHeadBoxColliderSize
