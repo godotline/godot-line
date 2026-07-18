@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://c757j6a6ewnbb"]
+
+[ext_resource type="Script" uid="uid://buc8uoonvmj7x" path="res://#Template/[Scripts]/Trigger/Single/Crystal.gd" id="1_script"]
+[ext_resource type="Material" uid="uid://cxlb1lr6km05b" path="res://#Template/[Materials]/CrystalGradientMaterial.tres" id="2_m6xhc"]
+[ext_resource type="ArrayMesh" uid="uid://biawqpkmgy5mx" path="res://#Template/[Resources]/Models/Hexahedron.obj" id="2_mesh"]
+[ext_resource type="Material" path="res://#Template/[Materials]/CrystalScanFade.tres" id="4_scan"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vclu1"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_scan"]
+size = Vector2(2, 2)
+
+[node name="Crystal" type="Area3D" unique_id=521365085]
+transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 0, 0, 0)
+collision_layer = 0
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=714946232]
+shape = SubResource("BoxShape3D_vclu1")
+
+[node name="Hexahedron" type="MeshInstance3D" parent="." unique_id=2091638269]
+material_override = ExtResource("2_m6xhc")
+mesh = ExtResource("2_mesh")
+
+[node name="ScanQuad" type="MeshInstance3D" parent="." unique_id=540720836]
+visible = false
+material_override = ExtResource("4_scan")
+cast_shadow = 0
+mesh = SubResource("QuadMesh_scan")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

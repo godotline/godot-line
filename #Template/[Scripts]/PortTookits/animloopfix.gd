@@ -28,7 +28,7 @@ extends Node
 				_batch_stop()
 				停止测试 = false
 
-func _ready():
+func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	
@@ -38,8 +38,8 @@ func _ready():
 		_batch_play()
 
 ## 核心：批量设置 autoplay = 节点名称
-func _batch_process():
-	var players = _find_animation_players()
+func _batch_process() -> void:
+	var players: Array[AnimationPlayer] = _find_animation_players()
 	if players.is_empty():
 		push_warning("[批量动画] 未找到匹配 '%s' 的 AnimationPlayer" % node_pattern)
 		return
@@ -49,9 +49,9 @@ func _batch_process():
 		player.autoplay = StringName(player.name)
 		
 		# 批量修改循环模式
-		var anim_list = player.get_animation_list()
+		var anim_list: PackedStringArray = player.get_animation_list()
 		for anim_name in anim_list:
-			var anim = player.get_animation(anim_name)
+			var anim: Animation = player.get_animation(anim_name)
 			if anim:
 				anim.loop_mode = target_loop_mode
 		
@@ -80,8 +80,8 @@ func _collect_recursive(node: Node, result: Array[AnimationPlayer]):
 		_collect_recursive(child, result)
 
 ## 播放（使用 autoplay 设置的名称，即节点名）
-func _batch_play():
-	var players = _find_animation_players()
+func _batch_play() -> void:
+	var players: Array[AnimationPlayer] = _find_animation_players()
 	for player in players:
 		# 播放 autoplay 中指定的动画（即节点名称）
 		if player.autoplay != "":
@@ -89,11 +89,11 @@ func _batch_play():
 			print("[批量播放] %s: %s" % [player.name, player.autoplay])
 		else:
 			# 如果没有设置 autoplay，则播放第一个可用动画
-			var first_anim = player.get_animation_list()
+		var first_anim: PackedStringArray = player.get_animation_list()
 			if first_anim.size() > 0:
 				player.play(first_anim[0])
 
-func _batch_stop():
-	var players = _find_animation_players()
+func _batch_stop() -> void:
+	var players: Array[AnimationPlayer] = _find_animation_players()
 	for player in players:
 		player.stop()

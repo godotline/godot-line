@@ -9,7 +9,7 @@ enum RotateMode {
 	LOCAL_AXIS_ADD,
 }
 
-static var instance
+static var instance: CameraFollower
 
 @export_node_path("Node3D") var target: NodePath
 @export var follow: bool = true

@@ -64,7 +64,7 @@ func trigger(_body: Node3D) -> void:
 func _play(index: int) -> void:
 	if index >= animators.size():
 		return
-	var player = animators[index]
+	var player: AnimationPlayer = animators[index]
 	if not is_instance_valid(player):
 		return
 	player.speed_scale = 1.0
@@ -78,19 +78,19 @@ func _play(index: int) -> void:
 func _stop(index: int) -> void:
 	if index >= animators.size():
 		return
-	var player = animators[index]
+	var player: AnimationPlayer = animators[index]
 	if is_instance_valid(player):
 		player.stop()
 
 func _get_state(index: int) -> void:
 	if index >= animators.size():
 		return
-	var player = animators[index]
+	var player: AnimationPlayer = animators[index]
 	if not is_instance_valid(player):
 		return
-	var anim_name = player.current_animation
+	var anim_name: String = player.current_animation
 	if anim_name != "":
-		var anim = player.get_animation(anim_name)
+		var anim: Animation = player.get_animation(anim_name)
 		if anim and anim.get_length() > 0.0:
 			_progress[index] = player.current_animation_position / anim.get_length()
 	_play_state[index] = _played[index]
@@ -98,17 +98,17 @@ func _get_state(index: int) -> void:
 func _set_state(index: int) -> void:
 	if index >= animators.size():
 		return
-	var player = animators[index]
+	var player: AnimationPlayer = animators[index]
 	if not is_instance_valid(player):
 		return
-	var anim_name = ""
+	var anim_name: String = ""
 	for _name in player.get_animation_list():
 		if _name != "RESET":
 			anim_name = _name
 			break
 	if anim_name != "":
 		player.play(anim_name)
-		var anim = player.get_animation(anim_name)
+		var anim: Animation = player.get_animation(anim_name)
 		if anim:
 			player.seek(_progress[index] * anim.get_length(), true)
 	player.pause()
@@ -121,11 +121,11 @@ func _on_revive() -> void:
 
 	for i in animators.size():
 		if _play_state[i] and is_instance_valid(animators[i]):
-			var player = animators[i]
+			var player: AnimationPlayer = animators[i]
 			if player.is_playing():
-				var _name = player.current_animation
+				var _name: String = player.current_animation
 				if _name != "":
-					var anim = player.get_animation(name)
+					var anim: Animation = player.get_animation(_name)
 					if anim and anim.get_length() > 0:
 						_progress[i] = player.current_animation_position / anim.get_length()
 
@@ -146,17 +146,17 @@ func _on_revive() -> void:
 func _seek_and_pause(index: int) -> void:
 	if index >= animators.size():
 		return
-	var player = animators[index]
+	var player: AnimationPlayer = animators[index]
 	if not is_instance_valid(player):
 		return
-	var anim_name = ""
+	var anim_name: String = ""
 	for _name in player.get_animation_list():
 		if _name != "RESET":
 			anim_name = _name
 			break
 	if anim_name != "":
 		player.play(anim_name)
-		var anim = player.get_animation(anim_name)
+		var anim: Animation = player.get_animation(anim_name)
 		if anim:
 			player.seek(_progress[index] * anim.get_length(), true)
 	player.pause()

@@ -22,15 +22,15 @@ extends Node3D
 signal on_animation_start
 signal on_animation_end
 
-@export_tool_button("抓取路径点") var set_end_action = func():
-	var target = animated_object if animated_object else self
+@export_tool_button("抓取路径点") var set_end_action: Callable = func() -> void:
+	var target: Node3D = animated_object if animated_object else self
 	target_positions.append(target.global_position)
 	move_durations.append(duration)
 	wait_times.append(0.0)
 	print("终点已添加: ", target_positions[-1])
 	notify_property_list_changed()
 
-@export_tool_button("预览播放") var preview_play_action = func():
+@export_tool_button("预览播放") var preview_play_action: Callable = func() -> void:
 	if Engine.is_editor_hint():
 		play_sequence()
 
@@ -50,19 +50,19 @@ func play_sequence() -> void:
 		return
 	
 	on_animation_start.emit()
-	var target = animated_object if animated_object else self
-	var original_pos = target.global_position
+	var target: Node3D = animated_object if animated_object else self
+	var original_pos: Vector3 = target.global_position
 	
-	var tween = create_tween()
+	var tween: Tween = create_tween()
 	
 	# 从初始位置出发,依次移动到每个路径点
 	for i in range(target_positions.size()):
-		var pos = target_positions[i]
-		var move_time = duration
+		var pos: Vector3 = target_positions[i]
+		var move_time: float = duration
 		if i < move_durations.size():
 			move_time = move_durations[i]
 		
-		var wait_time = 0.0
+		var wait_time: float = 0.0
 		if i < wait_times.size():
 			wait_time = wait_times[i]
 		
@@ -77,5 +77,5 @@ func play_sequence() -> void:
 	)
 	print("动画开始播放,路径点数: ", target_positions.size())
 
-func play_():
+func play_() -> void:
 	play_sequence()

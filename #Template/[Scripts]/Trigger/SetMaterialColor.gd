@@ -20,14 +20,14 @@ func _apply_color(sc: SingleColor, _body: Node3D) -> void:
 		return
 
 	# 确定目标网格
-	var mesh = target_mesh
+	var mesh: MeshInstance3D = target_mesh
 	if not mesh:
 		mesh = _body.find_child("MeshInstance3D", true, false) as MeshInstance3D
 	if not mesh:
 		return
 
 	# 复制材质，确保不修改原始磁盘资源
-	var mat = sc.material
+	var mat: Material = sc.material
 	if not mat.resource_local_to_scene:
 		mat = mat.duplicate()
 		mat.resource_local_to_scene = true
