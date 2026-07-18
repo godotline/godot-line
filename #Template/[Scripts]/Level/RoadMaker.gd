@@ -31,6 +31,9 @@ func new_road():
 	_finalize_previous_road()
 
 	road = base_floor.instantiate()
+	if not road:
+		push_error("RoadMaker.gd: base_floor 场景为空，无法实例化路面")
+		return
 	road.position = main_line.position
 	past_translation = main_line.position
 	roads.add_child(road)

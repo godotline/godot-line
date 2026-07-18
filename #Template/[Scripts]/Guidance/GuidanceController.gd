@@ -89,6 +89,9 @@ func _on_player_turn() -> void:
 		_id += 1
 
 func _spawn_box(pos: Vector3, rot_y: float) -> Node3D:
+	if not _box_scene:
+		push_error("GuidanceController.gd: GuidanceBox 场景未加载，无法生成引导盒")
+		return null
 	var box := _box_scene.instantiate() as Node3D
 	_holder.add_child(box)
 	box.global_position = pos

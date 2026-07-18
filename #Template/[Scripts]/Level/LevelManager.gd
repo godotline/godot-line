@@ -156,8 +156,10 @@ static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, r
 		camera_checkpoint.has_checkpoint = true
 		print("LevelManager: save_checkpoint offset=", camera_checkpoint.offset, " rot=", camera_checkpoint.rotation_degrees, " rot_offset=", camera_checkpoint.rotation_offset, " target_add_pos=", camera_checkpoint.target_add_position, " target_rot=", camera_checkpoint.target_rotation, " mode=", camera_checkpoint.rotate_mode, " base_rot=", camera_checkpoint.base_rotation)
 
-	var music_player := main_line.get_node("MusicPlayer") as AudioStreamPlayer
-	if music_player and music_player.playing:
+	var music_player := main_line.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+	if not music_player:
+		push_error("LevelManager.gd: MusicPlayer 节点未找到，无法保存音乐检查点时间")
+	elif music_player.playing:
 		music_checkpoint_time = music_player.get_playback_position()
 
 ## ============================================================
@@ -251,7 +253,7 @@ static func GameOverNormal(complete: bool) -> void:
 		var p = Player.instance
 		var music_player = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 		if music_player and music_player.stream:
-			var total_sec = p.level_data.levelTotalTime if p.level_data.useCustomLevelTime else music_player.stream.get_length()
+			var total_sec = p.level_data.levelTotalTime if p.level_data and p.level_data.useCustomLevelTime else music_player.stream.get_length()
 			var current_sec = music_player.get_playback_position()
 			percent = int((current_sec / total_sec) * 100) if total_sec > 0 else 0
 

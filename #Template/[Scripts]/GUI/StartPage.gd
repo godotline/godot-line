@@ -251,17 +251,27 @@ func get_setting(key: String):
 	return null
 
 func _create_setting_state(key: String, root: VBoxContainer) -> Dictionary:
+	var title_label = root.get_node_or_null("TitleLabel")
+	var value_label = root.get_node_or_null("Controls/ValueLabel")
+	var arrow_left = root.get_node_or_null("Controls/ArrowLeft")
+	var arrow_right = root.get_node_or_null("Controls/ArrowRight")
+	var arrow_coarse_left = root.get_node_or_null("Controls/ArrowCoarseLeft")
+	var arrow_fine_left = root.get_node_or_null("Controls/ArrowFineLeft")
+	var arrow_coarse_right = root.get_node_or_null("Controls/ArrowCoarseRight")
+	var arrow_fine_right = root.get_node_or_null("Controls/ArrowFineRight")
+	if not title_label or not value_label or not arrow_left or not arrow_right or not arrow_coarse_left or not arrow_fine_left or not arrow_coarse_right or not arrow_fine_right:
+		push_error("StartPage.gd: 设置项 '%s' 的 UI 子节点缺失，请检查场景结构" % key)
 	var state = {
 		key = key,
 		root = root,
-		title_label = root.get_node("TitleLabel"),
-		value_label = root.get_node("Controls/ValueLabel"),
-		arrow_left = root.get_node("Controls/ArrowLeft"),
-		arrow_right = root.get_node("Controls/ArrowRight"),
-		arrow_coarse_left = root.get_node("Controls/ArrowCoarseLeft"),
-		arrow_fine_left = root.get_node("Controls/ArrowFineLeft"),
-		arrow_coarse_right = root.get_node("Controls/ArrowCoarseRight"),
-		arrow_fine_right = root.get_node("Controls/ArrowFineRight"),
+		title_label = title_label,
+		value_label = value_label,
+		arrow_left = arrow_left,
+		arrow_right = arrow_right,
+		arrow_coarse_left = arrow_coarse_left,
+		arrow_fine_left = arrow_fine_left,
+		arrow_coarse_right = arrow_coarse_right,
+		arrow_fine_right = arrow_fine_right,
 		mode = MODE_CYCLIC,
 		options = [],
 		index = 0,

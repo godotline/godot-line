@@ -21,7 +21,7 @@ func _ready() -> void:
 	# 用定时器轮询 debug 状态开关，避免 _process 空跑
 	var poll := get_tree().create_timer(0.5)
 	poll.timeout.connect(_poll_debug)
-	set_process(false)
+
 
 func _poll_debug() -> void:
 	if not is_instance_valid(self):
@@ -34,19 +34,21 @@ func _poll_debug() -> void:
 	var debug_on := Player.instance.debug
 	if debug_on != _previous_debug:
 		_previous_debug = debug_on
-		set_process(debug_on)
 		visible = debug_on
+		if debug_on:
+			_start_refresh_timer()
 	# 继续轮询
 	var poll := get_tree().create_timer(0.5)
 	poll.timeout.connect(_poll_debug)
 
-func _process(_delta: float) -> void:
+
+func _start_refresh_timer() -> void:
 	if not Player.instance or not Player.instance.debug:
-		visible = false
-		set_process(false)
 		return
-	visible = true
 	_update_label()
+	var timer := get_tree().create_timer(0.1)
+	timer.timeout.connect(_start_refresh_timer)
+
 
 func _update_label() -> void:
 	var p := Player.instance
