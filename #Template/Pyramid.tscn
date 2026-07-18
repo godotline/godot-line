@@ -2,15 +2,15 @@
 
 [ext_resource type="ArrayMesh" uid="uid://bijrilva7k3km" path="res://#Template/[Resources]/Models/HalfPyramid.obj" id="1_ajvws"]
 [ext_resource type="Script" uid="uid://ctksyy3gv3pwu" path="res://#Template/[Scripts]/Trigger/Single/Pyramid.gd" id="1_oowoy"]
-[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="2_tulby"]
-[ext_resource type="Script" uid="uid://dtj3e2vqksb8s" path="res://#Template/[Scripts]/Trigger/Single/PyramidTrigger.gd" id="6_pyrtr"]
-
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/trigger.tscn" id="2_tulby"]
+[ext_resource type="Script" uid="uid://dtj3e2vqksb8s" path="res://#Template/[Scripts]/Trigger/PyramidTrigger.gd" id="6_pyrtr"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oowoy"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ajvws"]
 
 [node name="Pyramid" type="Node3D" unique_id=1497290031]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
 script = ExtResource("1_oowoy")
 
 [node name="Left" type="MeshInstance3D" parent="." unique_id=920015160]
@@ -25,28 +25,32 @@ surface_material_override/0 = SubResource("StandardMaterial3D_ajvws")
 
 [node name="OpenTrigger" parent="." unique_id=608483111 instance=ExtResource("2_tulby")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 100)
+
+[node name="PyramidTrigger" type="Node3D" parent="OpenTrigger" unique_id=829783754]
 script = ExtResource("6_pyrtr")
-type = 0
 change_direction = true
-final_direction = Vector3(0, 0, 0)
 
 [node name="FinalTurn" parent="." unique_id=658946201 instance=ExtResource("2_tulby")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 45.342495)
+
+[node name="PyramidTrigger" type="Node3D" parent="FinalTurn" unique_id=2132843373]
 script = ExtResource("6_pyrtr")
 type = 1
-change_direction = false
-final_direction = Vector3(0, 0, 0)
 
 [node name="WaitingForWin" parent="." unique_id=317890779 instance=ExtResource("2_tulby")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 0)
+require_playing = false
+
+[node name="PyramidTrigger" type="Node3D" parent="WaitingForWin" unique_id=1301256065]
 script = ExtResource("6_pyrtr")
 type = 2
 change_direction = true
-final_direction = Vector3(0, 0, 0)
 
 [node name="StopPlayer" parent="." unique_id=1231749146 instance=ExtResource("2_tulby")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, -53.41746)
+require_playing = false
+
+[node name="PyramidTrigger" type="Node3D" parent="StopPlayer" unique_id=1617173312]
 script = ExtResource("6_pyrtr")
 type = 3
 change_direction = true
-final_direction = Vector3(0, 0, 0)
