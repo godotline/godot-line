@@ -11,9 +11,10 @@ enum RotateMode {
 	LOCAL_AXIS_ADD,
 }
 
-static var instance
+static var instance: OldCameraFollower
 
-@export var follow_speed = Vector3(1.5, 1.5, 1.5)
+## 兼容旧场景中以标量配置跟随速度，以及新场景中的 Vector3 配置。
+@export var follow_speed: Variant = Vector3(1.5, 1.5, 1.5)
 @export var follow: bool = true
 @export var smooth: bool = true
 
@@ -40,7 +41,7 @@ var _rotation_progress: float = 0.0
 var _is_rotating: bool = false
 var _base_rotation := Vector3.ZERO
 var _target_add_position := Vector3.ZERO
-var _target_follow_speed = Vector3(1.5, 1.5, 1.5)
+var _target_follow_speed: Vector3 = Vector3(1.5, 1.5, 1.5)
 var _target_distance: float = 0.0
 
 ## Compatibility aliases for the former Godot OldCameraFollower API.
@@ -104,7 +105,7 @@ func _ready() -> void:
 
 	_resolve_target()
 	_target_add_position = rotator.position if rotator else Vector3.ZERO
-	_target_follow_speed = follow_speed
+	_target_follow_speed = _follow_speed_vector()
 	_target_rotation = rotator.rotation_degrees if rotator else Vector3.ZERO
 	_target_distance = absf(camera.position.z) if camera else 0.0
 	LevelManager.add_revive_listener(_on_player_revive)
@@ -128,7 +129,7 @@ func _process(delta: float) -> void:
 
 
 func _resolve_target() -> void:
-	var player_instance = Player.instance
+	var player_instance: Player = Player.instance
 	_target_node = player_instance if is_instance_valid(player_instance) else null
 
 

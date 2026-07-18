@@ -27,12 +27,12 @@ func _show_ui() -> void:
 	一 = true
 	if LevelManager.is_relive == true:
 		LevelManager.crown -= 1
-	var diamond_node = get_node_or_null("diamond")
+	var diamond_node: Node = get_node_or_null("diamond")
 	if diamond_node:
 		diamond_node.text = str(LevelManager.gem,"/10")
 	else:
 		push_error("gameui.gd: diamond 节点未找到")
-	var title_node = get_node_or_null("title")
+	var title_node: Label = get_node_or_null("title") as Label
 	if title_node:
 		title_node.text = levelname
 	else:
@@ -50,7 +50,7 @@ func _update_crown_display(count: int) -> void:
 		get_node_or_null("PerfactCrownNoLight3"),
 	]
 	if count >= 1 and count <= 3:
-		var anim_player = get_node_or_null("AnimationPlayer")
+		var anim_player: AnimationPlayer = get_node_or_null("AnimationPlayer") as AnimationPlayer
 		if anim_player:
 			anim_player.play(CROWN_ANIMS[count])
 		else:

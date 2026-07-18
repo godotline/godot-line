@@ -1,7 +1,7 @@
 @tool
 extends Node3D
 
-@export var selected_percent := 10 : set = _set_selected_percent
+@export var selected_percent: int = 10 : set = _set_selected_percent
 
 var _percent_nodes: Dictionary = {}
 var _percent_values: Array[int] = []

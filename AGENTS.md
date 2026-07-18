@@ -83,6 +83,8 @@ Defined in `project.godot`:
 - `PascalCase` for class names (`class_name`)
 - `UPPER_SNAKE_CASE` for constants
 - `lowerCamelCase` for signals
+- All GDScript under `#Template/[Scripts]` must use static type annotations for variables (`var value: Type`), including local variables and exported properties. Use explicit types instead of leaving variables untyped; inferred declarations (`:=`) should be replaced with an explicit type when the type is known.
+- Function parameters and return values under `#Template/[Scripts]` must also be explicitly typed.
 - `@tool` annotation used extensively for editor preview (animators, triggers, resources)
 - Follow [Godot GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 

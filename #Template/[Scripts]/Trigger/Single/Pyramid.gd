@@ -10,7 +10,7 @@ enum TriggerType {
 	Stop
 }
 
-@export var waiting_time := 5.0
+@export var waiting_time: float = 5.0
 
 var left: Node3D
 var right: Node3D

@@ -3,8 +3,19 @@ extends Area3D
 ## Gem - 宝石收集物
 ## 参考 Unity Gem.cs 实现，支持 fake 属性和复活恢复
 
-@export var speed := 1.0
-@export var fake := false
+const FRAGMENT_SCENE := preload("res://#Template/[Resources]/GemFragment.tscn")
+const FRAGMENT_COUNT := 8
+const FRAGMENT_SPEED_MIN := 2.0
+const FRAGMENT_SPEED_MAX := 4.0
+const FRAGMENT_UPWARD_SPEED := 3.0
+const FRAGMENT_SCALE_MIN := 2
+const FRAGMENT_SCALE_MAX := 2.5
+const FRAGMENT_LIFETIME := 3.0
+const FRAGMENT_SHRINK_DURATION := 0.5
+const FRAGMENT_TORQUE_SCALE := 0.2
+
+@export var speed: float = 1.0
+@export var fake: bool = false
 
 var _collected := false
 var _checkpoint_index := -1
@@ -22,29 +33,38 @@ func _on_body_entered(_body: Node) -> void:
 	var mesh := get_node_or_null("MeshInstance3D")
 	if mesh:
 		mesh.visible = false
-	else:
-		push_error("Gem.gd: MeshInstance3D 子节点未找到")
 	var anim_player := get_node_or_null("AnimationPlayer")
 	if anim_player:
 		anim_player.play("diamond")
-	else:
-		push_error("Gem.gd: AnimationPlayer 子节点未找到")
-	var particles := get_node_or_null("RemainParticle")
-	if particles:
-		particles.emitting = true
-	else:
-		push_error("Gem.gd: RemainParticle 子节点未找到")
+	_spawn_fragments()
 	# 注册复活回调
 	LevelManager.add_revive_listener(_on_revive)
 	# 用 Timer 替代 await，避免阻塞和延迟节点释放
 	var timer := get_tree().create_timer(2.0)
 	timer.timeout.connect(queue_free)
-	# 粒子结束后也尝试释放（以先到者为准）
-	particles = get_node_or_null("RemainParticle")
-	if particles:
-		particles.finished.connect(queue_free, Object.CONNECT_ONE_SHOT)
-	else:
-		push_error("Gem.gd: RemainParticle 子节点未找到，无法连接 finished 信号")
+
+func _spawn_fragments() -> void:
+	var fragment_parent := get_parent()
+	for index in FRAGMENT_COUNT:
+		var fragment := FRAGMENT_SCENE.instantiate() as RigidBody3D
+		fragment.name = "GemFragment_%02d" % index
+		fragment_parent.add_child(fragment)
+		fragment.global_position = global_position
+		var scale_factor := randf_range(FRAGMENT_SCALE_MIN, FRAGMENT_SCALE_MAX)
+		var fragment_mesh := fragment.get_node("MeshInstance3D") as MeshInstance3D
+		fragment_mesh.scale *= scale_factor
+
+		# 向上喷出并向四周散射，重力自然形成斜抛轨迹。
+		var angle := randf_range(0.0, TAU)
+		var horizontal := randf_range(FRAGMENT_SPEED_MIN, FRAGMENT_SPEED_MAX)
+		var launch_velocity := Vector3(cos(angle) * horizontal, FRAGMENT_UPWARD_SPEED, sin(angle) * horizontal)
+		fragment.apply_central_impulse(launch_velocity * fragment.mass)
+		fragment.apply_torque_impulse(Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * FRAGMENT_TORQUE_SCALE)
+
+		var shrink_tween := fragment.create_tween()
+		shrink_tween.tween_interval(FRAGMENT_LIFETIME)
+		shrink_tween.tween_property(fragment_mesh, "scale", Vector3.ZERO, FRAGMENT_SHRINK_DURATION)
+		shrink_tween.finished.connect(fragment.queue_free)
 
 func _on_revive() -> void:
 	# 只有在宝石之后存档才恢复（存档点索引 >= 宝石索引）
@@ -54,8 +74,6 @@ func _on_revive() -> void:
 		var mesh := get_node_or_null("MeshInstance3D")
 		if mesh:
 			mesh.visible = true
-		else:
-			push_error("Gem.gd: MeshInstance3D 子节点未找到，复活时无法恢复显示")
 		set_deferred("monitoring", true)
 		LevelManager.gem -= 1
 	LevelManager.remove_revive_listener(_on_revive)
