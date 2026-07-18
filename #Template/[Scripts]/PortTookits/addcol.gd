@@ -2,8 +2,8 @@
 extends Node3D
 
 # 配置变量 - 只处理名称包含这些关键字的节点
-@export var name_filters = []
-@export var layer = 2
+@export var name_filters: Array[String] = []
+@export var layer: int = 2
 
 @export var create_collisions: bool = false:
 	set(value):
@@ -17,9 +17,9 @@ extends Node3D
 			remove_all_static_bodies()
 			remove_collisions = false
 
-func create_static_bodies_for_meshes():
-	var mesh_instances = get_all_mesh_instances(self)
-	var count = 0
+func create_static_bodies_for_meshes() -> void:
+	var mesh_instances: Array[MeshInstance3D] = get_all_mesh_instances(self)
+	var count: int = 0
 	
 	for mesh_instance in mesh_instances:
 		# 检查是否匹配任何名称过滤器
@@ -36,16 +36,16 @@ func create_static_bodies_for_meshes():
 			continue
 		
 		# 创建 StaticBody3D
-		var static_body = StaticBody3D.new()
+		var static_body: StaticBody3D = StaticBody3D.new()
 		static_body.name = "StaticBody3D"
 		static_body.collision_layer = 1 << (layer - 1)
 		
 		# 创建 CollisionShape3D
-		var collision_shape = CollisionShape3D.new()
+		var collision_shape: CollisionShape3D = CollisionShape3D.new()
 		collision_shape.name = "CollisionShape3D"
 		
 		# 创建单一凸形碰撞体
-		var convex_shape = mesh_instance.mesh.create_convex_shape()
+		var convex_shape: ConvexPolygonShape3D = mesh_instance.mesh.create_convex_shape()
 		collision_shape.shape = convex_shape
 		
 		# 添加 collision_shape 到 static_body
@@ -56,7 +56,7 @@ func create_static_bodies_for_meshes():
 		
 		# 设置所有权 - 在添加到场景树之后
 		if Engine.is_editor_hint():
-			var scene_root = get_tree().edited_scene_root
+			var scene_root: Node = get_tree().edited_scene_root
 			static_body.owner = scene_root
 			collision_shape.owner = scene_root
 		
@@ -65,9 +65,9 @@ func create_static_bodies_for_meshes():
 	
 	print("完成！共创建 ", count, " 个静态碰撞体")
 
-func remove_all_static_bodies():
-	var static_bodies = get_all_static_bodies(self)
-	var count = 0
+func remove_all_static_bodies() -> void:
+	var static_bodies: Array[StaticBody3D] = get_all_static_bodies(self)
+	var count: int = 0
 	
 	for static_body in static_bodies:
 		# 检查是否匹配任何名称过滤器
@@ -91,15 +91,15 @@ func has_static_body_child(node: Node) -> bool:
 func matches_any_filter(_name: String) -> bool:
 	if name_filters.is_empty():
 		return true
-	var lower_name = _name.to_lower()
+	var lower_name: String = _name.to_lower()
 	for filter in name_filters:
 		if filter.to_lower() in lower_name:
 			return true
 	return false
 
 # 递归获取所有 MeshInstance3D 节点
-func get_all_mesh_instances(node: Node) -> Array:
-	var mesh_instances = []
+func get_all_mesh_instances(node: Node) -> Array[MeshInstance3D]:
+	var mesh_instances: Array[MeshInstance3D] = []
 	
 	for child in node.get_children():
 		if child is MeshInstance3D:
@@ -110,8 +110,8 @@ func get_all_mesh_instances(node: Node) -> Array:
 	return mesh_instances
 
 # 递归获取所有 StaticBody3D 节点
-func get_all_static_bodies(node: Node) -> Array:
-	var static_bodies = []
+func get_all_static_bodies(node: Node) -> Array[StaticBody3D]:
+	var static_bodies: Array[StaticBody3D] = []
 	
 	for child in node.get_children():
 		if child is StaticBody3D:

@@ -5,8 +5,8 @@ extends Node3D
 @export var type: Pyramid.TriggerType = Pyramid.TriggerType.Open
 
 @export_group("Final设置")
-@export var change_direction := false
-@export var final_direction := Vector3.ZERO
+@export var change_direction: bool = false
+@export var final_direction: Vector3 = Vector3.ZERO
 
 func trigger(_body: Node3D) -> void:
 	var pyramid := get_parent().get_parent() as Pyramid

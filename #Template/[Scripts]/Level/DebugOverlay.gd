@@ -73,7 +73,7 @@ func _update_label() -> void:
 	lines.append("已获取宝石数量: %d" % 	LevelManager.gem)
 	lines.append("已获取皇冠数量: %d/3" % 	LevelManager.crown)
 
-	var cam = OldCameraFollower.instance
+	var cam: OldCameraFollower = OldCameraFollower.instance
 	var camera := get_viewport().get_camera_3d()
 	if cam:
 		lines.append("相机偏移: (%.2f, %.2f, %.2f)" % [cam.add_position.x, cam.add_position.y, cam.add_position.z])

@@ -36,7 +36,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if use_time and not _time_triggered:
-		var current_time = LevelManager.anim_time
+		var current_time: float = LevelManager.anim_time
 		if current_time >= trigger_time:
 			_time_triggered = true
 			_apply_camera()

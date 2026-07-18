@@ -2,13 +2,13 @@
 extends Node3D
 @export var GuideTap: PackedScene
 @export_tool_button("Add","AcceptDialog")
-var add_action = func():
+var add_action: Callable = func() -> void:
 	# 获取当前节点的所有子节点
-	var children = get_children()
+	var children: Array[Node] = get_children()
 	
 	# 遍历每个子节点，在其位置添加新的taper实例
 	for child in children:
-		var child_node = GuideTap.instantiate()
+		var child_node: Node = GuideTap.instantiate()
 		if not child_node:
 			push_error("addtap.gd: GuideTap 场景未指定，无法实例化")
 			return

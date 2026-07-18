@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://#Template/[Materials]/crystal_scan_fade.gdshader" id="1_scan"]
+
+[resource]
+render_priority = -128
+shader = ExtResource("1_scan")
+shader_parameter/scan_origin = Vector3(0, 0, 0)
+shader_parameter/scan_radius = -1.0
+shader_parameter/scan_strength = 0.0

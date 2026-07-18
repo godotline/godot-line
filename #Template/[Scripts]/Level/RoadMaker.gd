@@ -1,7 +1,7 @@
 extends Node3D
 
 @export var base_floor:PackedScene
-@export var road_width := 3.0
+@export var road_width: float = 3.0
 
 @onready var main_line:Node3D = get_parent()
 @onready var past_translation := main_line.position
@@ -26,7 +26,7 @@ func _ready() -> void:
 	roads.position = to_global(position)
 	get_tree().current_scene.call_deferred("add_child",roads)
 
-func new_road():
+func new_road() -> void:
 	# 在创建新路段前，完成上一段路面的碰撞体（一次性设置）
 	_finalize_previous_road()
 
@@ -55,7 +55,7 @@ func new_road():
 		collision_child.set_deferred("disabled", true)
 	road.rotation = main_line.rotation
 
-func _find_child_of_type(parent: Node, child_type) -> Node:
+func _find_child_of_type(parent: Node, child_type: Variant) -> Node:
 	for child in parent.get_children():
 		if is_instance_of(child, child_type):
 			return child
@@ -100,7 +100,7 @@ func _physics_process(_delta: float) -> void:
 			# 兜底：如果没有找到视觉/碰撞分离结构，回退到原始行为
 			road.scale = new_scale
 
-func on_sky():
+func on_sky() -> void:
 	# 离开地面时，完成当前路段
 	_finalize_previous_road()
 	road = null

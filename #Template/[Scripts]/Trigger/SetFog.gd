@@ -38,7 +38,7 @@ func apply_fog() -> void:
 	env.fog_enabled = fog_settings.use_fog
 	
 	if fog_settings.use_fog:
-		var tween = create_tween()
+		var tween: Tween = create_tween()
 		tween.set_ease(ease_type)
 		tween.set_trans(trans_type)
 		tween.tween_property(env, "fog_light_color", fog_settings.fog_color, duration)

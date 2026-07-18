@@ -1,8 +1,9 @@
 extends RigidBody3D
 
 @onready var mesh: MeshInstance3D = $MeshInstance3D
+@onready var col: CollisionShape3D = $CollisionShape3D
 
-@export var shrink_delay: float = 2.0  ## 开始缩小前的延迟时间（秒）
+@export var shrink_delay: float = 5.0  ## 开始缩小前的延迟时间（秒）
 @export var shrink_duration: float = 1.0  ## 缩小动画持续时间（秒）
 
 var _shrink_tween: Tween
@@ -20,7 +21,9 @@ func _start_shrink() -> void:
 		return
 	
 	_shrink_tween = create_tween()
+	_shrink_tween.set_parallel()
 	_shrink_tween.tween_property(mesh, "scale", Vector3.ZERO, shrink_duration)
+	_shrink_tween.tween_property(col, "scale", Vector3.ZERO, shrink_duration)
 	_shrink_tween.finished.connect(_on_shrink_finished)
 
 func _on_shrink_finished() -> void:

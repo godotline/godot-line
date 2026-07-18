@@ -62,9 +62,9 @@ func _ready() -> void:
 		call_deferred("_draw_line")
 
 func _check_parent() -> void:
-	var parent = get_parent()
+	var parent: Node3D = get_parent() as Node3D
 	if parent is Area3D:
-		var script = parent.get_script()
+		var script: Script = parent.get_script()
 		if script and script.resource_path.ends_with("Jump.gd"):
 			_jump_node = parent
 			return
@@ -111,14 +111,14 @@ func _draw_line() -> void:
 		_line_mesh.mesh = null
 		return
 
-	var parent = get_parent()
-	var base_pos = parent.global_position if parent else global_position
+	var parent: Node3D = get_parent() as Node3D
+	var base_pos: Vector3 = parent.global_position if parent else global_position
 
 	var height: float = _jump_node.get("height") if _jump_node else 1.0
 	var gravity_strength: float = 9.8
 	if ProjectSettings.has_setting("physics/3d/default_gravity"):
 		gravity_strength = ProjectSettings.get_setting("physics/3d/default_gravity")
-	var jump_speed = sqrt(2 * gravity_strength * height)
+	var jump_speed: float = sqrt(2 * gravity_strength * height)
 
 	var immediate_mesh := ImmediateMesh.new()
 	immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)

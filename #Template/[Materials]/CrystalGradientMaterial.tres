@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://cxlb1lr6km05b"]
+
+[ext_resource type="Shader" uid="uid://d2ytn8s0doatw" path="res://#Template/[Materials]/crystal_gradient.gdshader" id="1_shader"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_shader")
+shader_parameter/top_color = Color(0.15930933, 0.33061928, 0.4716981, 1)
+shader_parameter/bottom_color = Color(0.2671057, 0.6257078, 0.7735849, 1)
+shader_parameter/split_pos = Vector3(1, 1, 1)
+shader_parameter/split_normal_vector = Vector3(0, 1, 0)
+shader_parameter/gradient_power = 2.0
+shader_parameter/reflect_color = Color(2.9960787, 2.9960787, 2.9960787, 1)
+shader_parameter/reflect_power = 8.0

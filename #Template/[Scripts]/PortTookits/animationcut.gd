@@ -1,25 +1,25 @@
 @tool
 extends EditorScript
 
-func _run():
-	var player = get_scene().get_node("AnimationPlayer") as AnimationPlayer
+func _run() -> void:
+	var player: AnimationPlayer = get_scene().get_node("AnimationPlayer") as AnimationPlayer
 	if not player:
 		print("错误：未找到 AnimationPlayer 节点")
 		return
 	
-	var parent = player.get_parent()
+	var parent: Node = player.get_parent()
 	
-	var anim_list = player.get_animation_list()
+	var anim_list: PackedStringArray = player.get_animation_list()
 	print("发现 ", anim_list.size(), " 个动画：", anim_list)
 	
 	for anim_name in anim_list:
 		# 创建新 AnimationPlayer
-		var new_player = AnimationPlayer.new()
+		var new_player: AnimationPlayer = AnimationPlayer.new()
 		new_player.name = anim_name
 		
 		# 复制动画资源
-		var anim = player.get_animation(anim_name)
-		var anim_copy = anim.duplicate()
+		var anim: Animation = player.get_animation(anim_name)
+		var anim_copy: Animation = anim.duplicate()
 		
 		# 过滤轨道：只保留第一个节点的动画
 		filter_animation_to_first_node(anim_copy)
@@ -30,7 +30,7 @@ func _run():
 			continue
 		
 		# 添加到新 player
-		var lib = AnimationLibrary.new()
+	var lib: AnimationLibrary = AnimationLibrary.new()
 		lib.add_animation(anim_name, anim_copy)
 		new_player.add_animation_library("", lib)
 		
@@ -51,12 +51,12 @@ func filter_animation_to_first_node(anim: Animation) -> void:
 		return
 	
 	# 获取第一个轨道的节点路径（如 "Node3D"）
-	var first_track_node_path = anim.track_get_path(0).get_concatenated_names()
+	var first_track_node_path: String = anim.track_get_path(0).get_concatenated_names()
 	
 	# 遍历所有轨道，删除不指向该节点的轨道（从后往前删除避免索引问题）
 	for i in range(anim.get_track_count() - 1, -1, -1):
-		var track_path = anim.track_get_path(i)
-		var track_node_path = track_path.get_concatenated_names()
+		var track_path: NodePath = anim.track_get_path(i)
+		var track_node_path: String = track_path.get_concatenated_names()
 		
 		# 如果轨道不属于第一个节点，删除它
 		if track_node_path != first_track_node_path:
