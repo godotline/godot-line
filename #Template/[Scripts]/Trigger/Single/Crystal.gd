@@ -13,6 +13,7 @@ const FRAGMENT_SCALE_MAX: float = 2.5
 const FRAGMENT_LIFETIME: float = 3.0
 const FRAGMENT_SHRINK_DURATION: float = 0.5
 const FRAGMENT_TORQUE_SCALE: float = 0.2
+const LIGHTNING_DURATION: float = 0.3
 
 @export var speed: float = 40.0
 @export var scan_duration: float = 1.25
@@ -22,10 +23,12 @@ var _collected: bool = false
 var _checkpoint_index: int = -1
 var _scan_elapsed: float = 0.0
 var _scan_material: ShaderMaterial
+var _lightning_elapsed: float = LIGHTNING_DURATION
 
 func _ready() -> void:
 	_apply_crystal_material($Hexahedron)
 	_scan_material = $ScanQuad.material_override as ShaderMaterial
+	$LightningQuad.visible = false
 	_reset_scan()
 	if not Engine.is_editor_hint():
 		LevelManager.add_revive_listener(_on_revive)
@@ -47,6 +50,10 @@ func _process(delta: float) -> void:
 		_scan_material.set_shader_parameter("scan_strength", 1.0 - smoothstep(0.0, 1.0, fade_progress))
 	else:
 		$ScanQuad.visible = false
+	if _lightning_elapsed < LIGHTNING_DURATION:
+		_lightning_elapsed += delta
+		if _lightning_elapsed >= LIGHTNING_DURATION:
+			$LightningQuad.visible = false
 
 func _on_body_entered(body: Node3D) -> void:
 	if _collected or body != Player.instance:
@@ -59,6 +66,7 @@ func _on_body_entered(body: Node3D) -> void:
 		# Crystal 使用与 Unity 事件 6 对应的收集通知；当前模板没有独立 Crystal 信号。
 		Player.instance.on_get_gem.emit()
 	_start_scan()
+	_start_lightning()
 	_spawn_fragments()
 
 func _spawn_fragments() -> void:
@@ -90,6 +98,10 @@ func _start_scan() -> void:
 	_scan_material.set_shader_parameter("scan_radius", 0.0)
 	_scan_material.set_shader_parameter("scan_strength", 1.0)
 	$ScanQuad.visible = true
+
+func _start_lightning() -> void:
+	_lightning_elapsed = 0.0
+	$LightningQuad.visible = true
 
 func _on_revive() -> void:
 	LevelManager.CompareCheckpointIndex(_checkpoint_index, func():

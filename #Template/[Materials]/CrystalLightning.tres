@@ -1,0 +1,15 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://#Template/[Materials]/crystal_lightning.gdshader" id="1_lightning"]
+
+[resource]
+render_priority = 10
+shader = ExtResource("1_lightning")
+shader_parameter/bolt_speed = 2.2
+shader_parameter/flicker_speed = 11.0
+shader_parameter/flash_rate = 5.0
+shader_parameter/flash_width = 0.18
+shader_parameter/idle_brightness = 0.32
+shader_parameter/flash_boost = 2.4
+shader_parameter/core_energy = 24.0
+shader_parameter/glow_energy = 10.0
