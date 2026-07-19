@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" format=3 uid="uid://cxlb1lr6km05b"]
 
-[ext_resource type="Shader" uid="uid://d2ytn8s0doatw" path="res://#Template/[Materials]/crystal_gradient.gdshader" id="1_shader"]
+[ext_resource type="Shader" uid="uid://bchh8n1dc2v0d" path="res://#Template/[Materials]/crystal_gradient.gdshader" id="1_shader"]
 
 [resource]
 render_priority = 0

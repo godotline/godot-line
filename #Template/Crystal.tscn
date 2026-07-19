@@ -4,11 +4,15 @@
 [ext_resource type="Material" uid="uid://cxlb1lr6km05b" path="res://#Template/[Materials]/CrystalGradientMaterial.tres" id="2_m6xhc"]
 [ext_resource type="ArrayMesh" uid="uid://biawqpkmgy5mx" path="res://#Template/[Resources]/Models/Hexahedron.obj" id="2_mesh"]
 [ext_resource type="Material" path="res://#Template/[Materials]/CrystalScanFade.tres" id="4_scan"]
+[ext_resource type="Material" path="res://#Template/[Materials]/CrystalLightning.tres" id="5_lightning"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vclu1"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_scan"]
 size = Vector2(2, 2)
+
+[sub_resource type="QuadMesh" id="QuadMesh_lightning"]
+size = Vector2(0.9, 2.7)
 
 [node name="Crystal" type="Area3D" unique_id=521365085]
 transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 0, 0, 0)
@@ -27,5 +31,11 @@ visible = false
 material_override = ExtResource("4_scan")
 cast_shadow = 0
 mesh = SubResource("QuadMesh_scan")
+
+[node name="LightningQuad" type="MeshInstance3D" parent="." unique_id=764125258]
+transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0)
+material_override = ExtResource("5_lightning")
+cast_shadow = 0
+mesh = SubResource("QuadMesh_lightning")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
