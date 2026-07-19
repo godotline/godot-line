@@ -4,16 +4,22 @@ extends Area3D
 ## 对齐 Unity Crystal：触碰后隐藏，并在复活时按检查点恢复。
 
 const FRAGMENT_SCENE: PackedScene = preload("res://#Template/[Resources]/GemFragment.tscn")
-const FRAGMENT_COUNT: int = 8
-const FRAGMENT_SPEED_MIN: float = 2.0
-const FRAGMENT_SPEED_MAX: float = 4.0
-const FRAGMENT_UPWARD_SPEED: float = 3.0
-const FRAGMENT_SCALE_MIN: float = 2
-const FRAGMENT_SCALE_MAX: float = 2.5
-const FRAGMENT_LIFETIME: float = 3.0
+const FRAGMENT_COUNT_MIN: int = 20
+const FRAGMENT_COUNT_MAX: int = 25
+const FRAGMENT_START_SPEED_MIN: float = 2.0
+const FRAGMENT_START_SPEED_MAX: float = 5.0
+const FRAGMENT_AXIS_SPEED_MIN: float = -4.0
+const FRAGMENT_AXIS_SPEED_MAX: float = 4.0
+const FRAGMENT_CONE_ANGLE_RADIANS: float = PI / 6.0
+const FRAGMENT_GRAVITY_SCALE: float = 1.5
+const FRAGMENT_SCALE_MIN: float = 1.0
+const FRAGMENT_SCALE_MAX: float = 1.5
+const FRAGMENT_LIFETIME_MIN: float = 3.0
+const FRAGMENT_LIFETIME_MAX: float = 5.0
 const FRAGMENT_SHRINK_DURATION: float = 0.5
 const FRAGMENT_TORQUE_SCALE: float = 0.2
 const LIGHTNING_DURATION: float = 0.3
+const COLLECTION_LIGHT_ENERGY: float = 6.0
 
 @export var speed: float = 40.0
 @export var scan_duration: float = 1.25
@@ -28,7 +34,9 @@ var _lightning_elapsed: float = LIGHTNING_DURATION
 func _ready() -> void:
 	_apply_crystal_material($Hexahedron)
 	_scan_material = $ScanQuad.material_override as ShaderMaterial
-	$LightningQuad.visible = false
+	$CrystalThunder.visible = false
+	$Aura.emitting = false
+	$CrystalLight.visible = false
 	_reset_scan()
 	if not Engine.is_editor_hint():
 		LevelManager.add_revive_listener(_on_revive)
@@ -52,8 +60,12 @@ func _process(delta: float) -> void:
 		$ScanQuad.visible = false
 	if _lightning_elapsed < LIGHTNING_DURATION:
 		_lightning_elapsed += delta
+		var light_progress: float = clampf(_lightning_elapsed / LIGHTNING_DURATION, 0.0, 1.0)
+		$CrystalLight.light_energy = lerpf(COLLECTION_LIGHT_ENERGY, 0.0, light_progress)
 		if _lightning_elapsed >= LIGHTNING_DURATION:
-			$LightningQuad.visible = false
+			$CrystalThunder.visible = false
+			$Aura.emitting = false
+			$CrystalLight.visible = false
 
 func _on_body_entered(body: Node3D) -> void:
 	if _collected or body != Player.instance:
@@ -71,7 +83,10 @@ func _on_body_entered(body: Node3D) -> void:
 
 func _spawn_fragments() -> void:
 	var fragment_parent: Node = get_parent()
-	for index in FRAGMENT_COUNT:
+	var fragment_count: int = randi_range(FRAGMENT_COUNT_MIN, FRAGMENT_COUNT_MAX)
+	var source_mesh: MeshInstance3D = $Hexahedron as MeshInstance3D
+	var source_material: Material = source_mesh.get_active_material(0)
+	for index in fragment_count:
 		var fragment: RigidBody3D = FRAGMENT_SCENE.instantiate() as RigidBody3D
 		fragment.name = "CrystalFragment_%02d" % index
 		fragment_parent.add_child(fragment)
@@ -79,16 +94,26 @@ func _spawn_fragments() -> void:
 		var scale_factor: float = randf_range(FRAGMENT_SCALE_MIN, FRAGMENT_SCALE_MAX)
 		var fragment_mesh: MeshInstance3D = fragment.get_node("MeshInstance3D") as MeshInstance3D
 		fragment_mesh.scale *= scale_factor
+		fragment_mesh.material_override = source_material
 
-		# 向上喷出并向四周散射，重力自然形成斜抛轨迹。
-		var angle: float = randf_range(0.0, TAU)
-		var horizontal: float = randf_range(FRAGMENT_SPEED_MIN, FRAGMENT_SPEED_MAX)
-		var launch_velocity: Vector3 = Vector3(cos(angle) * horizontal, FRAGMENT_UPWARD_SPEED, sin(angle) * horizontal)
+		# FX_GetCrystal 内嵌 GetGem：30° 向上圆锥初速改为 2–5，XYZ 仍各 -4–4。
+		var azimuth: float = randf_range(0.0, TAU)
+		var cos_angle: float = randf_range(cos(FRAGMENT_CONE_ANGLE_RADIANS), 1.0)
+		var sin_angle: float = sqrt(1.0 - cos_angle * cos_angle)
+		var cone_direction: Vector3 = Vector3(cos(azimuth) * sin_angle, cos_angle, sin(azimuth) * sin_angle)
+		var start_speed: float = randf_range(FRAGMENT_START_SPEED_MIN, FRAGMENT_START_SPEED_MAX)
+		var launch_velocity: Vector3 = cone_direction * start_speed + Vector3(
+			randf_range(FRAGMENT_AXIS_SPEED_MIN, FRAGMENT_AXIS_SPEED_MAX),
+			randf_range(FRAGMENT_AXIS_SPEED_MIN, FRAGMENT_AXIS_SPEED_MAX),
+			randf_range(FRAGMENT_AXIS_SPEED_MIN, FRAGMENT_AXIS_SPEED_MAX)
+		)
+		fragment.gravity_scale = FRAGMENT_GRAVITY_SCALE
 		fragment.apply_central_impulse(launch_velocity * fragment.mass)
 		fragment.apply_torque_impulse(Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * FRAGMENT_TORQUE_SCALE)
 
+		var fragment_lifetime: float = randf_range(FRAGMENT_LIFETIME_MIN, FRAGMENT_LIFETIME_MAX)
 		var shrink_tween: Tween = fragment.create_tween()
-		shrink_tween.tween_interval(FRAGMENT_LIFETIME)
+		shrink_tween.tween_interval(fragment_lifetime)
 		shrink_tween.tween_property(fragment_mesh, "scale", Vector3.ZERO, FRAGMENT_SHRINK_DURATION)
 		shrink_tween.finished.connect(fragment.queue_free)
 
@@ -101,7 +126,12 @@ func _start_scan() -> void:
 
 func _start_lightning() -> void:
 	_lightning_elapsed = 0.0
-	$LightningQuad.visible = true
+	$CrystalThunder.visible = true
+	$Aura.global_transform = Transform3D(Basis.IDENTITY, global_position)
+	$Aura.restart()
+	$Aura.emitting = true
+	$CrystalLight.light_energy = COLLECTION_LIGHT_ENERGY
+	$CrystalLight.visible = true
 
 func _on_revive() -> void:
 	LevelManager.CompareCheckpointIndex(_checkpoint_index, func():
@@ -118,6 +148,11 @@ func _reset_scan() -> void:
 		_scan_material.set_shader_parameter("scan_radius", -1.0)
 		_scan_material.set_shader_parameter("scan_strength", 0.0)
 	$ScanQuad.visible = false
+	$CrystalThunder.visible = false
+	$Aura.restart()
+	$Aura.emitting = false
+	$CrystalLight.light_energy = 0.0
+	$CrystalLight.visible = false
 
 func _set_crystal_mesh_visible(value: bool) -> void:
 	$Hexahedron.visible = value

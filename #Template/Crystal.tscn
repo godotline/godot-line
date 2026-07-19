@@ -5,6 +5,7 @@
 [ext_resource type="ArrayMesh" uid="uid://biawqpkmgy5mx" path="res://#Template/[Resources]/Models/Hexahedron.obj" id="2_mesh"]
 [ext_resource type="Material" path="res://#Template/[Materials]/CrystalScanFade.tres" id="4_scan"]
 [ext_resource type="Material" path="res://#Template/[Materials]/CrystalLightning.tres" id="5_lightning"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/Particle.png" id="6_particle"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vclu1"]
 
@@ -13,6 +14,53 @@ size = Vector2(2, 2)
 
 [sub_resource type="QuadMesh" id="QuadMesh_lightning"]
 size = Vector2(0.9, 2.7)
+
+[sub_resource type="Gradient" id="Gradient_crystal_aura"]
+offsets = PackedFloat32Array(0, 0.0662089, 0.334493, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_crystal_aura"]
+gradient = SubResource("Gradient_crystal_aura")
+
+[sub_resource type="Curve" id="Curve_crystal_aura_scale"]
+max_value = 4.0
+_data = [Vector2(0, 0.79310346), 1.4613726, 1.4613726, 0, 0, Vector2(1, 4), 0.4642752, 0.4642752, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_crystal_aura_scale"]
+curve = SubResource("Curve_crystal_aura_scale")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_crystal_aura"]
+angle_min = 45.0
+angle_max = 270.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 0.0
+emission_shape = 3
+emission_box_extents = Vector3(0.5, 0.5, 0.5)
+scale_min = 1.0
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_crystal_aura_scale")
+color_ramp = SubResource("GradientTexture1D_crystal_aura")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_crystal_aura"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.6544118, 0.8712983, 1, 1)
+albedo_texture = ExtResource("6_particle")
+emission_enabled = true
+emission = Color(0.6544118, 0.8712983, 1, 1)
+emission_energy_multiplier = 6.0
+billboard_mode = 3
+billboard_keep_scale = true
+
+[sub_resource type="QuadMesh" id="QuadMesh_crystal_aura"]
+material = SubResource("StandardMaterial3D_crystal_aura")
+size = Vector2(1, 1)
 
 [node name="Crystal" type="Area3D" unique_id=521365085]
 transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 0, 0, 0)
@@ -32,10 +80,29 @@ material_override = ExtResource("4_scan")
 cast_shadow = 0
 mesh = SubResource("QuadMesh_scan")
 
-[node name="LightningQuad" type="MeshInstance3D" parent="." unique_id=764125258]
+[node name="CrystalThunder" type="MeshInstance3D" parent="." unique_id=764125258]
 transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0)
 material_override = ExtResource("5_lightning")
 cast_shadow = 0
 mesh = SubResource("QuadMesh_lightning")
+
+[node name="Aura" type="GPUParticles3D" parent="." unique_id=1137045706]
+top_level = true
+emitting = false
+amount = 3
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+randomness = 0.1
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_crystal_aura")
+draw_pass_1 = SubResource("QuadMesh_crystal_aura")
+
+[node name="CrystalLight" type="OmniLight3D" parent="." unique_id=1137045707]
+visible = false
+light_color = Color(1, 1, 1, 1)
+light_energy = 6.0
+omni_range = 4.0
+shadow_enabled = false
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
