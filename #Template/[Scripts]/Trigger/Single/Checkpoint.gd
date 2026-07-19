@@ -35,8 +35,8 @@ enum Direction { First, Second }
 
 signal on_revive
 
-var used := false
-var used_revive := false
+var used: bool = false
+var used_revive: bool = false
 
 var _track_progress: float = 0.0
 var _scene_gravity: Vector3 = Vector3.ZERO
@@ -94,7 +94,7 @@ func _enter_trigger(body: Node3D) -> void:
 	_scene_gravity = ProjectSettings.get_setting("physics/3d/default_gravity_vector") * ProjectSettings.get_setting("physics/3d/default_gravity")
 
 	if AutoRecord:
-		var music_player := body.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+		var music_player: AudioStreamPlayer = body.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 		if music_player and music_player.playing:
 			GameTime = music_player.get_playback_position()
 		PlayerSpeed = body.speed
@@ -107,14 +107,14 @@ func _enter_trigger(body: Node3D) -> void:
 
 	# Save FakePlayer states
 	_fake_players_data.clear()
-	var fake_players := body.get_tree().get_nodes_in_group("fake_players")
+	var fake_players: Array[Node] = body.get_tree().get_nodes_in_group("fake_players")
 	for fp in fake_players:
-		var fake := fp as FakePlayer
+		var fake: FakePlayer = fp as FakePlayer
 		if fake:
 			_fake_players_data.append(fake.get_reset_data())
 
 func _capture_fog() -> void:
-	var env := get_viewport().get_world_3d().environment
+	var env: Environment = get_viewport().get_world_3d().environment
 	if env:
 		fog.use_fog = env.fog_enabled
 		fog.fog_color = env.fog_light_color
@@ -122,16 +122,16 @@ func _capture_fog() -> void:
 		fog.end = env.fog_depth_end
 
 func _capture_light() -> void:
-	var main_line := Player.instance
+	var main_line: Player = Player.instance
 	if main_line:
-		var scene_light := main_line.get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
+		var scene_light: DirectionalLight3D = main_line.get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
 		if scene_light:
 			light.rotation = scene_light.rotation_degrees
 			light.color = scene_light.light_color
 			light.intensity = scene_light.light_energy
 
 func _capture_ambient() -> void:
-	var env := get_viewport().get_world_3d().environment
+	var env: Environment = get_viewport().get_world_3d().environment
 	if env:
 		ambient.intensity = env.ambient_light_energy
 		match env.ambient_light_source:
@@ -154,7 +154,7 @@ func _restore_camera() -> void:
 			camera_old.set_camera()
 
 func _restore_fog() -> void:
-	var env := get_viewport().get_world_3d().environment
+	var env: Environment = get_viewport().get_world_3d().environment
 	if env:
 		env.fog_enabled = fog.use_fog
 		env.fog_light_color = fog.fog_color
@@ -162,16 +162,16 @@ func _restore_fog() -> void:
 		env.fog_depth_end = fog.end
 
 func _restore_light() -> void:
-	var main_line := Player.instance
+	var main_line: Player = Player.instance
 	if main_line:
-		var scene_light := main_line.get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
+		var scene_light: DirectionalLight3D = main_line.get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
 		if scene_light:
 			scene_light.rotation_degrees = light.rotation
 			scene_light.light_color = light.color
 			scene_light.light_energy = light.intensity
 
 func _restore_ambient() -> void:
-	var env := get_viewport().get_world_3d().environment
+	var env: Environment = get_viewport().get_world_3d().environment
 	if env:
 		env.ambient_light_energy = ambient.intensity
 		match ambient.lighting_type:
@@ -187,7 +187,7 @@ func _restore_ambient() -> void:
 				env.ambient_light_ground_color = ambient.ground_color
 
 func revive() -> void:
-	var main_line := Player.instance
+	var main_line: Player = Player.instance
 	if not main_line:
 		return
 
@@ -260,20 +260,20 @@ func revive() -> void:
 		s.apply()
 
 	# Restore FakePlayers
-	var fake_players := main_line.get_tree().get_nodes_in_group("fake_players")
+	var fake_players: Array[Node] = main_line.get_tree().get_nodes_in_group("fake_players")
 	for i in range(min(fake_players.size(), _fake_players_data.size())):
-		var fake := fake_players[i] as FakePlayer
+		var fake: FakePlayer = fake_players[i] as FakePlayer
 		if fake and _fake_players_data[i].get("playing", false):
 			fake.set_reset_data(_fake_players_data[i])
 
 	# Restore music to checkpoint position (paused, waiting for player to start)
-	var music_player := main_line.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+	var music_player: AudioStreamPlayer = main_line.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 	if music_player:
 		music_player.stop()
 		music_player.volume_db = 0.0
 		music_player.pitch_scale = 1.0
 		# Set music to checkpoint position but don't play yet
-		var music_time := LevelManager.music_checkpoint_time
+		var music_time: float = LevelManager.music_checkpoint_time
 		if music_time > 0.0 and main_line.level_data and main_line.level_data.levelAudioClip:
 			music_player.stream = main_line.level_data.levelAudioClip
 			# Play then immediately pause to set the position
@@ -292,5 +292,6 @@ func revive() -> void:
 
 	LevelManager.GameState = LevelManager.GameStatus.Waiting
 	LevelManager.emit_revive()
+
 
 	on_revive.emit()

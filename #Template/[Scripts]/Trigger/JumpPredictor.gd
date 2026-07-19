@@ -120,7 +120,7 @@ func _draw_line() -> void:
 		gravity_strength = ProjectSettings.get_setting("physics/3d/default_gravity")
 	var jump_speed: float = sqrt(2 * gravity_strength * height)
 
-	var immediate_mesh := ImmediateMesh.new()
+	var immediate_mesh: ImmediateMesh = ImmediateMesh.new()
 	immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 
 	var pos: Vector3 = base_pos
@@ -140,7 +140,7 @@ func _draw_line() -> void:
 	immediate_mesh.surface_end()
 	_line_mesh.mesh = immediate_mesh
 
-	var material := StandardMaterial3D.new()
+	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.albedo_color = color
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_line_mesh.material_override = material

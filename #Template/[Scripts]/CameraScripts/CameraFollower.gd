@@ -26,8 +26,8 @@ var shake_tween: Tween
 var fov_tween: Tween
 var shake_power: float = 0.0
 
-var follow_speed := Vector3(1.2, 3.0, 6.0)
-var follow_rotation := Quaternion.from_euler(Vector3(0.0, deg_to_rad(-45.0), 0.0))
+var follow_speed: Vector3 = Vector3(1.2, 3.0, 6.0)
+var follow_rotation: Quaternion = Quaternion.from_euler(Vector3(0.0, deg_to_rad(-45.0), 0.0))
 
 var _target_node: Node3D
 var _smooth_delta_samples: PackedFloat32Array = []
@@ -69,11 +69,11 @@ func _process(delta: float) -> void:
 		return
 
 	# Unity's Transform.position is a world-space position.
-	var target_position := follow_rotation * _target_node.global_position
-	var self_position := follow_rotation * global_position
-	var translation := target_position - self_position
-	var smooth_delta := _get_smooth_delta(delta)
-	var result := Vector3(
+	var target_position: Vector3 = follow_rotation * _target_node.global_position
+	var self_position: Vector3 = follow_rotation * global_position
+	var translation: Vector3 = target_position - self_position
+	var smooth_delta: float = _get_smooth_delta(delta)
+	var result: Vector3 = Vector3(
 		translation.x * smooth_delta * follow_speed.x,
 		translation.y * smooth_delta * follow_speed.y,
 		translation.z * smooth_delta * follow_speed.z
@@ -82,7 +82,7 @@ func _process(delta: float) -> void:
 	if smooth:
 		# Equivalent to Transform.Translate(result, origin), where origin is
 		# world-aligned at +45 degrees around Y.
-		var origin_basis := Basis.from_euler(Vector3(0.0, deg_to_rad(45.0), 0.0))
+		var origin_basis: Basis = Basis.from_euler(Vector3(0.0, deg_to_rad(45.0), 0.0))
 		global_position += origin_basis * result
 	else:
 		# Transform.Translate(result) uses the follower's own local axes.
@@ -121,10 +121,10 @@ func _set_offset(n_offset: Vector3, duration: float, trans_type: Tween.Transitio
 
 	offset_tween = create_tween()
 	if use_curve:
-		var initial := rotator.position
-		offset_tween.tween_method(func(weight: float) -> void:
-			rotator.position = initial.lerp(n_offset, _sample_curve(curve, weight)),
-			0.0, 1.0, maxf(duration, 0.0))
+		var initial: Vector3 = rotator.position
+		var update_offset: Callable = func(weight: float) -> void:
+			rotator.position = initial.lerp(n_offset, _sample_curve(curve, weight))
+		offset_tween.tween_method(update_offset, 0.0, 1.0, maxf(duration, 0.0))
 	else:
 		offset_tween.set_trans(trans_type).set_ease(ease_type)
 		offset_tween.tween_property(rotator, "position", n_offset, maxf(duration, 0.0))
@@ -138,17 +138,17 @@ func _set_rotation(n_rotation: Vector3, duration: float, mode: RotateMode,
 		return
 
 	rotation_tween = create_tween()
-	var tween_duration := maxf(duration, 0.0)
+	var tween_duration: float = maxf(duration, 0.0)
 	if mode == RotateMode.FAST or mode == RotateMode.FAST_BEYOND_360:
-		var initial := rotator.rotation_degrees
-		var destination := n_rotation
+		var initial: Vector3 = rotator.rotation_degrees
+		var destination: Vector3 = n_rotation
 		if mode == RotateMode.FAST:
 			destination = _short_rotation_target(initial, n_rotation)
 
 		if use_curve:
-			rotation_tween.tween_method(func(weight: float) -> void:
-				rotator.rotation_degrees = initial.lerp(destination, _sample_curve(curve, weight)),
-				0.0, 1.0, tween_duration)
+			var update_rotation: Callable = func(weight: float) -> void:
+				rotator.rotation_degrees = initial.lerp(destination, _sample_curve(curve, weight))
+			rotation_tween.tween_method(update_rotation, 0.0, 1.0, tween_duration)
 		else:
 			rotation_tween.set_trans(trans_type).set_ease(ease_type)
 			rotation_tween.tween_property(rotator, "rotation_degrees", destination, tween_duration)
@@ -156,12 +156,12 @@ func _set_rotation(n_rotation: Vector3, duration: float, mode: RotateMode,
 
 	# Axis-add modes are relative rotations. Rebuilding from the captured basis
 	# on every update also keeps custom curves and overshoot deterministic.
-	var initial_basis := rotator.basis
-	var initial_global_basis := rotator.global_basis
-	var apply_rotation := func(weight: float) -> void:
-		var sampled_weight := _sample_curve(curve, weight) if use_curve else weight
-		var radians := n_rotation * sampled_weight * (PI / 180.0)
-		var added_basis := Basis.from_euler(radians)
+	var initial_basis: Basis = rotator.basis
+	var initial_global_basis: Basis = rotator.global_basis
+	var apply_rotation: Callable = func(weight: float) -> void:
+		var sampled_weight: float = _sample_curve(curve, weight) if use_curve else weight
+		var radians: Vector3 = n_rotation * sampled_weight * (PI / 180.0)
+		var added_basis: Basis = Basis.from_euler(radians)
 		if mode == RotateMode.WORLD_AXIS_ADD:
 			rotator.global_basis = added_basis * initial_global_basis
 		else:
@@ -180,10 +180,10 @@ func _set_scale(n_scale: Vector3, duration: float, trans_type: Tween.TransitionT
 
 	scale_tween = create_tween()
 	if use_curve:
-		var initial := scale_node.scale
-		scale_tween.tween_method(func(weight: float) -> void:
-			scale_node.scale = initial.lerp(n_scale, _sample_curve(curve, weight)),
-			0.0, 1.0, maxf(duration, 0.0))
+		var initial: Vector3 = scale_node.scale
+		var update_scale: Callable = func(weight: float) -> void:
+			scale_node.scale = initial.lerp(n_scale, _sample_curve(curve, weight))
+		scale_tween.tween_method(update_scale, 0.0, 1.0, maxf(duration, 0.0))
 	else:
 		scale_tween.set_trans(trans_type).set_ease(ease_type)
 		scale_tween.tween_property(scale_node, "scale", n_scale, maxf(duration, 0.0))
@@ -197,10 +197,10 @@ func _set_fov(n_fov: float, duration: float, trans_type: Tween.TransitionType,
 
 	fov_tween = create_tween()
 	if use_curve:
-		var initial := camera.fov
-		fov_tween.tween_method(func(weight: float) -> void:
-			camera.fov = lerpf(initial, n_fov, _sample_curve(curve, weight)),
-			0.0, 1.0, maxf(duration, 0.0))
+		var initial: float = camera.fov
+		var update_fov: Callable = func(weight: float) -> void:
+			camera.fov = lerpf(initial, n_fov, _sample_curve(curve, weight))
+		fov_tween.tween_method(update_fov, 0.0, 1.0, maxf(duration, 0.0))
 	else:
 		fov_tween.set_trans(trans_type).set_ease(ease_type)
 		fov_tween.tween_property(camera, "fov", n_fov, maxf(duration, 0.0))
@@ -211,18 +211,15 @@ func do_shake(power: float = 1.0, duration: float = 3.0) -> void:
 	# DOTween, so the replacement shake starts without a discontinuity.
 	shake_tween = _kill_tween(shake_tween)
 	shake_tween = create_tween()
-	var half_duration := maxf(duration * 0.5, 0.0)
-	var current_power := shake_power
+	var half_duration: float = maxf(duration * 0.5, 0.0)
+	var current_power: float = shake_power
 
-	var rise := shake_tween.tween_method(func(value: float) -> void:
+	var update_shake: Callable = func(value: float) -> void:
 		shake_power = value
-		_shake_update(), current_power, power, half_duration)
-	rise.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		_shake_update()
 
-	var fall := shake_tween.tween_method(func(value: float) -> void:
-		shake_power = value
-		_shake_update(), power, 0.0, half_duration)
-	fall.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	shake_tween.tween_method(update_shake, current_power, power, half_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	shake_tween.tween_method(update_shake, power, 0.0, half_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	shake_tween.finished.connect(_shake_finished, CONNECT_ONE_SHOT)
 
 

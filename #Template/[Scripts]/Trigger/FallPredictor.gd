@@ -42,7 +42,7 @@ func _draw_line() -> void:
 	if ProjectSettings.has_setting("physics/3d/default_gravity"):
 		gravity_strength = ProjectSettings.get_setting("physics/3d/default_gravity")
 
-	var immediate_mesh := ImmediateMesh.new()
+	var immediate_mesh: ImmediateMesh = ImmediateMesh.new()
 	immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 
 	var x: float = 0.0
@@ -57,7 +57,7 @@ func _draw_line() -> void:
 
 	_mesh_instance.mesh = immediate_mesh
 
-	var material := StandardMaterial3D.new()
+	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.albedo_color = color
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_mesh_instance.material_override = material

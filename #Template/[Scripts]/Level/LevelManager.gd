@@ -19,7 +19,7 @@ enum Direction {
 ## ========== 游戏状态管理 ==========
 
 static var GameState: GameStatus = GameStatus.Waiting
-static var get_input := true
+static var get_input: bool = true
 
 ## 帧缓存 — Clicked 状态（每帧只计算一次）
 static var _clicked_cached: bool = false
@@ -29,7 +29,7 @@ static var Clicked: bool:
 	get:
 		if not get_input:
 			return false
-		var current_frame := Engine.get_process_frames()
+		var current_frame: int = Engine.get_process_frames()
 		if current_frame != _clicked_frame:
 			_clicked_cached = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) \
 				or Input.is_key_pressed(KEY_SPACE) \
@@ -89,27 +89,27 @@ static func reset_revive_listeners() -> void:
 
 ## 检查点尚未建立时为空，建立后保存主线变换。
 static var main_line_transform: Variant = null
-static var revive_position := Vector3.ZERO
-static var is_turn := false
-static var player_direction_index := 0
-static var anim_time := 0.0
-static var music_checkpoint_time := 0.0
-static var is_end := false
-static var percent := 0
-static var line_crossing_crown := 0
-static var crowns := [0, 0, 0]
-static var is_relive := false
-static var gem := 0
-static var crown := 0
+static var revive_position: Vector3 = Vector3.ZERO
+static var is_turn: bool = false
+static var player_direction_index: int = 0
+static var anim_time: float = 0.0
+static var music_checkpoint_time: float = 0.0
+static var is_end: bool = false
+static var percent: int = 0
+static var line_crossing_crown: int = 0
+static var crowns: Array[int] = [0, 0, 0]
+static var is_relive: bool = false
+static var gem: int = 0
+static var crown: int = 0
 static var current_checkpoint: Node = null
-static var checkpoint_count := 0
-static var player_speed := 12.0
-static var gravity := Vector3(0, -9.8, 0)
-static var player_first_direction := Vector3.ZERO
-static var player_second_direction := Vector3.ZERO
+static var checkpoint_count: int = 0
+static var player_speed: float = 12.0
+static var gravity: Vector3 = Vector3(0, -9.8, 0)
+static var player_first_direction: Vector3 = Vector3.ZERO
+static var player_second_direction: Vector3 = Vector3.ZERO
 
 ## 相机跟随器检查点数据，整合为字典结构
-static var camera_checkpoint := {
+static var camera_checkpoint: Dictionary = {
 	"has_checkpoint": false,
 	"restore_pending": false,
 	"offset": Vector3.ZERO,
@@ -157,7 +157,7 @@ static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, r
 		camera_checkpoint.has_checkpoint = true
 		print("LevelManager: save_checkpoint offset=", camera_checkpoint.offset, " rot=", camera_checkpoint.rotation_degrees, " rot_offset=", camera_checkpoint.rotation_offset, " target_add_pos=", camera_checkpoint.target_add_position, " target_rot=", camera_checkpoint.target_rotation, " mode=", camera_checkpoint.rotate_mode, " base_rot=", camera_checkpoint.base_rotation)
 
-	var music_player := main_line.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+	var music_player: AudioStreamPlayer = main_line.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 	if not music_player:
 		push_error("LevelManager.gd: MusicPlayer 节点未找到，无法保存音乐检查点时间")
 	elif music_player.playing:
@@ -182,7 +182,7 @@ static func load_checkpoint_to_main_line(main_line: CharacterBody3D) -> void:
 
 
 static func load_to_camera_follower(cf: Node3D) -> void:
-	var cp := camera_checkpoint
+	var cp: Dictionary = camera_checkpoint
 	if not cp.has_checkpoint:
 		return
 	cf.add_position = cp.offset
@@ -281,7 +281,7 @@ static func init_player_position(player: CharacterBody3D, position: Vector3, for
 	player.global_position = position
 
 	if do_turn:
-		var dir_index := 0 if target_dir == Direction.First else 1
+		var dir_index: int = 0 if target_dir == Direction.First else 1
 		player._currentDirection = dir_index
 		player.rotation_degrees = player.current_direction
 		# 转向后重新计算速度方向
@@ -315,5 +315,5 @@ static func SetFPSLimit(frame: int) -> void:
 	Engine.max_fps = frame
 
 static func GetColorByContent(color: Color) -> Color:
-	var brightness := color.r * 0.299 + color.g * 0.587 + color.b * 0.114
+	var brightness: float = color.r * 0.299 + color.g * 0.587 + color.b * 0.114
 	return Color.BLACK if brightness > 0.6 else Color.WHITE
