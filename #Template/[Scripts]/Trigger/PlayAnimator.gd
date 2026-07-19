@@ -10,10 +10,10 @@ var _played: Array[bool] = []
 var _finished: Array[bool] = []
 var _progress: Array[float] = []
 var _play_state: Array[bool] = []
-var _trigger_index := -1
-var _last_checkpoint_count := 0
-var _waiting_to_resume := false
-var _process_enabled := false  ## 是否需要 _process 轮询
+var _trigger_index: int = -1
+var _last_checkpoint_count: int = 0
+var _waiting_to_resume: bool = false
+var _process_enabled: bool = false  ## 是否需要 _process 轮询
 
 func _ready() -> void:
 	_last_checkpoint_count = LevelManager.checkpoint_count
@@ -27,7 +27,7 @@ func _ready() -> void:
 		_play_state.append(false)
 
 func _process(_delta: float) -> void:
-	var should_disable := true
+	var should_disable: bool = true
 
 	if LevelManager.checkpoint_count > _last_checkpoint_count:
 		_trigger_index = LevelManager.checkpoint_count

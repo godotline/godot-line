@@ -83,9 +83,10 @@ Defined in `project.godot`:
 - `PascalCase` for class names (`class_name`)
 - `UPPER_SNAKE_CASE` for constants
 - `lowerCamelCase` for signals
-- All GDScript under `#Template/[Scripts]` must use static type annotations for variables (`var value: Type`), including local variables and exported properties. Use explicit types instead of leaving variables untyped; inferred declarations (`:=`) should be replaced with an explicit type when the type is known.
+- All GDScript under `#Template/[Scripts]` must use static type annotations for variables (`var value: Type`), including local variables and exported properties. Use explicit types instead of leaving variables untyped; inferred declarations (`:=`) should be replaced with an explicit type when the type is known. This avoids type inference errors.
 - Function parameters and return values under `#Template/[Scripts]` must also be explicitly typed.
 - `@tool` annotation used extensively for editor preview (animators, triggers, resources)
+- **`@tool` script buttons:** Any `@tool` script that modifies data via button presses (e.g. `_set`, exported button actions) must call `EditorUndoRedoManager` to register the action AND call `notify_property_list_changed()` so the Inspector refreshes. Without this, changes are invisible to the undo system and the Inspector may show stale data.
 - Follow [Godot GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 
 ## Camera System — Two Generations
@@ -110,3 +111,47 @@ Use the editor plugin: **Template > 新建关卡** in the toolbar. Creates `[Sce
 - Player tail (ObjectPool, 256 MeshInstance3D) and RoadMaker road are **two independent systems**.
 - `FogSettings` resource drives fog, not a standalone FogColorChanger script.
 - Physics layers: 1=Player, 2=BaseFloor, 3=BaseWall.
+
+## Performance Best Practices
+
+### Avoid Recursive SceneTreeTimer Creation
+**Problem:** Using `SceneTreeTimer` in recursive patterns (creating a new timer in the timeout callback) causes frequent temporary object allocation, increasing GC pressure and causing FPS drops during gameplay.
+
+**Example (problematic):**
+```gdscript
+func _poll() -> void:
+    # Do something
+    var timer: SceneTreeTimer = get_tree().create_timer(0.5)
+    timer.timeout.connect(_poll)  # Recursive call creates new timer each time
+```
+
+**Solution:** Use persistent `Timer` nodes instead:
+```gdscript
+var _poll_timer: Timer
+
+func _ready() -> void:
+    _poll_timer = Timer.new()
+    _poll_timer.wait_time = 0.5
+    _poll_timer.one_shot = false
+    _poll_timer.autostart = true
+    _poll_timer.timeout.connect(_poll)
+    add_child(_poll_timer)
+
+func _poll() -> void:
+    # Do something (no timer creation)
+```
+
+**Fixed example:** `DebugOverlay.gd` was causing FPS drops due to recursive SceneTreeTimer usage. Fixed by using persistent Timer nodes.
+
+### Cache Expensive Node Lookups
+**Problem:** Calling `get_viewport().get_camera_3d()` or similar lookups every frame is expensive.
+
+**Solution:** Cache the reference once, update only when needed:
+```gdscript
+var _cached_camera: Camera3D
+
+func _ready() -> void:
+    _cached_camera = get_viewport().get_camera_3d()
+```
+
+**Note:** `SetFog.gd` uses `get_viewport().get_camera_3d()` but only on trigger activation (not per-frame), so it's acceptable.

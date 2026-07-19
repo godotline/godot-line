@@ -1,3 +1,4 @@
+// https://github.com/ffttasd/Godot_share_by_dd/blob/main/global_scan/shaders/global_scan.gdshader
 shader_type spatial;
 render_mode unshaded, cull_disabled, depth_draw_never, depth_test_disabled, fog_disabled, shadows_disabled;
 

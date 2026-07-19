@@ -71,7 +71,7 @@ func _run() -> void:
 
 	# 解析谱面
 	var hit_times: Array[float] = []
-	var parse_ok := _parse_beatmap(hit_times)
+	var parse_ok: bool = _parse_beatmap(hit_times)
 	if not parse_ok:
 		return
 
@@ -80,7 +80,7 @@ func _run() -> void:
 		return
 
 	# 获取当前编辑的场景根节点
-	var scene_root := get_tree().edited_scene_root
+	var scene_root: Node = get_tree().edited_scene_root
 	if not scene_root:
 		printerr("[NoteReader] 没有打开的场景。请先打开目标场景。")
 		return
@@ -100,25 +100,25 @@ func _run() -> void:
 		_add_owned_node(scene_root, trigger_holder)
 
 	# 沿谱面生成对象 (匹配原始行为: lastTime 初始为 0, 遍历全部 HitObjects)
-	var last_position := start_position
+	var last_position: Vector3 = start_position
 	var last_time: float = 0.0
-	var current_forward := forward1
-	var road_count := 0
-	var trigger_count := 0
+	var current_forward: Vector3 = forward1
+	var road_count: int = 0
+	var trigger_count: int = 0
 
 	for hit_time in hit_times:
 		# 跳过与上一拍完全相同的时间 (原始行为)
 		if is_equal_approx(hit_time, last_time):
 			continue
 
-		var delta_time := (hit_time - last_time) / 1000.0
-		var this_position := last_position + current_forward * speed * delta_time
+		var delta_time: float = (hit_time - last_time) / 1000.0
+		var this_position: Vector3 = last_position + current_forward * speed * delta_time
 
 		# 路面生成 — 放置在相邻两点的中点
 		if make_road:
-			var midpoint := (last_position + this_position) / 2.0
+			var midpoint: Vector3 = (last_position + this_position) / 2.0
 			if road_scene:
-				var road_piece := road_scene.instantiate()
+				var road_piece: Node = road_scene.instantiate()
 				if road_piece is Node3D:
 					road_piece.position = midpoint
 					_add_owned_node(road_holder, road_piece)
@@ -130,7 +130,7 @@ func _run() -> void:
 		# 自动触发器 — 放置在每一个命中位置
 		if auto_play:
 			if auto_play_scene:
-				var trigger_instance := auto_play_scene.instantiate()
+				var trigger_instance: Node = auto_play_scene.instantiate()
 				if trigger_instance is Node3D:
 					trigger_instance.position = this_position
 					_add_owned_node(trigger_holder, trigger_instance)
@@ -161,17 +161,17 @@ func _run() -> void:
 
 ## 解析 .osu 谱面文件的 [HitObjects] 段
 func _parse_beatmap(out_times: Array[float]) -> bool:
-	var file := FileAccess.open(beatmap_file, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(beatmap_file, FileAccess.READ)
 	if file == null:
 		printerr("[NoteReader] 无法打开文件: ", beatmap_file)
 		return false
 
-	var content := file.get_as_text()
+	var content: String = file.get_as_text()
 	file.close()
 
-	var reading := false
+	var reading: bool = false
 	for line in content.split("\n"):
-		var trimmed := line.strip_edges()
+		var trimmed: String = line.strip_edges()
 
 		if trimmed == "[HitObjects]":
 			reading = true
@@ -182,7 +182,7 @@ func _parse_beatmap(out_times: Array[float]) -> bool:
 			continue
 
 		# .osu HitObject 格式: x,y,time,type,...
-		var parts := trimmed.split(",", false)
+		var parts: PackedStringArray = trimmed.split(",", false)
 		if parts.size() < 3:
 			continue
 
@@ -193,16 +193,16 @@ func _parse_beatmap(out_times: Array[float]) -> bool:
 
 ## 创建默认路面 (BoxMesh)
 func _create_default_road(holder: Node3D, midpoint: Vector3, a: Vector3, b: Vector3) -> void:
-	var road := MeshInstance3D.new()
+	var road: MeshInstance3D = MeshInstance3D.new()
 	road.name = "RoadSegment"
 	road.mesh = BoxMesh.new()
 	road.position = midpoint
 
-	var dx := absf(a.x - b.x)
-	var dz := absf(a.z - b.z)
+	var dx: float = absf(a.x - b.x)
+	var dz: float = absf(a.z - b.z)
 	road.scale = Vector3(dx + road_width, 1.0, dz + road_width)
 
-	var mat := StandardMaterial3D.new()
+	var mat: StandardMaterial3D = StandardMaterial3D.new()
 	mat.albedo_color = road_color
 	road.set_surface_override_material(0, mat)
 
@@ -211,13 +211,13 @@ func _create_default_road(holder: Node3D, midpoint: Vector3, a: Vector3, b: Vect
 
 ## 创建默认自动触发器 (Area3D + BoxShape3D)
 func _create_default_trigger(holder: Node3D, pos: Vector3) -> void:
-	var trigger := Area3D.new()
+	var trigger: Area3D = Area3D.new()
 	trigger.name = "AutoTrigger"
 	trigger.position = pos
 
-	var collision := CollisionShape3D.new()
+	var collision: CollisionShape3D = CollisionShape3D.new()
 	collision.name = "CollisionShape3D"
-	var box_shape := BoxShape3D.new()
+	var box_shape: BoxShape3D = BoxShape3D.new()
 	box_shape.size = trigger_size
 	collision.shape = box_shape
 	trigger.add_child(collision)

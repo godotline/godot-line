@@ -9,13 +9,13 @@ extends Node3D
 @export var final_direction: Vector3 = Vector3.ZERO
 
 func trigger(_body: Node3D) -> void:
-	var pyramid := get_parent().get_parent() as Pyramid
+	var pyramid: Pyramid = get_parent().get_parent() as Pyramid
 	if not pyramid:
 		push_error("PyramidTrigger.gd: BaseTrigger 的父节点不是 Pyramid，无法触发")
 		return
 	pyramid.trigger(type)
 	if type == Pyramid.TriggerType.Final and change_direction:
-		var player := Player.instance
+		var player: Player = Player.instance
 		if player:
 			player.firstDirection = final_direction
 			player.secondDirection = final_direction

@@ -21,7 +21,7 @@ func apply() -> void:
 func apply_tweened(node: Node, duration: float, trans_type: int = 0, ease_type: int = 0) -> void:
 	if not material:
 		return
-	var tween := node.create_tween()
+	var tween: Tween = node.create_tween()
 	tween.set_ease(ease_type)
 	tween.set_trans(trans_type)
 	tween.tween_property(material, "albedo_color", color, duration)

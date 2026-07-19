@@ -24,15 +24,34 @@ signal on_animation_end
 
 @export_tool_button("抓取路径点") var set_end_action: Callable = func() -> void:
 	var target: Node3D = animated_object if animated_object else self
-	target_positions.append(target.global_position)
-	move_durations.append(duration)
-	wait_times.append(0.0)
-	print("终点已添加: ", target_positions[-1])
+	var new_pos: Vector3 = target.global_position
+	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("抓取路径点")
+	undo_redo.add_do_method(self, "_add_waypoint", new_pos, duration, 0.0)
+	undo_redo.add_undo_method(self, "_remove_last_waypoint")
+	undo_redo.commit_action(false)
 	notify_property_list_changed()
 
 @export_tool_button("预览播放") var preview_play_action: Callable = func() -> void:
 	if Engine.is_editor_hint():
 		play_sequence()
+
+func _add_waypoint(pos: Vector3, move_dur: float, wait: float) -> void:
+	target_positions.append(pos)
+	move_durations.append(move_dur)
+	wait_times.append(wait)
+	print("终点已添加: ", pos)
+	notify_property_list_changed()
+
+func _remove_last_waypoint() -> void:
+	if not target_positions.is_empty():
+		target_positions.pop_back()
+	if not move_durations.is_empty():
+		move_durations.pop_back()
+	if not wait_times.is_empty():
+		wait_times.pop_back()
+	print("已撤销最后一个路径点")
+	notify_property_list_changed()
 
 # ---------- 核心逻辑 ----------
 

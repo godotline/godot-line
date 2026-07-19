@@ -58,11 +58,11 @@ extends Node
 			_create_guideline_taps()
 
 
-const DEFAULT_BOX_SCENE := "res://#Template/[Resources]/GuidanceBox.tscn"
-const HIT_PARENT_NAME := "GuidelineTapHolder-BeatmapCreated"
+const DEFAULT_BOX_SCENE: String = "res://#Template/[Resources]/GuidanceBox.tscn"
+const HIT_PARENT_NAME: String = "GuidelineTapHolder-BeatmapCreated"
 
 ## 本项目的局部前进方向 (Player 使用 +Z 作为 forward)
-const LOCAL_FORWARD := Vector3(0, 0, 1)
+const LOCAL_FORWARD: Vector3 = Vector3(0, 0, 1)
 
 
 func _create_guideline_taps() -> void:
@@ -76,7 +76,7 @@ func _create_guideline_taps() -> void:
 		return
 
 	# 获取场景与 Player 参数
-	var scene_root := get_tree().edited_scene_root
+	var scene_root: Node = get_tree().edited_scene_root
 	if not scene_root:
 		printerr("[BeatmapReader] 没有打开的场景。")
 		return
@@ -112,16 +112,16 @@ func _create_guideline_taps() -> void:
 			return
 
 	# 创建容器 hitParent
-	var hit_parent := Node3D.new()
+	var hit_parent: Node3D = Node3D.new()
 	hit_parent.name = HIT_PARENT_NAME
 	_add_owned_node(scene_root, hit_parent)
 
-	var count := 1
+	var count: int = 1
 	var boxes: Array[Node3D] = []
 
 	# 第一个 box — pre-triggered, 放在 startPos - (0, 0.4, 0)
 	# 对应 Unity: Quaternion.Euler(90, firstDir.y, 0)
-	var first_box := _instantiate_box(box_prefab, hit_parent)
+	var first_box: Node3D = _instantiate_box(box_prefab, hit_parent)
 	first_box.position = start_pos - Vector3(0, 0.4, 0)
 	first_box.rotation_degrees = Vector3(0, first_dir.y, 0)
 	_set_triggered(first_box, true)
@@ -129,7 +129,7 @@ func _create_guideline_taps() -> void:
 
 	# 生成后续 box
 	for i in range(hit_time.size()):
-		var focused_box := _instantiate_box(box_prefab, hit_parent)
+		var focused_box: Node3D = _instantiate_box(box_prefab, hit_parent)
 		# focusedBox.transform.position = boxes[^1].transform.position
 		focused_box.position = boxes[count - 1].position
 
@@ -179,7 +179,7 @@ func _read_beatmap() -> void:
 		printerr("[BeatmapReader] 未选择谱面数据文件。")
 		return
 
-	var file := FileAccess.open(beatmap_file, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(beatmap_file, FileAccess.READ)
 	if file == null:
 		printerr("[BeatmapReader] 无法打开文件: ", beatmap_file)
 		return
@@ -192,7 +192,7 @@ func _read_beatmap() -> void:
 	# var index = hit1.IndexOf("[HitObjects]")
 	# hit1.RemoveRange(0, index + 1)
 	# hit1.RemoveAll(text => text == string.Empty)
-	var index := hit1.find("[HitObjects]")
+	var index: int = hit1.find("[HitObjects]")
 	if index == -1:
 		printerr("[BeatmapReader] 谱面中未找到 [HitObjects] 段。")
 		return
@@ -207,7 +207,7 @@ func _read_beatmap() -> void:
 	for parts in hit2:
 		if parts.size() < 3:
 			continue
-		var t := parts[2].to_float() / 1000.0 + offset
+		var t: float = parts[2].to_float() / 1000.0 + offset
 		hit_time.append(t)
 
 
@@ -220,7 +220,7 @@ func _find_player(root: Node) -> Player:
 	if root is Player:
 		return root
 	for child in root.get_children():
-		var found := _find_player(child)
+		var found: Player = _find_player(child)
 		if found:
 			return found
 	return null
@@ -228,7 +228,7 @@ func _find_player(root: Node) -> Player:
 
 ## 实例化 GuidanceBox 并添加到容器
 func _instantiate_box(scene: PackedScene, parent_node: Node3D) -> Node3D:
-	var box := scene.instantiate() as Node3D
+	var box: Node3D = scene.instantiate() as Node3D
 	_add_owned_node(parent_node, box)
 	box.name = "%s_%d" % [box.name, parent_node.get_child_count()]
 	return box
@@ -237,7 +237,7 @@ func _instantiate_box(scene: PackedScene, parent_node: Node3D) -> Node3D:
 ## 将 GuidanceBox 设为预触发状态
 ## GuidanceBox 脚本附在 Area3D 子节点上，用 duck typing 访问
 func _set_triggered(node: Node3D, triggered: bool) -> void:
-	var area := node.get_node_or_null("Area3D")
+	var area: Area3D = node.get_node_or_null("Area3D")
 	if not area:
 		return
 	# 等效于: firstBox.GetComponent<GuidelineTap>().triggered = true

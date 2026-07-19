@@ -28,7 +28,7 @@ func _physics_process(_delta: float) -> void:
 	if not _player_ref or _triggered:
 		set_physics_process(false)
 		return
-	var dist_sq := global_position.distance_squared_to(_player_ref.global_position)
+	var dist_sq: float = global_position.distance_squared_to(_player_ref.global_position)
 	if dist_sq <= TRIGGER_DISTANCE_SQ:
 		_triggered = true
 		set_physics_process(false)

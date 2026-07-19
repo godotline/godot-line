@@ -14,8 +14,8 @@ enum TriggerType {
 
 var left: Node3D
 var right: Node3D
-var width := 1.8
-var duration := 2.0
+var width: float = 1.8
+var duration: float = 2.0
 
 func _ready() -> void:
 	left = get_node_or_null("Left") as Node3D
@@ -35,10 +35,10 @@ func trigger(type: TriggerType) -> void:
 
 func _open_door() -> void:
 	if left:
-		var tween_left := create_tween().set_trans(Tween.TRANS_LINEAR)
+		var tween_left: Tween = create_tween().set_trans(Tween.TRANS_LINEAR)
 		tween_left.tween_property(left, "position:x", -width, duration)
 	if right:
-		var tween_right := create_tween().set_trans(Tween.TRANS_LINEAR)
+		var tween_right: Tween = create_tween().set_trans(Tween.TRANS_LINEAR)
 		tween_right.tween_property(right, "position:x", width, duration)
 	LevelManager.add_revive_listener(_reset_door)
 
@@ -55,6 +55,8 @@ func _stop() -> void:
 
 func _complete() -> void:
 	print("关卡结束")
+	if Player.instance:
+		Player.instance.is_end = true
 	LevelManager.GameOverNormal(true)
 
 func stop_player() -> void:
