@@ -10,7 +10,7 @@ extends Resource
 
 ## Returns a snapshot of the active follower, matching CameraSettings.GetCamera.
 func get_camera() -> CameraSettings:
-	var settings := CameraSettings.new()
+	var settings: CameraSettings = CameraSettings.new()
 	var follower: CameraFollower = CameraFollower.instance
 	if not follower:
 		return settings

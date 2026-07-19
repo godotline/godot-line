@@ -47,7 +47,7 @@ func get_audio_stream() -> AudioStream:
 
 ## 获取音频开始时间（根据检查点）
 func get_audio_start_time() -> float:
-	var start_time := 	LevelManager.music_checkpoint_time if 	LevelManager.music_checkpoint_time > 0.0 else 	LevelManager.anim_time
+	var start_time: float = LevelManager.music_checkpoint_time if LevelManager.music_checkpoint_time > 0.0 else LevelManager.anim_time
 	return start_time if start_time > 0.0 else 0.0
 
 

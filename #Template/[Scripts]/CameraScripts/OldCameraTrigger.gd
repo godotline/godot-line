@@ -22,7 +22,7 @@ extends Area3D
 signal on_finished
 
 var _follower: OldCameraFollower
-var _time_triggered := false
+var _time_triggered: bool = false
 
 
 func _ready() -> void:

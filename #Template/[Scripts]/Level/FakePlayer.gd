@@ -50,7 +50,7 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 
-	var collision := get_node_or_null("CollisionShape3D") as CollisionShape3D
+	var collision: CollisionShape3D = get_node_or_null("CollisionShape3D") as CollisionShape3D
 	if not collision:
 		collision = CollisionShape3D.new()
 		collision.name = "CollisionShape3D"
@@ -85,7 +85,7 @@ func _setup_collision_layers() -> void:
 
 ## 给单个 tail 设置/移除障碍物碰撞
 func _setup_tail_collision(tail: MeshInstance3D) -> void:
-	var body := tail.get_node_or_null("TailObstacle") as StaticBody3D
+	var body: StaticBody3D = tail.get_node_or_null("TailObstacle") as StaticBody3D
 	if body:
 		body.queue_free()
 	if isWall:
@@ -93,7 +93,7 @@ func _setup_tail_collision(tail: MeshInstance3D) -> void:
 		body.name = "TailObstacle"
 		body.collision_layer = 1 << 2  # BaseWall
 		body.collision_mask = 0
-		var col := CollisionShape3D.new()
+		var col: CollisionShape3D = CollisionShape3D.new()
 		col.shape = BoxShape3D.new()
 		col.shape.size = Vector3(1,1,1)
 		body.add_child(col)
@@ -105,7 +105,7 @@ func _physics_process(delta: float) -> void:
 
 	match state:
 		State.Moving:
-			var forward := transform.basis * Vector3.BACK
+			var forward: Vector3 = transform.basis * Vector3.BACK
 			velocity.x = forward.x * speed
 			velocity.z = forward.z * speed
 			if not is_on_floor():
@@ -113,13 +113,13 @@ func _physics_process(delta: float) -> void:
 			move_and_slide()
 
 			if _current_tail and is_on_floor():
-				var midpoint := (_tail_position + global_position) * 0.5
+				var midpoint: Vector3 = (_tail_position + global_position) * 0.5
 				_current_tail.global_position = midpoint
-				var distance := _tail_position.distance_to(global_position)
+				var distance: float = _tail_position.distance_to(global_position)
 				_current_tail.scale = Vector3(1, 1, distance)
 				_current_tail.look_at(global_position, Vector3.UP)
 
-			var is_grounded_now := is_on_floor()
+			var is_grounded_now: bool = is_on_floor()
 			if _previous_frame_is_grounded != is_grounded_now:
 				_previous_frame_is_grounded = is_grounded_now
 				if is_grounded_now:
@@ -137,13 +137,13 @@ func _process(_delta: float) -> void:
 	match state:
 		State.Moving:
 			if not synchronismWithPlayer:
-				var key_pressed := Input.is_key_pressed(createKey)
+				var key_pressed: bool = Input.is_key_pressed(createKey)
 				if key_pressed and not _last_key_state:
 					turn()
 					_create_turn_trigger()
 				_last_key_state = key_pressed
 			else:
-				var clicked := LevelManager.Clicked
+				var clicked: bool = LevelManager.Clicked
 				if clicked and not _last_clicked_state:
 					turn()
 					_create_turn_trigger()
@@ -154,18 +154,18 @@ func turn() -> void:
 	_create_tail()
 
 func _create_tail() -> void:
-	var now_q := global_transform.basis.get_rotation_quaternion()
-	var tail_half := 0.5
+	var now_q: Quaternion = global_transform.basis.get_rotation_quaternion()
+	var tail_half: float = 0.5
 
 	if _current_tail:
-		var last_q := _current_tail.global_transform.basis.get_rotation_quaternion()
-		var angle := last_q.angle_to(now_q)
+		var last_q: Quaternion = _current_tail.global_transform.basis.get_rotation_quaternion()
+		var angle: float = last_q.angle_to(now_q)
 		if angle >= 0.0 and angle <= deg_to_rad(90.0):
 			tail_half = 0.5 * tan(angle * 0.5)
 		else:
 			tail_half = -0.5 * tan((deg_to_rad(180.0) - angle) * 0.5)
-		var end := _tail_position + last_q * Vector3.FORWARD * (_tail_position.distance_to(global_position) + tail_half)
-		var mid := (_tail_position + end) * 0.5
+		var end: Vector3 = _tail_position + last_q * Vector3.FORWARD * (_tail_position.distance_to(global_position) + tail_half)
+		var mid: Vector3 = (_tail_position + end) * 0.5
 		mid.y = global_position.y
 		_current_tail.global_position = mid
 		_current_tail.scale = Vector3(1, 1, _tail_position.distance_to(end))
@@ -186,7 +186,7 @@ func _create_tail() -> void:
 		_setup_tail_collision(_current_tail)
 
 func _create_tail_segment() -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
+	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.name = "FakeTail"
 	if _mesh_instance:
 		mi.mesh = _mesh_instance.mesh
@@ -221,16 +221,16 @@ func _create_turn_trigger() -> void:
 	if not _trigger_holder:
 		return
 	
-	var area := Area3D.new()
+	var area: Area3D = Area3D.new()
 	area.name = "FakePlayerTurnTrigger %d" % _trigger_id
 	_trigger_id += 1
 
-	var collision := CollisionShape3D.new()
+	var collision: CollisionShape3D = CollisionShape3D.new()
 	collision.shape = BoxShape3D.new()
 	collision.shape.size = Vector3(1, 1, 1)
 	area.add_child(collision)
 
-	var trigger := FakePlayerTrigger.new()
+	var trigger: FakePlayerTrigger = FakePlayerTrigger.new()
 	trigger.targetPlayer = self
 	trigger.type = FakePlayerTrigger.SetType.Turn
 	area.add_child(trigger)

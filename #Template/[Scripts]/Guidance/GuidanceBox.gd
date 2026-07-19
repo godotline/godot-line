@@ -26,7 +26,7 @@ func _ready() -> void:
 
 	# Unity: if (Distance > appearDistance) Disappear(false);
 	# Unity 的 Distance 返回 sqrMagnitude，直接对比 appearDistance（不做平方）
-	var dist_sq := global_position.distance_squared_to(_player.global_position)
+	var dist_sq: float = global_position.distance_squared_to(_player.global_position)
 	if dist_sq > appear_distance:
 		_disappear(false)
 
@@ -38,7 +38,7 @@ func _process(_delta: float) -> void:
 	if not _player:
 		push_error("GuidanceBox.gd: Player.instance 为空，无法计算距离")
 		return
-	var dist_sq := global_position.distance_squared_to(_player.global_position)
+	var dist_sq: float = global_position.distance_squared_to(_player.global_position)
 
 	# Unity Update(): if (!triggered && Distance <= appearDistance && !Renderer.enabled) Appear();
 	if not _displayed and dist_sq <= appear_distance:
@@ -56,7 +56,7 @@ func _trigger() -> void:
 	triggered = true
 	set_process(false)
 	_disappear(true)
-	var effect := _trigger_effect.instantiate() as Node3D
+	var effect: Node3D = _trigger_effect.instantiate() as Node3D
 	get_tree().current_scene.add_child(effect)
 	effect.global_position = global_position
 	await get_tree().create_timer(1.0).timeout

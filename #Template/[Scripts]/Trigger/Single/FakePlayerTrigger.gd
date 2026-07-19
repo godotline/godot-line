@@ -28,9 +28,9 @@ func _on_body_entered(body: Node3D) -> void:
 	if not targetPlayer:
 		return
 
-	var is_player := body is Player
-	var is_fake_player := body is FakePlayer
-	var is_obstacle := body.is_in_group("obstacle")
+	var is_player: bool = body is Player
+	var is_fake_player: bool = body is FakePlayer
+	var is_obstacle: bool = body.is_in_group("obstacle")
 
 	# ChangeDirection 和 SetState 由真实玩家触发
 	if is_player:

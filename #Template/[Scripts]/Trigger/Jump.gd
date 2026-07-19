@@ -15,7 +15,7 @@ func _ready() -> void:
 
 ## 由父节点 BaseTrigger 调用的入口方法
 func trigger(body: Node3D) -> void:
-	var character := body as CharacterBody3D
+	var character: CharacterBody3D = body as CharacterBody3D
 	if character:
 		var jump_speed: float = sqrt(2 * 9.8 * height)
 		character.velocity += Vector3(0, jump_speed, 0)

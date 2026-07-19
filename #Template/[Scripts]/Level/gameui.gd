@@ -1,7 +1,7 @@
 extends Control
-var levelname := "level name"
+var levelname: String = "level name"
 @export var crown_no_light: Texture2D
-var 一 := false
+var 一: bool = false
 
 ## 皇冠动画名称数组，按数量索引
 const CROWN_ANIMS: Array[String] = ["", "1crown", "2crown", "3crown"]
@@ -11,7 +11,7 @@ func _ready() -> void:
 		levelname = Player.instance.level_data.levelTitle
 	else:
 		push_error("gameui.gd: Player.instance 或 level_data 为空，无法读取关卡标题")
-	$".".visible = false
+	$"." .visible = false
 	set_process(false)  ## 信号驱动，不需要轮询
 
 	# 连接 Player 游戏结束信号（信号驱动，替代轮询）
@@ -38,13 +38,13 @@ func _show_ui() -> void:
 	else:
 		push_error("gameui.gd: title 节点未找到")
 	_update_crown_display(LevelManager.crown)
-	$".".visible = true
+	$"." .visible = true
 
 
 ## 根据皇冠数量更新显示（使用数组替代多重 if-elif）
 func _update_crown_display(count: int) -> void:
 	# 获取所有皇冠节点
-	var crown_nodes := [
+	var crown_nodes: Array[Node] = [
 		get_node_or_null("PerfactCrownNoLight"),
 		get_node_or_null("PerfactCrownNoLight2"),
 		get_node_or_null("PerfactCrownNoLight3"),
@@ -74,7 +74,7 @@ func _on_back_pressed() -> void:
 
 func _on_revive_pressed() -> void:
 	一 = false
-	$".".visible = false
+	$"." .visible = false
 	LevelManager.is_end = false
 	if not Player.instance:
 		push_error("gameui.gd: Player.instance 为空，无法复活")

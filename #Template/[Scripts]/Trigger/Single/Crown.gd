@@ -48,12 +48,12 @@ func _take_crown() -> void:
 	_aura_particles.restart()
 	_aura_particles.emitting = true
 
-	var target_pos := _crown_sprite.position
-	var half_duration := aura_duration / 2.0
+	var target_pos: Vector3 = _crown_sprite.position
+	var half_duration: float = aura_duration / 2.0
 
 	_crown_mesh_shrink()
 
-	var tw := create_tween()
+	var tw: Tween = create_tween()
 	tw.set_parallel(true)
 
 	tw.tween_property(_aura_particles, "position:x", target_pos.x, aura_duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
@@ -73,7 +73,7 @@ func _crown_mesh_shrink() -> void:
 		_crown_mesh = null
 
 func _crown_sprite_fade() -> void:
-	var tw := create_tween()
+	var tw: Tween = create_tween()
 	tw.tween_property(_crown_sprite, "modulate:a", 0.0, aura_duration * 0.5)
 	tw.tween_callback(func() -> void:
 		if light_texture:
@@ -85,7 +85,7 @@ func _refresh_particles_color() -> void:
 	pass
 
 func _set_particles_lifetime(duration: float) -> void:
-	var systems := _aura_particles.get_children()
+	var systems: Array[Node] = _aura_particles.get_children()
 	systems.append(_aura_particles)
 	for system in systems:
 		if system is GPUParticles3D:

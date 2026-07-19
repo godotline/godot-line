@@ -21,7 +21,7 @@ enum TransformType { New, Add }
 var _is_playing: bool = false
 var _initialized: bool = false
 var _finished: bool = false
-var _trigger_index := -1
+var _trigger_index: int = -1
 var _cached_music_player: AudioStreamPlayer = null
 
 signal on_animation_start
@@ -30,27 +30,57 @@ signal on_animation_end
 # 工具按钮操作的是自身（子节点）
 @export_tool_button("Get Original Value")
 var get_start_action: Callable = func() -> void:
+	var old_value: Vector3 = start_value
 	start_value = _get_value(self)
+	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Get Original Value")
+	undo_redo.add_do_property(self, "start_value", start_value)
+	undo_redo.add_undo_property(self, "start_value", old_value)
+	undo_redo.commit_action(false)
+	notify_property_list_changed()
 
 @export_tool_button("Set Original Value")
 var set_start_action: Callable = func() -> void:
-	_set_value(self, start_value)
+	var old_value: Vector3 = _get_value(self)
+	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Set Original Value")
+	undo_redo.add_do_method(self, "_set_value", self, start_value)
+	undo_redo.add_undo_method(self, "_set_value", self, old_value)
+	undo_redo.commit_action(false)
+	notify_property_list_changed()
 
 @export_tool_button("Get New Value")
 var get_end_action: Callable = func() -> void:
+	var old_value: Vector3 = end_offset
 	match transform_type:
 		TransformType.New:
 			end_offset = _get_value(self)
 		TransformType.Add:
 			end_offset = _get_value(self) - start_value
+	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Get New Value")
+	undo_redo.add_do_property(self, "end_offset", end_offset)
+	undo_redo.add_undo_property(self, "end_offset", old_value)
+	undo_redo.commit_action(false)
+	notify_property_list_changed()
 
 @export_tool_button("Set New Value")
 var set_end_action: Callable = func() -> void:
+	var old_value: Vector3 = _get_value(self)
+	var target_value: Vector3
 	match transform_type:
 		TransformType.New:
+			target_value = end_offset
 			_set_value(self, end_offset)
 		TransformType.Add:
+			target_value = start_value + end_offset
 			_set_value(self, start_value + end_offset)
+	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Set New Value")
+	undo_redo.add_do_method(self, "_set_value", self, target_value)
+	undo_redo.add_undo_method(self, "_set_value", self, old_value)
+	undo_redo.commit_action(false)
+	notify_property_list_changed()
 
 @export_tool_button("Play")
 var play_action: Callable = func() -> void: Trigger()
@@ -71,7 +101,7 @@ func _process(_delta: float) -> void:
 	if LevelManager.GameState != LevelManager.GameStatus.Playing:
 		return
 	if not _cached_music_player:
-		var player := Player.instance
+		var player: Player = Player.instance
 		if player:
 			_cached_music_player = player.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 	if _cached_music_player and _cached_music_player.playing and _cached_music_player.get_playback_position() > trigger_time:
