@@ -17,9 +17,9 @@ signal post_toggled(is_on: bool)
 @onready var about_panel: Panel = $UIContainer/AboutPanel
 @onready var about_content: Panel = $UIContainer/AboutPanel/AboutContent
 # Setting item mode constants
-const MODE_CYCLIC = 0
-const MODE_RANGE = 1
-const MODE_LATENCY = 2
+const MODE_CYCLIC: int = 0
+const MODE_RANGE: int = 1
+const MODE_LATENCY: int = 2
 
 @onready var _set_auto_play: Node = $SetAutoPlay
 
@@ -93,7 +93,7 @@ func _init_setting_states() -> void:
 
 func _populate_about_from_level_data() -> void:
 	# Player 使用 class_name + static var instance 模式
-	var player := Player.instance if Player.instance != null else null
+	var player: Player = Player.instance if Player.instance != null else null
 	if not player or not player.level_data:
 		return
 	var ld: LevelData = player.level_data
@@ -109,7 +109,7 @@ func _populate_about_from_level_data() -> void:
 		for child in author_container.get_children():
 			child.queue_free()
 		for a in ld.authors:
-			var btn := Button.new()
+			var btn: Button = Button.new()
 			btn.text = a.name
 			btn.flat = true
 			btn.add_theme_font_size_override("font_size", 16)
@@ -141,8 +141,8 @@ func _show_about() -> void:
 	_about_visible = true
 	about_panel.visible = true
 
-	const REST := -150.0
-	const SHIFT := 400.0
+	const REST: float = -150.0
+	const SHIFT: float = 400.0
 	about_content.offset_top = REST + SHIFT
 	about_content.offset_bottom = -REST + SHIFT
 	about_content.rotation_degrees = 15
@@ -160,8 +160,8 @@ func _hide_about() -> void:
 		return
 	_about_visible = false
 
-	const REST := -150.0
-	const SHIFT := 400.0
+	const REST: float = -150.0
+	const SHIFT: float = 400.0
 	var tween: Tween = create_tween().set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
 	tween.set_parallel(true)
 	tween.tween_property(about_content, "offset_top", REST + SHIFT, 0.3)

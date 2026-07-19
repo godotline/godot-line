@@ -5,10 +5,10 @@ extends Node3D
 
 var _percent_nodes: Dictionary = {}
 var _percent_values: Array[int] = []
-var _is_ready := false
+var _is_ready: bool = false
 var _owner_restore: Dictionary = {}
 var _display_node: MeshInstance3D
-var _pending_refresh := false
+var _pending_refresh: bool = false
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
@@ -40,9 +40,9 @@ func _collect_percent_nodes() -> void:
 	_percent_values.clear()
 	for child in get_children():
 		if child is MeshInstance3D:
-			var name_str := str(child.name)
+			var name_str: String = str(child.name)
 			if name_str.is_valid_int():
-				var value := int(name_str)
+				var value: int = int(name_str)
 				_percent_nodes[value] = child
 				_percent_values.append(value)
 	_percent_values.sort()
@@ -66,7 +66,7 @@ func _set_selected_percent(value: int) -> void:
 
 func _apply_selection(value: int) -> void:
 	if _display_node != null and _display_node.mesh is TextMesh:
-		var text_mesh := _display_node.mesh as TextMesh
+		var text_mesh: TextMesh = _display_node.mesh as TextMesh
 		text_mesh.text = "%d%%" % value
 	for key in _percent_nodes.keys():
 		var node: MeshInstance3D = _percent_nodes[key]
@@ -80,7 +80,7 @@ func _prepare_scene_for_save() -> void:
 		_display_node = _percent_nodes[_percent_values[0]]
 	_apply_selection(selected_percent)
 	_owner_restore.clear()
-	var root := get_tree().edited_scene_root
+	var root: Node = get_tree().edited_scene_root
 	if root == null:
 		return
 	for key in _percent_nodes.keys():

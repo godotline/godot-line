@@ -19,10 +19,10 @@ func apply_fog() -> void:
 	if not fog_settings:
 		return
 	
-	var camera := get_viewport().get_camera_3d()
+	var camera: Camera3D = get_viewport().get_camera_3d()
 	if not camera:
 		return
-	var env := camera.get_environment()
+	var env: Environment = camera.get_environment()
 	if not env:
 		return
 

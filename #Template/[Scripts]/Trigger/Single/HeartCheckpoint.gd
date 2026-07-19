@@ -29,7 +29,7 @@ func _on_checkpoint_body_entered(body: Node3D) -> void:
 	if used:
 		return
 	if rotator:
-		var tw := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		var tw: Tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 		tw.tween_property(rotator, "scale", Vector3.ONE, 0.5)
 	_enter_trigger(body)
 
@@ -37,7 +37,7 @@ func _on_Crown_body_entered(_line: Node3D) -> void:
 	if used:
 		return
 	#$AnimationPlayer.play("crown")
-	var anim_player := get_node_or_null("AnimationPlayer")
+	var anim_player: AnimationPlayer = get_node_or_null("AnimationPlayer") as AnimationPlayer
 	if anim_player:
 		await anim_player.animation_finished
 	else:

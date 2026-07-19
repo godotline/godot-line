@@ -36,7 +36,7 @@ func _apply_color(sc: SingleColor, _body: Node3D) -> void:
 	mesh.material_override = mat
 
 	# 补间动画
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	tween.set_ease(ease_type)
 	tween.set_trans(trans_type)
 	tween.tween_property(mat, "albedo_color", sc.color, duration)

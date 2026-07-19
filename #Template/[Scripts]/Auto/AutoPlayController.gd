@@ -20,7 +20,7 @@ func _init_triggers() -> void:
 		push_warning("[AutoPlayController] GuidanceController 或 box_holder 未设置")
 		return
 
-	var boxes := GuidanceController.Instance.box_holder.get_children()
+	var boxes: Array[Node] = GuidanceController.Instance.box_holder.get_children()
 	if boxes.is_empty():
 		return
 
@@ -30,26 +30,26 @@ func _init_triggers() -> void:
 
 	# 从第二个 box 开始创建触发器（与 Unity 版一致，跳过第 0 个）
 	for i in range(1, boxes.size()):
-		var box := boxes[i]
+		var box: Node = boxes[i]
 		if not box is Node3D:
 			continue
-		var trigger := _create_trigger(box.global_position, i)
+		var trigger: Area3D = _create_trigger(box.global_position, i)
 		_triggers.append(trigger)
 
 	set_holder(enable)
 
 func _create_trigger(pos: Vector3, index: int) -> Area3D:
-	var area := Area3D.new()
+	var area: Area3D = Area3D.new()
 	area.name = "AutoPlayTrigger %d" % index
 	area.collision_mask = 1  # 检测 Player（layer 1），对齐 Unity 的 CompareTag("Player")
 
-	var collision := CollisionShape3D.new()
-	var box := BoxShape3D.new()
+	var collision: CollisionShape3D = CollisionShape3D.new()
+	var box: BoxShape3D = BoxShape3D.new()
 	box.size = Vector3(4, 4, 4)  # 对齐 Unity CreateTrigger(PrimitiveType.Cube, scale=4)
 	collision.shape = box
 	area.add_child(collision)
 
-	var script := load("res://#Template/[Scripts]/Auto/AutoPlay.gd")
+	var script: Script = load("res://#Template/[Scripts]/Auto/AutoPlay.gd")
 	area.set_script(script)
 
 	_holder.add_child(area)

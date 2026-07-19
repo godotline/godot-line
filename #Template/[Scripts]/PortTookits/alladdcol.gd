@@ -7,14 +7,24 @@ extends Node3D
 @export var create_collisions: bool = false:
 	set(value):
 		if value and Engine.is_editor_hint():
-			create_static_bodies_for_meshes()
+			var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+			undo_redo.create_action("创建碰撞体")
+			undo_redo.add_do_method(self, "create_static_bodies_for_meshes")
+			undo_redo.add_undo_method(self, "remove_all_static_bodies")
+			undo_redo.commit_action(false)
 			create_collisions = false
+			notify_property_list_changed()
 
 @export var remove_collisions: bool = false:
 	set(value):
 		if value and Engine.is_editor_hint():
-			remove_all_static_bodies()
+			var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+			undo_redo.create_action("移除碰撞体")
+			undo_redo.add_do_method(self, "remove_all_static_bodies")
+			undo_redo.add_undo_method(self, "create_static_bodies_for_meshes")
+			undo_redo.commit_action(false)
 			remove_collisions = false
+			notify_property_list_changed()
 
 # 创建碰撞体
 func create_static_bodies_for_meshes() -> void:

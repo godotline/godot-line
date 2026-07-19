@@ -6,12 +6,12 @@ extends RefCounted
 ## Unity 用 PlayerPrefs.GetFloat/SetFloat("MusicDelay"/"MusicVolume")
 ## Godot 用 ConfigFile 存到 user://settings.cfg
 
-const SETTINGS_PATH := "user://settings.cfg"
-const SECTION := "audio"
+const SETTINGS_PATH: String = "user://settings.cfg"
+const SECTION: String = "audio"
 
 ## 保存当前延迟和音量设置
 static func save_settings(delay: float, volume: float) -> void:
-	var config := ConfigFile.new()
+	var config: ConfigFile = ConfigFile.new()
 	config.set_value(SECTION, "music_delay", delay)
 	config.set_value(SECTION, "music_volume", volume)
 	config.save(SETTINGS_PATH)
@@ -19,7 +19,7 @@ static func save_settings(delay: float, volume: float) -> void:
 ## 加载已保存的设置，返回 { "delay": float, "volume": float }
 ## 首次使用时自动回退为默认值（delay=0.0, volume=1.0）
 static func load_settings() -> Dictionary:
-	var config := ConfigFile.new()
+	var config: ConfigFile = ConfigFile.new()
 	if config.load(SETTINGS_PATH) != OK:
 		return { "delay": 0.0, "volume": 1.0 }
 	return {

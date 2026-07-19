@@ -21,15 +21,15 @@ func _get_color() -> void:
 	if not texture_rect or not texture_rect.texture:
 		return
 	
-	var image := texture_rect.texture.get_image()
+	var image: Image = texture_rect.texture.get_image()
 	if not image:
 		return
 	
-	var main_color := _get_main_color(image)
+	var main_color: Color = _get_main_color(image)
 	
 	# Set camera background color
 	if camera:
-		var env := camera.environment
+		var env: Environment = camera.environment
 		if not env:
 			env = Environment.new()
 			camera.environment = env
@@ -37,24 +37,24 @@ func _get_color() -> void:
 		env.background_color = main_color
 
 func _get_main_color(image: Image) -> Color:
-	var color_count := {}
-	var width := image.get_width()
-	var height := image.get_height()
+	var color_count: Dictionary = {}
+	var width: int = image.get_width()
+	var height: int = image.get_height()
 	
 	for i in sample_count:
-		var x := randi() % width
-		var y := randi() % height
-		var color := image.get_pixel(x, y)
+		var x: int = randi() % width
+		var y: int = randi() % height
+		var color: Color = image.get_pixel(x, y)
 		
 		# Use color as key (convert to string for dictionary)
-		var color_key := "%f,%f,%f,%f" % [color.r, color.g, color.b, color.a]
+		var color_key: String = "%f,%f,%f,%f" % [color.r, color.g, color.b, color.a]
 		if color_count.has(color_key):
 			color_count[color_key]["count"] += 1
 		else:
 			color_count[color_key] = {"color": color, "count": 1}
 	
-	var main_color := Color.WHITE
-	var max_count := 0
+	var main_color: Color = Color.WHITE
+	var max_count: int = 0
 	
 	for key in color_count:
 		var data: Dictionary = color_count[key]
