@@ -3,8 +3,102 @@
 [ext_resource type="ArrayMesh" uid="uid://dug07r8y5fnwl" path="res://#Template/[Resources]/Models/Diamond.obj" id="1"]
 [ext_resource type="Script" uid="uid://bd13q1s154gh4" path="res://#Template/[Scripts]/Trigger/Single/Gem.gd" id="2"]
 [ext_resource type="Material" uid="uid://yr2s0ybyebck" path="res://#Template/[Materials]/Diamond.tres" id="3_lsh75"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/Particle.png" id="4_particle"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_v601g"]
+
+[sub_resource type="Gradient" id="Gradient_gem_sprirt"]
+offsets = PackedFloat32Array(0, 0.5382925, 1)
+colors = PackedColorArray(1, 1, 1, 0.49019608, 1, 1, 1, 0.49019608, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_gem_sprirt"]
+gradient = SubResource("Gradient_gem_sprirt")
+
+[sub_resource type="Curve" id="Curve_gem_sprirt_scale"]
+max_value = 5.0
+_data = [Vector2(0, 0.9051723), 0.0, 0.0, 0, 0, Vector2(0.8390244, 5), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_gem_sprirt_scale"]
+curve = SubResource("Curve_gem_sprirt_scale")
+
+[sub_resource type="Gradient" id="Gradient_gem_tail"]
+offsets = PackedFloat32Array(0, 0.0662089, 0.334493, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.39215687, 1, 1, 1, 0.39215687, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_gem_tail"]
+gradient = SubResource("Gradient_gem_tail")
+
+[sub_resource type="Gradient" id="Gradient_gem_aura"]
+offsets = PackedFloat32Array(0, 0.0662089, 0.334493, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_gem_aura"]
+gradient = SubResource("Gradient_gem_aura")
+
+[sub_resource type="Curve" id="Curve_gem_aura_scale"]
+max_value = 4.0
+_data = [Vector2(0, 0.79310346), 1.4613726, 1.4613726, 0, 0, Vector2(1, 4), 0.4642752, 0.4642752, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_gem_aura_scale"]
+curve = SubResource("Curve_gem_aura_scale")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gem_sprirt"]
+angular_velocity_min = 100.0
+angular_velocity_max = 100.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 0.0
+scale_min = 1.0
+scale_max = 1.0
+scale_curve = SubResource("CurveTexture_gem_sprirt_scale")
+color_ramp = SubResource("GradientTexture1D_gem_sprirt")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gem_tail"]
+angle_min = 45.0
+angle_max = 270.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 0.0
+scale_min = 0.2
+scale_max = 0.4
+scale_curve = SubResource("CurveTexture_gem_aura_scale")
+color_ramp = SubResource("GradientTexture1D_gem_tail")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gem_aura"]
+angle_min = 45.0
+angle_max = 270.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 0.0
+emission_shape = 3
+emission_box_extents = Vector3(0.5, 0.5, 0.5)
+scale_min = 1.0
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_gem_aura_scale")
+color_ramp = SubResource("GradientTexture1D_gem_aura")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gem_aura"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.6544118, 0.8712983, 1, 1)
+albedo_texture = ExtResource("4_particle")
+emission_enabled = true
+emission = Color(0.6544118, 0.8712983, 1, 1)
+emission_energy_multiplier = 6.0
+billboard_mode = 3
+billboard_keep_scale = true
+
+[sub_resource type="QuadMesh" id="QuadMesh_gem_aura"]
+material = SubResource("StandardMaterial3D_gem_aura")
+size = Vector2(1, 1)
 
 [sub_resource type="Animation" id="Animation_ptpe0"]
 length = 0.001
@@ -58,5 +152,46 @@ surface_material_override/0 = ExtResource("3_lsh75")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=889977260]
 libraries/ = SubResource("AnimationLibrary_hg8oc")
+
+[node name="Sprirt" type="GPUParticles3D" parent="." unique_id=1137045703]
+top_level = true
+emitting = false
+amount = 1
+lifetime = 7.0
+one_shot = true
+explosiveness = 1.0
+randomness = 0.1
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_gem_sprirt")
+draw_pass_1 = SubResource("QuadMesh_gem_aura")
+
+[node name="Tail" type="GPUParticles3D" parent="." unique_id=1137045705]
+top_level = true
+emitting = false
+amount = 128
+lifetime = 0.05
+one_shot = false
+local_coords = false
+process_material = SubResource("ParticleProcessMaterial_gem_tail")
+draw_pass_1 = SubResource("QuadMesh_gem_aura")
+
+[node name="Aura" type="GPUParticles3D" parent="." unique_id=1137045704]
+top_level = true
+emitting = false
+amount = 3
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+randomness = 0.1
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_gem_aura")
+draw_pass_1 = SubResource("QuadMesh_gem_aura")
+
+[node name="GemLight" type="OmniLight3D" parent="." unique_id=1137045706]
+visible = false
+light_color = Color(1, 1, 1, 1)
+light_energy = 6.0
+omni_range = 4.0
+shadow_enabled = false
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
