@@ -16,12 +16,12 @@ func _enter_tree() -> void:
 	_check_first_run()
 
 	_menu_button = MenuButton.new()
-	_menu_button.text = "Template"
+	_menu_button.text = "模板 2.2"
 	_menu_button.tooltip_text = "Template 相关资源"
 	_menu_button.switch_on_hover = true
 
 	var popup: PopupMenu = _menu_button.get_popup()
-	popup.add_item("Tutorial", 0)
+	popup.add_item("模板手册", 0)
 	popup.add_item("新建关卡", 1)
 	popup.id_pressed.connect(_on_menu_item_pressed)
 
