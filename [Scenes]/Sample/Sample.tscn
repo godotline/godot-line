@@ -192,6 +192,12 @@ transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 4.198456, 0.50000095, 12.
 [node name="ScanQuad" parent="Scene_Group/Scene_001/Crystal" index="2" unique_id=540720836]
 material_override = ExtResource("20_j2eg4")
 
+[node name="CrystalThunder" parent="Scene_Group/Scene_001/Crystal" index="3" unique_id=764125258]
+visible = false
+
+[node name="CrystalLight" parent="Scene_Group/Scene_001/Crystal" index="5" unique_id=1137045707]
+light_energy = 0.0
+
 [editable path="BasicOBJ_Group/CameraRoot"]
 [editable path="Scene_Group/Scene_001/Pyramid"]
 [editable path="Scene_Group/Scene_001/Crystal"]
