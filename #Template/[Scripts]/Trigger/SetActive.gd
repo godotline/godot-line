@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 ## SetActiveTrigger - 激活/禁用触发器
 ## 触发时激活/禁用指定节点，支持复活时恢复状态

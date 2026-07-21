@@ -1,5 +1,5 @@
 @tool
-extends Node3D
+extends Node
 
 @export var colors: Array[SingleColor] = []
 @export var duration: float = 2.0

@@ -20,6 +20,8 @@
 [ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Pyramid.tscn" id="18_emri0"]
 [ext_resource type="PackedScene" uid="uid://c757j6a6ewnbb" path="res://#Template/Crystal.tscn" id="19_6gt33"]
 [ext_resource type="Material" uid="uid://cnxil1uef6kon" path="res://#Template/[Materials]/CrystalScan.tres" id="20_j2eg4"]
+[ext_resource type="Script" uid="uid://bev0h34up6j0c" path="res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd" id="21_6uxci"]
+[ext_resource type="Script" uid="uid://cykhxwp0lnani" path="res://#Template/[Scripts]/Animator/MovingPosMax.gd" id="21_tdro7"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
@@ -180,11 +182,17 @@ transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 7.882288, 0, 61.789726)
 [node name="Obstacle3" parent="Scene_Group/Scene_001" unique_id=460537276 instance=ExtResource("15_6gt33")]
 transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 18.532341, 4.0459642, 9.804915)
 
+[node name="localpos" type="Node3D" parent="Scene_Group/Scene_001/Obstacle3" unique_id=412952206]
+script = ExtResource("9_0v7qw")
+transform_type = 1
+start_value = Vector3(18.532341, 4.0459642, 9.804915)
+end_offset = Vector3(0, 10, 0)
+
 [node name="Gem" parent="Scene_Group/Scene_001" unique_id=149611988 instance=ExtResource("16_s0yhu")]
 transform = Transform3D(1.9999998, 0, 0, 0, 2, 0, 0, 0, 1.9999998, 0.17272472, 0.15720987, 5.287298)
 
 [node name="Obstacle4" parent="Scene_Group/Scene_001" unique_id=1353085919 instance=ExtResource("15_6gt33")]
-transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 4.0459623, 23.695015)
+transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 28.07723, 23.695015)
 
 [node name="Crystal" parent="Scene_Group/Scene_001" unique_id=521365085 instance=ExtResource("19_6gt33")]
 transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 4.198456, 0.50000095, 12.258225)
@@ -198,6 +206,22 @@ visible = false
 [node name="CrystalLight" parent="Scene_Group/Scene_001/Crystal" index="5" unique_id=1137045707]
 light_energy = 0.0
 
+[node name="Trigger" parent="." unique_id=1812285461 instance=ExtResource("11_mq52h")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 2.1625028, -0.5, 12.624214)
+
+[node name="Comp1" parent="Trigger" index="2" unique_id=185958791 node_paths=PackedStringArray("animated_object")]
+script = ExtResource("21_tdro7")
+animated_object = NodePath("../../Scene_Group/Scene_001/Obstacle4")
+target_positions = Array[Vector3]([Vector3(1.9902518, 25.029184, 23.695015), Vector3(1.9902518, 4.0123825, 23.695015)])
+move_durations = Array[float]([0.0, 1.0])
+wait_times = Array[float]([0.0, 0.0])
+
+[node name="cam" type="Node3D" parent="Trigger" unique_id=656339306]
+script = ExtResource("21_6uxci")
+offset = Vector3(0, -10, 0)
+camera_rotation = Vector3(54, 35, 0)
+
 [editable path="BasicOBJ_Group/CameraRoot"]
 [editable path="Scene_Group/Scene_001/Pyramid"]
 [editable path="Scene_Group/Scene_001/Crystal"]
+[editable path="Trigger"]

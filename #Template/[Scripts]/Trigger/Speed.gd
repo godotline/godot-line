@@ -1,5 +1,5 @@
 @tool
-extends Node3D
+extends Node
 ## ChangeSpeedTrigger - 速度改变触发器
 ## 当玩家进入时改变其移动速度
 
