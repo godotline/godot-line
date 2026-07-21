@@ -1,5 +1,5 @@
 @tool
-extends Node3D
+extends Node
 ## KillPlayer - 接触即死触发器
 ## 当玩家进入触发区域时立即死亡
 ## 三种模式：Hit（撞墙）/ Drowned（落水）/ Border（出图）

@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 ## SetFog - 雾设置组件
 ## 由父节点 BaseTrigger 触发，用 Tween 过渡场景环境雾设置
 

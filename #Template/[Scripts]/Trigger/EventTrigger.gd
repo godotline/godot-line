@@ -1,5 +1,5 @@
 @tool
-extends Node3D
+extends Node
 
 ## 事件触发器 - 可配置多个目标节点和方法
 ## 纯组件模式：作为 BaseTrigger 的子节点，依赖父节点处理碰撞

@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 ## 动画播放触发器 - 纯组件模式
 ## 作为 BaseTrigger 的子节点，依赖父节点处理碰撞
