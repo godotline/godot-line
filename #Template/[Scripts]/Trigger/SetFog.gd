@@ -42,9 +42,8 @@ func apply_fog() -> void:
 		tween.set_ease(ease_type)
 		tween.set_trans(trans_type)
 		tween.tween_property(env, "fog_light_color", fog_settings.fog_color, duration)
-		tween.parallel().tween_property(env, "fog_light_energy", 1.0, duration)
-		tween.parallel().tween_property(env, "fog_aerial_perspective", 0.0, duration)
-		# Godot 4.x 的雾密度参数
+		tween.parallel().tween_property(env, "fog_depth_begin", fog_settings.start, duration)
+		tween.parallel().tween_property(env, "fog_depth_end", fog_settings.end, duration)
 		tween.tween_callback(func(): on_animation_end.emit())
 	else:
 		on_animation_end.emit()
