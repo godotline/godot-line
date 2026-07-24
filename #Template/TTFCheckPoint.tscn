@@ -1,0 +1,88 @@
+[gd_scene format=3 uid="uid://dof0b0pubsh14"]
+
+[ext_resource type="Script" uid="uid://dgp8ea8k4fnse" path="res://#Template/[Scripts]/Trigger/Single/TTFCheckPoint.gd" id="1_ttf"]
+[ext_resource type="Script" uid="uid://by5wk28c7s78f" path="res://#Template/[Scripts]/Trigger/Single/TTFCheckPointGem.gd" id="2_gem"]
+[ext_resource type="Script" uid="uid://d3rtrs1nr3pev" path="res://#Template/[Scripts]/Trigger/TTFCheckPointTrigger.gd" id="4_trig"]
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="4_wpge3"]
+[ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Gem.tscn" id="5_gem_scene"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_l0yca"]
+
+[sub_resource type="Animation" id="Animation_reset"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Rotator:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_collect"]
+resource_name = "collect"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Rotator:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(3.03143, 0.307786),
+"update": 0,
+"values": [Vector3(1, 1, 1), Vector3(0, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ttf"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"collect": SubResource("Animation_collect")
+}
+
+[node name="TTFCheckPoint" type="Area3D" unique_id=1406840828 node_paths=PackedStringArray("rotator", "checkpoint_gem", "checkpoint_text")]
+transform = Transform3D(-1, 0, 2.0663205e-07, 0, 1, 0, -2.0663205e-07, 0, -1, 0, 0, 0)
+collision_layer = 0
+script = ExtResource("1_ttf")
+rotator = NodePath("Rotator")
+checkpoint_gem = NodePath("Rotator/CheckPoint_Gem")
+checkpoint_text = NodePath("CheckPointText")
+text_target_y = 50.0
+text_move_duration = 3.0
+AutoRecord = true
+
+[node name="RevivePosition" type="Marker3D" parent="." unique_id=1168627924]
+
+[node name="Rotator" type="Node3D" parent="." unique_id=1113591939]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.725231, 5, 2.2161764e-06)
+
+[node name="CheckPoint_Gem" parent="Rotator" unique_id=1159660158 instance=ExtResource("5_gem_scene")]
+script = ExtResource("2_gem")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Rotator" unique_id=2090836190]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, -1.5209613, 0)
+mesh = SubResource("BoxMesh_l0yca")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Rotator" unique_id=392017031]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 1.4994445, 0)
+mesh = SubResource("BoxMesh_l0yca")
+
+[node name="CheckPointText" type="Label3D" parent="." unique_id=884986311]
+pixel_size = 0.01
+text = "CHECKPOINT"
+font_size = 200
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1886040340]
+libraries/ = SubResource("AnimationLibrary_ttf")
+
+[node name="Trigger" parent="." unique_id=608483111 instance=ExtResource("4_wpge3")]
+transform = Transform3D(30, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+
+[node name="Node3D" type="Node3D" parent="Trigger" unique_id=865735953 node_paths=PackedStringArray("checkpoint")]
+script = ExtResource("4_trig")
+checkpoint = NodePath("../..")
