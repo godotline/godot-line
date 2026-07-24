@@ -11,7 +11,7 @@ class_name TTFCheckPoint
 @export var rotation_speed: float = 90.0
 @export var bob_frequency: float = 2.0
 @export var bob_amplitude: float = 0.005
-@export var text_target_y: float = 100.0
+@export var text_target_z: float = 100.0
 @export var text_move_duration: float = 1.5
 
 var _rotator_start_position: Vector3 = Vector3.ZERO
@@ -58,4 +58,4 @@ func _move_checkpoint_text() -> void:
 		return
 	var tween: Tween = checkpoint_text.create_tween()
 	tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tween.tween_property(checkpoint_text, "position:y", text_target_y, text_move_duration)
+	tween.tween_property(checkpoint_text, "position:z", text_target_z, text_move_duration)
