@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 ## PyramidTrigger - 金字塔子触发器
 ## 作为 BaseTrigger 的子组件，碰撞后调用父节点 Pyramid 的 trigger 方法
 

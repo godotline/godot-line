@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 ## ChangeDirection - 方向改变触发器
 ## 当玩家进入时切换方向或转向
 

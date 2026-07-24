@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 ## Teleport - 传送触发器
 ## 当玩家进入时传送到目标位置
 
