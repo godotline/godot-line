@@ -1,0 +1,6 @@
+queue_rules:
+  - name: auto merge
+    queue_conditions:
+      - author = meny2333
+      - -draft
+      - -conflict
