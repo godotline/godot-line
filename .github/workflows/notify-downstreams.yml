@@ -13,9 +13,9 @@ jobs:
       matrix:
         repo:
           - godotline/GodotLineCollection
-          # 如果有更多关卡仓库，在这里加：
-          # - godotline/Level-01
-          # - godotline/Level-02
+          - godotline/godotline-editor
+          - meny2333/InvertedWorld
+          - meny2333/godothub
     steps:
       - name: Trigger downstream sync
         run: |
