@@ -1,20 +1,25 @@
 extends Control
-var levelname: String = "level name"
-@export var crown_no_light: Texture2D
-var 一: bool = false
 
-## 皇冠动画名称数组，按数量索引
-const CROWN_ANIMS: Array[String] = ["", "1crown", "2crown", "3crown"]
+var levelname: String = "level name"
+var _shown: bool = false
+
+@onready var normal_page: Control = $NormalPage
+@onready var revive_page: Control = $RevivePage
+@onready var backdrop: ColorRect = $ColorRect
+@onready var title_label: Label = $NormalPage/title
+@onready var normal_percentage: Label = $NormalPage/percentage
+@onready var normal_fill: TextureRect = $NormalPage/ProgressFrame/Fill
+@onready var collectible_label: Label = $NormalPage/Collectible/diamond
+@onready var revive_percentage: Label = $RevivePage/percentage
+@onready var revive_fill: TextureRect = $RevivePage/ProgressFrame/Fill
 
 func _ready() -> void:
 	if Player.instance and Player.instance.level_data:
 		levelname = Player.instance.level_data.levelTitle
 	else:
 		push_error("gameui.gd: Player.instance 或 level_data 为空，无法读取关卡标题")
-	$"." .visible = false
-	set_process(false)  ## 信号驱动，不需要轮询
-
-	# 连接 Player 游戏结束信号（信号驱动，替代轮询）
+	visible = false
+	set_process(false)
 	if Player.instance:
 		Player.instance.on_game_end.connect(_on_game_end)
 
@@ -22,46 +27,30 @@ func _on_game_end() -> void:
 	_show_ui()
 
 func _show_ui() -> void:
-	if 一:
+	if _shown:
 		return
-	一 = true
-	if LevelManager.is_relive == true:
+	_shown = true
+	if LevelManager.is_relive:
 		LevelManager.crown -= 1
-	var diamond_node: Node = get_node_or_null("diamond")
-	if diamond_node:
-		diamond_node.text = str(LevelManager.gem,"/10")
-	else:
-		push_error("gameui.gd: diamond 节点未找到")
-	var title_node: Label = get_node_or_null("title") as Label
-	if title_node:
-		title_node.text = levelname
-	else:
-		push_error("gameui.gd: title 节点未找到")
-	_update_crown_display(LevelManager.crown)
-	$"." .visible = true
 
+	var progress: float = clampf(float(LevelManager.percent) / 100.0, 0.0, 1.0)
+	var percentage_text: String = "%d%%" % LevelManager.percent
+	title_label.text = levelname
+	normal_percentage.text = percentage_text
+	revive_percentage.text = percentage_text
+	collectible_label.text = "%d/10" % LevelManager.gem
+	_set_progress(normal_fill, progress)
+	_set_progress(revive_fill, progress)
 
-## 根据皇冠数量更新显示（使用数组替代多重 if-elif）
-func _update_crown_display(count: int) -> void:
-	# 获取所有皇冠节点
-	var crown_nodes: Array[Node] = [
-		get_node_or_null("PerfactCrownNoLight"),
-		get_node_or_null("PerfactCrownNoLight2"),
-		get_node_or_null("PerfactCrownNoLight3"),
-	]
-	if count >= 1 and count <= 3:
-		var anim_player: AnimationPlayer = get_node_or_null("AnimationPlayer") as AnimationPlayer
-		if anim_player:
-			anim_player.play(CROWN_ANIMS[count])
-		else:
-			push_error("gameui.gd: AnimationPlayer 节点未找到，无法播放皇冠动画")
-	else:
-		for node in crown_nodes:
-			if node:
-				node.texture = crown_no_light
-			else:
-				push_error("gameui.gd: 皇冠节点未找到，无法更新纹理")
+	var can_revive: bool = Player.instance != null and not Player.instance.is_end and LevelManager.current_checkpoint != null
+	normal_page.visible = not can_revive
+	revive_page.visible = can_revive
+	backdrop.color.a = 0.0 if can_revive else 0.639216
+	visible = true
 
+func _set_progress(fill: TextureRect, progress: float) -> void:
+	fill.anchor_right = progress
+	fill.offset_right = -6.0 if progress >= 0.02 else 6.0
 
 func _on_back_pressed() -> void:
 	get_tree().quit()
@@ -72,9 +61,14 @@ func _on_back_pressed() -> void:
 	LevelManager.crown = 0
 	LevelManager.percent = 0
 
+func _on_cancel_revive_pressed() -> void:
+	revive_page.visible = false
+	normal_page.visible = true
+	backdrop.color.a = 0.639216
+
 func _on_revive_pressed() -> void:
-	一 = false
-	$"." .visible = false
+	_shown = false
+	visible = false
 	LevelManager.is_end = false
 	if not Player.instance:
 		push_error("gameui.gd: Player.instance 为空，无法复活")
@@ -90,6 +84,18 @@ func _on_revive_pressed() -> void:
 		_on_gamereplay_pressed()
 
 func _on_gamereplay_pressed() -> void:
+	LevelManager.reset_to_defaults()
+	var loading_scene: PackedScene = load("res://#Template/[Resources]/LoadingPage.tscn") as PackedScene
+	if loading_scene:
+		var loading_page: Node = loading_scene.instantiate()
+		get_tree().current_scene.add_child(loading_page)
+		var reveal_tween: Tween = loading_page.call("reveal", _get_loading_background_color()) as Tween
+		await reveal_tween.finished
 	if Player.instance:
 		Player.instance.reload()
-	LevelManager.reset_to_defaults()
+
+func _get_loading_background_color() -> Color:
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera and camera.environment:
+		return camera.environment.background_color
+	return RenderingServer.get_default_clear_color()
