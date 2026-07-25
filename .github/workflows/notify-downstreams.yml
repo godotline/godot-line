@@ -1,0 +1,26 @@
+name: Notify Downstreams on Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master]
+
+jobs:
+  notify:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo:
+          - godotline/GodotLineCollection
+          # 如果有更多关卡仓库，在这里加：
+          # - godotline/Level-01
+          # - godotline/Level-02
+    steps:
+      - name: Trigger downstream sync
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.PAT_CROSS_REPO }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ matrix.repo }}/dispatches \
+            -d '{"event_type":"template-updated","client_payload":{"upstream_sha":"${{ github.sha }}","pr_number":"${{ github.event.pull_request.number }}","pr_title":"${{ github.event.pull_request.title }}"}}'

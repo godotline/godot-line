@@ -1,453 +1,392 @@
 [gd_scene format=3 uid="uid://wx3awwdt8xdy"]
 
-[ext_resource type="Script" uid="uid://qco7fgruvgdp" path="res://#Template/[Scripts]/Level/gameui.gd" id="1_kyccr"]
-[ext_resource type="Texture2D" uid="uid://cno75hsl8nprg" path="res://#Template/[Resources]/ui/back.png" id="1_ost3h"]
-[ext_resource type="Texture2D" uid="uid://bwihfp1btcg7x" path="res://#Template/[Resources]/ui/play.png" id="3_rien4"]
-[ext_resource type="Texture2D" uid="uid://cws2kbpa72tfp" path="res://#Template/[Resources]/ui/Button_side.png" id="4_ll6ia"]
-[ext_resource type="Texture2D" uid="uid://bgt8vywkt6g0t" path="res://#Template/[Resources]/ui/Button_inner.png" id="5_ey6o0"]
-[ext_resource type="Texture2D" uid="uid://dkwpccuxcds6c" path="res://#Template/[Resources]/ui/replay.png" id="6_71rya"]
-[ext_resource type="FontFile" uid="uid://diyv3w2nftxaw" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="7_oqarj"]
-[ext_resource type="Texture2D" uid="uid://bd6wjnftaax54" path="res://#Template/[Resources]/ui/Diamond.png" id="8_rien4"]
-[ext_resource type="Texture2D" uid="uid://bokq00qv7ojs5" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="9_71rya"]
-[ext_resource type="AudioStream" uid="uid://giwen5re11kf" path="res://#Template/[Resources]/crown_get_1.wav" id="10_oqarj"]
-[ext_resource type="Texture2D" uid="uid://ba51vkdfm1o22" path="res://#Template/[Resources]/PerfactCrownLight.png" id="11_jn05g"]
-[ext_resource type="AudioStream" uid="uid://c6ygu805r8o2v" path="res://#Template/[Resources]/crown_get_2.wav" id="12_jn05g"]
-[ext_resource type="AudioStream" uid="uid://b1y1txusbuca3" path="res://#Template/[Resources]/crown_get_3.wav" id="13_pkpr1"]
+[ext_resource type="Script" uid="uid://qco7fgruvgdp" path="res://#Template/[Scripts]/Level/gameui.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/GUI/Sprites.png" id="2_atlas"]
+[ext_resource type="FontFile" path="res://#Template/[Resources]/GUI/MiSans-Normal.ttf" id="3_misans"]
+[ext_resource type="FontFile" path="res://#Template/[Resources]/GUI/CaviarDreams.TTF" id="4_caviar"]
 
-[sub_resource type="Animation" id="Animation_pkpr1"]
-resource_name = "1crown"
-length = 2.0
-tracks/0/type = "audio"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("../AnimationPlayer/AudioStreamPlayer")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"clips": [{
-"end_offset": 0.205986,
-"start_offset": 0.0666667,
-"stream": ExtResource("10_oqarj")
-}],
-"times": PackedFloat32Array(0)
-}
-tracks/0/use_blend = true
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:texture")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.251),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("../PerfactCrownNoLight2:texture")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 2),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("9_71rya"), ExtResource("9_71rya")]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("../PerfactCrownNoLight3:texture")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 2),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("9_71rya"), ExtResource("9_71rya")]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath(".:modulate")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.25, 0.5),
-"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
-}
+[sub_resource type="AtlasTexture" id="Atlas_frame"]
+atlas = ExtResource("2_atlas")
+region = Rect2(370, 0, 54, 55)
 
-[sub_resource type="Animation" id="Animation_qve72"]
-resource_name = "1crown"
-length = 2.0
-tracks/0/type = "audio"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("../AnimationPlayer/AudioStreamPlayer")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"clips": [{
-"end_offset": 0.0,
-"start_offset": 0.0,
-"stream": ExtResource("12_jn05g")
-}],
-"times": PackedFloat32Array(0)
-}
-tracks/0/use_blend = true
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:texture")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.251),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("../PerfactCrownNoLight2:texture")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.501),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("../PerfactCrownNoLight3:texture")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 2),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("9_71rya"), ExtResource("9_71rya")]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath(".:modulate")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.25, 0.5),
-"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
-}
-tracks/5/type = "value"
-tracks/5/imported = false
-tracks/5/enabled = true
-tracks/5/path = NodePath("../PerfactCrownNoLight2:modulate")
-tracks/5/interp = 1
-tracks/5/loop_wrap = true
-tracks/5/keys = {
-"times": PackedFloat32Array(0.25, 0.5, 0.75),
-"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
-}
+[sub_resource type="AtlasTexture" id="Atlas_fill"]
+atlas = ExtResource("2_atlas")
+region = Rect2(305, 0, 64, 64)
 
-[sub_resource type="Animation" id="Animation_p1ec3"]
-resource_name = "3crown"
-length = 2.0
-tracks/0/type = "audio"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("../AnimationPlayer/AudioStreamPlayer")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"clips": [{
-"end_offset": 1.17252,
-"start_offset": 0.0666667,
-"stream": ExtResource("13_pkpr1")
-}],
-"times": PackedFloat32Array(0)
-}
-tracks/0/use_blend = true
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:texture")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.251),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("../PerfactCrownNoLight2:texture")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.501),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("../PerfactCrownNoLight3:texture")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.951),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [ExtResource("9_71rya"), ExtResource("11_jn05g")]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath(".:modulate")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.25, 0.5),
-"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
-}
-tracks/5/type = "value"
-tracks/5/imported = false
-tracks/5/enabled = true
-tracks/5/path = NodePath("../PerfactCrownNoLight2:modulate")
-tracks/5/interp = 1
-tracks/5/loop_wrap = true
-tracks/5/keys = {
-"times": PackedFloat32Array(0.25, 0.5, 0.75),
-"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
-}
-tracks/6/type = "value"
-tracks/6/imported = false
-tracks/6/enabled = true
-tracks/6/path = NodePath("../PerfactCrownNoLight3:modulate")
-tracks/6/interp = 1
-tracks/6/loop_wrap = true
-tracks/6/keys = {
-"times": PackedFloat32Array(0.7, 0.95, 1.2),
-"transitions": PackedFloat32Array(3.03143, 1, 0.307786),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
-}
+[sub_resource type="AtlasTexture" id="Atlas_gem"]
+atlas = ExtResource("2_atlas")
+region = Rect2(215, 0, 89, 96)
 
-[sub_resource type="Animation" id="Animation_ci0m4"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:texture")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [ExtResource("9_71rya")]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("../PerfactCrownNoLight2:texture")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [ExtResource("9_71rya")]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("../PerfactCrownNoLight3:texture")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [ExtResource("9_71rya")]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath(".:modulate")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Color(1, 1, 1, 1)]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("../PerfactCrownNoLight2:modulate")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Color(1, 1, 1, 1)]
-}
+[sub_resource type="AtlasTexture" id="Atlas_restart"]
+atlas = ExtResource("2_atlas")
+region = Rect2(242, 238, 161, 135)
 
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_qve72"]
-_data = {
-&"1crown": SubResource("Animation_pkpr1"),
-&"2crown": SubResource("Animation_qve72"),
-&"3crown": SubResource("Animation_p1ec3"),
-&"RESET": SubResource("Animation_ci0m4")
-}
+[sub_resource type="AtlasTexture" id="Atlas_continue"]
+atlas = ExtResource("2_atlas")
+region = Rect2(244, 374, 129, 148)
 
-[node name="gameui" type="Control" unique_id=256348809]
+[sub_resource type="AtlasTexture" id="Atlas_switch"]
+atlas = ExtResource("2_atlas")
+region = Rect2(425, 0, 48, 84)
+
+[sub_resource type="StyleBoxTexture" id="Style_frame"]
+texture = SubResource("Atlas_frame")
+texture_margin_left = 18.0
+texture_margin_top = 18.0
+texture_margin_right = 18.0
+texture_margin_bottom = 18.0
+
+[sub_resource type="StyleBoxFlat" id="Style_frame_hover"]
+bg_color = Color(1, 1, 1, 0.08)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="Style_progress_frame"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="Style_transparent"]
+bg_color = Color(0, 0, 0, 0)
+
+[sub_resource type="Theme" id="Theme_level_ui"]
+default_font = ExtResource("3_misans")
+default_font_size = 22
+Button/styles/normal = SubResource("Style_frame")
+Button/styles/hover = SubResource("Style_frame_hover")
+Button/styles/pressed = SubResource("Style_frame_hover")
+Button/styles/focus = SubResource("Style_transparent")
+
+[node name="gameui" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_kyccr")
-metadata/_edit_lock_ = true
+theme = SubResource("Theme_level_ui")
+script = ExtResource("1_script")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=2008919363]
+[node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.360784)
-metadata/_edit_lock_ = true
+color = Color(0, 0, 0, 0.639216)
 
-[node name="back" type="Button" parent="." unique_id=1581313299]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 530.0
-offset_right = 90.0
-offset_bottom = 629.0
-theme_override_icons/icon = ExtResource("1_ost3h")
-flat = true
+[node name="NormalPage" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
 
-[node name="revive" type="Button" parent="." unique_id=1869438121]
-layout_mode = 0
-offset_left = 209.0
-offset_top = 477.0
-offset_right = 599.0
-offset_bottom = 605.0
-scale = Vector2(0.8, 0.8)
-theme_override_icons/icon = ExtResource("3_rien4")
-flat = true
-icon_alignment = 1
-
-[node name="ButtonSide" type="Sprite2D" parent="revive" unique_id=1715673482]
-position = Vector2(49, 65)
-texture = ExtResource("4_ll6ia")
-
-[node name="ButtonInner" type="Sprite2D" parent="revive" unique_id=690871823]
-position = Vector2(196, 65)
-texture = ExtResource("5_ey6o0")
-
-[node name="ButtonSide2" type="Sprite2D" parent="revive" unique_id=1469949046]
-position = Vector2(343, 65)
-rotation = -3.14159
-texture = ExtResource("4_ll6ia")
-
-[node name="replay" type="Button" parent="." unique_id=1889046404]
-layout_mode = 0
-offset_left = 632.0
-offset_top = 477.0
-offset_right = 1022.0
-offset_bottom = 605.0
-scale = Vector2(0.8, 0.8)
-theme_override_icons/icon = ExtResource("6_71rya")
-flat = true
-icon_alignment = 1
-
-[node name="ButtonSide" type="Sprite2D" parent="replay" unique_id=1247274872]
-position = Vector2(49, 65)
-texture = ExtResource("4_ll6ia")
-
-[node name="ButtonInner" type="Sprite2D" parent="replay" unique_id=1150049866]
-position = Vector2(196, 65)
-texture = ExtResource("5_ey6o0")
-
-[node name="ButtonSide2" type="Sprite2D" parent="replay" unique_id=857453340]
-position = Vector2(343, 65)
-rotation = -3.14159
-texture = ExtResource("4_ll6ia")
-
-[node name="title" type="Label" parent="." unique_id=611670578]
-layout_mode = 0
-offset_top = 50.0
-offset_right = 1151.0
-offset_bottom = 167.0
-theme_override_fonts/font = ExtResource("7_oqarj")
-theme_override_font_sizes/font_size = 80
+[node name="title" type="Label" parent="NormalPage"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 48.0
+offset_right = -20.0
+offset_bottom = 116.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("4_caviar")
+theme_override_font_sizes/font_size = 48
 text = "Level Name"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="diamond" type="Label" parent="." unique_id=1141371551]
-layout_mode = 0
-offset_left = 552.0
-offset_top = 346.0
-offset_right = 719.0
-offset_bottom = 418.0
-theme_override_fonts/font = ExtResource("7_oqarj")
-theme_override_font_sizes/font_size = 60
-text = "0/10"
+[node name="percentage" type="Label" parent="NormalPage"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 100.0
+offset_top = 142.0
+offset_right = -100.0
+offset_bottom = 198.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("4_caviar")
+theme_override_font_sizes/font_size = 38
+text = "0%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="gem_icon" type="Sprite2D" parent="." unique_id=1651383760]
-position = Vector2(493, 383)
-scale = Vector2(0.5, 0.5)
-texture = ExtResource("8_rien4")
+[node name="ProgressFrame" type="Panel" parent="NormalPage"]
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 218.0
+offset_right = 150.0
+offset_bottom = 238.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("Style_progress_frame")
 
-[node name="PerfactCrownNoLight" type="Sprite2D" parent="." unique_id=1235566660]
-position = Vector2(427, 242)
-scale = Vector2(0.8, 0.8)
-texture = ExtResource("9_71rya")
+[node name="Fill" type="TextureRect" parent="NormalPage/ProgressFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 6.0
+offset_bottom = -6.0
+grow_vertical = 2
+texture = SubResource("Atlas_fill")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="PerfactCrownNoLight2" type="Sprite2D" parent="." unique_id=786121659]
-position = Vector2(582, 245)
-scale = Vector2(0.8, 0.8)
-texture = ExtResource("9_71rya")
+[node name="Collectible" type="HBoxContainer" parent="NormalPage"]
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -90.0
+offset_top = 258.0
+offset_right = 90.0
+offset_bottom = 326.0
+grow_horizontal = 2
+theme_override_constants/separation = 12
+alignment = 1
 
-[node name="PerfactCrownNoLight3" type="Sprite2D" parent="." unique_id=264465006]
-position = Vector2(719, 245)
-scale = Vector2(0.8, 0.8)
-texture = ExtResource("9_71rya")
+[node name="gem_icon" type="TextureRect" parent="NormalPage/Collectible"]
+custom_minimum_size = Vector2(54, 58)
+layout_mode = 2
+texture = SubResource("Atlas_gem")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=591769431]
-root_node = NodePath("../PerfactCrownNoLight")
-libraries/ = SubResource("AnimationLibrary_qve72")
+[node name="diamond" type="Label" parent="NormalPage/Collectible"]
+custom_minimum_size = Vector2(88, 58)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_caviar")
+theme_override_font_sizes/font_size = 30
+text = "0/10"
+vertical_alignment = 1
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="AnimationPlayer" unique_id=1971946730]
+[node name="replay" type="Button" parent="NormalPage"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -141.0
+offset_top = -104.0
+offset_right = 141.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
 
+[node name="Icon" type="TextureRect" parent="NormalPage/replay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -43.0
+offset_top = -30.0
+offset_right = 43.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("Atlas_restart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RevivePage" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="ReviveBackground" type="ColorRect" parent="RevivePage"]
+layout_mode = 1
+anchors_preset = 10
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -135.0
+offset_bottom = 135.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.517647)
+
+[node name="AskingText" type="Label" parent="RevivePage"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -110.0
+offset_right = 300.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+text = "是否从上一个检查点复活？\n您将会失去所有已获得的收集物"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="percentage" type="Label" parent="RevivePage"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 100.0
+offset_top = 118.0
+offset_right = -100.0
+offset_bottom = 168.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("4_caviar")
+theme_override_font_sizes/font_size = 34
+text = "0%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ProgressFrame" type="Panel" parent="RevivePage"]
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 182.0
+offset_right = 150.0
+offset_bottom = 202.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("Style_progress_frame")
+
+[node name="Fill" type="TextureRect" parent="RevivePage/ProgressFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 6.0
+offset_bottom = -6.0
+grow_vertical = 2
+texture = SubResource("Atlas_fill")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="cancel" type="Button" parent="RevivePage"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -177.0
+offset_top = -104.0
+offset_right = -105.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Icon" type="TextureRect" parent="RevivePage/cancel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -17.0
+offset_top = -30.0
+offset_right = 17.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("Atlas_switch")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="revive" type="Button" parent="RevivePage"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -69.0
+offset_top = -104.0
+offset_right = 132.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Icon" type="TextureRect" parent="RevivePage/revive"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -34.0
+offset_right = 32.0
+offset_bottom = 34.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("Atlas_continue")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="back" type="Button" parent="."]
+layout_mode = 1
+offset_left = 22.0
+offset_top = 20.0
+offset_right = 74.0
+offset_bottom = 82.0
+tooltip_text = "退出"
+
+[node name="Icon" type="TextureRect" parent="back"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -13.0
+offset_top = -24.0
+offset_right = 13.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("Atlas_switch")
+expand_mode = 1
+stretch_mode = 5
+
+[connection signal="pressed" from="NormalPage/replay" to="." method="_on_gamereplay_pressed"]
+[connection signal="pressed" from="RevivePage/cancel" to="." method="_on_cancel_revive_pressed"]
+[connection signal="pressed" from="RevivePage/revive" to="." method="_on_revive_pressed"]
 [connection signal="pressed" from="back" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="revive" to="." method="_on_revive_pressed"]
-[connection signal="pressed" from="replay" to="." method="_on_gamereplay_pressed"]

@@ -11,6 +11,7 @@ signal post_toggled(is_on: bool)
 
 @onready var _ui_container: Control = $UIContainer
 @onready var main_panel: Panel = $UIContainer/MainPanel
+@onready var autoplay_area: HBoxContainer = $UIContainer/RightArea
 @onready var top_bar: HBoxContainer = $UIContainer/TopBar
 @onready var info_btn: Button = $UIContainer/InfoButton
 @onready var bottom_bar: Panel = $UIContainer/BottomBar
@@ -38,8 +39,26 @@ var _about_visible: bool = false
 
 func _ready() -> void:
 	_init_setting_states()
+	_apply_ported_visuals()
 	# 从 Player.level_data 读取关卡信息，填充关于页面（与 Unity 版 StartPage 一致）
 	_populate_about_from_level_data()
+
+func _apply_ported_visuals() -> void:
+	var left_icon: Texture2D = load("res://#Template/[Resources]/GUI/arrow_left.png") as Texture2D
+	var right_icon: Texture2D = load("res://#Template/[Resources]/GUI/arrow_right.png") as Texture2D
+	for state: Dictionary in _setting_states.values():
+		var left_buttons: Array[Button] = [state.arrow_left, state.arrow_fine_left, state.arrow_coarse_left]
+		var right_buttons: Array[Button] = [state.arrow_right, state.arrow_fine_right, state.arrow_coarse_right]
+		for button: Button in left_buttons:
+			button.text = ""
+			button.icon = left_icon
+			button.expand_icon = true
+			button.custom_minimum_size = Vector2(36.0, 36.0)
+		for button: Button in right_buttons:
+			button.text = ""
+			button.icon = right_icon
+			button.expand_icon = true
+			button.custom_minimum_size = Vector2(36.0, 36.0)
 
 func _init_setting_states() -> void:
 	# --- AntiAliasing (CYCLIC) ---
@@ -141,7 +160,7 @@ func _show_about() -> void:
 	_about_visible = true
 	about_panel.visible = true
 
-	const REST: float = -150.0
+	const REST: float = -185.0
 	const SHIFT: float = 400.0
 	about_content.offset_top = REST + SHIFT
 	about_content.offset_bottom = -REST + SHIFT
@@ -160,7 +179,7 @@ func _hide_about() -> void:
 		return
 	_about_visible = false
 
-	const REST: float = -150.0
+	const REST: float = -185.0
 	const SHIFT: float = 400.0
 	var tween: Tween = create_tween().set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
 	tween.set_parallel(true)
@@ -191,6 +210,10 @@ func hide_animated() -> void:
 	if top_bar and is_instance_valid(top_bar):
 		tween.tween_property(top_bar, "offset_top", -top_bar.size.y - 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 		tween.tween_property(top_bar, "modulate:a", 0.0, 0.35)
+
+	if autoplay_area and is_instance_valid(autoplay_area):
+		tween.tween_property(autoplay_area, "offset_top", -autoplay_area.size.y - 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+		tween.tween_property(autoplay_area, "modulate:a", 0.0, 0.35)
 
 	if about_content and is_instance_valid(about_content):
 		tween.tween_property(about_content, "modulate:a", 0.0, 0.35)

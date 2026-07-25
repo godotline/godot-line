@@ -2,29 +2,47 @@
 
 [ext_resource type="Script" uid="uid://urm8r3g8vfda" path="res://#Template/[Scripts]/GUI/StartPage.gd" id="1"]
 [ext_resource type="Script" uid="uid://cpt228wqyq445" path="res://#Template/[Scripts]/Auto/SetAutoPlay.gd" id="2"]
+[ext_resource type="FontFile" path="res://#Template/[Resources]/GUI/MiSans-Normal.ttf" id="3_font"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/GUI/arrow_left.png" id="4_left"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/GUI/arrow_right.png" id="5_right"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/GUI/info.png" id="6_info"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(0, 0, 0, 0)
 
 [sub_resource type="StyleBoxFlat" id="4"]
-bg_color = Color(0.19, 0.19, 0.19, 0.7)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
+bg_color = Color(0, 0, 0, 0.392157)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
 
 [sub_resource type="StyleBoxFlat" id="5"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [sub_resource type="StyleBoxFlat" id="6"]
-bg_color = Color(0.2509804, 0.2509804, 0.2509804, 0.6784314)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
-corner_radius_bottom_left = 22
+bg_color = Color(0, 0, 0, 0.392157)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
 
 [sub_resource type="StyleBoxFlat" id="3"]
-bg_color = Color(0.38039216, 0.38039216, 0.38039216, 0.5254902)
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="7_hover"]
+bg_color = Color(1, 1, 1, 0.12)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="Theme" id="8_theme"]
+default_font = ExtResource("3_font")
+default_font_size = 20
+Button/colors/font_color = Color(1, 1, 1, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/styles/normal = SubResource("1")
+Button/styles/hover = SubResource("7_hover")
+Button/styles/pressed = SubResource("7_hover")
 
 [node name="StartPage" type="CanvasLayer" unique_id=1577292833]
 layer = 2
@@ -37,6 +55,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("8_theme")
 mouse_filter = 2
 
 [node name="MainPanel" type="Panel" parent="UIContainer" unique_id=636120868]
@@ -47,19 +66,21 @@ theme_override_styles/panel = SubResource("1")
 
 [node name="RightArea" type="HBoxContainer" parent="UIContainer" unique_id=162991083]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -55.5
-offset_right = 55.5
-offset_bottom = 40.0
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 8.0
+offset_bottom = 68.0
 grow_horizontal = 2
-alignment = 2
+alignment = 1
 
 [node name="AutoPlayToggle" type="HBoxContainer" parent="UIContainer/RightArea" unique_id=235974998]
+custom_minimum_size = Vector2(216, 60)
 layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
 
 [node name="CheckBox" type="CheckBox" parent="UIContainer/RightArea/AutoPlayToggle" unique_id=1675355245]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 flat = true
 
@@ -68,30 +89,32 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 0, 0, 1)
 theme_override_font_sizes/font_size = 16
 text = "AUTOPLAY"
+vertical_alignment = 1
 
 [node name="TopBar" type="HBoxContainer" parent="UIContainer" unique_id=96717573]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 16.0
-offset_top = 36.0
+offset_top = 18.0
 offset_right = -16.0
-offset_bottom = 56.0
+offset_bottom = 58.0
 grow_horizontal = 2
 
 [node name="HintLabel" type="Label" parent="UIContainer/TopBar" unique_id=1657515663]
 layout_mode = 2
-size_flags_horizontal = 6
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "R: 重新开始  |  K: 快速死亡  |  D: 调试模式"
+theme_override_font_sizes/font_size = 12
+text = "R : 重新开始    K : 快速死亡    D : 调试模式"
+horizontal_alignment = 2
 
 [node name="BottomBar" type="Panel" parent="UIContainer" unique_id=1447155151]
 layout_mode = 0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -80.0
+offset_top = -240.0
 theme_override_styles/panel = SubResource("4")
 
 [node name="HBox" type="HBoxContainer" parent="UIContainer/BottomBar" unique_id=959627512]
@@ -99,7 +122,10 @@ layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
+offset_top = 34.0
 offset_right = -20.0
+offset_bottom = -30.0
+theme_override_constants/separation = 12
 
 [node name="AntiAliasingItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=87616723]
 layout_mode = 2
@@ -109,7 +135,7 @@ size_flags_vertical = 4
 [node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/AntiAliasingItem" unique_id=666338461]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 22
 text = "抗锯齿"
 horizontal_alignment = 1
 
@@ -138,7 +164,7 @@ flat = true
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 20
 text = "Off"
 horizontal_alignment = 1
 
@@ -167,7 +193,7 @@ size_flags_vertical = 4
 [node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/QualityItem" unique_id=1216785956]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 22
 text = "画质等级"
 horizontal_alignment = 1
 
@@ -196,7 +222,7 @@ flat = true
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 20
 text = "中"
 horizontal_alignment = 1
 
@@ -225,7 +251,7 @@ size_flags_vertical = 4
 [node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/LatencyItem" unique_id=1986991335]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 22
 text = "音画延迟"
 horizontal_alignment = 1
 
@@ -253,7 +279,7 @@ flat = true
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 19
 text = "0.0ms"
 horizontal_alignment = 1
 
@@ -281,7 +307,7 @@ size_flags_vertical = 4
 [node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/VolumeItem" unique_id=1454086533]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 22
 text = "音量大小"
 horizontal_alignment = 1
 
@@ -310,7 +336,7 @@ flat = true
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 20
 text = "100.0%"
 horizontal_alignment = 1
 
@@ -344,7 +370,7 @@ flat = true
 
 [node name="ItemLabel" type="Label" parent="UIContainer/BottomBar/HBox/ShadowToggle" unique_id=851565371]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 text = "阴影"
 
 [node name="PostToggle" type="HBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1124031244]
@@ -356,7 +382,7 @@ flat = true
 
 [node name="ItemLabel" type="Label" parent="UIContainer/BottomBar/HBox/PostToggle" unique_id=2081490737]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 text = "后处理"
 
 [node name="AboutPanel" type="Panel" parent="UIContainer" unique_id=651998823]
@@ -373,10 +399,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -150.0
-offset_right = 240.0
-offset_bottom = 150.0
+offset_left = -300.0
+offset_top = -185.0
+offset_right = 300.0
+offset_bottom = 185.0
 theme_override_styles/panel = SubResource("6")
 
 [node name="AboutVBox" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutContent" unique_id=61138793]
@@ -386,17 +412,17 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -75.5
-offset_top = -43.0
-offset_right = 75.5
-offset_bottom = 43.0
+offset_left = -250.0
+offset_top = -137.0
+offset_right = 250.0
+offset_bottom = 137.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="about_title" type="Label" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=2001776335]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 29
 text = "测试场景"
 horizontal_alignment = 1
 
@@ -414,7 +440,7 @@ size_flags_vertical = 3
 [node name="about_credits" type="Label" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=2627800]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 text = "共舞的线模板
 基于冰焰模板 4.3.0 修改
 作者：Max冰焰、筱夕Sushi、Quantumilk"
@@ -425,15 +451,15 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = -1.0
-offset_top = -134.0
-offset_right = 73.0
-offset_bottom = -89.0
+offset_left = 24.0
+offset_top = -226.0
+offset_right = 72.0
+offset_bottom = -178.0
 grow_vertical = 0
-theme_override_font_sizes/font_size = 22
+theme_override_icons/icon = ExtResource("6_info")
 theme_override_styles/normal = SubResource("3")
-text = "i  "
-alignment = 2
+flat = true
+expand_icon = true
 
 [node name="SetAutoPlay" type="Node" parent="." unique_id=1734727122]
 script = ExtResource("2")
