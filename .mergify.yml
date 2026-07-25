@@ -4,3 +4,9 @@ queue_rules:
       - author = meny2333
       - -draft
       - -conflict
+merge_protections_settings:
+  auto_merge_conditions:
+    - -conflict
+    - -draft
+    - base = main
+    - author = meny2333
