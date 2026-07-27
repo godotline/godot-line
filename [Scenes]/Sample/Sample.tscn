@@ -20,6 +20,8 @@
 [ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Pyramid.tscn" id="18_emri0"]
 [ext_resource type="PackedScene" uid="uid://c757j6a6ewnbb" path="res://#Template/Crystal.tscn" id="19_6gt33"]
 [ext_resource type="Material" uid="uid://cnxil1uef6kon" path="res://#Template/[Materials]/CrystalScan.tres" id="20_j2eg4"]
+[ext_resource type="Script" uid="uid://cu08nct5ud6vc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="21_tdro7"]
+[ext_resource type="Script" uid="uid://bdbb1ogxk0fcr" path="res://#Template/[Scripts]/Trigger/JumpPredictor.gd" id="22_77abe"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
@@ -40,8 +42,10 @@ _data = {
 
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
-[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("1_3w2qj")]
+[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 node_paths=PackedStringArray("scene_camera", "scene_light") instance=ExtResource("1_3w2qj")]
 animation = NodePath("../AnimationPlayer")
+scene_camera = NodePath("../CameraRoot/Rotator/Scale/Camera3D")
+scene_light = NodePath("../DirectionalLight3D")
 level_data = ExtResource("2_uo2eh")
 
 [node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_sm0oj")]
@@ -203,6 +207,19 @@ visible = false
 
 [node name="CrystalLight" parent="Scene_Group/Scene_001/Crystal" index="5" unique_id=1137045707]
 light_energy = 0.0
+
+[node name="Trigger3" parent="Scene_Group/Scene_001" unique_id=1323296306 instance=ExtResource("11_mq52h")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 5.3776135, -0.5, 15.017628)
+
+[node name="jump" type="Node3D" parent="Scene_Group/Scene_001/Trigger3" unique_id=342149430]
+script = ExtResource("21_tdro7")
+height = 2.0
+
+[node name="jumppre" type="Node3D" parent="Scene_Group/Scene_001/Trigger3" unique_id=983390150]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 5.3776135, -0.5, 15.017628)
+top_level = true
+script = ExtResource("22_77abe")
+draw_preview = true
 
 [editable path="BasicOBJ_Group/CameraRoot"]
 [editable path="Scene_Group/Scene_001/Pyramid"]

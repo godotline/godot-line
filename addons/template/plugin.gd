@@ -7,13 +7,17 @@ const MARKER_PATH := "user://.first_run_welcome_done"
 const TEMPLATE_DEFAULT := "res://[Scenes]/DefaultScene/Default.tscn"
 const TEMPLATE_SAMPLE := "res://[Scenes]/Sample/Sample.tscn"
 const LEVELS_ROOT := "res://[Scenes]/"
+const DirectionGizmoPlugin := preload("res://addons/template/direction_gizmo_plugin.gd")
 
 var _menu_button: MenuButton
 var _new_level_dialog: ConfirmationDialog
+var _direction_gizmo_plugin: EditorNode3DGizmoPlugin
 
 
 func _enter_tree() -> void:
 	_check_first_run()
+	_direction_gizmo_plugin = DirectionGizmoPlugin.new()
+	add_node_3d_gizmo_plugin(_direction_gizmo_plugin)
 
 	_menu_button = MenuButton.new()
 	_menu_button.text = "模板 2.2"
@@ -29,6 +33,9 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
+	if _direction_gizmo_plugin:
+		remove_node_3d_gizmo_plugin(_direction_gizmo_plugin)
+		_direction_gizmo_plugin = null
 	if _menu_button:
 		remove_control_from_container(CONTAINER_TOOLBAR, _menu_button)
 		_menu_button.queue_free()
