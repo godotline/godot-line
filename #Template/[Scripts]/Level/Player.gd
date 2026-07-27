@@ -89,6 +89,10 @@ var _delay_applied: bool = false
 
 ## ========== Tail 对象池 ==========
 const TAIL_POOL_SIZE: int = 256
+const TAIL_COLLISION_LAYER: int = 1 << 3
+const TAIL_COLLISION_MASK: int = (1 << 1) | (1 << 2)
+const TAIL_JOIN_OVERLAP: float = 0.025
+const TAIL_COLLISION_MARGIN: float = 0.001
 var _tail_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
 
 func _ready() -> void:
@@ -175,7 +179,7 @@ func _process(_delta: float) -> void:
 		tail_position.y = past_translation.y
 		var offset: Vector3 = tail_position - past_translation
 		var distance: float = offset.length()
-		var tail_length: float = distance + tailScale
+		var tail_length: float = maxf(distance, float(tailScale))
 
 		_update_tail_body(line, past_translation + offset / 2, tail_length)
 	else:
@@ -275,34 +279,71 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	return holder
 
 func new_line() -> void:
+	_finish_tail_join(line)
 	_release_tail_body(line)
 	line = _get_from_pool()
 	line.name = "TailMesh"
 	line.mesh = mesh
 	line.position = Vector3.ZERO
 	line.rotation = Vector3.ZERO
-	line.scale = Vector3.ONE
+	var initial_scale: Vector3 = Vector3(1.0, 1.0, maxf(float(tailScale), 1.0))
+	line.scale = initial_scale
 	line.set_surface_override_material(0, material)
 	line.visible = show_line_tail or not hen_shin
 
 	var tail_holder: Node3D = _get_or_create_player_tail_holder()
 	var body: RigidBody3D = _create_tail_body()
-	tail_holder.add_child(body)
-	body.add_child(line)
+	past_translation = position
 	body.position = position
 	body.rotation = rotation
-	_update_tail_collision(line, Vector3.ONE)
+	tail_holder.add_child(body)
+	body.add_child(line)
+	_update_tail_collision(line, initial_scale)
 
-	past_translation = position
 	emit_signal("new_line1")
+
+func _finish_tail_join(tail: MeshInstance3D) -> void:
+	var half_width: float = float(tailScale) * 0.5
+	if not is_instance_valid(tail):
+		return
+
+	var body: RigidBody3D = tail.get_parent() as RigidBody3D
+	if not body or not body.freeze:
+		return
+
+	var previous_forward: Vector3 = body.basis * Vector3.BACK
+	previous_forward.y = 0.0
+	previous_forward = previous_forward.normalized()
+	var current_forward: Vector3 = basis * Vector3.BACK
+	current_forward.y = 0.0
+	current_forward = current_forward.normalized()
+
+	var direction_dot: float = clampf(previous_forward.dot(current_forward), -1.0, 1.0)
+	var angle: float = rad_to_deg(acos(direction_dot))
+	var join_offset: float
+	if angle <= 90.0:
+		join_offset = half_width * tan(deg_to_rad(angle * 0.5))
+	else:
+		join_offset = -half_width * tan(deg_to_rad((180.0 - angle) * 0.5))
+
+	var horizontal_offset: Vector3 = position - past_translation
+	horizontal_offset.y = 0.0
+	if horizontal_offset.length() < float(tailScale):
+		_update_tail_body(tail, past_translation + horizontal_offset * 0.5, float(tailScale))
+		return
+	var end: Vector3 = past_translation + previous_forward * (horizontal_offset.length() + join_offset + TAIL_JOIN_OVERLAP)
+	end.y = past_translation.y
+	_update_tail_body(tail, (past_translation + end) * 0.5, maxf(past_translation.distance_to(end), 0.001))
 
 func _create_tail_body() -> RigidBody3D:
 	var body: RigidBody3D = RigidBody3D.new()
 	body.name = "TailRigidBody"
-	body.collision_layer = 0
-	body.collision_mask = 1 << 1 # BaseFloor
+	# 最新 Tail 和已完成 Tail 都参与外部碰撞，但 Tail 之间互不碰撞。
+	body.collision_layer = TAIL_COLLISION_LAYER
+	body.collision_mask = TAIL_COLLISION_MASK
 	body.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
 	body.freeze = true
+	body.mass = 100.0
 	body.axis_lock_angular_x = true
 	body.axis_lock_angular_y = true
 	body.axis_lock_angular_z = true
@@ -311,7 +352,9 @@ func _create_tail_body() -> RigidBody3D:
 
 	var collision: CollisionShape3D = CollisionShape3D.new()
 	collision.name = "CollisionShape3D"
-	collision.shape = BoxShape3D.new()
+	var box: BoxShape3D = BoxShape3D.new()
+	box.margin = TAIL_COLLISION_MARGIN
+	collision.shape = box
 	body.add_child(collision)
 	return body
 
@@ -344,6 +387,10 @@ func _release_tail_body(tail: MeshInstance3D) -> void:
 		return
 	var release_transform: Transform3D = body.global_transform
 	body.freeze = false
+	body.global_transform = release_transform
+	# 冻结延伸期间不锁位置，释放到最终位置后再对齐 Unity 的 X/Z 约束。
+	body.axis_lock_linear_x = true
+	body.axis_lock_linear_z = true
 	body.global_transform = release_transform
 	body.reset_physics_interpolation()
 	body.linear_velocity = Vector3.ZERO
@@ -483,7 +530,6 @@ func turn() -> void:
 		rotation_degrees = current_direction
 		_sync_henshin_rotation()
 		velocity = to_global(Vector3(0, 0, 1) * speed) - position
-		past_translation = position
 		new_line()
 		_play_music_from_level_data()
 	else:
@@ -501,14 +547,12 @@ func turn() -> void:
 			_play_music_from_level_data()
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
-			past_translation = position
 			new_line()
 		elif music_delay > 0:
 			_delay_applied = true
 			# 正值：线立即移动，音乐延后播放（对齐 Unity delay > 0 分支）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
-			past_translation = position
 			new_line()
 			get_tree().create_timer(music_delay).timeout.connect(_play_music_from_level_data)
 		elif music_delay < 0:
@@ -521,7 +565,6 @@ func turn() -> void:
 			# 零值：音画同步启动（原行为）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
-			past_translation = position
 			new_line()
 			_play_music_from_level_data()
 
@@ -555,7 +598,6 @@ func _start_game_after_delay() -> void:
 	LevelManager.GameState = LevelManager.GameStatus.Playing
 	velocity = to_global(Vector3(0, 0, 1) * speed) - position
 
-	past_translation = position
 	new_line()
 
 func _on_Area_body_entered(_body: Node) -> void:
