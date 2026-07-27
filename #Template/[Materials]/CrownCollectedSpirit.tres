@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/Spirit.png" id="1_texture"]
+
+[resource]
+resource_name = "CrownCollectedSpirit"
+transparency = 1
+shading_mode = 0
+billboard_mode = 1
+albedo_texture = ExtResource("1_texture")

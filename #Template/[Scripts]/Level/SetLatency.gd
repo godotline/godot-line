@@ -12,9 +12,12 @@ const SECTION: String = "audio"
 ## 保存当前延迟和音量设置
 static func save_settings(delay: float, volume: float) -> void:
 	var config: ConfigFile = ConfigFile.new()
+	config.load(SETTINGS_PATH)
 	config.set_value(SECTION, "music_delay", delay)
 	config.set_value(SECTION, "music_volume", volume)
-	config.save(SETTINGS_PATH)
+	var error: Error = config.save(SETTINGS_PATH)
+	if error != OK:
+		push_error("SetLatency.gd: failed to save settings (%s)" % error_string(error))
 
 ## 加载已保存的设置，返回 { "delay": float, "volume": float }
 ## 首次使用时自动回退为默认值（delay=0.0, volume=1.0）
