@@ -62,11 +62,15 @@ func _ready() -> void:
 		call_deferred("_draw_line")
 
 func _check_parent() -> void:
-	var parent: Node3D = get_parent() as Node3D
-	if parent is Area3D:
-		var script: Script = parent.get_script()
+	var parent: Node = get_parent()
+	if not parent:
+		return
+	for sibling in parent.get_children():
+		if sibling == self:
+			continue
+		var script: Script = sibling.get_script()
 		if script and script.resource_path.ends_with("Jump.gd"):
-			_jump_node = parent
+			_jump_node = sibling
 			return
 
 func _connect_to_jump() -> void:

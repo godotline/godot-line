@@ -5,7 +5,7 @@ class_name StartPage
 signal start_requested
 signal info_button_pressed
 signal autoplay_toggled(is_on: bool)
-signal setting_changed(key: String, value)
+signal setting_changed(key: String, value: Variant)
 signal shadow_toggled(is_on: bool)
 signal post_toggled(is_on: bool)
 
@@ -254,7 +254,7 @@ func set_about_content(title: String, authors: Array, credits: String) -> void:
 	if credits_node is Label:
 		credits_node.text = credits
 
-func set_setting(key: String, value) -> void:
+func set_setting(key: String, value: Variant) -> void:
 	if not _setting_states.has(key):
 		return
 	var state: Dictionary = _setting_states[key]
@@ -265,10 +265,10 @@ func set_setting(key: String, value) -> void:
 		elif state.options.size() > 0:
 			push_warning("StartPage.set_setting: value '%s' not found in options" % str(value))
 	else:
-		state.value = clampf(value, state.min_val, state.max_val)
+		state.value = clampf(float(value), state.min_val, state.max_val)
 	_update_setting_display(state)
 
-func get_setting(key: String):
+func get_setting(key: String) -> Variant:
 	if _setting_states.has(key):
 		return _get_setting_value(_setting_states[key])
 	return null
@@ -325,7 +325,7 @@ func _update_setting_display(state: Dictionary) -> void:
 				display_val = round(state.value * 100)
 			state.value_label.text = str(display_val) + state.suffix
 
-func _get_setting_value(state: Dictionary):
+func _get_setting_value(state: Dictionary) -> Variant:
 	if state.mode == MODE_CYCLIC:
 		return state.options[state.index] if state.options.size() > 0 else null
 	return state.value

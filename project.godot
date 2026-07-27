@@ -20,6 +20,10 @@ run/delta_smoothing=false
 boot_splash/show_image=false
 config/icon="res://icon.png"
 
+[autoload]
+
+MCPRuntimeProbe="*uid://bsg12huaf1u5i"
+
 [debug]
 
 gdscript/warnings/enable=false

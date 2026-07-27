@@ -1,6 +1,6 @@
 # GodotLine TODO — 冰焰模板 V4.7.6 对照表（修订版）
 
-与 `D:\Code\dl\MTPIDM001-Introduction\Assets\#Template\`（Unity 冰焰模板 V4.7.6）逐项对比。
+与 `/home/meny/Code/DLMTP-Template/Assets/#Template/`（Unity 冰焰模板 V4.7.6）逐项对比。
 
 ---
 
@@ -14,53 +14,53 @@
 | P0 | Trigger | SetActive | ✓ | ✓ | `SetActive.gd`（纯组件），revive 恢复逻辑，支持 `active_on_awake` |
 | P1 | Level | FakePlayer 系统 | ✓ | ✓ | 假线（FakePlayer.gd + FakePlayerTransport + FakePlayerTrigger） |
 | P1 | Trigger | FakePlayerTrigger | ✓ | ✓ | 三种模式：Turn / ChangeDirection / SetState，旧模式 Area3D |
-| P1 | Trigger | GravityTrigger | ✓ | ✗ | **未实现** — 更改场景重力 |
-| P1 | Trigger | PlayAudioClip | ✓ | ✗ | **未实现** — 触发播放音效（支持 Trigger 和事件两种模式） |
-| P1 | Trigger | FadeOutMusic | ✓ | ⚠️ | AudioManager 已有 `fade_out()`，缺 Trigger 封装组件 |
+| P1 | Trigger | GravityTrigger | ✓ | ✓ | `GravityTrigger.gd`，支持任意重力向量与检查点复活回退 |
+| P1 | Trigger | PlayAudioClip | ✓ | ✓ | `PlayAudioClip.gd`，支持 BaseTrigger 与直接 `play_clip()` 调用 |
+| P1 | Trigger | FadeOutMusic | ✓ | ✓ | `FadeOutMusic.gd`，封装 `AudioManager.fade_out()` |
 | P1 | Trigger | SetFog / FogTrigger | ✓ | ✓ | `SetFog.gd` 已使用 FogSettings 资源，Tween 过渡 |
-| P1 | Trigger | SetLight | ✓ | ✗ | **未实现** — 更改定向光源（Rotation/Color/Intensity/ShadowStrength） |
-| P1 | Trigger | SetAmbient | ✓ | ✗ | **未实现** — 更改环境光源类型 |
-| P1 | Trigger | SetImageColor | ✓ | ✗ | **未实现** — 更改 UI Image 颜色 |
+| P1 | Trigger | SetLight | ✓ | ✓ | `SetLight.gd`，Rotation/Color/Intensity/ShadowStrength Tween |
+| P1 | Trigger | SetAmbient | ✓ | ✓ | `SetAmbient.gd`，Skybox/Color/Gradient 环境光 Tween |
+| P1 | Trigger | SetImageColor | ✓ | ✓ | `SetImageColor.gd` + `SingleImageColor` 资源 |
 | P1 | Trigger | Gem / Crystal | ✓ | ✓ | `Gem.gd`（旧模式 Area3D），使用 `LevelManager.gem` 计数，支持 fake 属性和复活恢复 |
-| P1 | Level | FollowPlayer | ✓ | ✗ | **未实现** — 物体跟随玩家的辅助组件 |
-| P1 | Animator | LocalScaleAnimator | ✓ | ✗ | **未实现** — 缩放时间动画 |
-| P1 | Animator | TimerLight (定向光源) | ✓ | ✗ | **未实现** — 时间驱动的光源动画 |
-| P1 | Animator | TimerAmbient (环境光) | ✓ | ✗ | **未实现** — 时间驱动的环境光动画 |
+| P1 | Level | FollowPlayer | ✓ | ✓ | `FollowPlayer.gd`，支持 world offset 与保持原始 Y |
+| P1 | Animator | LocalScaleAnimator | ✓ | ✓ | `LocalScaleAnimator.gd` 继承 `AnimatorBase` |
+| P1 | Animator | TimerLight (定向光源) | ✓ | ✓ | `TimerLight.gd`，按音乐时间触发、复活回退 |
+| P1 | Animator | TimerAmbient (环境光) | ✓ | ✓ | `TimerAmbient.gd`，按音乐时间触发、复活回退 |
 | P1 | Animator | TimerFog (雾气) | ✓ | ✓ | SetFog.gd + FogSettings 已支持时间驱动的完整雾设置 |
-| P1 | Animator | TimerImageColor | ✓ | ✗ | **未实现** — 时间驱动的 Image 颜色动画 |
+| P1 | Animator | TimerImageColor | ✓ | ✓ | `TimerImageColor.gd`，按音乐时间触发、复活回退 |
 | P2 | GUI | StartPage | ✓ | ✓ | 开始页面 UI（含 About 面板动画、延迟/音量/画质/抗锯齿设置、Autoplay/Shadow/Post 开关） |
-| P2 | GUI | LoadingPage | ✓ | ✗ | **未实现** — 加载页面 UI |
-| P2 | GUI | LevelUI | ✓ | ✗ | **未实现** — 关卡内 UI（包含游戏内信息显示） |
-| P2 | GUI | SetQuality | ✓ | ⚠️ | UI 完成（AntiAliasing + Quality 循环选项），信号接口暴露，待接入 QualitySettings |
+| P2 | GUI | LoadingPage | ✓ | ✓ | `LoadingPage.tscn` + `LoadingPage.gd` |
+| P2 | GUI | LevelUI | ✓ | ✓ | `GAMEUI.tscn` + `gameui.gd` |
+| P2 | GUI | SetQuality | ✓ | ✓ | `GraphicsQuality.gd`：显示值映射、MSAA、阴影、后处理、ActiveByQuality 和 ConfigFile 持久化 |
 | P2 | GUI | SetLatency | ✓ | ✓ | SetLatency.gd 完成，延迟语义对齐 Unity StartGame，ConfigFile 持久化 |
 | P2 | GUI | KeyBoardFunctionsDisplay | ✓ | ✓ | 顶部提示栏 "R/K/D" 快捷键显示 |
 | P2 | GUI | SettingItem 排版优化 | — | ✓ | 两行排版（标题在上，◄ 数值 ► 在下），◄/► 箭头符号 |
-| P2 | GUI | GuidanceEnabled | ✓ | ✗ | **未实现** — 引导线启用按钮（AutoPlay 开关已有，缺 UI 按钮） |
+| P2 | GUI | GuidanceEnabled | ✓ | ✓ | `GuidanceEnabled.gd`，切换 GuidanceBoxHolder |
 | P2 | GUI | HideCanvas / ShowCanvas | ✓ | ✓ | About 面板动画显隐（ShowCanvas/HideCanvas 等效） |
 | P2 | Level | ObjectPool | ✓ | ✓ | 通用对象池（线身、粒子等复用），含 TailPool 256 容量 |
-| P2 | Trigger | ParticleSystemPlay | ✓ | ✗ | **未实现** — 触发位置播放粒子效果 |
-| P2 | Trigger | Henshin | ✓ | ✗ | **未实现** — 变身（模型/材质切换） |
-| P2 | Trigger | AchievementTrigger | ✓ | ✗ | **未实现** — 成就系统触发器 |
-| P2 | Trigger | ACChanger | ✓ | ✗ | **未实现** — 音频配置切换（需先有 AudioManager） |
-| P2 | Level | TimeScale | ✓ | ⚠️ | LevelData 已有 `timeScale` 字段并在 `apply_to()` 中应用 `Engine.time_scale`，但缺编辑器 UI 控制 |
-| P2 | Level | ActiveByQuality | ✓ | ✗ | **未实现** — 根据画质等级启用/禁用对象 |
-| P2 | Level | DisableInPlaymode | ✓ | ✗ | **未实现** — 运行时隐藏编辑器辅助对象 |
-| P2 | Editor | TrailRenderer (路径高亮) | ✓ | ✗ | **未实现** — 编辑器内路径高亮 + 点击时间显示 |
-| P2 | Player | C 键输出音乐时间 | ✓ | ✗ | **未实现** — 编辑器快捷键，在控制台输出当前音乐时间 |
+| P2 | Trigger | ParticleSystemPlay | ✓ | ✓ | `ParticleSystemPlay.gd`，复活时按检查点回退 |
+| P2 | Trigger | Henshin | ✓ | ✓ | `Henshin.gd` 触发 Player 替代模型、身体/尾线显隐、朝向 Tween |
+| P2 | Trigger | AchievementTrigger | ✓ | ✓ | `AchievementTrigger.gd` 发出可接入平台服务的 `achievement_requested` 信号 |
+| P2 | Trigger | ACChanger | ✓ | ✓ | `ACChanger.gd`，环境光色 Tween |
+| P2 | Level | TimeScale | ✓ | ✓ | `TimeScale.gd`，游戏内 T 键切换时间/音乐速度 |
+| P2 | Level | ActiveByQuality | ✓ | ✓ | `ActiveByQuality.gd`，由 StartPage 画质设置驱动 |
+| P2 | Level | DisableInPlaymode | ✓ | ✓ | `DisableInPlayMode.gd`，只隐藏脚本所附着节点，不影响父级场景组 |
+| — | Editor | TrailRenderer (路径高亮) | — | — | Unity `#Template` 脚本、Prefab、Scene 内均无此组件；运行时轨迹由 Player tail / RoadMaker 覆盖 |
+| P2 | Player | C 键输出音乐时间 | ✓ | ✓ | 编辑器模式下 `Player.gd` 输出当前音乐播放时间 |
 | P2 | Player | 事件系统 | ✓ | ✓ | Player.gd 信号含 OnGameAwake, OnPlayerStart, OnChangeDirection, OnLeaveGround, OnTouchGround, OnGameOver, OnGetGem, OnPlayerJump |
-| P1 | Player | noDeath 标志 | ✓ | ✗ | **未实现** — Unity KillPlayer 检查 player.noDeath 跳过死亡，Godot 无此字段 |
+| P1 | Player | noDeath 标志 | ✓ | ✓ | `Player.no_death`，墙碰撞和 `KillPlayer` 均尊重该标志 |
 | P1 | Player | Tail 对象池 | ✓ | ✓ | TAIL_POOL_SIZE=256，循环复用 MeshInstance3D |
-| P1 | Player | Henshin 变身系统 | ✓ | ✗ | **未实现** — 双材质切换（characterMaterial/alphaMaterial） |
-| P1 | Player | playedAnimators / playedTimelines | ✓ | ✗ | **未实现** — Unity 跟踪已播放动画器/时间线用于存档恢复 |
-| P2 | Player | sceneCamera / sceneLight 引用 | ✓ | ✗ | **未实现** — Unity Player 持有直接引用，Godot 靠 get_first_node_in_group 查找 |
+| P1 | Player | Henshin 变身系统 | ✓ | ✓ | `Henshin.gd` + Player 可选替代模型、身体/尾线显隐、朝向 Tween |
+| P1 | Player | playedAnimators / playedTimelines | ✓ | ✓ | `played_animators` 保存 AnimationPlayer 播放位置并在检查点复活恢复 |
+| P2 | Player | sceneCamera / sceneLight 引用 | ✓ | ✓ | Player 导出并缓存 `scene_camera` / `scene_light`，保留自动查找回退 |
 | P2 | Player | musicVolume 独立字段 | ✓ | ✓ | `music_volume` 和 `music_delay` 已添加到 Player.gd |
-| P2 | Player | Editor 工具 | ✓ | ✗ | **未实现** — GetStartPosition 按钮、OnDrawGizmos 方向绘制、GetFrame FPS 计数 |
-| P3 | Level | PlayerCubes | ✓ | ✗ | 玩家轨迹方块（Godot 用 road mesh 替代） |
-| P3 | Trigger | TTFCheckPoint 系列 | ✓ | ✗ | 主题化存档点（TTFCheckPoint + TTFCheckPointGem + TTFCheckPointTrigger） |
-| P3 | Assets | 3D 模型 / 材质 | 28+ 模型, 35 材质 | 3 模型, 5 材质 | 水、自然包、云、环、BonusBox、Fragment、Heart 等 |
-| P3 | Assets | 音乐文件 | 4 首 | 1 首 | Phigros_Intro, SampleTrack, Shake_It_Up, nevva |
+| P2 | Player | Editor 工具 | ✓ | ✓ | `direction_gizmo_plugin.gd` 四向辅助线；场景 Transform 即起点；FPS 由 DebugOverlay 提供 |
+| P3 | Level | PlayerCubes | ✓ | ✓ | 玩家死亡碎块由 `DeathParticle.tscn` 等效，轨迹路面由 RoadMaker 负责 |
+| P3 | Trigger | TTFCheckPoint 系列 | ✓ | ✓ | `TTFCheckPoint.tscn` 与三个对应脚本已移植 |
+| P3 | Assets | 3D 模型 / 材质 | 6 OBJ, 16 MAT | ✓ | 源目录 6 个 OBJ 均已导入；可完整翻译的缺失材质已补 `.tres`，Unity 自定义 Shader 由现有 Godot Shader 等效 |
+| P3 | Assets | 音乐文件 | 2 首 | ✓ | 源目录实际只有 `SampleTrack.mp3`、`Shake_It_Up.ogg`，均已导入；原有 `Sample.mp3` 保留 |
 | — | 系统 | BaseTrigger | ✓ | ✓ | Area3D 触发器基类，含 one_shot、require_playing、track_exit、debug_mode |
-| — | 系统 | Trigger | ✓ | ✗ | 原 `Trigger.gd`（`hit_the_line` 信号）已删除，由 BaseTrigger 替代 |
+| — | 系统 | Trigger | ✓ | ✓ | 原 `Trigger.gd` 已按架构要求删除，由 BaseTrigger 的组件分发完整替代 |
 | — | 系统 | Checkpoint | ✓ | ✓ | 检查点（全状态记录 + 恢复），含相机/雾/光/环境光/材质颜色 |
 | — | 系统 | CrownCheckpoint | ✓ | ✓ | 皇冠检查点（粒子特效 + 精灵过渡动画） |
 | — | 系统 | HeartCheckpoint | ✓ | ✓ | 爱心检查点（旋转动画 + 缩放弹跳） |
@@ -105,7 +105,7 @@
 | — | 系统 | GameUI | ✓ | ✓ | 游戏结束 UI（皇冠/宝石统计 + 复活/重玩） |
 | — | 系统 | DeathParticle | ✓ | ✓ | 死亡粒子（8 段碎片 + 随机冲量/扭矩） |
 | — | 系统 | DebugOverlay | ✓ | ✓ | 调试信息覆盖层（FPS/坐标/朝向/状态/宝石/皇冠/相机） |
-| — | 系统 | MPM Importer 插件 | — | ✓ | **Godot 新增** — .mpm 格式导入器（CameraTrigger/AnimatorPlayer/MovingPosMax） |
+| — | 系统 | MPM Importer 插件 | — | — | 当前项目不存在且不应重建；`AGENTS.md` 明确列为已删除路径 |
 | — | 系统 | PortTookits | — | ✓ | **Godot 新增** — Unity 迁移辅助工具集 |
 
 **图例**: ✓ = 已完成, ⚠️ = 需验证/部分完成/命名不同, ✗ = 未实现, — = Godot 新增或 Unity 无此功能
@@ -124,20 +124,29 @@
 
 ---
 
-## 三、完成统计
+## 三、审计结论
 
-| 类别 | 总计 | ✓ 已完成 | ⚠️ 部分/待验证 | ✗ 未实现 |
-|------|:---:|:--------:|:-------------:|:--------:|
-| Trigger | 29 | 14 | 1 | 9 |
-| Level | 10 | 5 | 1 | 4 |
-| Animator | 6 | 3 | 1 | 2 |
-| GUI | 9 | 5 | 1 | 2 |
-| Player | 9 | 3 | 0 | 6 |
-| Editor | 1 | 0 | 0 | 1 |
-| Assets | 2 | 0 | 0 | 2 |
-| **已对齐系统** | 33 | 33 | 0 | 0 |
+| 类型 | 结论 |
+|------|------|
+| Unity 普通运行时脚本 | 已移植或由表内 Godot 系统等效覆盖，无阻塞关卡制作的脚本缺口 |
+| Unity Timeline Track/Clip/Mixer/Behaviour | 使用 Godot `AnimationPlayer` 属性轨道、Tween 和 Timer Animator；不复制 Unity Playables 胶水类 |
+| Unity Post Processing Stack | Mobile renderer 可用项由 Environment 属性轨道与 GraphicsQuality 开关覆盖；Motion Blur、Depth of Field、Vignette 无直接移动端等价项 |
+| 源目录资源 | 6 个 OBJ、12 张有独立名称的纹理和 2 个音频均已有原件或等效文件；新增 OBJ/音频已通过 Godot 导入器加载 |
+| 外部依赖资产 | Unity Prefab 引用但不位于 `Assets/#Template` 的自然包、水体等不属于本次可迁移源文件 |
 
-> 注：Trigger 统计包含 Godot 新增的 PropertyModifierTrigger；已对齐系统包含 Godot 新增的 SingleActive/AuthorInfo/SetLatency/MPM Importer/PortTookits
+### 3.1 文件名不同但已覆盖的 Unity 类
+
+| Unity 类 | Godot 对应实现 |
+|-----------|----------------|
+| `CheckpointTrigger` | `Checkpoint.gd` 自身碰撞，以及 TTF 的 `TTFCheckPointTrigger.gd` |
+| `GameEvents` | `Player.gd` 的游戏流程信号 |
+| `HideCanvas` / `ShowCanvas` | `StartPage.gd` 的 About/页面 Tween |
+| `KeyBoardManager` / `KeyBoardFunctionsDisplay` | Godot InputMap、`Player._input()`、StartPage 顶部提示栏 |
+| `LevelUI` | `GAMEUI.tscn` + `gameui.gd` |
+| `PlayerCubes` | `DeathParticle.tscn`；轨迹路面由 `RoadMaker.gd` 负责 |
+| `RoadPaver` | `RoadMaker.gd` |
+| `SetQuality` | `GraphicsQuality.gd` + StartPage 设置控件 |
+| `*Track` / `*Clip` / `*MixerBehaviour` | Godot `AnimationPlayer` 属性轨道、Tween、Timer Animator |
 
 ---
 
@@ -147,43 +156,43 @@
 - [x] ~~**Trigger 系统组件化重构**~~ — 已完成，见 `Comp.md`。三种模式共存（纯组件/自容器/旧模式），稳定运行
 
 ### P1 — 核心功能补齐
-- [ ] **GravityTrigger** — 更改场景重力，revive 恢复（LevelData 已有 gravity 字段和 apply_to，缺 Trigger 组件封装）
-- [ ] **PlayAudioClip** — 触发播放音效，支持 Trigger/事件模式
-- [ ] **FadeOutMusic** — 淡出背景音乐 Trigger 组件封装（AudioManager.fade_out 已有，缺 Node3D 组件）
-- [ ] **SetLight** — 更改定向光源 Rotation/Color/Intensity/Shadow（Checkpoint 已有 _capture_light/_restore_light，缺独立 Trigger）
-- [ ] **SetAmbient** — 更改环境光源类型（Checkpoint 已有 _capture_ambient/_restore_ambient，缺独立 Trigger）
-- [ ] **SetImageColor** — 更改 UI Image 颜色
-- [ ] **FollowPlayer** — 物体跟随玩家辅助组件
-- [ ] **noDeath 标志** — Player.gd 添加 `no_death` 字段，KillPlayer 检查跳过
-- [ ] **Henshin 变身系统** — Player.gd 双材质切换
+- [x] **GravityTrigger** — 更改场景重力，revive 恢复
+- [x] **PlayAudioClip** — 触发播放音效，支持 Trigger/事件模式
+- [x] **FadeOutMusic** — 淡出背景音乐 Trigger 组件封装
+- [x] **SetLight** — 更改定向光源 Rotation/Color/Intensity/Shadow
+- [x] **SetAmbient** — 更改环境光源类型
+- [x] **SetImageColor** — 更改 UI Image 颜色
+- [x] **FollowPlayer** — 物体跟随玩家辅助组件
+- [x] **noDeath 标志** — Player.gd 与 KillPlayer 检查跳过
+- [x] **Henshin 变身系统** — Player.gd 替代模型/尾线显示控制
 
 ### P1 — Animator 补齐
-- [ ] **LocalScaleAnimator** — 缩放时间动画
-- [ ] **TimerLight** — 时间驱动定向光源动画
-- [ ] **TimerAmbient** — 时间驱动环境光动画
+- [x] **LocalScaleAnimator** — 缩放时间动画
+- [x] **TimerLight** — 时间驱动定向光源动画
+- [x] **TimerAmbient** — 时间驱动环境光动画
 - [x] ~~**TimerFog**~~ — 已由 SetFog.gd + FogSettings 覆盖
-- [ ] **TimerImageColor** — 时间驱动 Image 颜色动画
+- [x] **TimerImageColor** — 时间驱动 Image 颜色动画
 
 ### P2 — 体验增强
-- [ ] **LoadingPage** — 加载页面 UI
-- [ ] **LevelUI** — 关卡内 UI
-- [ ] **GuidanceEnabled** — 引导线启用 UI 按钮
-- [ ] **ParticleSystemPlay** — 触发位置播放粒子效果
-- [ ] **AchievementTrigger** — 成就系统触发器
-- [ ] **ACChanger** — 音频配置切换
-- [ ] **TimeScale** — 编辑器全局时间倍速 UI 控制（LevelData.timeScale 已实现运行时缩放）
-- [ ] **ActiveByQuality** — 根据画质等级启用/禁用对象
-- [ ] **DisableInPlaymode** — 运行时隐藏编辑器辅助对象
-- [ ] **TrailRenderer** — 编辑器路径高亮 + 点击时间显示
-- [ ] **C 键输出音乐时间** — 编辑器快捷键
-- [ ] **sceneCamera / sceneLight 直接引用** — Player.gd 缓存引用
-- [ ] **playedAnimators / playedTimelines** — 跟踪已播放动画器用于存档恢复
-- [ ] **Editor 工具** — GetStartPosition 按钮、OnDrawGizmos、GetFrame FPS
+- [x] **LoadingPage** — 加载页面 UI
+- [x] **LevelUI** — 关卡内 UI
+- [x] **GuidanceEnabled** — 引导线启用 UI 按钮
+- [x] **ParticleSystemPlay** — 触发位置播放粒子效果
+- [x] **AchievementTrigger** — 成就系统触发器
+- [x] **ACChanger** — 环境光色切换
+- [x] **TimeScale** — 游戏内全局时间倍速控制
+- [x] **ActiveByQuality** — 根据画质等级启用/禁用对象
+- [x] **DisableInPlaymode** — 运行时隐藏编辑器辅助对象
+- [x] ~~**TrailRenderer**~~ — Unity `#Template` 内不存在该源组件；Player tail / RoadMaker 已覆盖实际轨迹功能
+- [x] **C 键输出音乐时间** — 编辑器快捷键
+- [x] **sceneCamera / sceneLight 直接引用** — Player.gd 缓存引用
+- [x] **playedAnimators / playedTimelines** — AnimationPlayer 状态用于存档恢复
+- [x] **Editor 工具** — 四向 Node3D gizmo 已移植；Godot Transform 直接保存起点；DebugOverlay 提供 FPS
 
 ### P3 — 资产补充
-- [ ] **3D 模型/材质补充** — 水、自然包、云、环、BonusBox、Fragment、Heart 等（当前 3 模型 + 5 材质）
-- [ ] **音乐文件补充** — Phigros_Intro, SampleTrack, Shake_It_Up, nevva（当前 1 首 Sample.mp3）
-- [ ] **TTFCheckPoint 系列** — 主题化存档点
+- [x] **3D 模型/材质补充** — `#Template` 源目录中的 OBJ 全部导入，可完整转换的材质已补齐
+- [x] **音乐文件补充** — 源目录实际 2 首均已导入；Phigros_Intro / nevva 不在本次源路径内
+- [x] **TTFCheckPoint 系列** — 主题化存档点
 
 ---
 
@@ -193,9 +202,9 @@
 
 | 模式 | 基类 | 碰撞由谁处理 | 文件数 |
 |------|------|-------------|--------|
-| **纯组件** | `extends Node3D` | 父节点 BaseTrigger | 14 |
+| **纯组件** | `extends Node/Node3D` | 父节点 BaseTrigger | 22 |
 | **自容器** | `extends BaseTrigger` (即 Area3D) | 自身继承 BaseTrigger | 2 |
-| **旧模式** | `extends Area3D` | 自身处理 body_entered | 6 (+2 继承 Checkpoint) |
+| **旧模式** | `extends Area3D` | 自身处理 body_entered | 9 |
 
 ### 5.2 纯组件列表
 
@@ -205,7 +214,6 @@
 |------|---------|------|
 | `Jump.gd` | `trigger(body)` | 跳跃 + JumpPredictor/FallPredictor |
 | `SetFog.gd` | `trigger(body)` | FogSettings + Tween 过渡 |
-| `Pyramid.gd` | 无（管理节点） | 由 PyramidTrigger 调用 |
 | `EventTrigger.gd` | `trigger(body)` + `on_exit(body)` | 多目标调用 + onclick 模式 |
 | `PlayAnimator.gd` | `trigger(body)` | AnimationPlayer 播放 + 复活恢复 |
 | `SetActive.gd` | `trigger(body)` | 激活/禁用节点 + revive 恢复 |
@@ -214,14 +222,23 @@
 | `KillPlayer.gd` | `trigger(body)` | Hit/Drowned/Border + 自定义音效 |
 | `ChangeDirection.gd` | `trigger(body)` | Direction/Turn 两种模式 |
 | `Speed.gd` | `trigger(body)` | 修改 speed + 即时同步速度向量 |
-| `JumpPredictor.gd` | 无（工具类） | 跳跃轨迹预测可视化 |
-| `FallPredictor.gd` | 无（工具类） | 下落轨迹预测可视化 |
+| `PyramidTrigger.gd` | `trigger(body)` | 调用父节点 Pyramid |
+| `GravityTrigger.gd` | `trigger(body)` | 任意重力向量 + 复活恢复 |
+| `PlayAudioClip.gd` | `trigger(body)` | 播放一次性音效 |
+| `FadeOutMusic.gd` | `trigger(body)` | 淡出背景音乐 |
+| `SetLight.gd` | `trigger(body)` | 定向光设置 Tween |
+| `SetAmbient.gd` | `trigger(body)` | Environment 环境光 Tween |
+| `SetImageColor.gd` | `trigger(body)` | CanvasItem 颜色 Tween |
+| `ParticleSystemPlay.gd` | `trigger(body)` | 粒子播放与复活回退 |
+| `Henshin.gd` | `trigger(body)` | 玩家模型变身 |
+| `ACChanger.gd` | `trigger(body)` | 环境光颜色 Tween |
+| `AchievementTrigger.gd` | `trigger(body)` | 成就请求信号 |
+| `TTFCheckPointTrigger.gd` | `trigger(body)` | 触发 TTFCheckPoint |
 
 ### 5.3 自容器列表
 
 | 文件 | class_name | 备注 |
 |------|-----------|------|
-| `PyramidTrigger.gd` | — | 调用父节点 Pyramid 的 `trigger(type)` |
 | `PropertyModifierTrigger.gd` | `PropertyModifierTrigger` | 通用属性修改 + Tween + 复活恢复 |
 | `OldCameraShakeTrigger.gd` | — | 旧相机系统震动（BaseTrigger 自容器） |
 

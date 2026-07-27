@@ -25,7 +25,7 @@ func trigger(body: Node3D) -> void:
 	if LevelManager.GameState != LevelManager.GameStatus.Playing:
 		return
 	var player: Player = body as Player
-	if player and player.is_live:
+	if player and player.is_live and not player.no_death:
 		if no_revive:
 			LevelManager.checkpoint_count = 0
 			LevelManager.crown = 0

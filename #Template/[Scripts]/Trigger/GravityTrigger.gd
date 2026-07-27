@@ -1,0 +1,24 @@
+extends Node3D
+
+## Applies a level-local gravity override. Add this as a BaseTrigger child.
+@export var gravity: Vector3 = Vector3(0.0, -9.8, 0.0)
+
+var _checkpoint_index: int = -1
+
+func trigger(body: Node3D) -> void:
+	var player: Player = body as Player
+	if not player:
+		return
+	_checkpoint_index = LevelManager.checkpoint_count
+	player.set_gravity_override(gravity)
+	LevelManager.add_revive_listener(_on_revive)
+
+func _on_revive() -> void:
+	LevelManager.CompareCheckpointIndex(_checkpoint_index, func() -> void:
+		var player: Player = Player.instance
+		if player:
+			player.clear_gravity_override()
+	)
+
+func _exit_tree() -> void:
+	LevelManager.remove_revive_listener(_on_revive)

@@ -90,6 +90,7 @@ func _enter_trigger(body: Node3D) -> void:
 	# Save player state
 	_player_first_direction = body.firstDirection
 	_player_second_direction = body.secondDirection
+	body.capture_managed_animation_state()
 	_track_progress = body.animation_node.get_current_animation_position() if body.animation_node and body.animation_node.is_playing() else 0.0
 	_scene_gravity = ProjectSettings.get_setting("physics/3d/default_gravity_vector") * ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -114,7 +115,7 @@ func _enter_trigger(body: Node3D) -> void:
 			_fake_players_data.append(fake.get_reset_data())
 
 func _capture_fog() -> void:
-	var env: Environment = get_viewport().get_world_3d().environment
+	var env: Environment = _get_scene_environment()
 	if env:
 		fog.use_fog = env.fog_enabled
 		fog.fog_color = env.fog_light_color
@@ -124,14 +125,15 @@ func _capture_fog() -> void:
 func _capture_light() -> void:
 	var main_line: Player = Player.instance
 	if main_line:
-		var scene_light: DirectionalLight3D = main_line.get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
+		var scene_light: DirectionalLight3D = main_line.get_scene_light()
 		if scene_light:
 			light.rotation = scene_light.rotation_degrees
 			light.color = scene_light.light_color
 			light.intensity = scene_light.light_energy
+			light.shadow_strength = 1.0 if scene_light.shadow_enabled else 0.0
 
 func _capture_ambient() -> void:
-	var env: Environment = get_viewport().get_world_3d().environment
+	var env: Environment = _get_scene_environment()
 	if env:
 		ambient.intensity = env.ambient_light_energy
 		match env.ambient_light_source:
@@ -154,7 +156,7 @@ func _restore_camera() -> void:
 			camera_old.set_camera()
 
 func _restore_fog() -> void:
-	var env: Environment = get_viewport().get_world_3d().environment
+	var env: Environment = _get_scene_environment()
 	if env:
 		env.fog_enabled = fog.use_fog
 		env.fog_light_color = fog.fog_color
@@ -164,14 +166,10 @@ func _restore_fog() -> void:
 func _restore_light() -> void:
 	var main_line: Player = Player.instance
 	if main_line:
-		var scene_light: DirectionalLight3D = main_line.get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
-		if scene_light:
-			scene_light.rotation_degrees = light.rotation
-			scene_light.light_color = light.color
-			scene_light.light_energy = light.intensity
+		light.apply(main_line.get_scene_light())
 
 func _restore_ambient() -> void:
-	var env: Environment = get_viewport().get_world_3d().environment
+	var env: Environment = _get_scene_environment()
 	if env:
 		env.ambient_light_energy = ambient.intensity
 		match ambient.lighting_type:
@@ -185,6 +183,12 @@ func _restore_ambient() -> void:
 				env.ambient_light_sky_color = ambient.sky_color
 				env.ambient_light_horizon_color = ambient.equator_color
 				env.ambient_light_ground_color = ambient.ground_color
+
+func _get_scene_environment() -> Environment:
+	var main_line: Player = Player.instance
+	if main_line:
+		return main_line.get_scene_environment()
+	return get_viewport().get_world_3d().environment
 
 func revive() -> void:
 	var main_line: Player = Player.instance
@@ -252,6 +256,7 @@ func revive() -> void:
 		_restore_light()
 	if not manual_ambient:
 		_restore_ambient()
+	main_line.restore_managed_animation_state()
 
 	# Restore material colors
 	for s in material_colors_auto:

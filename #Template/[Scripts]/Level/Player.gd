@@ -35,6 +35,11 @@ var current_direction: Vector3:
 @export var is_turn: bool = false
 @export var is_end: bool = false
 @export var tail_holder: Node3D
+@export var scene_camera: Camera3D
+@export var scene_light: DirectionalLight3D
+@export var no_death: bool = false
+@export var draw_direction: bool = false
+@export var played_animators: Array[AnimationPlayer] = []
 
 @onready var mesh: Mesh = $MeshInstance3D.mesh
 @onready var past_translation: Vector3 = position
@@ -42,6 +47,17 @@ var current_direction: Vector3:
 @onready var tree: SceneTree = get_tree()
 @onready var animation_node: AnimationPlayer = get_node(animation) if animation else null
 @onready var land_effect: GPUParticles3D = $LandEffect
+
+var _managed_animation_states: Array[Dictionary] = []
+var _gravity_override: Vector3 = Vector3.ZERO
+var _has_gravity_override: bool = false
+
+var hen_shin: bool = false
+var henshin_object: Node3D
+var henshin_offset: Vector3 = Vector3.ZERO
+var show_line_tail: bool = true
+var show_line_body: bool = true
+var henshin_rotation_time: float = 0.0
 
 @export var level_data: LevelData
 
@@ -90,6 +106,8 @@ func _ready() -> void:
 		else:
 			speed = level_data.speed
 		rotation_degrees = current_direction
+		_cache_scene_references()
+		_pause_managed_animators()
 		emit_signal("on_game_awake")
 	if is_inside_tree():
 		if level_data:
@@ -103,17 +121,25 @@ func _ready() -> void:
 	# 实例化 StartPage（启动界面）
 	var start_page_scene: PackedScene = load("res://#Template/[Resources]/StartPage.tscn") as PackedScene
 	if start_page_scene and not Engine.is_editor_hint():
-		# 加载持久化的音画延迟/音量设置（对齐 Unity PlayerPrefs）
+		# 加载持久化设置（对齐 Unity PlayerPrefs）
 		var saved: Dictionary = SetLatency.load_settings()
 		music_delay = saved.delay
 		music_volume = saved.volume
+		GraphicsQuality.load_settings()
 
 		var page: StartPage = start_page_scene.instantiate()
 		add_child(page)
 		page.set_setting("latency", music_delay)
 		page.set_setting("volume", music_volume)
+		page.set_setting("quality", GraphicsQuality.get_quality_label())
+		page.set_setting("antialiasing", GraphicsQuality.get_antialiasing_label())
+		page.shadow_checkbox.button_pressed = GraphicsQuality.shadows_enabled
+		page.post_checkbox.button_pressed = GraphicsQuality.post_process_enabled
 		page.start_requested.connect(_on_start_from_startpage)
 		page.setting_changed.connect(_on_setting_changed)
+		page.shadow_toggled.connect(_on_shadow_toggled)
+		page.post_toggled.connect(_on_post_toggled)
+		GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
 
 func _on_start_from_startpage() -> void:
 	turn()
@@ -121,10 +147,9 @@ func _on_start_from_startpage() -> void:
 func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint() and (is_live or LevelManager.GameState == LevelManager.GameStatus.Moving):
 		if not is_on_floor():
-			var gravity_strength: float = level_data.gravity.length() if level_data else 9.8
-			velocity.y -= gravity_strength * delta
+			velocity += get_current_gravity() * delta
 		move_and_slide()
-		if is_live and is_on_wall():
+		if is_live and is_on_wall() and not no_death:
 			die()
 		if fly:
 			$".".position.y = y
@@ -145,16 +170,23 @@ func _process(_delta: float) -> void:
 	if is_on_floor_now:
 		if past_is_on_floor != is_on_floor_now:
 			new_line()
-		var offset: Vector3 = position - past_translation
+		# 尾段保持生成时的高度，只在水平面上跟随线头延伸。
+		var tail_position: Vector3 = position
+		tail_position.y = past_translation.y
+		var offset: Vector3 = tail_position - past_translation
 		var distance: float = offset.length()
+		var tail_length: float = distance + tailScale
 
-		line.position = past_translation + offset / 2
-		line.scale = Vector3(1, 1, distance + tailScale)
+		_update_tail_body(line, past_translation + offset / 2, tail_length)
 	else:
 		if past_is_on_floor != is_on_floor_now:
+			_release_tail_body(line)
 			emit_signal("on_sky")
 			emit_signal("on_leave_ground")
 	past_is_on_floor = is_on_floor_now
+
+	if hen_shin and is_instance_valid(henshin_object):
+		henshin_object.global_position = global_position + henshin_offset
 
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
@@ -179,6 +211,9 @@ func _input(event: InputEvent) -> void:
 			KEY_D:
 				if OS.is_debug_build():
 					debug = not debug
+			KEY_C:
+				if Engine.is_editor_hint() and $MusicPlayer.playing:
+					print("Music time: %.3f" % $MusicPlayer.get_playback_position())
 
 func reload() -> void:
 	LevelManager.main_line_transform = start_transform
@@ -196,14 +231,25 @@ func _clear_tail() -> void:
 	tail_holder = _get_or_create_player_tail_holder()
 	for child in tail_holder.get_children():
 		var tail: MeshInstance3D = child as MeshInstance3D
+		if child is RigidBody3D:
+			tail = child.get_node_or_null("TailMesh") as MeshInstance3D
 		if tail:
 			_return_to_pool(tail)
 		else:
 			child.queue_free()
 
 func _return_to_pool(tail: MeshInstance3D) -> void:
-	if tail.get_parent():
+	var body: RigidBody3D = tail.get_parent() as RigidBody3D
+	if body:
+		body.remove_child(tail)
+		if body.get_parent():
+			body.get_parent().remove_child(body)
+		body.queue_free()
+	elif tail.get_parent():
 		tail.get_parent().remove_child(tail)
+	tail.position = Vector3.ZERO
+	tail.rotation = Vector3.ZERO
+	tail.scale = Vector3.ONE
 	tail.visible = false
 	if not _tail_pool.is_full():
 		_tail_pool.add(tail)
@@ -229,18 +275,189 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	return holder
 
 func new_line() -> void:
+	_release_tail_body(line)
 	line = _get_from_pool()
+	line.name = "TailMesh"
 	line.mesh = mesh
-	line.position = position
-	line.rotation = rotation
+	line.position = Vector3.ZERO
+	line.rotation = Vector3.ZERO
+	line.scale = Vector3.ONE
 	line.set_surface_override_material(0, material)
-	line.visible = true
+	line.visible = show_line_tail or not hen_shin
 
 	var tail_holder: Node3D = _get_or_create_player_tail_holder()
-	tail_holder.add_child(line)
+	var body: RigidBody3D = _create_tail_body()
+	tail_holder.add_child(body)
+	body.add_child(line)
+	body.position = position
+	body.rotation = rotation
+	_update_tail_collision(line, Vector3.ONE)
 
 	past_translation = position
 	emit_signal("new_line1")
+
+func _create_tail_body() -> RigidBody3D:
+	var body: RigidBody3D = RigidBody3D.new()
+	body.name = "TailRigidBody"
+	body.collision_layer = 0
+	body.collision_mask = 1 << 1 # BaseFloor
+	body.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
+	body.freeze = true
+	body.axis_lock_angular_x = true
+	body.axis_lock_angular_y = true
+	body.axis_lock_angular_z = true
+	body.gravity_scale = 0.0
+	body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
+
+	var collision: CollisionShape3D = CollisionShape3D.new()
+	collision.name = "CollisionShape3D"
+	collision.shape = BoxShape3D.new()
+	body.add_child(collision)
+	return body
+
+func _update_tail_body(tail: MeshInstance3D, center: Vector3, length: float) -> void:
+	var body: RigidBody3D = tail.get_parent() as RigidBody3D
+	if not body:
+		return
+	body.position = center
+	var tail_scale: Vector3 = Vector3(1.0, 1.0, length)
+	tail.scale = tail_scale
+	_update_tail_collision(tail, tail_scale)
+
+func _update_tail_collision(tail: MeshInstance3D, tail_scale: Vector3) -> void:
+	var body: RigidBody3D = tail.get_parent() as RigidBody3D
+	if not body or not tail.mesh:
+		return
+	var collision: CollisionShape3D = body.get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if not collision or not collision.shape is BoxShape3D:
+		return
+	var mesh_aabb: AABB = tail.mesh.get_aabb()
+	var box: BoxShape3D = collision.shape as BoxShape3D
+	box.size = mesh_aabb.size * tail_scale.abs()
+	collision.position = mesh_aabb.get_center() * tail_scale
+
+func _release_tail_body(tail: MeshInstance3D) -> void:
+	if not is_instance_valid(tail):
+		return
+	var body: RigidBody3D = tail.get_parent() as RigidBody3D
+	if not body or not body.freeze:
+		return
+	var release_transform: Transform3D = body.global_transform
+	body.freeze = false
+	body.global_transform = release_transform
+	body.reset_physics_interpolation()
+	body.linear_velocity = Vector3.ZERO
+	body.angular_velocity = Vector3.ZERO
+	body.sleeping = false
+
+func get_current_gravity() -> Vector3:
+	if _has_gravity_override:
+		return _gravity_override
+	return level_data.gravity if level_data else Vector3(0.0, -9.8, 0.0)
+
+func set_gravity_override(value: Vector3) -> void:
+	_gravity_override = value
+	_has_gravity_override = true
+
+func clear_gravity_override() -> void:
+	_gravity_override = Vector3.ZERO
+	_has_gravity_override = false
+
+func get_scene_camera() -> Camera3D:
+	if not is_instance_valid(scene_camera):
+		scene_camera = get_viewport().get_camera_3d()
+	return scene_camera
+
+func get_scene_light() -> DirectionalLight3D:
+	if not is_instance_valid(scene_light):
+		scene_light = get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
+	if not is_instance_valid(scene_light) and get_tree().current_scene:
+		var lights: Array[Node] = get_tree().current_scene.find_children("*", "DirectionalLight3D", true, false)
+		if not lights.is_empty():
+			scene_light = lights[0] as DirectionalLight3D
+	return scene_light
+
+func get_scene_environment() -> Environment:
+	var camera: Camera3D = get_scene_camera()
+	if camera and camera.get_environment():
+		return camera.get_environment()
+	return get_world_3d().environment
+
+func _cache_scene_references() -> void:
+	get_scene_camera()
+	get_scene_light()
+
+func enable_henshin(model: Node3D, offset: Vector3, show_tail: bool, show_body: bool, rotation_time: float) -> void:
+	if not model:
+		push_warning("Player.gd: Henshin requires a henshin_object")
+		return
+	if henshin_object and henshin_object != model:
+		henshin_object.visible = false
+	hen_shin = true
+	henshin_object = model
+	henshin_offset = offset
+	show_line_tail = show_tail
+	show_line_body = show_body
+	henshin_rotation_time = rotation_time
+	henshin_object.visible = true
+	henshin_object.global_position = global_position + henshin_offset
+	_sync_henshin_rotation()
+	$MeshInstance3D.visible = show_line_body
+	if not show_line_tail:
+		_clear_tail()
+
+func reset_henshin_state() -> void:
+	if henshin_object:
+		henshin_object.visible = false
+	hen_shin = false
+	henshin_object = null
+	henshin_offset = Vector3.ZERO
+	show_line_tail = true
+	show_line_body = true
+	henshin_rotation_time = 0.0
+	$MeshInstance3D.visible = true
+
+func _sync_henshin_rotation() -> void:
+	if not hen_shin or not is_instance_valid(henshin_object):
+		return
+	if henshin_rotation_time <= 0.0:
+		henshin_object.rotation_degrees = rotation_degrees
+		return
+	henshin_object.create_tween().tween_property(henshin_object, "rotation_degrees", rotation_degrees, henshin_rotation_time)
+
+func capture_managed_animation_state() -> void:
+	_managed_animation_states.clear()
+	for animator: AnimationPlayer in played_animators:
+		if animator and not animator.current_animation.is_empty():
+			_managed_animation_states.append({
+				"animator": animator,
+				"animation": animator.current_animation,
+				"position": animator.current_animation_position,
+				"playing": animator.is_playing()
+			})
+
+func restore_managed_animation_state() -> void:
+	for state: Dictionary in _managed_animation_states:
+		var animator: AnimationPlayer = state.get("animator") as AnimationPlayer
+		if not animator:
+			continue
+		var animation_name: StringName = state.get("animation", StringName()) as StringName
+		if animation_name.is_empty() or not animator.has_animation(animation_name):
+			continue
+		animator.play(animation_name)
+		animator.seek(state.get("position", 0.0) as float, true)
+		if not (state.get("playing", false) as bool):
+			animator.pause()
+
+func _pause_managed_animators() -> void:
+	for animator: AnimationPlayer in played_animators:
+		if animator:
+			animator.pause()
+
+func _resume_managed_animators() -> void:
+	for animator: AnimationPlayer in played_animators:
+		if animator and not animator.current_animation.is_empty():
+			animator.play()
 
 func _play_land_effect() -> void:
 	if is_instance_valid(land_effect):
@@ -264,6 +481,7 @@ func turn() -> void:
 		emit_signal("on_change_direction")
 		_currentDirection = 1 - _currentDirection
 		rotation_degrees = current_direction
+		_sync_henshin_rotation()
 		velocity = to_global(Vector3(0, 0, 1) * speed) - position
 		past_translation = position
 		new_line()
@@ -276,6 +494,8 @@ func turn() -> void:
 			page.hide_animated()
 		emit_signal("on_player_start")
 		rotation_degrees = current_direction
+		_sync_henshin_rotation()
+		_resume_managed_animators()
 
 		if _delay_applied:
 			_play_music_from_level_data()
@@ -339,7 +559,7 @@ func _start_game_after_delay() -> void:
 	new_line()
 
 func _on_Area_body_entered(_body: Node) -> void:
-	if not is_live:
+	if not is_live or no_death:
 		return
 
 	die()
@@ -394,12 +614,32 @@ func _random_rotation() -> Vector3:
 
 ## StartPage 设置变化回调：更新 Player 字段 + 立即持久化 + 实时应用音量
 ## 对齐 Unity SetLatency.cs 的 AddLatency/SubtractLatency/AddVolume/SubtractVolume + SetText + PlayerPrefs.SetFloat
-func _on_setting_changed(key: String, value) -> void:
+func _on_setting_changed(key: String, value: Variant) -> void:
 	match key:
 		"latency":
-			music_delay = value
+			music_delay = float(value)
+			SetLatency.save_settings(music_delay, music_volume)
 		"volume":
-			music_volume = value
+			music_volume = float(value)
 			if $MusicPlayer.playing:
 				$MusicPlayer.volume_db = linear_to_db(max(music_volume, 0.001))
-	SetLatency.save_settings(music_delay, music_volume)
+			SetLatency.save_settings(music_delay, music_volume)
+		"quality":
+			var quality_level: int = GraphicsQuality.quality_level_from_value(value)
+			GraphicsQuality.set_level(quality_level)
+			get_tree().call_group("active_by_quality", "apply_quality", quality_level)
+			GraphicsQuality.save_settings()
+		"antialiasing":
+			GraphicsQuality.antialiasing = GraphicsQuality.antialiasing_level_from_value(value)
+			GraphicsQuality.apply_antialiasing(get_viewport())
+			GraphicsQuality.save_settings()
+
+func _on_shadow_toggled(is_on: bool) -> void:
+	GraphicsQuality.shadows_enabled = is_on
+	GraphicsQuality.apply_shadows(get_tree())
+	GraphicsQuality.save_settings()
+
+func _on_post_toggled(is_on: bool) -> void:
+	GraphicsQuality.post_process_enabled = is_on
+	GraphicsQuality.apply_post_process(get_scene_environment())
+	GraphicsQuality.save_settings()
