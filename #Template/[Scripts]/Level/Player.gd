@@ -93,6 +93,7 @@ const TAIL_COLLISION_LAYER: int = 1 << 3
 const TAIL_COLLISION_MASK: int = (1 << 1) | (1 << 2)
 const TAIL_JOIN_OVERLAP: float = 0.025
 const TAIL_COLLISION_MARGIN: float = 0.001
+const TAIL_INITIAL_LENGTH: float = 1.0
 var _tail_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
 
 func _ready() -> void:
@@ -174,14 +175,13 @@ func _process(_delta: float) -> void:
 	if is_on_floor_now:
 		if past_is_on_floor != is_on_floor_now:
 			new_line()
-		# 尾段保持生成时的高度，只在水平面上跟随线头延伸。
 		var tail_position: Vector3 = position
 		tail_position.y = past_translation.y
 		var offset: Vector3 = tail_position - past_translation
 		var distance: float = offset.length()
-		var tail_length: float = maxf(distance, float(tailScale))
+		var center: Vector3 = past_translation + offset / 2
 
-		_update_tail_body(line, past_translation + offset / 2, tail_length)
+		_update_tail_body(line, center, distance + tailScale)
 	else:
 		if past_is_on_floor != is_on_floor_now:
 			_release_tail_body(line)
@@ -286,7 +286,7 @@ func new_line() -> void:
 	line.mesh = mesh
 	line.position = Vector3.ZERO
 	line.rotation = Vector3.ZERO
-	var initial_scale: Vector3 = Vector3(1.0, 1.0, maxf(float(tailScale), 1.0))
+	var initial_scale: Vector3 = Vector3.ONE
 	line.scale = initial_scale
 	line.set_surface_override_material(0, material)
 	line.visible = show_line_tail or not hen_shin
@@ -328,12 +328,15 @@ func _finish_tail_join(tail: MeshInstance3D) -> void:
 
 	var horizontal_offset: Vector3 = position - past_translation
 	horizontal_offset.y = 0.0
-	if horizontal_offset.length() < float(tailScale):
-		_update_tail_body(tail, past_translation + horizontal_offset * 0.5, float(tailScale))
+	if horizontal_offset.length() < TAIL_INITIAL_LENGTH:
+		_update_tail_body(tail, past_translation, TAIL_INITIAL_LENGTH)
 		return
 	var end: Vector3 = past_translation + previous_forward * (horizontal_offset.length() + join_offset + TAIL_JOIN_OVERLAP)
 	end.y = past_translation.y
-	_update_tail_body(tail, (past_translation + end) * 0.5, maxf(past_translation.distance_to(end), 0.001))
+	var join_length: float = maxf(past_translation.distance_to(end), TAIL_INITIAL_LENGTH)
+	_update_tail_body(tail, (past_translation + end) / 2, join_length)
+
+	_create_corner_fill(position)
 
 func _create_tail_body() -> RigidBody3D:
 	var body: RigidBody3D = RigidBody3D.new()
@@ -363,6 +366,7 @@ func _update_tail_body(tail: MeshInstance3D, center: Vector3, length: float) -> 
 	if not body:
 		return
 	body.position = center
+	tail.position = Vector3.ZERO
 	var tail_scale: Vector3 = Vector3(1.0, 1.0, length)
 	tail.scale = tail_scale
 	_update_tail_collision(tail, tail_scale)
@@ -379,6 +383,17 @@ func _update_tail_collision(tail: MeshInstance3D, tail_scale: Vector3) -> void:
 	box.size = mesh_aabb.size * tail_scale.abs()
 	collision.position = mesh_aabb.get_center() * tail_scale
 
+func _create_corner_fill(at: Vector3) -> void:
+	var fill: MeshInstance3D = _get_from_pool()
+	fill.name = "CornerFill"
+	fill.mesh = mesh
+	fill.position = at
+	fill.rotation = Vector3.ZERO
+	fill.scale = Vector3.ONE
+	fill.set_surface_override_material(0, material)
+	fill.visible = show_line_tail or not hen_shin
+	_get_or_create_player_tail_holder().add_child(fill)
+
 func _release_tail_body(tail: MeshInstance3D) -> void:
 	if not is_instance_valid(tail):
 		return
@@ -387,10 +402,6 @@ func _release_tail_body(tail: MeshInstance3D) -> void:
 		return
 	var release_transform: Transform3D = body.global_transform
 	body.freeze = false
-	body.global_transform = release_transform
-	# 冻结延伸期间不锁位置，释放到最终位置后再对齐 Unity 的 X/Z 约束。
-	body.axis_lock_linear_x = true
-	body.axis_lock_linear_z = true
 	body.global_transform = release_transform
 	body.reset_physics_interpolation()
 	body.linear_velocity = Vector3.ZERO
