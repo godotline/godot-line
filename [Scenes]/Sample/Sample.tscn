@@ -22,6 +22,7 @@
 [ext_resource type="Material" uid="uid://cnxil1uef6kon" path="res://#Template/[Materials]/CrystalScan.tres" id="20_j2eg4"]
 [ext_resource type="Script" uid="uid://cu08nct5ud6vc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="21_tdro7"]
 [ext_resource type="Script" uid="uid://bdbb1ogxk0fcr" path="res://#Template/[Scripts]/Trigger/JumpPredictor.gd" id="22_77abe"]
+[ext_resource type="Script" uid="uid://cu3xuawfji3m2" path="res://#Template/[Scripts]/Trigger/EventTrigger.gd" id="23_77abe"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
@@ -122,18 +123,19 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 24.0
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 33.807224, -0.45, 32.800053)
 
 [node name="Scene_001" type="Node3D" parent="Scene_Group" unique_id=514366687]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.034236908, -0.761029, 4.2663374)
 
 [node name="Ground" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("8_lthrg")]
 transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 300, 0, -1, 0)
 
 [node name="Ground2" parent="Scene_Group/Scene_001" unique_id=1080893231 instance=ExtResource("8_lthrg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2214155, -0.761029, 3.9591422)
+transform = Transform3D(2.1093316, 0, 0, 0, 1, 0, 0, 0, 10.958137, -0.005569935, -0.97786236, 3.3902893)
 
 [node name="Node3D" type="Node3D" parent="Scene_Group/Scene_001/Ground2" unique_id=795488879]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1084816, 0)
 script = ExtResource("9_0v7qw")
-start_value = Vector3(4.2214155, 0, 3.9591422)
-end_offset = Vector3(4.2214155, 3.1084816, 3.9591422)
+start_value = Vector3(0.028666973, -1.4123864, 7.6566267)
+end_offset = Vector3(0, 5, 0)
+duration = 2.0
 
 [node name="Node3D2" type="Node3D" parent="Scene_Group/Scene_001/Ground2" unique_id=431550219]
 script = ExtResource("10_7en4s")
@@ -220,6 +222,14 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 5.3776135, -0.5, 15.017
 top_level = true
 script = ExtResource("22_77abe")
 draw_preview = true
+
+[node name="Trigger4" parent="Scene_Group/Scene_001" unique_id=712157509 instance=ExtResource("11_mq52h")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 2.4095306)
+
+[node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177 node_paths=PackedStringArray("target_nodes")]
+script = ExtResource("23_77abe")
+target_nodes = [NodePath("../../Ground2/Node3D")]
+target_methods = Array[String]([""])
 
 [editable path="BasicOBJ_Group/CameraRoot"]
 [editable path="Scene_Group/Scene_001/Pyramid"]

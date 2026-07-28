@@ -95,6 +95,7 @@ const TAIL_JOIN_OVERLAP: float = 0.025
 const TAIL_COLLISION_MARGIN: float = 0.001
 const TAIL_INITIAL_LENGTH: float = 1.0
 var _tail_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
+var _tail_body_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
 
 func _ready() -> void:
 	instance = self
@@ -248,7 +249,13 @@ func _return_to_pool(tail: MeshInstance3D) -> void:
 		body.remove_child(tail)
 		if body.get_parent():
 			body.get_parent().remove_child(body)
-		body.queue_free()
+		body.linear_velocity = Vector3.ZERO
+		body.angular_velocity = Vector3.ZERO
+		body.freeze = true
+		if not _tail_body_pool.is_full():
+			_tail_body_pool.add(body)
+		else:
+			body.queue_free()
 	elif tail.get_parent():
 		tail.get_parent().remove_child(tail)
 	tail.position = Vector3.ZERO
@@ -281,6 +288,7 @@ func _get_or_create_player_tail_holder() -> Node3D:
 func new_line() -> void:
 	_finish_tail_join(line)
 	_release_tail_body(line)
+	_spawn_corner_tail(position, rotation)
 	line = _get_from_pool()
 	line.name = "TailMesh"
 	line.mesh = mesh
@@ -308,7 +316,7 @@ func _finish_tail_join(tail: MeshInstance3D) -> void:
 		return
 
 	var body: RigidBody3D = tail.get_parent() as RigidBody3D
-	if not body or not body.freeze:
+	if not body:
 		return
 
 	var previous_forward: Vector3 = body.basis * Vector3.BACK
@@ -339,36 +347,50 @@ func _finish_tail_join(tail: MeshInstance3D) -> void:
 	_create_corner_fill(position)
 
 func _create_tail_body() -> RigidBody3D:
-	var body: RigidBody3D = RigidBody3D.new()
-	body.name = "TailRigidBody"
-	# 最新 Tail 和已完成 Tail 都参与外部碰撞，但 Tail 之间互不碰撞。
-	body.collision_layer = TAIL_COLLISION_LAYER
-	body.collision_mask = TAIL_COLLISION_MASK
-	body.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
-	body.freeze = true
-	body.mass = 100.0
-	body.axis_lock_angular_x = true
-	body.axis_lock_angular_y = true
-	body.axis_lock_angular_z = true
-	body.gravity_scale = 0.0
-	body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
+	var body: RigidBody3D = _tail_body_pool.pop() as RigidBody3D
+	if not body:
+		body = RigidBody3D.new()
+		body.name = "TailRigidBody"
+		body.collision_layer = TAIL_COLLISION_LAYER
+		body.collision_mask = TAIL_COLLISION_MASK
+		body.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
+		body.axis_lock_linear_z = true
+		body.axis_lock_linear_x = true
+		body.axis_lock_angular_z = true
+		body.mass = 100.0
+		body.gravity_scale = 0.0
+		body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
 
-	var collision: CollisionShape3D = CollisionShape3D.new()
-	collision.name = "CollisionShape3D"
-	var box: BoxShape3D = BoxShape3D.new()
-	box.margin = TAIL_COLLISION_MARGIN
-	collision.shape = box
-	body.add_child(collision)
+		var collision: CollisionShape3D = CollisionShape3D.new()
+		collision.name = "CollisionShape3D"
+		var box: BoxShape3D = BoxShape3D.new()
+		box.margin = TAIL_COLLISION_MARGIN
+		collision.shape = box
+		body.add_child(collision)
+	else:
+		body.freeze = false
+		body.linear_velocity = Vector3.ZERO
+		body.angular_velocity = Vector3.ZERO
+		body.axis_lock_linear_z = true
+		body.axis_lock_linear_x = true
+		body.axis_lock_angular_x = false
+		body.axis_lock_angular_y = false
+		body.axis_lock_angular_z = true
+		body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
 	return body
 
-func _update_tail_body(tail: MeshInstance3D, center: Vector3, length: float) -> void:
+func _update_tail_body(tail: MeshInstance3D, _center: Vector3, length: float) -> void:
 	var body: RigidBody3D = tail.get_parent() as RigidBody3D
 	if not body:
 		return
+<<<<<<< HEAD
+=======
 	body.position = center
 	tail.position = Vector3.ZERO
+>>>>>>> origin/main
 	var tail_scale: Vector3 = Vector3(1.0, 1.0, length)
 	tail.scale = tail_scale
+	tail.position = Vector3(0, 0, length * 0.5)
 	_update_tail_collision(tail, tail_scale)
 
 func _update_tail_collision(tail: MeshInstance3D, tail_scale: Vector3) -> void:
@@ -381,7 +403,7 @@ func _update_tail_collision(tail: MeshInstance3D, tail_scale: Vector3) -> void:
 	var mesh_aabb: AABB = tail.mesh.get_aabb()
 	var box: BoxShape3D = collision.shape as BoxShape3D
 	box.size = mesh_aabb.size * tail_scale.abs()
-	collision.position = mesh_aabb.get_center() * tail_scale
+	collision.position = tail.position + mesh_aabb.get_center() * tail_scale
 
 func _create_corner_fill(at: Vector3) -> void:
 	var fill: MeshInstance3D = _get_from_pool()
@@ -398,8 +420,56 @@ func _release_tail_body(tail: MeshInstance3D) -> void:
 	if not is_instance_valid(tail):
 		return
 	var body: RigidBody3D = tail.get_parent() as RigidBody3D
-	if not body or not body.freeze:
+	if not body:
 		return
+<<<<<<< HEAD
+
+func _spawn_corner_tail(at_position: Vector3, at_rotation: Vector3) -> void:
+	var body: RigidBody3D = _tail_body_pool.pop() as RigidBody3D
+	if not body:
+		body = RigidBody3D.new()
+		body.name = "CornerTail"
+		body.collision_layer = TAIL_COLLISION_LAYER
+		body.collision_mask = TAIL_COLLISION_MASK
+		body.mass = 100.0
+		body.axis_lock_linear_x = true
+		body.axis_lock_linear_z = true
+		body.axis_lock_angular_x = true
+		body.axis_lock_angular_y = true
+		body.axis_lock_angular_z = true
+		body.gravity_scale = 0.0
+		body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
+
+		var collision: CollisionShape3D = CollisionShape3D.new()
+		collision.name = "CollisionShape3D"
+		var box: BoxShape3D = BoxShape3D.new()
+		box.margin = TAIL_COLLISION_MARGIN
+		box.size = Vector3.ONE
+		collision.shape = box
+		body.add_child(collision)
+	else:
+		body.freeze = false
+		body.linear_velocity = Vector3.ZERO
+		body.angular_velocity = Vector3.ZERO
+		body.axis_lock_linear_x = true
+		body.axis_lock_linear_z = true
+		body.axis_lock_angular_x = true
+		body.axis_lock_angular_y = true
+		body.axis_lock_angular_z = true
+		body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
+	body.position = at_position
+	body.rotation = at_rotation
+
+	var tail_mesh: MeshInstance3D = MeshInstance3D.new()
+	tail_mesh.name = "TailMesh"
+	tail_mesh.mesh = mesh
+	tail_mesh.set_surface_override_material(0, material)
+	tail_mesh.visible = show_line_tail or not hen_shin
+	body.add_child(tail_mesh)
+
+	var tail_holder: Node3D = _get_or_create_player_tail_holder()
+	tail_holder.add_child(body)
+=======
 	var release_transform: Transform3D = body.global_transform
 	body.freeze = false
 	body.global_transform = release_transform
@@ -407,6 +477,7 @@ func _release_tail_body(tail: MeshInstance3D) -> void:
 	body.linear_velocity = Vector3.ZERO
 	body.angular_velocity = Vector3.ZERO
 	body.sleeping = false
+>>>>>>> origin/main
 
 func get_current_gravity() -> Vector3:
 	if _has_gravity_override:
@@ -637,6 +708,7 @@ func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = Le
 
 		for i in 8:
 			var deathParticle_instance: RigidBody3D = deathParticle.instantiate()
+			deathParticle_instance.collision_layer = 1
 			deathParticle_instance.add_to_group("death_particles")
 			var parent: Node = get_parent()
 			if not parent:
