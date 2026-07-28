@@ -182,7 +182,7 @@ func _process(_delta: float) -> void:
 		var distance: float = offset.length()
 		var center: Vector3 = past_translation + offset / 2
 
-		_update_tail_body(line, center, distance + tailScale)
+		_update_tail_body(line, center, distance)
 	else:
 		if past_is_on_floor != is_on_floor_now:
 			_release_tail_body(line)
@@ -383,11 +383,6 @@ func _update_tail_body(tail: MeshInstance3D, _center: Vector3, length: float) ->
 	var body: RigidBody3D = tail.get_parent() as RigidBody3D
 	if not body:
 		return
-<<<<<<< HEAD
-=======
-	body.position = center
-	tail.position = Vector3.ZERO
->>>>>>> origin/main
 	var tail_scale: Vector3 = Vector3(1.0, 1.0, length)
 	tail.scale = tail_scale
 	tail.position = Vector3(0, 0, length * 0.5)
@@ -422,7 +417,6 @@ func _release_tail_body(tail: MeshInstance3D) -> void:
 	var body: RigidBody3D = tail.get_parent() as RigidBody3D
 	if not body:
 		return
-<<<<<<< HEAD
 
 func _spawn_corner_tail(at_position: Vector3, at_rotation: Vector3) -> void:
 	var body: RigidBody3D = _tail_body_pool.pop() as RigidBody3D
@@ -469,15 +463,6 @@ func _spawn_corner_tail(at_position: Vector3, at_rotation: Vector3) -> void:
 
 	var tail_holder: Node3D = _get_or_create_player_tail_holder()
 	tail_holder.add_child(body)
-=======
-	var release_transform: Transform3D = body.global_transform
-	body.freeze = false
-	body.global_transform = release_transform
-	body.reset_physics_interpolation()
-	body.linear_velocity = Vector3.ZERO
-	body.angular_velocity = Vector3.ZERO
-	body.sleeping = false
->>>>>>> origin/main
 
 func get_current_gravity() -> Vector3:
 	if _has_gravity_override:
