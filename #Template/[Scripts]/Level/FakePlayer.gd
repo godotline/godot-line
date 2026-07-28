@@ -117,7 +117,8 @@ func _physics_process(delta: float) -> void:
 				_current_tail.global_position = midpoint
 				var distance: float = _tail_position.distance_to(global_position)
 				_current_tail.scale = Vector3(1, 1, distance)
-				_current_tail.look_at(global_position, Vector3.UP)
+				if distance > 0.001:
+					_current_tail.look_at(global_position, Vector3.UP)
 
 			var is_grounded_now: bool = is_on_floor()
 			if _previous_frame_is_grounded != is_grounded_now:
@@ -169,7 +170,8 @@ func _create_tail() -> void:
 		mid.y = global_position.y
 		_current_tail.global_position = mid
 		_current_tail.scale = Vector3(1, 1, _tail_position.distance_to(end))
-		_current_tail.look_at(global_position, Vector3.UP)
+		if _tail_position.distance_to(end) > 0.001:
+			_current_tail.look_at(global_position, Vector3.UP)
 
 	_tail_position = global_position + now_q * Vector3.FORWARD * abs(tail_half)
 
