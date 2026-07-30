@@ -22,7 +22,7 @@ enum LineDirection {
 	set(value):
 		reverse = value
 		_redraw()
-@export var show_in_game: bool = true
+@export var show_in_game: bool = false
 @export var count: int = 100:
 	set(value):
 		count = max(0, value)

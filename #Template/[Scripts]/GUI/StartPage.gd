@@ -40,8 +40,15 @@ var _about_visible: bool = false
 func _ready() -> void:
 	_init_setting_states()
 	_apply_ported_visuals()
-	# 从 Player.level_data 读取关卡信息，填充关于页面（与 Unity 版 StartPage 一致）
 	_populate_about_from_level_data()
+	if OS.has_feature("template"):
+		autoplay_area.visible = false
+		if _set_auto_play:
+			_set_auto_play.queue_free()
+	else:
+		await get_tree().process_frame
+		if _set_auto_play and _set_auto_play.has_method("get_auto"):
+			autoplay_checkbox.button_pressed = _set_auto_play.get_auto()
 
 func _apply_ported_visuals() -> void:
 	var left_icon: Texture2D = load("res://#Template/[Resources]/GUI/arrow_left.png") as Texture2D
@@ -142,7 +149,7 @@ static func _open_author_url(url: String) -> void:
 
 # === Background click ===
 
-func _on_background_click(event: InputEvent) -> void:
+func _on_main_panel_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		start_requested.emit()
 
@@ -388,10 +395,10 @@ func _on_info_pressed() -> void:
 	info_button_pressed.emit()
 	_toggle_about()
 
-func _on_autoplay_toggled(_is_on: bool) -> void:
-	autoplay_toggled.emit(_is_on)
+func _on_autoplay_toggled(is_on: bool) -> void:
+	autoplay_toggled.emit(is_on)
 	if _set_auto_play and _set_auto_play.has_method("SetAuto"):
-		_set_auto_play.SetAuto()
+		_set_auto_play.SetAuto(is_on)
 
 func _on_shadow_toggled(is_on: bool) -> void:
 	shadow_toggled.emit(is_on)
