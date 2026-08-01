@@ -77,6 +77,7 @@ func _appear() -> void:
 		_displayed = true
 		_index = LevelManager.checkpoint_count
 		_root.visible = true
+		_sprite.visible = true
 		LevelManager.add_revive_listener(_reset_data)
 
 # Unity: Disappear(bool onlyBox)
@@ -86,6 +87,7 @@ func _disappear(only_box: bool) -> void:
 		_sprite.visible = false
 	else:
 		_root.visible = false
+		_sprite.visible = false
 
 func _reset_data() -> void:
 	LevelManager.remove_revive_listener(_reset_data)

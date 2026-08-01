@@ -1,4 +1,5 @@
 # Ignore hidden directories (all levels)
 .*/
 !.github/
+!.githooks/
 docs/

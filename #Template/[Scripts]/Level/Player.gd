@@ -201,8 +201,10 @@ func _input(event: InputEvent) -> void:
 			var page: CanvasLayer = get_node_or_null("StartPage") as CanvasLayer
 			if page and page.visible:
 				return
-		var can_turn: bool = LevelManager.GameState == LevelManager.GameStatus.Playing or (LevelManager.GameState == LevelManager.GameStatus.Waiting and not is_start)
-		if event.is_action_pressed("turn") and is_live and allowTurn and can_turn and not disallow_input:
+		var canStart: bool = LevelManager.GameState == LevelManager.GameStatus.Waiting and not is_start
+		var canPlay: bool = LevelManager.GameState == LevelManager.GameStatus.Playing and not disallow_input
+		# Autoplay blocks gameplay turns, but Unity still accepts the click that starts a revived run.
+		if event.is_action_pressed("turn") and is_live and allowTurn and (canStart or canPlay):
 			turn()
 
 	if event is InputEventKey and event.pressed and not event.echo:
