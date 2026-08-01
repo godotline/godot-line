@@ -153,6 +153,11 @@ func _on_main_panel_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		start_requested.emit()
 
+func _on_autoplay_hit_target_pressed() -> void:
+	var is_on: bool = not autoplay_checkbox.button_pressed
+	autoplay_checkbox.set_pressed_no_signal(is_on)
+	_on_autoplay_toggled(is_on)
+
 # === About show/hide animation ===
 
 func _toggle_about() -> void:

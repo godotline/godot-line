@@ -5,7 +5,7 @@ class_name AutoPlayController
 
 static var Instance: AutoPlayController
 
-@export var enable: bool = true
+@export var enable: bool = false
 
 var _holder: Node3D
 var _triggers: Array[Area3D] = []

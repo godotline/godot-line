@@ -58,6 +58,15 @@ grow_vertical = 2
 mouse_filter = 2
 theme = SubResource("8_theme")
 
+[node name="MainPanel" type="Panel" parent="UIContainer" unique_id=636120868]
+layout_mode = 0
+anchor_top = 0.25
+anchor_right = 1.0
+anchor_bottom = 0.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("1")
+
 [node name="RightArea" type="HBoxContainer" parent="UIContainer" unique_id=162991083]
 layout_mode = 1
 anchors_preset = 10
@@ -70,16 +79,19 @@ alignment = 1
 [node name="AutoPlayToggle" type="HBoxContainer" parent="UIContainer/RightArea" unique_id=235974998]
 custom_minimum_size = Vector2(216, 60)
 layout_mode = 2
+mouse_filter = 0
 theme_override_constants/separation = 10
 alignment = 1
 
 [node name="CheckBox" type="CheckBox" parent="UIContainer/RightArea/AutoPlayToggle" unique_id=1675355245]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
+mouse_filter = 2
 flat = true
 
 [node name="ItemLabel" type="Label" parent="UIContainer/RightArea/AutoPlayToggle" unique_id=1399267776]
 layout_mode = 2
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0, 0, 1)
 theme_override_font_sizes/font_size = 16
 text = "AUTOPLAY"
@@ -94,6 +106,7 @@ offset_top = 18.0
 offset_right = -16.0
 offset_bottom = 58.0
 grow_horizontal = 2
+mouse_filter = 2
 
 [node name="HintLabel" type="Label" parent="UIContainer/TopBar" unique_id=1657515663]
 layout_mode = 2
@@ -103,11 +116,24 @@ theme_override_font_sizes/font_size = 12
 text = "R : 重新开始    K : 快速死亡    D : 调试模式"
 horizontal_alignment = 2
 
-[node name="MainPanel" type="Panel" parent="UIContainer" unique_id=636120868]
+[node name="AutoplayHitTarget" type="Button" parent="UIContainer" unique_id=1734727123]
 layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-theme_override_styles/panel = SubResource("1")
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -108.0
+offset_top = 8.0
+offset_right = 108.0
+offset_bottom = 68.0
+grow_horizontal = 2
+mouse_default_cursor_shape = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("1")
+theme_override_styles/hover = SubResource("1")
+theme_override_styles/pressed = SubResource("1")
+theme_override_styles/focus = SubResource("1")
+flat = true
 
 [node name="BottomBar" type="Panel" parent="UIContainer" unique_id=1447155151]
 layout_mode = 1
@@ -515,6 +541,7 @@ expand_icon = true
 [node name="SetAutoPlay" type="Node" parent="." unique_id=1734727122]
 script = ExtResource("2")
 
-[connection signal="gui_input" from="UIContainer/MainPanel" to="." method="_on_background_click"]
+[connection signal="gui_input" from="UIContainer/MainPanel" to="." method="_on_main_panel_gui_input"]
+[connection signal="pressed" from="UIContainer/AutoplayHitTarget" to="." method="_on_autoplay_hit_target_pressed"]
 [connection signal="gui_input" from="UIContainer/AboutPanel/AboutContent" to="." method="_on_about_click"]
 [connection signal="pressed" from="UIContainer/InfoButton" to="." method="_on_info_pressed"]
