@@ -17,6 +17,8 @@ signal post_toggled(is_on: bool)
 @onready var bottom_bar: Panel = $UIContainer/BottomBar
 @onready var about_panel: Panel = $UIContainer/AboutPanel
 @onready var about_content: Panel = $UIContainer/AboutPanel/AboutContent
+@onready var about_canvas: Control = $UIContainer/AboutPanel/AboutContent
+@onready var about_hide_canvas: Node = $UIContainer/AboutPanel/AboutContent/HideCanvas
 # Setting item mode constants
 const MODE_CYCLIC: int = 0
 const MODE_RANGE: int = 1
@@ -160,46 +162,20 @@ func _on_autoplay_hit_target_pressed() -> void:
 
 # === About show/hide animation ===
 
-func _toggle_about() -> void:
-	if _about_visible:
-		_hide_about()
-	else:
-		_show_about()
-
 func _show_about() -> void:
 	if _about_visible:
 		return
 	_about_visible = true
 	about_panel.visible = true
-
-	const REST: float = -185.0
-	const SHIFT: float = 400.0
-	about_content.offset_top = REST + SHIFT
-	about_content.offset_bottom = -REST + SHIFT
-	about_content.rotation_degrees = 15
-	about_content.modulate.a = 0.0
-
-	var tween: Tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	tween.set_parallel(true)
-	tween.tween_property(about_content, "offset_top", REST, 0.4)
-	tween.tween_property(about_content, "offset_bottom", -REST, 0.4)
-	tween.tween_property(about_content, "rotation_degrees", 0.0, 0.4)
-	tween.tween_property(about_content, "modulate:a", 1.0, 0.3)
+	if about_canvas.has_method("show_canvas"):
+		about_canvas.call("show_canvas")
 
 func _hide_about() -> void:
 	if not _about_visible:
 		return
 	_about_visible = false
-
-	const REST: float = -185.0
-	const SHIFT: float = 400.0
-	var tween: Tween = create_tween().set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
-	tween.set_parallel(true)
-	tween.tween_property(about_content, "offset_top", REST + SHIFT, 0.3)
-	tween.tween_property(about_content, "offset_bottom", -REST + SHIFT, 0.3)
-	tween.tween_property(about_content, "rotation_degrees", -15.0, 0.3)
-	tween.tween_property(about_content, "modulate:a", 0.0, 0.3)
-	tween.finished.connect(_on_about_hide_finished)
+	if about_hide_canvas.has_method("hide_canvas"):
+		about_hide_canvas.call("hide_canvas")
 func _on_about_hide_finished() -> void:
 	about_panel.visible = false
 
@@ -398,7 +374,7 @@ func _on_about_click(event: InputEvent) -> void:
 
 func _on_info_pressed() -> void:
 	info_button_pressed.emit()
-	_toggle_about()
+	_show_about()
 
 func _on_autoplay_toggled(is_on: bool) -> void:
 	autoplay_toggled.emit(is_on)

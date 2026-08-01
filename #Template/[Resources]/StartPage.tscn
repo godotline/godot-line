@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://crqiqa5ytpy7u" path="res://#Template/[Resources]/GUI/arrow_left.png" id="4_left"]
 [ext_resource type="Texture2D" uid="uid://ca8sn1wc12uyy" path="res://#Template/[Resources]/GUI/arrow_right.png" id="5_right"]
 [ext_resource type="Texture2D" uid="uid://b2vgkd0fgi6i8" path="res://#Template/[Resources]/GUI/info.png" id="6_info"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/GUI/ShowCanvas.gd" id="7_show_canvas"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/GUI/HideCanvas.gd" id="8_hide_canvas"]
 
 [sub_resource type="StyleBoxFlat" id="7_hover"]
 bg_color = Color(1, 1, 1, 0.12)
@@ -480,7 +482,23 @@ offset_left = -300.0
 offset_top = -185.0
 offset_right = 300.0
 offset_bottom = 185.0
+script = ExtResource("7_show_canvas")
+duration = 0.5
+invoke_before_animation = true
+auto_hide_on_ready = true
+hidden_offset_y = 400.0
+hidden_rotation_degrees = 15.0
 theme_override_styles/panel = SubResource("6")
+
+[node name="HideCanvas" type="Node" parent="UIContainer/AboutPanel/AboutContent"]
+script = ExtResource("8_hide_canvas")
+duration = 0.5
+auto_hide_on_ready = true
+invoke_before_animation = true
+hidden_offset_y = 400.0
+hidden_rotation_degrees = -15.0
+fade_delay = 0.3
+fade_duration = 0.2
 
 [node name="AboutVBox" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutContent" unique_id=61138793]
 layout_mode = 1
@@ -545,3 +563,4 @@ script = ExtResource("2")
 [connection signal="pressed" from="UIContainer/AutoplayHitTarget" to="." method="_on_autoplay_hit_target_pressed"]
 [connection signal="gui_input" from="UIContainer/AboutPanel/AboutContent" to="." method="_on_about_click"]
 [connection signal="pressed" from="UIContainer/InfoButton" to="." method="_on_info_pressed"]
+[connection signal="hide_animation_finished" from="UIContainer/AboutPanel/AboutContent/HideCanvas" to="." method="_on_about_hide_finished"]

@@ -17,14 +17,10 @@ func _ready() -> void:
 	if Player.instance and Player.instance.level_data:
 		levelname = Player.instance.level_data.levelTitle
 	else:
-		push_error("gameui.gd: Player.instance 或 level_data 为空，无法读取关卡标题")
+		push_error("LevelUI.gd: Player.instance 或 level_data 为空，无法读取关卡标题")
 	visible = false
-	set_process(false)
 	if Player.instance:
-		Player.instance.on_game_end.connect(_on_game_end)
-
-func _on_game_end() -> void:
-	_show_ui()
+		Player.instance.on_game_end.connect(_show_ui)
 
 func _show_ui() -> void:
 	if _shown:
@@ -71,7 +67,7 @@ func _on_revive_pressed() -> void:
 	visible = false
 	LevelManager.is_end = false
 	if not Player.instance:
-		push_error("gameui.gd: Player.instance 为空，无法复活")
+		push_error("LevelUI.gd: Player.instance 为空，无法复活")
 		_on_gamereplay_pressed()
 		return
 	if Player.instance.is_end:

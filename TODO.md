@@ -30,7 +30,7 @@
 | P1 | Animator | TimerImageColor | ✓ | ✓ | `TimerImageColor.gd`，按音乐时间触发、复活回退 |
 | P2 | GUI | StartPage | ✓ | ✓ | 开始页面 UI（含 About 面板动画、延迟/音量/画质/抗锯齿设置、Autoplay/Shadow/Post 开关） |
 | P2 | GUI | LoadingPage | ✓ | ✓ | `LoadingPage.tscn` + `LoadingPage.gd` |
-| P2 | GUI | LevelUI | ✓ | ✓ | `GAMEUI.tscn` + `gameui.gd` |
+| P2 | GUI | LevelUI | ✓ | ✓ | `GAMEUI.tscn` + `GUI/LevelUI.gd` |
 | P2 | GUI | SetQuality | ✓ | ✓ | `GraphicsQuality.gd`：显示值映射、MSAA、阴影、后处理、ActiveByQuality 和 ConfigFile 持久化 |
 | P2 | GUI | SetLatency | ✓ | ✓ | SetLatency.gd 完成，延迟语义对齐 Unity StartGame，ConfigFile 持久化 |
 | P2 | GUI | KeyBoardFunctionsDisplay | ✓ | ✓ | 顶部提示栏 "R/K/D" 快捷键显示 |
@@ -142,7 +142,7 @@
 | `GameEvents` | `Player.gd` 的游戏流程信号 |
 | `HideCanvas` / `ShowCanvas` | `StartPage.gd` 的 About/页面 Tween |
 | `KeyBoardManager` / `KeyBoardFunctionsDisplay` | Godot InputMap、`Player._input()`、StartPage 顶部提示栏 |
-| `LevelUI` | `GAMEUI.tscn` + `gameui.gd` |
+| `LevelUI` | `GAMEUI.tscn` + `GUI/LevelUI.gd` |
 | `PlayerCubes` | `DeathParticle.tscn`；轨迹路面由 `RoadPaver.gd` 负责 |
 | `RoadPaver` | `RoadPaver.gd` |
 | `SetQuality` | `GraphicsQuality.gd` + StartPage 设置控件 |

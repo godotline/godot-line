@@ -76,6 +76,7 @@ script = ExtResource("7_fmbnj")
 [node name="Scene_Group" type="Node3D" parent="." unique_id=1042175662]
 
 [node name="GuidanceBoxHolder" type="Node3D" parent="Scene_Group" unique_id=684718765]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.81450033, 0)
 
 [node name="OriginalGuidanceBox" parent="Scene_Group/GuidanceBoxHolder" unique_id=1723303954 instance=ExtResource("14_y8kmt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, 0)
@@ -129,11 +130,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.034236908, -0.761029, 4.266
 transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 300, 0, -1, 0)
 
 [node name="Ground2" parent="Scene_Group/Scene_001" unique_id=1080893231 instance=ExtResource("8_lthrg")]
-transform = Transform3D(2.1093316, 0, 0, 0, 1, 0, 0, 0, 10.958137, -0.005569935, -0.97786236, 3.3902893)
+transform = Transform3D(2.1093316, 0, 0, 0, 1, 0, 0, 0, 10.958137, -0.005569935, -0.97786236, 18.44947)
 
 [node name="Node3D" type="Node3D" parent="Scene_Group/Scene_001/Ground2" unique_id=795488879]
 script = ExtResource("9_0v7qw")
-start_value = Vector3(0.028666973, -1.4123864, 7.6566267)
+start_value = Vector3(0.028666973, -1.7388914, 22.715809)
 end_offset = Vector3(0, 5, 0)
 duration = 2.0
 
@@ -152,7 +153,7 @@ secondDirection = Vector3(0, 0, 0)
 targetState = 0
 
 [node name="Trigger2" parent="Scene_Group/Scene_001" unique_id=237830721 node_paths=PackedStringArray("targetPlayer") instance=ExtResource("11_mq52h")]
-transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, -0.26624966, -0.5, -4.2847214)
+transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 3.599347, -0.50000095, 8.274333)
 script = ExtResource("12_1fvat")
 targetPlayer = NodePath("../FakePlayer")
 type = 0
@@ -224,7 +225,7 @@ script = ExtResource("22_77abe")
 draw_preview = true
 
 [node name="Trigger4" parent="Scene_Group/Scene_001" unique_id=712157509 instance=ExtResource("11_mq52h")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 2.4095306)
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 15.605786)
 
 [node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177 node_paths=PackedStringArray("target_nodes")]
 script = ExtResource("23_77abe")
