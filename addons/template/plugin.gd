@@ -8,25 +8,30 @@ const TEMPLATE_DEFAULT := "res://[Scenes]/DefaultScene/Default.tscn"
 const TEMPLATE_SAMPLE := "res://[Scenes]/Sample/Sample.tscn"
 const LEVELS_ROOT := "res://[Scenes]/"
 const DirectionGizmoPlugin := preload("res://addons/template/direction_gizmo_plugin.gd")
+const PluginStoreDialogClass := preload("res://addons/template/plugin_store_dialog.gd")
 
 var _menu_button: MenuButton
 var _new_level_dialog: ConfirmationDialog
+var _store_dialog: ConfirmationDialog
 var _direction_gizmo_plugin: EditorNode3DGizmoPlugin
 
 
 func _enter_tree() -> void:
+	PluginStoreDialogClass.cleanup_quarantine()
 	_check_first_run()
 	_direction_gizmo_plugin = DirectionGizmoPlugin.new()
 	add_node_3d_gizmo_plugin(_direction_gizmo_plugin)
 
 	_menu_button = MenuButton.new()
-	_menu_button.text = "模板 2.2"
+	_menu_button.text = "模板 2.3.236"
 	_menu_button.tooltip_text = "Template 相关资源"
 	_menu_button.switch_on_hover = true
 
 	var popup: PopupMenu = _menu_button.get_popup()
 	popup.add_item("模板手册", 0)
 	popup.add_item("新建关卡", 1)
+	popup.add_separator()
+	popup.add_item("插件商城", 2)
 	popup.id_pressed.connect(_on_menu_item_pressed)
 
 	add_control_to_container(CONTAINER_TOOLBAR, _menu_button)
@@ -43,6 +48,9 @@ func _exit_tree() -> void:
 	if _new_level_dialog and is_instance_valid(_new_level_dialog):
 		_new_level_dialog.queue_free()
 		_new_level_dialog = null
+	if _store_dialog and is_instance_valid(_store_dialog):
+		_store_dialog.queue_free()
+		_store_dialog = null
 
 
 func _check_first_run() -> void:
@@ -63,6 +71,20 @@ func _on_menu_item_pressed(id: int) -> void:
 			OS.shell_open(WELCOME_URL)
 		1:
 			_show_new_level_dialog()
+		2:
+			_show_store_dialog()
+
+
+# ===================== 插件商城 =====================
+
+func _show_store_dialog() -> void:
+	if _store_dialog and is_instance_valid(_store_dialog):
+		_store_dialog.queue_free()
+		_store_dialog = null
+
+	_store_dialog = PluginStoreDialogClass.new()
+	add_child(_store_dialog)
+	_store_dialog.popup_centered(Vector2i(720, 520))
 
 
 # ===================== 新建关卡 =====================

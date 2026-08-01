@@ -3,8 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_ssf0a"]
 [ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://[Scenes]/DefaultScene/Default.tres" id="2_cwhkr"]
 [ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_dnrub"]
+[ext_resource type="Script" uid="uid://dr6kymfjs0usi" path="res://#Template/[Scripts]/Level/RoadPaver.gd" id="3_sy5ms"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="4_wshga"]
-[ext_resource type="Texture2D" uid="uid://bokq00qv7ojs5" path="res://#Template/[Resources]/PerfactCrownNoLight.png" id="5_ow1ll"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="8_8w8iv"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
@@ -30,6 +30,11 @@ _data = {
 animation = NodePath("../AnimationPlayer")
 level_data = ExtResource("2_cwhkr")
 
+[node name="Node3D" type="Node3D" parent="BasicOBJ_Group/Player" unique_id=1968713715]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.6166801, 0)
+script = ExtResource("3_sy5ms")
+base_floor = ExtResource("8_8w8iv")
+
 [node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_dnrub")]
 
 [node name="Camera3D" parent="BasicOBJ_Group/CameraRoot/Rotator/Scale" parent_id_path=PackedInt32Array(1925825702, 1568144045) index="0" unique_id=1985620912]
@@ -46,7 +51,6 @@ transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.8
 shadow_enabled = true
 
 [node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("4_wshga")]
-crown_no_light = ExtResource("5_ow1ll")
 
 [node name="Scene_Group" type="Node3D" parent="." unique_id=1042175662]
 

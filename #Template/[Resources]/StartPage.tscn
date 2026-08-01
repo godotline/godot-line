@@ -2,13 +2,31 @@
 
 [ext_resource type="Script" uid="uid://urm8r3g8vfda" path="res://#Template/[Scripts]/GUI/StartPage.gd" id="1"]
 [ext_resource type="Script" uid="uid://cpt228wqyq445" path="res://#Template/[Scripts]/Auto/SetAutoPlay.gd" id="2"]
-[ext_resource type="FontFile" path="res://#Template/[Resources]/GUI/MiSans-Normal.ttf" id="3_font"]
-[ext_resource type="Texture2D" path="res://#Template/[Resources]/GUI/arrow_left.png" id="4_left"]
-[ext_resource type="Texture2D" path="res://#Template/[Resources]/GUI/arrow_right.png" id="5_right"]
-[ext_resource type="Texture2D" path="res://#Template/[Resources]/GUI/info.png" id="6_info"]
+[ext_resource type="FontFile" uid="uid://cofd0gpguc54l" path="res://#Template/[Resources]/GUI/MiSans-Normal.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://crqiqa5ytpy7u" path="res://#Template/[Resources]/GUI/arrow_left.png" id="4_left"]
+[ext_resource type="Texture2D" uid="uid://ca8sn1wc12uyy" path="res://#Template/[Resources]/GUI/arrow_right.png" id="5_right"]
+[ext_resource type="Texture2D" uid="uid://b2vgkd0fgi6i8" path="res://#Template/[Resources]/GUI/info.png" id="6_info"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/GUI/ShowCanvas.gd" id="7_show_canvas"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/GUI/HideCanvas.gd" id="8_hide_canvas"]
+
+[sub_resource type="StyleBoxFlat" id="7_hover"]
+bg_color = Color(1, 1, 1, 0.12)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(0, 0, 0, 0)
+
+[sub_resource type="Theme" id="8_theme"]
+default_font = ExtResource("3_font")
+default_font_size = 20
+Button/colors/font_color = Color(1, 1, 1, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/styles/hover = SubResource("7_hover")
+Button/styles/normal = SubResource("1")
+Button/styles/pressed = SubResource("7_hover")
 
 [sub_resource type="StyleBoxFlat" id="4"]
 bg_color = Color(0, 0, 0, 0.392157)
@@ -28,22 +46,6 @@ corner_radius_bottom_left = 28
 [sub_resource type="StyleBoxFlat" id="3"]
 bg_color = Color(1, 1, 1, 0)
 
-[sub_resource type="StyleBoxFlat" id="7_hover"]
-bg_color = Color(1, 1, 1, 0.12)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="Theme" id="8_theme"]
-default_font = ExtResource("3_font")
-default_font_size = 20
-Button/colors/font_color = Color(1, 1, 1, 1)
-Button/colors/font_hover_color = Color(1, 1, 1, 1)
-Button/styles/normal = SubResource("1")
-Button/styles/hover = SubResource("7_hover")
-Button/styles/pressed = SubResource("7_hover")
-
 [node name="StartPage" type="CanvasLayer" unique_id=1577292833]
 layer = 2
 script = ExtResource("1")
@@ -55,13 +57,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = SubResource("8_theme")
 mouse_filter = 2
+theme = SubResource("8_theme")
 
 [node name="MainPanel" type="Panel" parent="UIContainer" unique_id=636120868]
 layout_mode = 0
+anchor_top = 0.25
 anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_bottom = 0.75
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("1")
 
 [node name="RightArea" type="HBoxContainer" parent="UIContainer" unique_id=162991083]
@@ -76,16 +81,19 @@ alignment = 1
 [node name="AutoPlayToggle" type="HBoxContainer" parent="UIContainer/RightArea" unique_id=235974998]
 custom_minimum_size = Vector2(216, 60)
 layout_mode = 2
+mouse_filter = 0
 theme_override_constants/separation = 10
 alignment = 1
 
 [node name="CheckBox" type="CheckBox" parent="UIContainer/RightArea/AutoPlayToggle" unique_id=1675355245]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
+mouse_filter = 2
 flat = true
 
 [node name="ItemLabel" type="Label" parent="UIContainer/RightArea/AutoPlayToggle" unique_id=1399267776]
 layout_mode = 2
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0, 0, 1)
 theme_override_font_sizes/font_size = 16
 text = "AUTOPLAY"
@@ -100,6 +108,7 @@ offset_top = 18.0
 offset_right = -16.0
 offset_bottom = 58.0
 grow_horizontal = 2
+mouse_filter = 2
 
 [node name="HintLabel" type="Label" parent="UIContainer/TopBar" unique_id=1657515663]
 layout_mode = 2
@@ -109,12 +118,34 @@ theme_override_font_sizes/font_size = 12
 text = "R : 重新开始    K : 快速死亡    D : 调试模式"
 horizontal_alignment = 2
 
-[node name="BottomBar" type="Panel" parent="UIContainer" unique_id=1447155151]
+[node name="AutoplayHitTarget" type="Button" parent="UIContainer" unique_id=1734727123]
 layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -108.0
+offset_top = 8.0
+offset_right = 108.0
+offset_bottom = 68.0
+grow_horizontal = 2
+mouse_default_cursor_shape = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("1")
+theme_override_styles/hover = SubResource("1")
+theme_override_styles/pressed = SubResource("1")
+theme_override_styles/focus = SubResource("1")
+flat = true
+
+[node name="BottomBar" type="Panel" parent="UIContainer" unique_id=1447155151]
+layout_mode = 1
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -240.0
+offset_top = -125.0
+grow_horizontal = 2
+grow_vertical = 0
 theme_override_styles/panel = SubResource("4")
 
 [node name="HBox" type="HBoxContainer" parent="UIContainer/BottomBar" unique_id=959627512]
@@ -145,20 +176,26 @@ alignment = 1
 
 [node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1102256506]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "<<"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=141123282]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "<"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1671055612]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "◄"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1021863229]
 custom_minimum_size = Vector2(60, 0)
@@ -169,21 +206,27 @@ text = "Off"
 horizontal_alignment = 1
 
 [node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1830302213]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "►"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=2005454214]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = ">"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=731316818]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = ">>"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="QualityItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=2077653218]
 layout_mode = 2
@@ -203,20 +246,26 @@ alignment = 1
 
 [node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=374645834]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "<<"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=726645966]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "<"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1253007165]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "◄"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1811727225]
 custom_minimum_size = Vector2(60, 0)
@@ -227,21 +276,27 @@ text = "中"
 horizontal_alignment = 1
 
 [node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=240866013]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "►"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=484715634]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = ">"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1341994536]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = ">>"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="LatencyItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1619395701]
 layout_mode = 2
@@ -260,20 +315,26 @@ layout_mode = 2
 alignment = 1
 
 [node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1834214201]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "<<"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1113184714]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "<"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1747806464]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "◄"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=719853010]
 custom_minimum_size = Vector2(60, 0)
@@ -285,19 +346,25 @@ horizontal_alignment = 1
 
 [node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1256156666]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "►"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=732235424]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = ">"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=204037458]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = ">>"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="VolumeItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=814000201]
 layout_mode = 2
@@ -317,20 +384,26 @@ alignment = 1
 
 [node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1691003379]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "<<"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1958315036]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "<"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1425491818]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "◄"
+icon = ExtResource("4_left")
 flat = true
+expand_icon = true
 
 [node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1695563518]
 custom_minimum_size = Vector2(60, 0)
@@ -341,21 +414,27 @@ text = "100.0%"
 horizontal_alignment = 1
 
 [node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1931182474]
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "►"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=603818232]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = ">"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1011048075]
 visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = ">>"
+icon = ExtResource("5_right")
 flat = true
+expand_icon = true
 
 [node name="Sep" type="Control" parent="UIContainer/BottomBar/HBox" unique_id=504125627]
 custom_minimum_size = Vector2(16, 0)
@@ -403,7 +482,23 @@ offset_left = -300.0
 offset_top = -185.0
 offset_right = 300.0
 offset_bottom = 185.0
+script = ExtResource("7_show_canvas")
+duration = 0.5
+invoke_before_animation = true
+auto_hide_on_ready = true
+hidden_offset_y = 400.0
+hidden_rotation_degrees = 15.0
 theme_override_styles/panel = SubResource("6")
+
+[node name="HideCanvas" type="Node" parent="UIContainer/AboutPanel/AboutContent"]
+script = ExtResource("8_hide_canvas")
+duration = 0.5
+auto_hide_on_ready = true
+invoke_before_animation = true
+hidden_offset_y = 400.0
+hidden_rotation_degrees = -15.0
+fade_delay = 0.3
+fade_duration = 0.2
 
 [node name="AboutVBox" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutContent" unique_id=61138793]
 layout_mode = 1
@@ -452,9 +547,9 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 24.0
-offset_top = -226.0
-offset_right = 72.0
-offset_bottom = -178.0
+offset_top = -74.0
+offset_right = 66.0
+offset_bottom = -34.0
 grow_vertical = 0
 theme_override_icons/icon = ExtResource("6_info")
 theme_override_styles/normal = SubResource("3")
@@ -464,6 +559,8 @@ expand_icon = true
 [node name="SetAutoPlay" type="Node" parent="." unique_id=1734727122]
 script = ExtResource("2")
 
-[connection signal="gui_input" from="UIContainer/MainPanel" to="." method="_on_background_click"]
+[connection signal="gui_input" from="UIContainer/MainPanel" to="." method="_on_main_panel_gui_input"]
+[connection signal="pressed" from="UIContainer/AutoplayHitTarget" to="." method="_on_autoplay_hit_target_pressed"]
 [connection signal="gui_input" from="UIContainer/AboutPanel/AboutContent" to="." method="_on_about_click"]
 [connection signal="pressed" from="UIContainer/InfoButton" to="." method="_on_info_pressed"]
+[connection signal="hide_animation_finished" from="UIContainer/AboutPanel/AboutContent/HideCanvas" to="." method="_on_about_hide_finished"]

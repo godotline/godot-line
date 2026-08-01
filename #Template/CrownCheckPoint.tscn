@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dqvgfuneewf1j"]
 
-[ext_resource type="ArrayMesh" uid="uid://cnq7qr81j0cvw" path="res://#Template/[Resources]/Models/PerfactCrown.obj" id="1"]
+[ext_resource type="ArrayMesh" uid="uid://bapgfhj4dq6kj" path="res://#Template/[Resources]/Models/Crown.obj" id="1"]
 [ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Trigger/Single/Crown.gd" id="2"]
 [ext_resource type="Texture2D" uid="uid://dkh4268rrxtoj" path="res://#Template/[Resources]/PCrownT.png" id="3_ctg82"]
 [ext_resource type="Texture2D" uid="uid://bb36l0chn1l3s" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="5_dklm7"]
@@ -104,7 +104,7 @@ aura_extra_time = 0.8
 light_texture = ExtResource("6_8wqky")
 
 [node name="Crown" type="MeshInstance3D" parent="." unique_id=1455513811]
-transform = Transform3D(5, 0, 0, 0, -2.1855695e-07, 5, 0, -5, -2.1855695e-07, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 mesh = ExtResource("1")
 surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 

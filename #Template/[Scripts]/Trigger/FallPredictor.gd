@@ -2,6 +2,8 @@
 extends Node3D
 class_name FallPredictor
 
+@export_group("预测设置")
+@export var show_in_game: bool = false
 @export var speed: int = 12:
 	set(value):
 		speed = value
@@ -28,7 +30,8 @@ func _ready() -> void:
 	_mesh_instance = MeshInstance3D.new()
 	_mesh_instance.name = "PredictorLine"
 	add_child(_mesh_instance)
-	_draw_line()
+	if Engine.is_editor_hint() or show_in_game:
+		_draw_line()
 
 func _draw_line() -> void:
 	if not _mesh_instance:

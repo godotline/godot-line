@@ -94,6 +94,9 @@ const TAIL_COLLISION_MASK: int = (1 << 1) | (1 << 2)
 const TAIL_JOIN_OVERLAP: float = 0.025
 const TAIL_COLLISION_MARGIN: float = 0.001
 const TAIL_INITIAL_LENGTH: float = 1.0
+const TAIL_MASS: float = 1000.0
+const TAIL_LINEAR_DAMP: float = 1.0
+const TAIL_ANGULAR_DAMP: float = 2.0
 var _tail_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
 var _tail_body_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
 
@@ -170,22 +173,20 @@ func _process(_delta: float) -> void:
 		emit_signal("on_touch_ground")
 	past_is_on_floor_effect = is_on_floor_now
 
-	if not line:
-		return
-
 	if is_on_floor_now:
 		if past_is_on_floor != is_on_floor_now:
 			new_line()
-		var tail_position: Vector3 = position
-		tail_position.y = past_translation.y
-		var offset: Vector3 = tail_position - past_translation
-		var distance: float = offset.length()
-		var center: Vector3 = past_translation + offset / 2
+		if line:
+			var tail_position: Vector3 = position
+			tail_position.y = past_translation.y
+			var offset: Vector3 = tail_position - past_translation
+			var distance: float = offset.length()
+			var center: Vector3 = past_translation + offset / 2
 
-		_update_tail_body(line, center, distance)
+			_update_tail_body(line, center, distance)
 	else:
 		if past_is_on_floor != is_on_floor_now:
-			_release_tail_body(line)
+			line = null
 			emit_signal("on_sky")
 			emit_signal("on_leave_ground")
 	past_is_on_floor = is_on_floor_now
@@ -200,8 +201,10 @@ func _input(event: InputEvent) -> void:
 			var page: CanvasLayer = get_node_or_null("StartPage") as CanvasLayer
 			if page and page.visible:
 				return
-		var can_turn: bool = LevelManager.GameState == LevelManager.GameStatus.Playing or (LevelManager.GameState == LevelManager.GameStatus.Waiting and not is_start)
-		if event.is_action_pressed("turn") and is_live and allowTurn and can_turn and not disallow_input:
+		var canStart: bool = LevelManager.GameState == LevelManager.GameStatus.Waiting and not is_start
+		var canPlay: bool = LevelManager.GameState == LevelManager.GameStatus.Playing and not disallow_input
+		# Autoplay blocks gameplay turns, but Unity still accepts the click that starts a revived run.
+		if event.is_action_pressed("turn") and is_live and allowTurn and (canStart or canPlay):
 			turn()
 
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -287,7 +290,6 @@ func _get_or_create_player_tail_holder() -> Node3D:
 
 func new_line() -> void:
 	_finish_tail_join(line)
-	_release_tail_body(line)
 	_spawn_corner_tail(position, rotation)
 	line = _get_from_pool()
 	line.name = "TailMesh"
@@ -350,34 +352,41 @@ func _create_tail_body() -> RigidBody3D:
 	var body: RigidBody3D = _tail_body_pool.pop() as RigidBody3D
 	if not body:
 		body = RigidBody3D.new()
-		body.name = "TailRigidBody"
-		body.collision_layer = TAIL_COLLISION_LAYER
-		body.collision_mask = TAIL_COLLISION_MASK
-		body.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
-		body.axis_lock_linear_z = true
-		body.axis_lock_linear_x = true
-		body.axis_lock_angular_z = true
-		body.mass = 100.0
-		body.gravity_scale = 0.0
-		body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
-
 		var collision: CollisionShape3D = CollisionShape3D.new()
 		collision.name = "CollisionShape3D"
 		var box: BoxShape3D = BoxShape3D.new()
 		box.margin = TAIL_COLLISION_MARGIN
 		collision.shape = box
 		body.add_child(collision)
-	else:
-		body.freeze = false
-		body.linear_velocity = Vector3.ZERO
-		body.angular_velocity = Vector3.ZERO
-		body.axis_lock_linear_z = true
-		body.axis_lock_linear_x = true
-		body.axis_lock_angular_x = false
-		body.axis_lock_angular_y = false
-		body.axis_lock_angular_z = true
-		body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
+	body.name = "TailRigidBody"
+	_configure_tail_physics(body)
 	return body
+
+func _configure_tail_physics(body: RigidBody3D) -> void:
+	body.collision_layer = TAIL_COLLISION_LAYER
+	body.collision_mask = TAIL_COLLISION_MASK
+	body.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
+	body.mass = TAIL_MASS
+	body.linear_damp = TAIL_LINEAR_DAMP
+	body.angular_damp = TAIL_ANGULAR_DAMP
+	body.axis_lock_linear_x = true
+	body.axis_lock_linear_z = true
+	body.axis_lock_angular_x = false
+	body.axis_lock_angular_y = false
+	body.axis_lock_angular_z = true
+	body.gravity_scale = 0.0
+	body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
+	body.freeze = false
+	body.linear_velocity = Vector3.ZERO
+	body.angular_velocity = Vector3.ZERO
+	body.sleeping = false
+
+	var physics_material: PhysicsMaterial = PhysicsMaterial.new()
+	physics_material.friction = 1.0
+	physics_material.rough = true
+	physics_material.bounce = 0.0
+	physics_material.absorbent = true
+	body.physics_material_override = physics_material
 
 func _update_tail_body(tail: MeshInstance3D, _center: Vector3, length: float) -> void:
 	var body: RigidBody3D = tail.get_parent() as RigidBody3D
@@ -411,46 +420,23 @@ func _create_corner_fill(at: Vector3) -> void:
 	fill.visible = show_line_tail or not hen_shin
 	_get_or_create_player_tail_holder().add_child(fill)
 
-func _release_tail_body(tail: MeshInstance3D) -> void:
-	if not is_instance_valid(tail):
-		return
-	var body: RigidBody3D = tail.get_parent() as RigidBody3D
-	if not body:
-		return
-
 func _spawn_corner_tail(at_position: Vector3, at_rotation: Vector3) -> void:
 	var body: RigidBody3D = _tail_body_pool.pop() as RigidBody3D
 	if not body:
 		body = RigidBody3D.new()
-		body.name = "CornerTail"
-		body.collision_layer = TAIL_COLLISION_LAYER
-		body.collision_mask = TAIL_COLLISION_MASK
-		body.mass = 100.0
-		body.axis_lock_linear_x = true
-		body.axis_lock_linear_z = true
-		body.axis_lock_angular_x = true
-		body.axis_lock_angular_y = true
-		body.axis_lock_angular_z = true
-		body.gravity_scale = 0.0
-		body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
-
 		var collision: CollisionShape3D = CollisionShape3D.new()
 		collision.name = "CollisionShape3D"
 		var box: BoxShape3D = BoxShape3D.new()
 		box.margin = TAIL_COLLISION_MARGIN
-		box.size = Vector3.ONE
 		collision.shape = box
 		body.add_child(collision)
-	else:
-		body.freeze = false
-		body.linear_velocity = Vector3.ZERO
-		body.angular_velocity = Vector3.ZERO
-		body.axis_lock_linear_x = true
-		body.axis_lock_linear_z = true
-		body.axis_lock_angular_x = true
-		body.axis_lock_angular_y = true
-		body.axis_lock_angular_z = true
-		body.constant_force = Vector3(0.0, get_current_gravity().y * body.mass, 0.0)
+	body.name = "CornerTail"
+	_configure_tail_physics(body)
+	var collision: CollisionShape3D = body.get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if collision and collision.shape is BoxShape3D:
+		var box: BoxShape3D = collision.shape as BoxShape3D
+		box.size = Vector3.ONE
+		collision.position = Vector3.ZERO
 	body.position = at_position
 	body.rotation = at_rotation
 

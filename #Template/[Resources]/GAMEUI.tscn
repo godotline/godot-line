@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://wx3awwdt8xdy"]
 
-[ext_resource type="Script" uid="uid://qco7fgruvgdp" path="res://#Template/[Scripts]/Level/gameui.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://qco7fgruvgdp" path="res://#Template/[Scripts]/GUI/LevelUI.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://#Template/[Resources]/GUI/Sprites.png" id="2_atlas"]
 [ext_resource type="FontFile" path="res://#Template/[Resources]/GUI/MiSans-Normal.ttf" id="3_misans"]
 [ext_resource type="FontFile" path="res://#Template/[Resources]/GUI/CaviarDreams.TTF" id="4_caviar"]

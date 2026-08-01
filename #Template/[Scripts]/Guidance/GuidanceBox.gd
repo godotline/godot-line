@@ -6,37 +6,50 @@ class_name GuidanceBox
 @export var can_be_triggered: bool = true
 @export var have_line: bool = true
 
-var _player: CharacterBody3D
+var _player: Player
 var _root: Node3D
 var _sprite: Sprite3D
 var _trigger_effect: PackedScene
 var _index: int = 0
+var _initialized: bool = false
 
 var triggered: bool = false
 var _displayed: bool = false
 
 func _ready() -> void:
-	_player = Player.instance
-	if not _player:
-		push_error("GuidanceBox.gd: Player.instance 为空，无法初始化引导盒")
-		return
+	_try_initialize()
+
+func _try_initialize() -> bool:
+	if _initialized:
+		return true
+
+	var player: Player = Player.instance
+	if not is_instance_valid(player):
+		return false
+
+	_player = player
 	_root = $".."
 	_sprite = $"../Sprite3D"
 	_trigger_effect = load("res://#Template/[Resources]/Triggered.tscn")
+	_initialized = true
 
 	# Unity: if (Distance > appearDistance) Disappear(false);
 	# Unity 的 Distance 返回 sqrMagnitude，直接对比 appearDistance（不做平方）
 	var dist_sq: float = global_position.distance_squared_to(_player.global_position)
 	if dist_sq > appear_distance:
 		_disappear(false)
+	return true
 
 func _process(_delta: float) -> void:
+	if not _try_initialize():
+		return
+
 	if triggered:
 		return
 
 	# 合并两次距离计算为一次（性能优化：distance_squared_to 是关键热点）
-	if not _player:
-		push_error("GuidanceBox.gd: Player.instance 为空，无法计算距离")
+	if not is_instance_valid(_player):
+		_initialized = false
 		return
 	var dist_sq: float = global_position.distance_squared_to(_player.global_position)
 
@@ -46,9 +59,6 @@ func _process(_delta: float) -> void:
 
 	# 触发检测：仅在点击时才检查近距离
 	if LevelManager.Clicked and can_be_triggered and dist_sq <= trigger_distance * trigger_distance:
-		if not _player:
-			push_error("GuidanceBox.gd: Player.instance 为空，无法触发点击")
-			return
 		if LevelManager.GameState == LevelManager.GameStatus.Playing and not _player.disallow_input:
 			_trigger()
 
@@ -77,6 +87,7 @@ func _appear() -> void:
 		_displayed = true
 		_index = LevelManager.checkpoint_count
 		_root.visible = true
+		_sprite.visible = true
 		LevelManager.add_revive_listener(_reset_data)
 
 # Unity: Disappear(bool onlyBox)
@@ -86,6 +97,7 @@ func _disappear(only_box: bool) -> void:
 		_sprite.visible = false
 	else:
 		_root.visible = false
+		_sprite.visible = false
 
 func _reset_data() -> void:
 	LevelManager.remove_revive_listener(_reset_data)

@@ -30,7 +30,7 @@
 | P1 | Animator | TimerImageColor | ✓ | ✓ | `TimerImageColor.gd`，按音乐时间触发、复活回退 |
 | P2 | GUI | StartPage | ✓ | ✓ | 开始页面 UI（含 About 面板动画、延迟/音量/画质/抗锯齿设置、Autoplay/Shadow/Post 开关） |
 | P2 | GUI | LoadingPage | ✓ | ✓ | `LoadingPage.tscn` + `LoadingPage.gd` |
-| P2 | GUI | LevelUI | ✓ | ✓ | `GAMEUI.tscn` + `gameui.gd` |
+| P2 | GUI | LevelUI | ✓ | ✓ | `GAMEUI.tscn` + `GUI/LevelUI.gd` |
 | P2 | GUI | SetQuality | ✓ | ✓ | `GraphicsQuality.gd`：显示值映射、MSAA、阴影、后处理、ActiveByQuality 和 ConfigFile 持久化 |
 | P2 | GUI | SetLatency | ✓ | ✓ | SetLatency.gd 完成，延迟语义对齐 Unity StartGame，ConfigFile 持久化 |
 | P2 | GUI | KeyBoardFunctionsDisplay | ✓ | ✓ | 顶部提示栏 "R/K/D" 快捷键显示 |
@@ -45,7 +45,7 @@
 | P2 | Level | TimeScale | ✓ | ✓ | `TimeScale.gd`，游戏内 T 键切换时间/音乐速度 |
 | P2 | Level | ActiveByQuality | ✓ | ✓ | `ActiveByQuality.gd`，由 StartPage 画质设置驱动 |
 | P2 | Level | DisableInPlaymode | ✓ | ✓ | `DisableInPlayMode.gd`，只隐藏脚本所附着节点，不影响父级场景组 |
-| — | Editor | TrailRenderer (路径高亮) | — | — | Unity `#Template` 脚本、Prefab、Scene 内均无此组件；运行时轨迹由 Player tail / RoadMaker 覆盖 |
+| — | Editor | TrailRenderer (路径高亮) | — | — | Unity `#Template` 脚本、Prefab、Scene 内均无此组件；运行时轨迹由 Player tail / RoadPaver 覆盖 |
 | P2 | Player | C 键输出音乐时间 | ✓ | ✓ | 编辑器模式下 `Player.gd` 输出当前音乐播放时间 |
 | P2 | Player | 事件系统 | ✓ | ✓ | Player.gd 信号含 OnGameAwake, OnPlayerStart, OnChangeDirection, OnLeaveGround, OnTouchGround, OnGameOver, OnGetGem, OnPlayerJump |
 | P1 | Player | noDeath 标志 | ✓ | ✓ | `Player.no_death`，墙碰撞和 `KillPlayer` 均尊重该标志 |
@@ -55,7 +55,7 @@
 | P2 | Player | sceneCamera / sceneLight 引用 | ✓ | ✓ | Player 导出并缓存 `scene_camera` / `scene_light`，保留自动查找回退 |
 | P2 | Player | musicVolume 独立字段 | ✓ | ✓ | `music_volume` 和 `music_delay` 已添加到 Player.gd |
 | P2 | Player | Editor 工具 | ✓ | ✓ | `direction_gizmo_plugin.gd` 四向辅助线；场景 Transform 即起点；FPS 由 DebugOverlay 提供 |
-| P3 | Level | PlayerCubes | ✓ | ✓ | 玩家死亡碎块由 `DeathParticle.tscn` 等效，轨迹路面由 RoadMaker 负责 |
+| P3 | Level | PlayerCubes | ✓ | ✓ | 玩家死亡碎块由 `DeathParticle.tscn` 等效，轨迹路面由 RoadPaver 负责 |
 | P3 | Trigger | TTFCheckPoint 系列 | ✓ | ✓ | `TTFCheckPoint.tscn` 与三个对应脚本已移植 |
 | P3 | Assets | 3D 模型 / 材质 | 6 OBJ, 16 MAT | ✓ | 源目录 6 个 OBJ 均已导入；可完整翻译的缺失材质已补 `.tres`，Unity 自定义 Shader 由现有 Godot Shader 等效 |
 | P3 | Assets | 音乐文件 | 2 首 | ✓ | 源目录实际只有 `SampleTrack.mp3`、`Shake_It_Up.ogg`，均已导入；原有 `Sample.mp3` 保留 |
@@ -101,7 +101,7 @@
 | — | 系统 | Player | ✓ | ✓ | 玩家角色（CharacterBody3D），含 land_effect 粒子 |
 | — | 系统 | LevelManager | ✓ | ✓ | 游戏状态机（静态 RefCounted），含 revive 监听器系统 |
 | — | 系统 | Percentage | ✓ | ✓ | 百分比标记（编辑器工具） |
-| — | 系统 | RoadMaker | ✓ | ✓ | 路径生成（S 键保存） |
+| — | 系统 | RoadPaver | ✓ | ✓ | 路径生成 |
 | — | 系统 | GameUI | ✓ | ✓ | 游戏结束 UI（皇冠/宝石统计 + 复活/重玩） |
 | — | 系统 | DeathParticle | ✓ | ✓ | 死亡粒子（8 段碎片 + 随机冲量/扭矩） |
 | — | 系统 | DebugOverlay | ✓ | ✓ | 调试信息覆盖层（FPS/坐标/朝向/状态/宝石/皇冠/相机） |
@@ -142,9 +142,9 @@
 | `GameEvents` | `Player.gd` 的游戏流程信号 |
 | `HideCanvas` / `ShowCanvas` | `StartPage.gd` 的 About/页面 Tween |
 | `KeyBoardManager` / `KeyBoardFunctionsDisplay` | Godot InputMap、`Player._input()`、StartPage 顶部提示栏 |
-| `LevelUI` | `GAMEUI.tscn` + `gameui.gd` |
-| `PlayerCubes` | `DeathParticle.tscn`；轨迹路面由 `RoadMaker.gd` 负责 |
-| `RoadPaver` | `RoadMaker.gd` |
+| `LevelUI` | `GAMEUI.tscn` + `GUI/LevelUI.gd` |
+| `PlayerCubes` | `DeathParticle.tscn`；轨迹路面由 `RoadPaver.gd` 负责 |
+| `RoadPaver` | `RoadPaver.gd` |
 | `SetQuality` | `GraphicsQuality.gd` + StartPage 设置控件 |
 | `*Track` / `*Clip` / `*MixerBehaviour` | Godot `AnimationPlayer` 属性轨道、Tween、Timer Animator |
 
@@ -183,7 +183,7 @@
 - [x] **TimeScale** — 游戏内全局时间倍速控制
 - [x] **ActiveByQuality** — 根据画质等级启用/禁用对象
 - [x] **DisableInPlaymode** — 运行时隐藏编辑器辅助对象
-- [x] ~~**TrailRenderer**~~ — Unity `#Template` 内不存在该源组件；Player tail / RoadMaker 已覆盖实际轨迹功能
+- [x] ~~**TrailRenderer**~~ — Unity `#Template` 内不存在该源组件；Player tail / RoadPaver 已覆盖实际轨迹功能
 - [x] **C 键输出音乐时间** — 编辑器快捷键
 - [x] **sceneCamera / sceneLight 直接引用** — Player.gd 缓存引用
 - [x] **playedAnimators / playedTimelines** — AnimationPlayer 状态用于存档恢复
@@ -266,7 +266,7 @@
 |----------|----------|----------|
 | **高** | 物理 | ~~`_physics_process` 中 `move_and_slide()` 调用顺序错误~~ 已修复（先 gravity 再 move_and_slide） |
 | **高** | 渲染 | Player 尾线每段独立 `MeshInstance3D`，Draw Call 线性增长 |
-| **高** | 渲染 | RoadMaker 每帧缩放 `StaticBody3D.scale` 触发物理重建 |
+| **高** | 渲染 | RoadPaver 每帧缩放 `StaticBody3D.scale` 触发物理重建 |
 | **中** | 内存 | AudioManager 每次播放新建 `AudioStreamPlayer`（播放完自动 queue_free） |
 | **中** | CPU | Crown/HeartCheckpoint 每帧旋转，无可见性检查 |
 | **中** | CPU | GuidanceBox 每帧两次距离计算 |
@@ -277,7 +277,7 @@
 
 #### Phase 1：紧急优化（P0）
 - [x] ~~修复 `move_and_slide()` 调用顺序~~ — 已修复
-- [ ] RoadMaker 视觉/碰撞分离
+- [ ] RoadPaver 视觉/碰撞分离
 - [ ] AudioManager 对象池
 - [ ] 可见性检查
 
