@@ -10,7 +10,7 @@ func _can_handle(object: Object) -> bool:
 	return node != null and node.get_script() == EVENT_TRIGGER_SCRIPT
 
 
-func _parse_end(object: Object) -> void:
+func _parse_begin(object: Object) -> void:
 	var node: Node = object as Node
 	if node == null:
 		return

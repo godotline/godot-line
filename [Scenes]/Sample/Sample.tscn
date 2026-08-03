@@ -230,8 +230,10 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505,
 
 [node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177 node_paths=PackedStringArray("target_node")]
 script = ExtResource("23_77abe")
-target_node = NodePath("../../Trigger3/jump")
+target_node = NodePath("../../Ground2/Node3D")
 debug_mode = true
+
+[connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
 
 [editable path="BasicOBJ_Group/CameraRoot"]
 [editable path="Scene_Group/Scene_001/Trigger"]

@@ -27,7 +27,7 @@ func _enter_tree() -> void:
 	add_inspector_plugin(_event_trigger_inspector_plugin)
 
 	_menu_button = MenuButton.new()
-	_menu_button.text = "模板 2.3.240"
+	_menu_button.text = "模板 2.3.241"
 	_menu_button.tooltip_text = "Template 相关资源"
 	_menu_button.switch_on_hover = true
 

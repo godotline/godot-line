@@ -3,6 +3,7 @@ extends CharacterBody3D
 class_name Player
 
 static var instance: Player
+static var _scene_reload_in_progress: bool = false
 
 ## ========== 事件信号（GameEvents 系统） ==========
 signal on_game_awake			## 游戏初始化完成
@@ -74,6 +75,7 @@ var tailScale: int = 1
 
 var start_transform: Transform3D = transform
 var loading: bool = false
+var _reload_queued: bool = false
 var debug: bool = false
 @export var allowTurn: bool = true
 var disallowInput: bool = false
@@ -149,6 +151,11 @@ func _ready() -> void:
 		page.shadow_toggled.connect(_on_shadow_toggled)
 		page.post_toggled.connect(_on_post_toggled)
 		GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
+	if not Engine.is_editor_hint():
+		call_deferred("_clear_scene_reload_guard")
+
+func _clear_scene_reload_guard() -> void:
+	_scene_reload_in_progress = false
 
 func _on_start_from_startpage() -> void:
 	turn()
@@ -237,6 +244,10 @@ func _input(event: InputEvent) -> void:
 					print("Music time: %.3f" % $MusicPlayer.get_playback_position())
 
 func reload() -> void:
+	if _reload_queued or _scene_reload_in_progress:
+		return
+	_reload_queued = true
+	_scene_reload_in_progress = true
 	LevelManager.main_line_transform = start_transform
 	LevelManager.reset_camera_checkpoint()
 	LevelManager.player_direction_index = _currentDirection
@@ -244,12 +255,34 @@ func reload() -> void:
 	LevelManager.player_second_direction = secondDirection
 	LevelManager.anim_time = 0.0
 	_clear_tail()
-	tree.reload_current_scene()
+	call_deferred("_reload_current_scene")
+
+func _reload_current_scene() -> void:
+	if not is_inside_tree():
+		_reload_queued = false
+		return
+	var current_scene: Node = tree.current_scene
+	if not is_instance_valid(current_scene):
+		_reload_queued = false
+		_scene_reload_in_progress = false
+		loading = false
+		push_error("Player.gd: 当前场景为空，无法重新加载关卡")
+		return
+	var reload_error: Error = tree.reload_current_scene()
+	if reload_error != OK:
+		_reload_queued = false
+		_scene_reload_in_progress = false
+		loading = false
+		push_error("Player.gd: 重新加载关卡失败，错误码: %s" % reload_error)
 
 func _clear_tail() -> void:
 	line = null
 	past_translation = position
-	tail_holder = _get_or_create_player_tail_holder()
+	var holder: Node3D = _get_or_create_player_tail_holder()
+	if not holder:
+		tail_holder = null
+		return
+	tail_holder = holder
 	for child in tail_holder.get_children():
 		var tail: MeshInstance3D = child as MeshInstance3D
 		if child is RigidBody3D:
@@ -291,6 +324,8 @@ func _get_from_pool() -> MeshInstance3D:
 
 func _get_or_create_player_tail_holder() -> Node3D:
 	var root: Node = tree.current_scene
+	if not is_instance_valid(root):
+		return null
 
 	var holder: Node3D = root.get_node_or_null("PlayerTailHolder") as Node3D
 	if not holder:
@@ -302,6 +337,9 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	return holder
 
 func new_line() -> void:
+	var tail_holder: Node3D = _get_or_create_player_tail_holder()
+	if not tail_holder:
+		return
 	_finish_tail_join(line)
 	_spawn_corner_tail(position, rotation)
 	line = _get_from_pool()
@@ -314,7 +352,6 @@ func new_line() -> void:
 	line.set_surface_override_material(0, material)
 	line.visible = show_line_tail or not hen_shin
 
-	var tail_holder: Node3D = _get_or_create_player_tail_holder()
 	var body: RigidBody3D = _create_tail_body()
 	past_translation = position
 	body.position = position

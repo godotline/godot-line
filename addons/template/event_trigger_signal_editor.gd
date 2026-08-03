@@ -36,7 +36,7 @@ func _build_ui() -> void:
 	add_child(title)
 
 	var description: Label = Label.new()
-	description.text = "在上方 target_node 属性中拖入节点，再选择无参数方法。"
+	description.text = "在下方 target_node 属性中拖入节点，再选择无参数方法。"
 	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	description.add_theme_color_override("font_color", Color(0.65, 0.65, 0.65))
 	add_child(description)
@@ -182,8 +182,9 @@ func _update_connect_button() -> void:
 		var method: StringName = StringName(_method_picker.get_item_text(_method_picker.selected))
 		var callback: Callable = Callable(_target_node, method)
 		if _source.is_connected(&"triggered", callback):
-			_connect_button.text = "已连接"
-			_connect_button.disabled = true
+			var connection_flags: int = _get_connection_flags(callback)
+			_connect_button.text = "已连接" if connection_flags & CONNECT_PERSIST else "保存连接"
+			_connect_button.disabled = (connection_flags & CONNECT_PERSIST) != 0
 			return
 	_connect_button.text = "连接回调"
 	_connect_button.disabled = not can_connect
@@ -193,7 +194,11 @@ func _connect_selected_callback() -> void:
 	if not is_instance_valid(_target_node) or _method_picker.selected < 0:
 		return
 	var method: StringName = StringName(_method_picker.get_item_text(_method_picker.selected))
-	_connect_callback(_target_node, method)
+	var callback: Callable = Callable(_target_node, method)
+	if _source.is_connected(&"triggered", callback):
+		_persist_callback(callback)
+	else:
+		_connect_callback(_target_node, method)
 
 
 func _refresh_connection_list() -> void:
@@ -257,6 +262,16 @@ func _get_callback_methods(target: Node) -> Array[String]:
 	return method_names
 
 
+func _get_connection_flags(callback: Callable) -> int:
+	if not is_instance_valid(_source):
+		return 0
+	for connection: Dictionary in _source.get_signal_connection_list(&"triggered"):
+		var connected_callback: Callable = connection.get("callable", Callable())
+		if connected_callback == callback:
+			return int(connection.get("flags", 0))
+	return 0
+
+
 func _connect_callback(target: Node, method: StringName) -> void:
 	if not is_instance_valid(_source) or not is_instance_valid(target):
 		return
@@ -266,10 +281,30 @@ func _connect_callback(target: Node, method: StringName) -> void:
 
 	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
 	undo_redo.create_action("连接 EventTrigger 回调")
-	undo_redo.add_do_method(_source, "connect", &"triggered", callback)
+	undo_redo.add_do_method(_source, "connect", &"triggered", callback, CONNECT_PERSIST)
 	undo_redo.add_undo_method(_source, "disconnect", &"triggered", callback)
 	undo_redo.commit_action()
 	_source.notify_property_list_changed()
+	EditorInterface.mark_scene_as_unsaved()
+	_refresh_editor()
+
+
+func _persist_callback(callback: Callable) -> void:
+	if not is_instance_valid(_source) or not _source.is_connected(&"triggered", callback):
+		return
+	var connection_flags: int = _get_connection_flags(callback)
+	if connection_flags & CONNECT_PERSIST:
+		return
+
+	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("保存 EventTrigger 回调")
+	undo_redo.add_do_method(_source, "disconnect", &"triggered", callback)
+	undo_redo.add_do_method(_source, "connect", &"triggered", callback, CONNECT_PERSIST)
+	undo_redo.add_undo_method(_source, "disconnect", &"triggered", callback)
+	undo_redo.add_undo_method(_source, "connect", &"triggered", callback, connection_flags)
+	undo_redo.commit_action()
+	_source.notify_property_list_changed()
+	EditorInterface.mark_scene_as_unsaved()
 	_refresh_editor()
 
 
@@ -283,9 +318,10 @@ func _disconnect_callback(target: Node, method: StringName) -> void:
 	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
 	undo_redo.create_action("断开 EventTrigger 回调")
 	undo_redo.add_do_method(_source, "disconnect", &"triggered", callback)
-	undo_redo.add_undo_method(_source, "connect", &"triggered", callback)
+	undo_redo.add_undo_method(_source, "connect", &"triggered", callback, _get_connection_flags(callback))
 	undo_redo.commit_action()
 	_source.notify_property_list_changed()
+	EditorInterface.mark_scene_as_unsaved()
 	_refresh_editor()
 
 
