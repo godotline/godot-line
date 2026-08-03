@@ -104,6 +104,8 @@ func _clear() -> void:
 		_line_mesh = null
 
 func _draw_line() -> void:
+	if not is_inside_tree():
+		return
 	if not _line_mesh:
 		_line_mesh = MeshInstance3D.new()
 		_line_mesh.name = "TrajectoryLine"

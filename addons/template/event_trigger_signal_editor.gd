@@ -223,11 +223,14 @@ func _refresh_connection_list() -> void:
 			continue
 
 		var row: HBoxContainer = HBoxContainer.new()
-		var callback_label: Label = Label.new()
-		callback_label.text = "%s.%s()" % [_get_scene_tree_path(target), String(callback.get_method())]
-		callback_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		callback_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(callback_label)
+		var callback_path: String = "%s.%s()" % [_get_scene_tree_path(target), String(callback.get_method())]
+		var callback_link: LinkButton = LinkButton.new()
+		callback_link.text = callback_path
+		callback_link.tooltip_text = "%s\n点击跳转到目标节点" % callback_path
+		callback_link.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		callback_link.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		callback_link.pressed.connect(_select_callback_target.bind(target))
+		row.add_child(callback_link)
 
 		var disconnect_button: Button = Button.new()
 		disconnect_button.text = "断开"
@@ -235,6 +238,18 @@ func _refresh_connection_list() -> void:
 		disconnect_button.pressed.connect(_disconnect_callback.bind(target, callback.get_method()))
 		row.add_child(disconnect_button)
 		_connections_box.add_child(row)
+
+
+func _select_callback_target(target: Node) -> void:
+	if not is_instance_valid(target):
+		return
+	call_deferred("_edit_callback_target", target)
+
+
+func _edit_callback_target(target: Node) -> void:
+	if not is_instance_valid(target):
+		return
+	EditorInterface.edit_node(target)
 
 
 func _add_status(text: String) -> void:

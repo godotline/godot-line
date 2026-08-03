@@ -9,24 +9,46 @@ static var Instance: AutoPlayController
 
 var _holder: Node3D
 var _triggers: Array[Area3D] = []
+var _init_in_progress: bool = false
+var _initialized: bool = false
 
 func _ready() -> void:
 	Instance = self
-	# 等场景所有节点 _ready() 完成后再初始化（与 Unity 版一致，确保 GuidanceController 已就绪）
-	get_tree().process_frame.connect(_init_triggers, CONNECT_ONE_SHOT)
+	# 等场景切换和其他节点的 _ready() 完成后再读取 current_scene。
+	call_deferred("_init_triggers")
 
 func _init_triggers() -> void:
-	if not GuidanceController.Instance or not GuidanceController.Instance.box_holder:
-		push_warning("[AutoPlayController] GuidanceController 或 box_holder 未设置")
+	if _init_in_progress or _initialized:
+		return
+	_init_in_progress = true
+	await get_tree().process_frame
+	if not is_inside_tree():
+		_init_in_progress = false
 		return
 
-	var boxes: Array[Node] = GuidanceController.Instance.box_holder.get_children()
+	var current_scene: Node = get_tree().current_scene
+	if not is_instance_valid(current_scene):
+		_queue_init_retry()
+		return
+
+	var guidance_controller: GuidanceController = GuidanceController.Instance
+	if not is_instance_valid(guidance_controller):
+		_queue_init_retry()
+		return
+	var box_holder: Node3D = guidance_controller.box_holder
+	if not is_instance_valid(box_holder):
+		_queue_init_retry()
+		return
+
+	var boxes: Array[Node] = box_holder.get_children()
 	if boxes.is_empty():
+		_init_in_progress = false
+		_initialized = true
 		return
 
 	_holder = Node3D.new()
 	_holder.name = "AutoPlayHolder"
-	get_tree().current_scene.add_child(_holder)
+	current_scene.add_child(_holder)
 
 	# 从第二个 box 开始创建触发器（与 Unity 版一致，跳过第 0 个）
 	for i in range(1, boxes.size()):
@@ -36,7 +58,14 @@ func _init_triggers() -> void:
 		var trigger: Area3D = _create_trigger(box.global_position, i)
 		_triggers.append(trigger)
 
+	_init_in_progress = false
+	_initialized = true
 	set_holder(enable)
+
+func _queue_init_retry() -> void:
+	_init_in_progress = false
+	if is_inside_tree():
+		call_deferred("_init_triggers")
 
 func _create_trigger(pos: Vector3, index: int) -> Area3D:
 	var area: Area3D = Area3D.new()
