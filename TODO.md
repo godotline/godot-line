@@ -67,7 +67,7 @@
 | — | 系统 | Jump | ✓ | ✓ | 跳跃触发器（纯组件模式），含 JumpPredictor/FallPredictor |
 | — | 系统 | ChangeTurn / ChangeDirection | ✓ | ✓ | Direction/Turn 两种模式（纯组件） |
 | — | 系统 | ChangeSpeed / Speed | ✓ | ✓ | 速度改变触发器（纯组件 `Speed.gd`），即时同步速度向量 |
-| — | 系统 | EventTrigger | ✓ | ✓ | 事件分发触发器（纯组件），支持 onclick 模式和复活恢复 |
+| — | 系统 | EventTrigger | ✓ | ✓ | 事件分发触发器（纯组件），通过 Inspector 插件连接 `triggered` 回调，支持 onclick 模式和复活恢复 |
 | — | 系统 | PlayAnimator / CustomAnimPlay | ✓ | ✓ | 播放帧动画（纯组件），含进度记录和复活恢复 |
 | — | 系统 | SetMaterialColor | ✓ | ✓ | 材质颜色动画（纯组件），Tween 过渡 + emission 支持 |
 | — | 系统 | SetActiveTrigger | ✓ | ✓ | 激活/禁用节点（纯组件 `SetActive.gd`），revive 恢复 |
@@ -214,7 +214,7 @@
 |------|---------|------|
 | `Jump.gd` | `trigger(body)` | 跳跃 + JumpPredictor/FallPredictor |
 | `SetFog.gd` | `trigger(body)` | FogSettings + Tween 过渡 |
-| `EventTrigger.gd` | `trigger(body)` + `on_exit(body)` | 多目标调用 + onclick 模式 |
+| `EventTrigger.gd` | `trigger(body)` + `on_exit(body)` + `triggered` | Inspector 插件连接 UnityEvent 等效回调 + onclick 模式 |
 | `PlayAnimator.gd` | `trigger(body)` | AnimationPlayer 播放 + 复活恢复 |
 | `SetActive.gd` | `trigger(body)` | 激活/禁用节点 + revive 恢复 |
 | `SetMaterialColor.gd` | `trigger(body)` | material_override + Tween |

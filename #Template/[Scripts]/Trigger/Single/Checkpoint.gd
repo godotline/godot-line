@@ -1,4 +1,4 @@
-extends Area3D
+extends Node3D
 class_name Checkpoint
 
 enum Direction { First, Second }
@@ -45,14 +45,49 @@ var _player_second_direction: Vector3 = Vector3.ZERO
 var _fake_players_data: Array[Dictionary] = []
 
 var _revive_position: Node3D
+var _trigger_area: Area3D
+var _checkpoint_container: Node3D
 
 func _ready() -> void:
-	_revive_position = get_node_or_null("RevivePosition")
+	_checkpoint_container = _resolve_checkpoint_container()
+	_trigger_area = _resolve_trigger_area()
+	_revive_position = _checkpoint_container.get_node_or_null("RevivePosition") as Node3D
 	if _revive_position:
 		_revive_position.visible = false
 
-	if not body_entered.is_connected(_on_checkpoint_body_entered):
-		body_entered.connect(_on_checkpoint_body_entered)
+	if _trigger_area and not (_trigger_area is BaseTrigger):
+		if not _trigger_area.body_entered.is_connected(_on_checkpoint_body_entered):
+			_trigger_area.body_entered.connect(_on_checkpoint_body_entered)
+
+func _resolve_checkpoint_container() -> Node3D:
+	var current_node: Node = self
+	if current_node is Area3D:
+		return current_node as Node3D
+	var parent_area: Area3D = get_parent() as Area3D
+	if parent_area:
+		var container: Node3D = parent_area.get_parent() as Node3D
+		if container:
+			return container
+	return self
+
+func _resolve_trigger_area() -> Area3D:
+	var current_node: Node = self
+	if current_node is Area3D:
+		return current_node as Area3D
+	var parent_area: Area3D = get_parent() as Area3D
+	if parent_area:
+		return parent_area
+	return _checkpoint_container.get_node_or_null("Area3D") as Area3D
+
+func _get_trigger_area() -> Area3D:
+	return _trigger_area
+
+func _reconnect_trigger(callback: Callable) -> void:
+	if not _trigger_area:
+		return
+	if _trigger_area.body_entered.is_connected(callback):
+		_trigger_area.body_entered.disconnect(callback)
+	_trigger_area.body_entered.connect(callback)
 
 func _on_checkpoint_body_entered(body: Node3D) -> void:
 	if used:

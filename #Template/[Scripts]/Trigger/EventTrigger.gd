@@ -1,14 +1,13 @@
 @tool
 extends Node
+class_name EventTrigger
 
-## 事件触发器 - 可配置多个目标节点和方法
+## 事件触发器 - Unity EventTrigger 的 Godot 组件实现
 ## 纯组件模式：作为 BaseTrigger 的子节点，依赖父节点处理碰撞
 
-@export_group("触发目标")
-## 目标节点列表
-@export var target_nodes: Array[Node] = []
-## 对应的方法名列表（默认为 "Trigger"）
-@export var target_methods: Array[String] = []
+## 等效于 Unity 版的 onTriggerEnter UnityEvent。
+## 目标回调由 EventTrigger Inspector 插件连接到这个信号。
+signal triggered
 
 @export_group("触发模式")
 @export var invoke_on_awake: bool = false
@@ -62,31 +61,8 @@ func _invoke() -> void:
 	_trigger_index = LevelManager.checkpoint_count
 	if debug_mode:
 		print("[EventTrigger] %s 触发 (checkpoint: %d)" % [name, _trigger_index])
-	_invoke_targets()
+	triggered.emit()
 	LevelManager.add_revive_listener(_on_revive)
-
-## 调用所有配置的目标节点方法
-func _invoke_targets() -> void:
-	if debug_mode:
-		print("[EventTrigger] %s 调用 %d 个目标" % [name, target_nodes.size()])
-
-	for i in range(target_nodes.size()):
-		var node: Node = target_nodes[i]
-		if node == null:
-			push_warning("[EventTrigger] 目标节点 #%d 为空，跳过" % i)
-			continue
-
-		# 获取方法名，如果索引越界则使用默认值 "Trigger"
-		var method: String = "Trigger"
-		if i < target_methods.size() and target_methods[i] != "":
-			method = target_methods[i]
-
-		if node.has_method(method):
-			if debug_mode:
-				print("[EventTrigger]   -> %s.%s()" % [node.name, method])
-			node.call(method)
-		else:
-			push_warning("[EventTrigger] 节点 '%s' 没有方法 '%s'" % [node.name, method])
 
 func _on_revive() -> void:
 	if not is_instance_valid(self):
