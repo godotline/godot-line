@@ -43,11 +43,11 @@ _data = {
 
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
-[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 node_paths=PackedStringArray("scene_camera", "scene_light") instance=ExtResource("1_3w2qj")]
+[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 node_paths=PackedStringArray("sceneCamera", "sceneLight") instance=ExtResource("1_3w2qj")]
 animation = NodePath("../AnimationPlayer")
-scene_camera = NodePath("../CameraRoot/Rotator/Scale/Camera3D")
-scene_light = NodePath("../DirectionalLight3D")
-level_data = ExtResource("2_uo2eh")
+sceneCamera = NodePath("../CameraRoot/Rotator/Scale/Camera3D")
+sceneLight = NodePath("../DirectionalLight3D")
+levelData = ExtResource("2_uo2eh")
 
 [node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_sm0oj")]
 
@@ -228,8 +228,10 @@ draw_preview = true
 [node name="Trigger4" parent="Scene_Group/Scene_001" unique_id=712157509 instance=ExtResource("11_mq52h")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 15.605786)
 
-[node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177]
+[node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177 node_paths=PackedStringArray("target_node")]
 script = ExtResource("23_77abe")
+target_node = NodePath("../../Trigger3/jump")
+debug_mode = true
 
 [editable path="BasicOBJ_Group/CameraRoot"]
 [editable path="Scene_Group/Scene_001/Trigger"]

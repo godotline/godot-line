@@ -14,10 +14,10 @@ var _shown: bool = false
 @onready var revive_fill: TextureRect = $RevivePage/ProgressFrame/Fill
 
 func _ready() -> void:
-	if Player.instance and Player.instance.level_data:
-		levelname = Player.instance.level_data.levelTitle
+	if Player.instance and Player.instance.levelData:
+		levelname = Player.instance.levelData.levelTitle
 	else:
-		push_error("LevelUI.gd: Player.instance 或 level_data 为空，无法读取关卡标题")
+		push_error("LevelUI.gd: Player.instance 或 levelData 为空，无法读取关卡标题")
 	visible = false
 	if Player.instance:
 		Player.instance.on_game_end.connect(_show_ui)

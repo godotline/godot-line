@@ -27,7 +27,7 @@ func _enter_tree() -> void:
 	add_inspector_plugin(_event_trigger_inspector_plugin)
 
 	_menu_button = MenuButton.new()
-	_menu_button.text = "模板 2.3.238"
+	_menu_button.text = "模板 2.3.240"
 	_menu_button.tooltip_text = "Template 相关资源"
 	_menu_button.switch_on_hover = true
 
@@ -212,8 +212,8 @@ func _create_new_level(level_name: String, template_path: String, level_id: int)
 		root.queue_free()
 		return ERR_INVALID_DATA
 
-	if not player.level_data:
-		_push_error("模板场景 %s 的 Player 节点未设置 level_data" % template_path)
+	if not player.levelData:
+		_push_error("模板场景 %s 的 Player 节点未设置 levelData" % template_path)
 		root.queue_free()
 		return ERR_INVALID_DATA
 
@@ -221,7 +221,7 @@ func _create_new_level(level_name: String, template_path: String, level_id: int)
 	DirAccess.make_dir_recursive_absolute(level_dir)
 
 	# 深拷贝 LevelData 资源，设新字段（唯一化）
-	var new_data := (player.level_data as Resource).duplicate(true) as LevelData
+	var new_data := (player.levelData as Resource).duplicate(true) as LevelData
 	if not new_data:
 		_push_error("复制 LevelData 资源失败")
 		root.queue_free()
@@ -247,8 +247,8 @@ func _create_new_level(level_name: String, template_path: String, level_id: int)
 		root.queue_free()
 		return ERR_CANT_OPEN
 
-	# 将 Player 的 level_data 指向唯一副本
-	player.level_data = saved_data
+	# 将 Player 的 levelData 指向唯一副本
+	player.levelData = saved_data
 
 	# 打包并保存场景
 	var new_scene := PackedScene.new()

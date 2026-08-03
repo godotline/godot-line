@@ -25,7 +25,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 
 func _is_direction_enabled(target: Node3D) -> bool:
 	if target is Player:
-		return (target as Player).draw_direction
+		return (target as Player).drawDirection
 	var fake_player: FakePlayer = _find_fake_player(target)
 	if fake_player:
 		return fake_player.drawDirection

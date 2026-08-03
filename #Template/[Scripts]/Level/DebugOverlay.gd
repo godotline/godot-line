@@ -63,12 +63,12 @@ func _update_label() -> void:
 	var fps: int = Engine.get_frames_per_second()
 	lines.append("FPS: %d" % fps)
 
-	if p.level_data:
+	if p.levelData:
 		var music_player: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 		if music_player and music_player.stream:
 			var progress: float = music_player.get_playback_position() / music_player.stream.get_length() if music_player.stream.get_length() > 0 else 0.0
 			var current_sec: float = music_player.get_playback_position()
-			var total_sec: float = p.level_data.levelTotalTime if p.level_data.useCustomLevelTime else music_player.stream.get_length()
+			var total_sec: float = p.levelData.levelTotalTime if p.levelData.useCustomLevelTime else music_player.stream.get_length()
 			lines.append("进度: %d%% (%.1f秒/%.1f秒)" % [int(progress * 100), current_sec, total_sec])
 
 	lines.append("游戏状态: %s" % LevelManager.GameStatus.keys()[LevelManager.GameState])

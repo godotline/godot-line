@@ -122,9 +122,9 @@ func _init_setting_states() -> void:
 func _populate_about_from_level_data() -> void:
 	# Player 使用 class_name + static var instance 模式
 	var player: Player = Player.instance if Player.instance != null else null
-	if not player or not player.level_data:
+	if not player or not player.levelData:
 		return
-	var ld: LevelData = player.level_data
+	var ld: LevelData = player.levelData
 
 	# 设置标题
 	var title_node: Node = about_content.find_child("about_title", true)

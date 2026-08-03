@@ -160,12 +160,12 @@ func _capture_fog() -> void:
 func _capture_light() -> void:
 	var main_line: Player = Player.instance
 	if main_line:
-		var scene_light: DirectionalLight3D = main_line.get_scene_light()
-		if scene_light:
-			light.rotation = scene_light.rotation_degrees
-			light.color = scene_light.light_color
-			light.intensity = scene_light.light_energy
-			light.shadow_strength = 1.0 if scene_light.shadow_enabled else 0.0
+		var sceneLight: DirectionalLight3D = main_line.get_scene_light()
+		if sceneLight:
+			light.rotation = sceneLight.rotation_degrees
+			light.color = sceneLight.light_color
+			light.intensity = sceneLight.light_energy
+			light.shadow_strength = 1.0 if sceneLight.shadow_enabled else 0.0
 
 func _capture_ambient() -> void:
 	var env: Environment = _get_scene_environment()
@@ -314,8 +314,8 @@ func revive() -> void:
 		music_player.pitch_scale = 1.0
 		# Set music to checkpoint position but don't play yet
 		var music_time: float = LevelManager.music_checkpoint_time
-		if music_time > 0.0 and main_line.level_data and main_line.level_data.levelAudioClip:
-			music_player.stream = main_line.level_data.levelAudioClip
+		if music_time > 0.0 and main_line.levelData and main_line.levelData.levelAudioClip:
+			music_player.stream = main_line.levelData.levelAudioClip
 			# Play then immediately pause to set the position
 			music_player.play(music_time)
 			music_player.stream_paused = true
