@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://c6y2vppvx5060" path="res://#Template/[Resources]/BlackCrown_Light.png" id="6_8wqky"]
 [ext_resource type="Texture2D" uid="uid://mj12gw3q1d3w" path="res://#Template/[Resources]/FX_CrownCircle.png" id="7_circle"]
 [ext_resource type="Texture2D" uid="uid://c4rc47thiqgln" path="res://#Template/[Resources]/Spirit.png" id="8_spirit"]
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="9_trigger"]
 
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qoafd"]
@@ -97,8 +98,14 @@ particles_anim_loop = false
 material = SubResource("StandardMaterial3D_particle_circle")
 size = Vector2(2, 2)
 
-[node name="Crown" type="Area3D" unique_id=1805653336]
+[node name="Crown" type="Node3D" unique_id=1805653336]
+
+[node name="Area3D" parent="." instance=ExtResource("9_trigger")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 collision_layer = 0
+require_playing = false
+
+[node name="CrownCheckpoint" type="Node3D" parent="Area3D"]
 script = ExtResource("2")
 aura_extra_time = 0.8
 light_texture = ExtResource("6_8wqky")
@@ -108,11 +115,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 mesh = ExtResource("1")
 surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 
-[node name="CrownTrigger" type="CollisionShape3D" parent="." unique_id=18434010]
+[node name="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
 shape = SubResource("2")
 
-[node name="Marker3D" type="Marker3D" parent="CrownTrigger" unique_id=626349944]
+[node name="Marker3D" parent="Area3D" index="1"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="RevivePosition" type="MeshInstance3D" parent="." unique_id=1500499588]
@@ -142,5 +149,3 @@ explosiveness = 1.0
 local_coords = true
 process_material = SubResource("ParticleProcessMaterial_circle")
 draw_pass_1 = SubResource("QuadMesh_circle")
-
-[connection signal="body_entered" from="." to="." method="_on_checkpoint_body_entered"]

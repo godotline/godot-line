@@ -9,11 +9,13 @@ const TEMPLATE_SAMPLE := "res://[Scenes]/Sample/Sample.tscn"
 const LEVELS_ROOT := "res://[Scenes]/"
 const DirectionGizmoPlugin := preload("res://addons/template/direction_gizmo_plugin.gd")
 const PluginStoreDialogClass := preload("res://addons/template/plugin_store_dialog.gd")
+const EventTriggerInspectorPluginClass := preload("res://addons/template/event_trigger_inspector_plugin.gd")
 
 var _menu_button: MenuButton
 var _new_level_dialog: ConfirmationDialog
 var _store_dialog: ConfirmationDialog
 var _direction_gizmo_plugin: EditorNode3DGizmoPlugin
+var _event_trigger_inspector_plugin: Object
 
 
 func _enter_tree() -> void:
@@ -21,9 +23,11 @@ func _enter_tree() -> void:
 	_check_first_run()
 	_direction_gizmo_plugin = DirectionGizmoPlugin.new()
 	add_node_3d_gizmo_plugin(_direction_gizmo_plugin)
+	_event_trigger_inspector_plugin = EventTriggerInspectorPluginClass.new()
+	add_inspector_plugin(_event_trigger_inspector_plugin)
 
 	_menu_button = MenuButton.new()
-	_menu_button.text = "模板 2.3.236"
+	_menu_button.text = "模板 2.3.238"
 	_menu_button.tooltip_text = "Template 相关资源"
 	_menu_button.switch_on_hover = true
 
@@ -41,6 +45,9 @@ func _exit_tree() -> void:
 	if _direction_gizmo_plugin:
 		remove_node_3d_gizmo_plugin(_direction_gizmo_plugin)
 		_direction_gizmo_plugin = null
+	if _event_trigger_inspector_plugin:
+		remove_inspector_plugin(_event_trigger_inspector_plugin)
+		_event_trigger_inspector_plugin = null
 	if _menu_button:
 		remove_control_from_container(CONTAINER_TOOLBAR, _menu_button)
 		_menu_button.queue_free()

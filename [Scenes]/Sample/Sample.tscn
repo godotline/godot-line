@@ -10,7 +10,7 @@
 [ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="9_0v7qw"]
 [ext_resource type="Script" uid="uid://cq3coymowo07g" path="res://#Template/[Scripts]/Animator/LocalScaleAnimator.gd" id="10_7en4s"]
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="11_mq52h"]
-[ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/Single/FakePlayerTrigger.gd" id="12_1fvat"]
+[ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/FakePlayerTrigger.gd" id="12_1fvat"]
 [ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="13_hkwba"]
 [ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="14_y8kmt"]
 [ext_resource type="PackedScene" uid="uid://car71stqmy3mh" path="res://#Template/Obstacle.tscn" id="15_6gt33"]
@@ -143,26 +143,25 @@ script = ExtResource("10_7en4s")
 start_value = Vector3(1, 1, 1)
 end_offset = Vector3(1, 5, 3)
 
-[node name="Trigger" parent="Scene_Group/Scene_001" unique_id=608483111 node_paths=PackedStringArray("targetPlayer") instance=ExtResource("11_mq52h")]
+[node name="Trigger" parent="Scene_Group/Scene_001" unique_id=608483111 instance=ExtResource("11_mq52h")]
 transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 2.2444015, -0.5, 2.7034848)
-script = ExtResource("12_1fvat")
-targetPlayer = NodePath("../FakePlayer")
-type = 2
-firstDirection = Vector3(0, 90, 0)
-secondDirection = Vector3(0, 0, 0)
-targetState = 0
 
-[node name="Trigger2" parent="Scene_Group/Scene_001" unique_id=237830721 node_paths=PackedStringArray("targetPlayer") instance=ExtResource("11_mq52h")]
-transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 3.599347, -0.50000095, 8.274333)
+[node name="FakePlayerTrigger" type="Node3D" parent="Scene_Group/Scene_001/Trigger" unique_id=589288902 node_paths=PackedStringArray("targetPlayer")]
 script = ExtResource("12_1fvat")
-targetPlayer = NodePath("../FakePlayer")
-type = 0
-firstDirection = Vector3(0, 90, 0)
-secondDirection = Vector3(0, 0, 0)
-targetState = 0
+targetPlayer = NodePath("../../FakePlayer/FakePlayerComponent")
+type = 2
+
+[node name="Trigger2" parent="Scene_Group/Scene_001" unique_id=237830721 instance=ExtResource("11_mq52h")]
+transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 3.599347, -0.50000095, 8.274333)
+
+[node name="FakePlayerTrigger" type="Node3D" parent="Scene_Group/Scene_001/Trigger2" unique_id=1494374801 node_paths=PackedStringArray("targetPlayer")]
+script = ExtResource("12_1fvat")
+targetPlayer = NodePath("../../FakePlayer/FakePlayerComponent")
 
 [node name="Crown" parent="Scene_Group/Scene_001" unique_id=1805653336 instance=ExtResource("13_hkwba")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.353553, -9.536743e-07, 15.392802)
+
+[node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" index="3"]
 AutoRecord = true
 
 [node name="Obstacle" parent="Scene_Group/Scene_001" unique_id=359263919 instance=ExtResource("15_6gt33")]
@@ -173,6 +172,8 @@ transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 14.330317, 29.313358, 0.5, 43.87
 
 [node name="FakePlayer" parent="Scene_Group/Scene_001" unique_id=226051297 instance=ExtResource("15_fmoim")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5376909, 0, 7.029239)
+
+[node name="FakePlayerComponent" parent="Scene_Group/Scene_001/FakePlayer" index="0"]
 startPosition = Vector3(-2.5376909, 0, 7.029239)
 isWall = true
 synchronismWithPlayer = true
@@ -227,11 +228,13 @@ draw_preview = true
 [node name="Trigger4" parent="Scene_Group/Scene_001" unique_id=712157509 instance=ExtResource("11_mq52h")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 15.605786)
 
-[node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177 node_paths=PackedStringArray("target_nodes")]
+[node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177]
 script = ExtResource("23_77abe")
-target_nodes = [NodePath("../../Ground2/Node3D")]
-target_methods = Array[String]([""])
 
 [editable path="BasicOBJ_Group/CameraRoot"]
+[editable path="Scene_Group/Scene_001/Trigger"]
+[editable path="Scene_Group/Scene_001/Trigger2"]
+[editable path="Scene_Group/Scene_001/Crown"]
+[editable path="Scene_Group/Scene_001/FakePlayer"]
 [editable path="Scene_Group/Scene_001/Pyramid"]
 [editable path="Scene_Group/Scene_001/Crystal"]

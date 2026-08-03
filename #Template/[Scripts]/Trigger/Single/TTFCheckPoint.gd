@@ -28,10 +28,8 @@ func _ready() -> void:
 	if rotator:
 		_rotator_start_position = rotator.position
 
-	# Make the inherited Area3D callback resolve to this variant explicitly.
-	if body_entered.is_connected(_on_checkpoint_body_entered):
-		body_entered.disconnect(_on_checkpoint_body_entered)
-	body_entered.connect(_on_checkpoint_body_entered)
+	# Make the inherited trigger callback resolve to this variant explicitly.
+	_reconnect_trigger(_on_checkpoint_body_entered)
 
 func _process(delta: float) -> void:
 	if not rotator or not visible:

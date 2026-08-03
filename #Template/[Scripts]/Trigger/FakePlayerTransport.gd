@@ -31,11 +31,17 @@ func _on_body_entered(body: Node3D) -> void:
 		return
 
 	if tpToPlayer:
-		fakePlayer.global_position = body.global_position + offset
+		_set_fake_player_position(body.global_position + offset)
 	else:
 		match transportType:
 			TransportType.Transform:
 				if target:
-					fakePlayer.global_position = target.global_position
+					_set_fake_player_position(target.global_position)
 			TransportType.Vector3:
-				fakePlayer.global_position = position
+				_set_fake_player_position(position)
+
+func _set_fake_player_position(value: Vector3) -> void:
+	if fakePlayer.has_method("set_world_position"):
+		fakePlayer.set_world_position(value)
+	else:
+		fakePlayer.global_position = value

@@ -10,7 +10,7 @@ func _init() -> void:
 	create_material("back_z", Color(1.0, 0.85, 0.15))
 
 func _has_gizmo(for_node_3d: Node3D) -> bool:
-	return for_node_3d is Player or for_node_3d is FakePlayer
+	return for_node_3d is Player or _find_fake_player(for_node_3d) != null
 
 func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	gizmo.clear()
@@ -26,9 +26,20 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 func _is_direction_enabled(target: Node3D) -> bool:
 	if target is Player:
 		return (target as Player).draw_direction
-	if target is FakePlayer:
-		return (target as FakePlayer).drawDirection
+	var fake_player: FakePlayer = _find_fake_player(target)
+	if fake_player:
+		return fake_player.drawDirection
 	return false
+
+func _find_fake_player(node: Node3D) -> FakePlayer:
+	var direct: FakePlayer = node as FakePlayer
+	if direct:
+		return direct
+	for child: Node in node.get_children():
+		var component: FakePlayer = child as FakePlayer
+		if component:
+			return component
+	return null
 
 func _add_world_direction(gizmo: EditorNode3DGizmo, target: Node3D, world_direction: Vector3, material_name: String) -> void:
 	var local_direction: Vector3 = target.global_basis.inverse() * world_direction.normalized()

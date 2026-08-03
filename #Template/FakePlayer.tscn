@@ -10,6 +10,8 @@ material = ExtResource("2_htf3w")
 
 [node name="FakePlayer" type="CharacterBody3D" unique_id=226051297]
 collision_mask = 2
+
+[node name="FakePlayerComponent" type="Node3D" parent="."]
 script = ExtResource("1_xljse")
 characterMaterial = ExtResource("2_htf3w")
 firstDirection = Vector3(0, 0, 0)
