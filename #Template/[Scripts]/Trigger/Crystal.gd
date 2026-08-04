@@ -1,5 +1,5 @@
 @tool
-extends Area3D
+extends Node3D
 ## Crystal - 水晶收集物
 ## 对齐 Unity Crystal：触碰后隐藏，并在复活时按检查点恢复。
 
@@ -30,13 +30,30 @@ var _checkpoint_index: int = -1
 var _scan_elapsed: float = 0.0
 var _scan_material: ShaderMaterial
 var _lightning_elapsed: float = LIGHTNING_DURATION
+var _content_root: Node3D
+var _trigger_area: Area3D
+var _hexahedron: MeshInstance3D
+var _scan_quad: MeshInstance3D
+var _crystal_thunder: MeshInstance3D
+var _aura: GPUParticles3D
+var _crystal_light: OmniLight3D
 
 func _ready() -> void:
-	_apply_crystal_material($Hexahedron)
-	_scan_material = $ScanQuad.material_override as ShaderMaterial
-	$CrystalThunder.visible = false
-	$Aura.emitting = false
-	$CrystalLight.visible = false
+	_content_root = _resolve_content_root()
+	_trigger_area = get_parent() as Area3D
+	_hexahedron = _content_root.get_node_or_null("Hexahedron") as MeshInstance3D
+	_scan_quad = _content_root.get_node_or_null("ScanQuad") as MeshInstance3D
+	_crystal_thunder = _content_root.get_node_or_null("CrystalThunder") as MeshInstance3D
+	_aura = _content_root.get_node_or_null("Aura") as GPUParticles3D
+	_crystal_light = _content_root.get_node_or_null("CrystalLight") as OmniLight3D
+	if not _hexahedron or not _scan_quad or not _crystal_thunder or not _aura or not _crystal_light:
+		push_error("Crystal.gd: 收集物视觉节点不完整")
+		return
+	_apply_crystal_material(_hexahedron)
+	_scan_material = _scan_quad.material_override as ShaderMaterial
+	_crystal_thunder.visible = false
+	_aura.emitting = false
+	_crystal_light.visible = false
 	_reset_scan()
 	if not Engine.is_editor_hint():
 		LevelManager.add_revive_listener(_on_revive)
@@ -46,33 +63,42 @@ func _exit_tree() -> void:
 		LevelManager.remove_revive_listener(_on_revive)
 
 func _process(delta: float) -> void:
-	if Engine.is_editor_hint():
+	if Engine.is_editor_hint() or not _content_root or not _scan_material:
 		return
-	rotate_y(deg_to_rad(speed) * delta)
+	_content_root.rotate_y(deg_to_rad(speed) * delta)
 	if _scan_elapsed < scan_duration:
 		_scan_elapsed += delta
 		var progress: float = clampf(_scan_elapsed / scan_duration, 0.0, 1.0)
-		_scan_material.set_shader_parameter("scan_origin", global_position)
+		_scan_material.set_shader_parameter("scan_origin", _content_root.global_position)
 		_scan_material.set_shader_parameter("scan_radius", lerpf(0.0, scan_max_radius, progress))
 		var fade_progress: float = inverse_lerp(0.7, 1.0, progress)
 		_scan_material.set_shader_parameter("scan_strength", 1.0 - smoothstep(0.0, 1.0, fade_progress))
 	else:
-		$ScanQuad.visible = false
+		_scan_quad.visible = false
 	if _lightning_elapsed < LIGHTNING_DURATION:
 		_lightning_elapsed += delta
 		var light_progress: float = clampf(_lightning_elapsed / LIGHTNING_DURATION, 0.0, 1.0)
-		$CrystalLight.light_energy = lerpf(COLLECTION_LIGHT_ENERGY, 0.0, light_progress)
+		_crystal_light.light_energy = lerpf(COLLECTION_LIGHT_ENERGY, 0.0, light_progress)
 		if _lightning_elapsed >= LIGHTNING_DURATION:
-			$CrystalThunder.visible = false
-			$Aura.emitting = false
-			$CrystalLight.visible = false
+			_crystal_thunder.visible = false
+			_aura.emitting = false
+			_crystal_light.visible = false
+
+func _resolve_content_root() -> Node3D:
+	var area: Area3D = get_parent() as Area3D
+	if area and area.get_parent() is Node3D:
+		return area.get_parent() as Node3D
+	return self
+
+func trigger(body: Node3D) -> void:
+	_on_body_entered(body)
 
 func _on_body_entered(body: Node3D) -> void:
 	if _collected or body != Player.instance:
 		return
 	_collected = true
 	_checkpoint_index = LevelManager.checkpoint_count
-	set_deferred("monitoring", false)
+	_set_monitoring(false)
 	_set_crystal_mesh_visible(false)
 	if Player.instance and Player.instance.has_signal("on_get_gem"):
 		# Crystal 使用与 Unity 事件 6 对应的收集通知；当前模板没有独立 Crystal 信号。
@@ -82,15 +108,15 @@ func _on_body_entered(body: Node3D) -> void:
 	_spawn_fragments()
 
 func _spawn_fragments() -> void:
-	var fragment_parent: Node = get_parent()
+	var fragment_parent: Node = _content_root.get_parent()
 	var fragment_count: int = randi_range(FRAGMENT_COUNT_MIN, FRAGMENT_COUNT_MAX)
-	var source_mesh: MeshInstance3D = $Hexahedron as MeshInstance3D
+	var source_mesh: MeshInstance3D = _hexahedron
 	var source_material: Material = source_mesh.get_active_material(0)
-	for index in fragment_count:
+	for index: int in fragment_count:
 		var fragment: RigidBody3D = FRAGMENT_SCENE.instantiate() as RigidBody3D
 		fragment.name = "CrystalFragment_%02d" % index
 		fragment_parent.add_child(fragment)
-		fragment.global_position = global_position
+		fragment.global_position = _content_root.global_position
 		var scale_factor: float = randf_range(FRAGMENT_SCALE_MIN, FRAGMENT_SCALE_MAX)
 		var fragment_mesh: MeshInstance3D = fragment.get_node("MeshInstance3D") as MeshInstance3D
 		fragment_mesh.scale *= scale_factor
@@ -119,46 +145,50 @@ func _spawn_fragments() -> void:
 
 func _start_scan() -> void:
 	_scan_elapsed = 0.0
-	_scan_material.set_shader_parameter("scan_origin", global_position)
+	_scan_material.set_shader_parameter("scan_origin", _content_root.global_position)
 	_scan_material.set_shader_parameter("scan_radius", 0.0)
 	_scan_material.set_shader_parameter("scan_strength", 1.0)
-	$ScanQuad.visible = true
+	_scan_quad.visible = true
 
 func _start_lightning() -> void:
 	_lightning_elapsed = 0.0
-	$CrystalThunder.visible = true
-	$Aura.global_transform = Transform3D(Basis.IDENTITY, global_position)
-	$Aura.restart()
-	$Aura.emitting = true
-	$CrystalLight.light_energy = COLLECTION_LIGHT_ENERGY
-	$CrystalLight.visible = true
+	_crystal_thunder.visible = true
+	_aura.global_transform = Transform3D(Basis.IDENTITY, _content_root.global_position)
+	_aura.restart()
+	_aura.emitting = true
+	_crystal_light.light_energy = COLLECTION_LIGHT_ENERGY
+	_crystal_light.visible = true
 
 func _on_revive() -> void:
 	LevelManager.CompareCheckpointIndex(_checkpoint_index, func():
 		_collected = false
 		_set_crystal_mesh_visible(true)
-		set_deferred("monitoring", true)
+		_set_monitoring(true)
 		_reset_scan()
 	)
 
 func _reset_scan() -> void:
 	_scan_elapsed = scan_duration
 	if _scan_material:
-		_scan_material.set_shader_parameter("scan_origin", global_position)
+		_scan_material.set_shader_parameter("scan_origin", _content_root.global_position)
 		_scan_material.set_shader_parameter("scan_radius", -1.0)
 		_scan_material.set_shader_parameter("scan_strength", 0.0)
-	$ScanQuad.visible = false
-	$CrystalThunder.visible = false
-	$Aura.restart()
-	$Aura.emitting = false
-	$CrystalLight.light_energy = 0.0
-	$CrystalLight.visible = false
+	_scan_quad.visible = false
+	_crystal_thunder.visible = false
+	_aura.restart()
+	_aura.emitting = false
+	_crystal_light.light_energy = 0.0
+	_crystal_light.visible = false
 
 func _set_crystal_mesh_visible(value: bool) -> void:
-	$Hexahedron.visible = value
+	_hexahedron.visible = value
+
+func _set_monitoring(value: bool) -> void:
+	if _trigger_area:
+		_trigger_area.set_deferred("monitoring", value)
 
 func _apply_crystal_material(node: Node) -> void:
 	if node is MeshInstance3D:
 		node.material_override = preload("res://#Template/[Materials]/CrystalGradientMaterial.tres")
-	for child in node.get_children():
+	for child: Node in node.get_children():
 		_apply_crystal_material(child)

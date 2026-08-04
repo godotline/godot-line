@@ -45,24 +45,15 @@ var _player_second_direction: Vector3 = Vector3.ZERO
 var _fake_players_data: Array[Dictionary] = []
 
 var _revive_position: Node3D
-var _trigger_area: Area3D
 var _checkpoint_container: Node3D
 
 func _ready() -> void:
 	_checkpoint_container = _resolve_checkpoint_container()
-	_trigger_area = _resolve_trigger_area()
 	_revive_position = _checkpoint_container.get_node_or_null("RevivePosition") as Node3D
 	if _revive_position:
 		_revive_position.visible = false
 
-	if _trigger_area and not (_trigger_area is BaseTrigger):
-		if not _trigger_area.body_entered.is_connected(_on_checkpoint_body_entered):
-			_trigger_area.body_entered.connect(_on_checkpoint_body_entered)
-
 func _resolve_checkpoint_container() -> Node3D:
-	var current_node: Node = self
-	if current_node is Area3D:
-		return current_node as Node3D
 	var parent_area: Area3D = get_parent() as Area3D
 	if parent_area:
 		var container: Node3D = parent_area.get_parent() as Node3D
@@ -70,24 +61,8 @@ func _resolve_checkpoint_container() -> Node3D:
 			return container
 	return self
 
-func _resolve_trigger_area() -> Area3D:
-	var current_node: Node = self
-	if current_node is Area3D:
-		return current_node as Area3D
-	var parent_area: Area3D = get_parent() as Area3D
-	if parent_area:
-		return parent_area
-	return _checkpoint_container.get_node_or_null("Area3D") as Area3D
-
-func _get_trigger_area() -> Area3D:
-	return _trigger_area
-
-func _reconnect_trigger(callback: Callable) -> void:
-	if not _trigger_area:
-		return
-	if _trigger_area.body_entered.is_connected(callback):
-		_trigger_area.body_entered.disconnect(callback)
-	_trigger_area.body_entered.connect(callback)
+func trigger(body: Node3D) -> void:
+	_on_checkpoint_body_entered(body)
 
 func _on_checkpoint_body_entered(body: Node3D) -> void:
 	if used:
@@ -119,7 +94,7 @@ func _enter_trigger(body: Node3D) -> void:
 		_capture_ambient()
 
 	# Capture material colors auto
-	for s in material_colors_auto:
+	for s: SingleColor in material_colors_auto:
 		s.apply()
 
 	# Save player state
@@ -145,7 +120,7 @@ func _enter_trigger(body: Node3D) -> void:
 	# Save FakePlayer states
 	_fake_players_data.clear()
 	var fake_players: Array[Node] = body.get_tree().get_nodes_in_group("fake_players")
-	for fp in fake_players:
+	for fp: Node in fake_players:
 		var fake: FakePlayer = fp as FakePlayer
 		if fake:
 			_fake_players_data.append(fake.get_reset_data())
@@ -259,7 +234,7 @@ func revive() -> void:
 	get_tree().call_group("death_particles", "queue_free")
 
 	# Kill all tweens
-	for tween in get_tree().get_processed_tweens():
+	for tween: Tween in get_tree().get_processed_tweens():
 		tween.kill()
 
 	# Restore camera
@@ -295,14 +270,14 @@ func revive() -> void:
 	main_line.restore_managed_animation_state()
 
 	# Restore material colors
-	for s in material_colors_auto:
+	for s: SingleColor in material_colors_auto:
 		s.apply()
-	for s in material_colors_manual:
+	for s: SingleColor in material_colors_manual:
 		s.apply()
 
 	# Restore FakePlayers
 	var fake_players: Array[Node] = main_line.get_tree().get_nodes_in_group("fake_players")
-	for i in range(min(fake_players.size(), _fake_players_data.size())):
+	for i: int in range(min(fake_players.size(), _fake_players_data.size())):
 		var fake: FakePlayer = fake_players[i] as FakePlayer
 		if fake and _fake_players_data[i].get("playing", false):
 			fake.set_reset_data(_fake_players_data[i])

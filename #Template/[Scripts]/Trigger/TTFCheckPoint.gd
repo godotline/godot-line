@@ -20,19 +20,16 @@ var _visual_time: float = 0.0
 func _ready() -> void:
 	super._ready()
 	if not rotator:
-		rotator = get_node_or_null("Rotator") as Node3D
+		rotator = _checkpoint_container.get_node_or_null("Rotator") as Node3D
 	if not checkpoint_gem and rotator:
-		checkpoint_gem = rotator.get_node_or_null("CheckPoint_Gem") as Node3D
+		checkpoint_gem = rotator.get_node_or_null("CheckPoint_Gem/Area3D/Gem") as Node3D
 	if not checkpoint_text:
-		checkpoint_text = get_node_or_null("CheckPointText") as Node3D
+		checkpoint_text = _checkpoint_container.get_node_or_null("CheckPointText") as Node3D
 	if rotator:
 		_rotator_start_position = rotator.position
 
-	# Make the inherited trigger callback resolve to this variant explicitly.
-	_reconnect_trigger(_on_checkpoint_body_entered)
-
 func _process(delta: float) -> void:
-	if not rotator or not visible:
+	if not rotator or not _checkpoint_container or not _checkpoint_container.visible:
 		return
 	_visual_time += delta
 	rotator.rotate_y(deg_to_rad(rotation_speed) * delta)

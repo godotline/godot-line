@@ -9,6 +9,8 @@
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
+fog_mode = 1
+fog_density = 1.0
 
 [sub_resource type="Animation" id="Animation_wkp8b"]
 length = 0.001

@@ -1,11 +1,12 @@
 [gd_scene format=3 uid="uid://c757j6a6ewnbb"]
 
-[ext_resource type="Script" uid="uid://buc8uoonvmj7x" path="res://#Template/[Scripts]/Trigger/Single/Crystal.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://buc8uoonvmj7x" path="res://#Template/[Scripts]/Trigger/Crystal.gd" id="1_script"]
 [ext_resource type="Material" uid="uid://cxlb1lr6km05b" path="res://#Template/[Materials]/CrystalGradientMaterial.tres" id="2_m6xhc"]
 [ext_resource type="ArrayMesh" uid="uid://biawqpkmgy5mx" path="res://#Template/[Resources]/Models/Hexahedron.obj" id="2_mesh"]
 [ext_resource type="Material" path="res://#Template/[Materials]/CrystalScanFade.tres" id="4_scan"]
 [ext_resource type="Material" path="res://#Template/[Materials]/CrystalLightning.tres" id="5_lightning"]
 [ext_resource type="Texture2D" path="res://#Template/[Resources]/Particle.png" id="6_particle"]
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="7_trigger"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vclu1"]
 
@@ -62,12 +63,17 @@ billboard_keep_scale = true
 material = SubResource("StandardMaterial3D_crystal_aura")
 size = Vector2(1, 1)
 
-[node name="Crystal" type="Area3D" unique_id=521365085]
+[node name="Crystal" type="Node3D" unique_id=521365085]
 transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 0, 0, 0)
+
+[node name="Area3D" parent="." instance=ExtResource("7_trigger")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 collision_layer = 0
+
+[node name="Crystal" type="Node3D" parent="Area3D"]
 script = ExtResource("1_script")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=714946232]
+[node name="CollisionShape3D" parent="Area3D" index="0"]
 shape = SubResource("BoxShape3D_vclu1")
 
 [node name="Hexahedron" type="MeshInstance3D" parent="." unique_id=2091638269]
@@ -104,5 +110,3 @@ light_color = Color(1, 1, 1, 1)
 light_energy = 6.0
 omni_range = 4.0
 shadow_enabled = false
-
-[connection signal="body_entered" from="." to="." method="_on_body_entered"]

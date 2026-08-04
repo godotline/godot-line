@@ -31,6 +31,8 @@
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
+fog_mode = 1
+fog_density = 1.0
 
 [sub_resource type="Animation" id="Animation_wkp8b"]
 length = 0.001
@@ -44,30 +46,30 @@ _data = {
 &"level": SubResource("3")
 }
 
-[sub_resource type="Resource" id="Resource_h2w7o"]
+[sub_resource type="Resource" id="Resource_qvrir"]
 resource_local_to_scene = true
 script = ExtResource("14_2sj2s")
 rotation = Vector3(54, 45, 0)
 fov = 75.0
 
-[sub_resource type="Resource" id="Resource_35o3m"]
+[sub_resource type="Resource" id="Resource_n0hkk"]
 resource_local_to_scene = true
 script = ExtResource("15_qvrir")
 
-[sub_resource type="Resource" id="Resource_ljfsc"]
+[sub_resource type="Resource" id="Resource_w5hru"]
 resource_local_to_scene = true
 script = ExtResource("16_n0hkk")
 fog_color = Color(0.518, 0.553, 0.608, 1)
 start = 10.0
 end = 100.0
 
-[sub_resource type="Resource" id="Resource_xv01r"]
+[sub_resource type="Resource" id="Resource_44jhc"]
 resource_local_to_scene = true
 script = ExtResource("17_w5hru")
 rotation = Vector3(-60.000114, 149.99977, 0)
 shadow_strength = 1.0
 
-[sub_resource type="Resource" id="Resource_x3urn"]
+[sub_resource type="Resource" id="Resource_h2w7o"]
 resource_local_to_scene = true
 script = ExtResource("18_44jhc")
 lighting_type = 0
@@ -195,13 +197,12 @@ targetPlayer = NodePath("../../FakePlayer/FakePlayerComponent")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.353553, -9.536743e-07, 15.392802)
 
 [node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" index="3"]
-AutoRecord = true
 GameTime = 2.371338
-camera_new = SubResource("Resource_h2w7o")
-camera_old = SubResource("Resource_35o3m")
-fog = SubResource("Resource_ljfsc")
-light = SubResource("Resource_xv01r")
-ambient = SubResource("Resource_x3urn")
+camera_new = SubResource("Resource_qvrir")
+camera_old = SubResource("Resource_n0hkk")
+fog = SubResource("Resource_w5hru")
+light = SubResource("Resource_44jhc")
+ambient = SubResource("Resource_h2w7o")
 
 [node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0"]
 render_priority = 0
@@ -238,7 +239,12 @@ end_offset = Vector3(0, 10, 0)
 
 [node name="Gem" parent="Scene_Group/Scene_001" unique_id=149611988 instance=ExtResource("16_s0yhu")]
 transform = Transform3D(1.9999998, 0, 0, 0, 2, 0, 0, 0, 1.9999998, 0.17272472, 0.15720987, 5.287298)
+
+[node name="Gem" parent="Scene_Group/Scene_001/Gem/Area3D" index="3"]
 speed = 1.0
+
+[node name="GemLight" parent="Scene_Group/Scene_001/Gem" index="6" unique_id=1137045706]
+light_energy = 0.0
 
 [node name="Obstacle4" parent="Scene_Group/Scene_001" unique_id=1353085919 instance=ExtResource("15_6gt33")]
 transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 28.07723, 23.695015)
@@ -285,4 +291,5 @@ debug_mode = true
 [editable path="Scene_Group/Scene_001/Crown"]
 [editable path="Scene_Group/Scene_001/FakePlayer"]
 [editable path="Scene_Group/Scene_001/Pyramid"]
+[editable path="Scene_Group/Scene_001/Gem"]
 [editable path="Scene_Group/Scene_001/Crystal"]

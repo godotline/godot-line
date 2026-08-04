@@ -44,13 +44,13 @@ This is the most important architectural detail. **New triggers should use Mode 
 
 | Mode | Base | Collision handled by | Example |
 |------|------|---------------------|---------|
-| **Pure component** (Mode 1) | `extends Node3D` | Parent `BaseTrigger` node | `Jump.gd`, `KillPlayer.gd`, `Speed.gd` |
-| **Self-contained** (Mode 2) | `extends BaseTrigger` (Area3D) | Itself | `PyramidTrigger.gd`, `PropertyModifierTrigger.gd` |
-| **Legacy** (Mode 3) | `extends Area3D` | Itself via `body_entered` | `Gem.gd`, `Checkpoint.gd`, `CameraTrigger.gd` |
+| **Pure component** (Mode 1) | `extends Node` / `Node3D` | Parent `BaseTrigger` node | `Jump.gd`, `Gem.gd`, `Checkpoint.gd` |
+| **Self-contained** (Mode 2) | `extends BaseTrigger` (Area3D) | Itself | `OldCameraShakeTrigger.gd` |
+| **Legacy** (Mode 3) | `extends Area3D` | Itself via `body_entered` | `OldCameraTrigger.gd`, `CameraShakeTrigger.gd`, `GuidanceBox.gd` |
 
 **Mode 1 (pure component):** Implement `trigger(body: Node3D)` method. Place as child of a `BaseTrigger` node (or `trigger.tscn` instance). `BaseTrigger` uses duck typing — it calls `trigger(body)` on any child that has that method. No inheritance required.
 
-**BaseTrigger** (`#Template/[Scripts]/Trigger/Single/BaseTrigger.gd`): `class_name BaseTrigger extends Area3D`. Exports: `one_shot`, `require_playing`, `track_exit`, `debug_mode`. Collects behaviors in `_ready()` via `_collect_behaviors()`.
+**BaseTrigger** (`#Template/[Scripts]/Trigger/BaseTrigger.gd`): `class_name BaseTrigger extends Area3D`. Exports: `one_shot`, `require_playing`, `track_exit`, `debug_mode`. Collects behaviors in `_ready()` via `_collect_behaviors()`.
 
 ## Core Singletons (All Static / RefCounted)
 
@@ -63,7 +63,7 @@ This is the most important architectural detail. **New triggers should use Mode 
 
 - **Default scene:** `[Scenes]/DefaultScene/Default.tscn` (not Sample — Sample exists but Default is the primary)
 - **Player scene:** `#Template/Player.tscn` — instantiated inside level scenes under `BasicOBJ_Group/Player`
-- **Trigger container:** `#Template/trigger.tscn` — reusable BaseTrigger scene, add component children to it
+- **Trigger container:** `#Template/Trigger.tscn` — reusable BaseTrigger scene, add component children to it
 - **Start page:** `#Template/[Resources]/StartPage.tscn` — dynamically instantiated by `Player._ready()`
 - **Debug overlay:** `#Template/[Resources]/DebugOverlay.tscn` — dynamically instantiated by `Player._ready()`, toggle with D key (debug builds only)
 - **Game UI:** `#Template/[Resources]/GAMEUI.tscn` — game over screen with revive/replay
