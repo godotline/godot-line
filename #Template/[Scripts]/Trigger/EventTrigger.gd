@@ -8,6 +8,15 @@ class_name EventTrigger
 ## 等效于 Unity 版的 onTriggerEnter UnityEvent。
 ## 目标回调由 EventTrigger Inspector 插件连接到这个信号。
 signal triggered
+signal target_node_changed
+
+@export_group("事件回调")
+@export var target_node: Node = null:
+	set(value):
+		if target_node == value:
+			return
+		target_node = value
+		target_node_changed.emit()
 
 @export_group("触发模式")
 @export var invoke_on_awake: bool = false

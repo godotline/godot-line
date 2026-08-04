@@ -20,6 +20,8 @@ const FRAGMENT_SHRINK_DURATION: float = 0.5
 const FRAGMENT_TORQUE_SCALE: float = 0.2
 const COLLECTION_LIGHT_DURATION: float = 0.5
 const COLLECTION_LIGHT_ENERGY: float = 6.0
+const MAX_GEM_COUNT: int = 10
+const DEFAULT_ROTATION_SPEED_RADIANS: float = 0.6981317
 const SPRIRT_LIFETIME: float = 7.0
 const SPRIRT_GRAVITY: float = -0.5
 const SPRIRT_VELOCITY_X_MAX: float = 10.0
@@ -27,10 +29,11 @@ const SPRIRT_VELOCITY_Y_MAX: float = 50.0
 const SPRIRT_VELOCITY_Z_MAX: float = 50.0
 const TAIL_RATE_OVER_DISTANCE: float = 30.0
 
-@export var speed: float = 1.0
+@export var speed: float = DEFAULT_ROTATION_SPEED_RADIANS
 @export var fake: bool = false
 
 var _collected: bool = false
+var _counted_in_gem_total: bool = false
 var _checkpoint_index: int = -1
 var _collection_light_elapsed: float = COLLECTION_LIGHT_DURATION
 var _sprirt_active: bool = false
@@ -52,7 +55,9 @@ func _on_body_entered(body: Node) -> void:
 	_collected = true
 	_checkpoint_index = LevelManager.checkpoint_count
 	set_deferred("monitoring", false)
-	LevelManager.gem += 1
+	_counted_in_gem_total = LevelManager.gem < MAX_GEM_COUNT
+	if _counted_in_gem_total:
+		LevelManager.gem += 1
 	if Player.instance and Player.instance.has_signal("on_get_gem"):
 		Player.instance.on_get_gem.emit()
 	var mesh: MeshInstance3D = get_node_or_null("MeshInstance3D") as MeshInstance3D
@@ -121,7 +126,8 @@ func _emit_tail_between(start_position: Vector3, end_position: Vector3) -> void:
 	while distance_along <= segment_length:
 		var emit_position: Vector3 = start_position + direction * distance_along
 		_tail.global_position = emit_position
-		_tail.emit_particle(Transform3D.IDENTITY, Vector3.ZERO, Color.WHITE, Color.WHITE, GPUParticles3D.EMIT_FLAG_POSITION)
+		var particle_transform: Transform3D = Transform3D(Basis.IDENTITY, emit_position)
+		_tail.emit_particle(particle_transform, Vector3.ZERO, Color.WHITE, Color.WHITE, GPUParticles3D.EMIT_FLAG_POSITION)
 		distance_along += spacing
 	_tail_distance_remainder = fmod(_tail_distance_remainder + segment_length, spacing)
 
@@ -164,7 +170,8 @@ func _spawn_fragments() -> void:
 
 func _on_revive() -> void:
 	# 只有在宝石之后存档才恢复（存档点索引 >= 宝石索引）
-	if _checkpoint_index >= LevelManager.checkpoint_count:
+	var should_restore: bool = _checkpoint_index >= LevelManager.checkpoint_count
+	if should_restore:
 		# 宝石在存档点之前，需要恢复
 		_collected = false
 		var mesh: MeshInstance3D = get_node_or_null("MeshInstance3D") as MeshInstance3D
@@ -173,9 +180,11 @@ func _on_revive() -> void:
 		var anim_player: AnimationPlayer = get_node_or_null("AnimationPlayer") as AnimationPlayer
 		if anim_player:
 			anim_player.play("RESET")
-		_reset_collection_effect()
 		set_deferred("monitoring", true)
-		LevelManager.gem -= 1
+		if _counted_in_gem_total:
+			LevelManager.gem = maxi(LevelManager.gem - 1, 0)
+			_counted_in_gem_total = false
+	_reset_collection_effect()
 	LevelManager.remove_revive_listener(_on_revive)
 
 func _process(delta: float) -> void:

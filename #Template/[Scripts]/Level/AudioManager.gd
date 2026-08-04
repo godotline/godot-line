@@ -67,8 +67,8 @@ static var progress: float:
 		var p: AudioStreamPlayer = _get_music_player()
 		if not p or not p.stream:
 			return 0.0
-		if player.level_data and player.level_data.useCustomLevelTime:
-			return p.get_playback_position() / max(player.level_data.levelTotalTime, 0.001)
+		if player.levelData and player.levelData.useCustomLevelTime:
+			return p.get_playback_position() / max(player.levelData.levelTotalTime, 0.001)
 		return p.get_playback_position() / max(p.stream.get_length(), 0.001)
 
 ## 停止音乐

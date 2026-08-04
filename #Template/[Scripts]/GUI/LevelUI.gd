@@ -2,6 +2,7 @@ extends Control
 
 var levelname: String = "level name"
 var _shown: bool = false
+var _replay_requested: bool = false
 
 @onready var normal_page: Control = $NormalPage
 @onready var revive_page: Control = $RevivePage
@@ -14,10 +15,10 @@ var _shown: bool = false
 @onready var revive_fill: TextureRect = $RevivePage/ProgressFrame/Fill
 
 func _ready() -> void:
-	if Player.instance and Player.instance.level_data:
-		levelname = Player.instance.level_data.levelTitle
+	if Player.instance and Player.instance.levelData:
+		levelname = Player.instance.levelData.levelTitle
 	else:
-		push_error("LevelUI.gd: Player.instance 或 level_data 为空，无法读取关卡标题")
+		push_error("LevelUI.gd: Player.instance 或 levelData 为空，无法读取关卡标题")
 	visible = false
 	if Player.instance:
 		Player.instance.on_game_end.connect(_show_ui)
@@ -80,15 +81,36 @@ func _on_revive_pressed() -> void:
 		_on_gamereplay_pressed()
 
 func _on_gamereplay_pressed() -> void:
+	if _replay_requested:
+		return
+	_replay_requested = true
 	LevelManager.reset_to_defaults()
+
+	# Wait for a previous scene switch to settle before reading current_scene.
+	await get_tree().process_frame
+	if not is_inside_tree():
+		return
+	var current_scene: Node = get_tree().current_scene
+	if not is_instance_valid(current_scene):
+		_replay_requested = false
+		push_error("LevelUI.gd: 当前场景为空，无法重新加载关卡")
+		return
+
 	var loading_scene: PackedScene = load("res://#Template/[Resources]/LoadingPage.tscn") as PackedScene
 	if loading_scene:
-		var loading_page: Node = loading_scene.instantiate()
-		get_tree().current_scene.add_child(loading_page)
-		var reveal_tween: Tween = loading_page.call("reveal", _get_loading_background_color()) as Tween
-		await reveal_tween.finished
-	if Player.instance:
-		Player.instance.reload()
+		var loading_page: LoadingPage = loading_scene.instantiate() as LoadingPage
+		if loading_page:
+			current_scene.add_child(loading_page)
+			var reveal_tween: Tween = loading_page.reveal(_get_loading_background_color())
+			await reveal_tween.finished
+	if not is_inside_tree():
+		return
+	var player: Player = Player.instance
+	if is_instance_valid(player):
+		player.reload()
+	else:
+		_replay_requested = false
+		push_error("LevelUI.gd: Player.instance 为空，无法重新加载关卡")
 
 func _get_loading_background_color() -> Color:
 	var camera: Camera3D = get_viewport().get_camera_3d()

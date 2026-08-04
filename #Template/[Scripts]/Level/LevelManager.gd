@@ -254,7 +254,7 @@ static func GameOverNormal(complete: bool) -> void:
 		var p: Player = Player.instance
 		var music_player: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
 		if music_player and music_player.stream:
-			var total_sec: float = p.level_data.levelTotalTime if p.level_data and p.level_data.useCustomLevelTime else music_player.stream.get_length()
+			var total_sec: float = p.levelData.levelTotalTime if p.levelData and p.levelData.useCustomLevelTime else music_player.stream.get_length()
 			var current_sec: float = music_player.get_playback_position()
 			percent = int((current_sec / total_sec) * 100) if total_sec > 0 else 0
 

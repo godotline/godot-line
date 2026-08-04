@@ -9,6 +9,6 @@ func trigger(body: Node3D) -> void:
 	var player: Player = body as Player
 	if not player or not light_settings:
 		return
-	var scene_light: DirectionalLight3D = player.get_scene_light()
-	if scene_light:
-		light_settings.apply_tweened(scene_light, duration, trans_type, ease_type)
+	var sceneLight: DirectionalLight3D = player.get_scene_light()
+	if sceneLight:
+		light_settings.apply_tweened(sceneLight, duration, trans_type, ease_type)

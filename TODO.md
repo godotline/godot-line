@@ -48,12 +48,12 @@
 | — | Editor | TrailRenderer (路径高亮) | — | — | Unity `#Template` 脚本、Prefab、Scene 内均无此组件；运行时轨迹由 Player tail / RoadPaver 覆盖 |
 | P2 | Player | C 键输出音乐时间 | ✓ | ✓ | 编辑器模式下 `Player.gd` 输出当前音乐播放时间 |
 | P2 | Player | 事件系统 | ✓ | ✓ | Player.gd 信号含 OnGameAwake, OnPlayerStart, OnChangeDirection, OnLeaveGround, OnTouchGround, OnGameOver, OnGetGem, OnPlayerJump |
-| P1 | Player | noDeath 标志 | ✓ | ✓ | `Player.no_death`，墙碰撞和 `KillPlayer` 均尊重该标志 |
+| P1 | Player | noDeath 标志 | ✓ | ✓ | `Player.noDeath`，墙碰撞和 `KillPlayer` 均尊重该标志 |
 | P1 | Player | Tail 对象池 | ✓ | ✓ | TAIL_POOL_SIZE=256，循环复用 MeshInstance3D |
 | P1 | Player | Henshin 变身系统 | ✓ | ✓ | `Henshin.gd` + Player 可选替代模型、身体/尾线显隐、朝向 Tween |
-| P1 | Player | playedAnimators / playedTimelines | ✓ | ✓ | `played_animators` 保存 AnimationPlayer 播放位置并在检查点复活恢复 |
-| P2 | Player | sceneCamera / sceneLight 引用 | ✓ | ✓ | Player 导出并缓存 `scene_camera` / `scene_light`，保留自动查找回退 |
-| P2 | Player | musicVolume 独立字段 | ✓ | ✓ | `music_volume` 和 `music_delay` 已添加到 Player.gd |
+| P1 | Player | playedAnimators / playedTimelines | ✓ | ✓ | `playedAnimators` 保存 AnimationPlayer 播放位置并在检查点复活恢复 |
+| P2 | Player | sceneCamera / sceneLight 引用 | ✓ | ✓ | Player 导出并缓存 `sceneCamera` / `sceneLight`，保留自动查找回退 |
+| P2 | Player | musicVolume 独立字段 | ✓ | ✓ | `musicVolume` 和 `musicDelay` 已添加到 Player.gd |
 | P2 | Player | Editor 工具 | ✓ | ✓ | `direction_gizmo_plugin.gd` 四向辅助线；场景 Transform 即起点；FPS 由 DebugOverlay 提供 |
 | P3 | Level | PlayerCubes | ✓ | ✓ | 玩家死亡碎块由 `DeathParticle.tscn` 等效，轨迹路面由 RoadPaver 负责 |
 | P3 | Trigger | TTFCheckPoint 系列 | ✓ | ✓ | `TTFCheckPoint.tscn` 与三个对应脚本已移植 |

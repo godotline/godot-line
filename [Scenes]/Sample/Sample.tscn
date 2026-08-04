@@ -12,11 +12,16 @@
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="11_mq52h"]
 [ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/FakePlayerTrigger.gd" id="12_1fvat"]
 [ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="13_hkwba"]
+[ext_resource type="Script" uid="uid://b51jai1eoi3p6" path="res://#Template/[Scripts]/Settings/CameraSettings.gd" id="14_2sj2s"]
 [ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="14_y8kmt"]
 [ext_resource type="PackedScene" uid="uid://car71stqmy3mh" path="res://#Template/Obstacle.tscn" id="15_6gt33"]
 [ext_resource type="PackedScene" uid="uid://dbmrq55p4ik62" path="res://#Template/FakePlayer.tscn" id="15_fmoim"]
+[ext_resource type="Script" uid="uid://dwfmi5egh11fa" path="res://#Template/[Scripts]/Settings/OldCameraSettings.gd" id="15_qvrir"]
+[ext_resource type="Script" uid="uid://bfhukfse7kskq" path="res://#Template/[Scripts]/Settings/FogSettings.gd" id="16_n0hkk"]
 [ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Gem.tscn" id="16_s0yhu"]
 [ext_resource type="Script" uid="uid://dqs5yftnojwpe" path="res://#Template/[Scripts]/Level/DisableInPlayMode.gd" id="17_j2eg4"]
+[ext_resource type="Script" uid="uid://f5lnff32rrn5" path="res://#Template/[Scripts]/Settings/LightSettings.gd" id="17_w5hru"]
+[ext_resource type="Script" uid="uid://6ex7d7l6f7kl" path="res://#Template/[Scripts]/Settings/AmbientSettings.gd" id="18_44jhc"]
 [ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Pyramid.tscn" id="18_emri0"]
 [ext_resource type="PackedScene" uid="uid://c757j6a6ewnbb" path="res://#Template/Crystal.tscn" id="19_6gt33"]
 [ext_resource type="Material" uid="uid://cnxil1uef6kon" path="res://#Template/[Materials]/CrystalScan.tres" id="20_j2eg4"]
@@ -39,15 +44,43 @@ _data = {
 &"level": SubResource("3")
 }
 
+[sub_resource type="Resource" id="Resource_h2w7o"]
+resource_local_to_scene = true
+script = ExtResource("14_2sj2s")
+rotation = Vector3(54, 45, 0)
+fov = 75.0
+
+[sub_resource type="Resource" id="Resource_35o3m"]
+resource_local_to_scene = true
+script = ExtResource("15_qvrir")
+
+[sub_resource type="Resource" id="Resource_ljfsc"]
+resource_local_to_scene = true
+script = ExtResource("16_n0hkk")
+fog_color = Color(0.518, 0.553, 0.608, 1)
+start = 10.0
+end = 100.0
+
+[sub_resource type="Resource" id="Resource_xv01r"]
+resource_local_to_scene = true
+script = ExtResource("17_w5hru")
+rotation = Vector3(-60.000114, 149.99977, 0)
+shadow_strength = 1.0
+
+[sub_resource type="Resource" id="Resource_x3urn"]
+resource_local_to_scene = true
+script = ExtResource("18_44jhc")
+lighting_type = 0
+
 [node name="LevelHolder" type="Node3D" unique_id=542804875]
 
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
-[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 node_paths=PackedStringArray("scene_camera", "scene_light") instance=ExtResource("1_3w2qj")]
+[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 node_paths=PackedStringArray("sceneCamera", "sceneLight") instance=ExtResource("1_3w2qj")]
 animation = NodePath("../AnimationPlayer")
-scene_camera = NodePath("../CameraRoot/Rotator/Scale/Camera3D")
-scene_light = NodePath("../DirectionalLight3D")
-level_data = ExtResource("2_uo2eh")
+sceneCamera = NodePath("../CameraRoot/Rotator/Scale/Camera3D")
+sceneLight = NodePath("../DirectionalLight3D")
+levelData = ExtResource("2_uo2eh")
 
 [node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_sm0oj")]
 
@@ -163,6 +196,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.353553, -9.536743e-07, 15.
 
 [node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" index="3"]
 AutoRecord = true
+GameTime = 2.371338
+camera_new = SubResource("Resource_h2w7o")
+camera_old = SubResource("Resource_35o3m")
+fog = SubResource("Resource_ljfsc")
+light = SubResource("Resource_xv01r")
+ambient = SubResource("Resource_x3urn")
+
+[node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0"]
+render_priority = 0
 
 [node name="Obstacle" parent="Scene_Group/Scene_001" unique_id=359263919 instance=ExtResource("15_6gt33")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 14.330317, 38.845993, 0.5, 32.94414)
@@ -196,6 +238,7 @@ end_offset = Vector3(0, 10, 0)
 
 [node name="Gem" parent="Scene_Group/Scene_001" unique_id=149611988 instance=ExtResource("16_s0yhu")]
 transform = Transform3D(1.9999998, 0, 0, 0, 2, 0, 0, 0, 1.9999998, 0.17272472, 0.15720987, 5.287298)
+speed = 1.0
 
 [node name="Obstacle4" parent="Scene_Group/Scene_001" unique_id=1353085919 instance=ExtResource("15_6gt33")]
 transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 28.07723, 23.695015)
@@ -228,8 +271,13 @@ draw_preview = true
 [node name="Trigger4" parent="Scene_Group/Scene_001" unique_id=712157509 instance=ExtResource("11_mq52h")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 15.605786)
 
-[node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177]
+[node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177 node_paths=PackedStringArray("target_node")]
 script = ExtResource("23_77abe")
+target_node = NodePath("../../Ground2/Node3D2")
+debug_mode = true
+
+[connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
+[connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D2" method="Trigger"]
 
 [editable path="BasicOBJ_Group/CameraRoot"]
 [editable path="Scene_Group/Scene_001/Trigger"]

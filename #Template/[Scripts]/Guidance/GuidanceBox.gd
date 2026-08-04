@@ -59,7 +59,7 @@ func _process(_delta: float) -> void:
 
 	# 触发检测：仅在点击时才检查近距离
 	if LevelManager.Clicked and can_be_triggered and dist_sq <= trigger_distance * trigger_distance:
-		if LevelManager.GameState == LevelManager.GameStatus.Playing and not _player.disallow_input:
+		if LevelManager.GameState == LevelManager.GameStatus.Playing and not _player.disallowInput:
 			_trigger()
 
 func _trigger() -> void:

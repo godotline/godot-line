@@ -3,6 +3,7 @@ extends CharacterBody3D
 class_name Player
 
 static var instance: Player
+static var _scene_reload_in_progress: bool = false
 
 ## ========== 事件信号（GameEvents 系统） ==========
 signal on_game_awake			## 游戏初始化完成
@@ -29,17 +30,17 @@ var current_direction: Vector3:
 	get:
 		return secondDirection if _currentDirection == 1 else firstDirection
 
-@export var fly: bool = false
-@export var noclip: bool = false
+var fly: bool = false
+var noclip: bool = false
 @export var animation: NodePath
-@export var is_turn: bool = false
-@export var is_end: bool = false
-@export var tail_holder: Node3D
-@export var scene_camera: Camera3D
-@export var scene_light: DirectionalLight3D
-@export var no_death: bool = false
-@export var draw_direction: bool = false
-@export var played_animators: Array[AnimationPlayer] = []
+var is_turn: bool = false
+var is_end: bool = false
+var tail_holder: Node3D
+@export var sceneCamera: Camera3D
+@export var sceneLight: DirectionalLight3D
+@export var noDeath: bool = false
+@export var drawDirection: bool = false
+@export var playedAnimators: Array[AnimationPlayer] = []
 
 @onready var mesh: Mesh = $MeshInstance3D.mesh
 @onready var past_translation: Vector3 = position
@@ -59,7 +60,7 @@ var show_line_tail: bool = true
 var show_line_body: bool = true
 var henshin_rotation_time: float = 0.0
 
-@export var level_data: LevelData
+@export var levelData: LevelData
 
 @export var deathParticle: PackedScene
 
@@ -74,15 +75,16 @@ var tailScale: int = 1
 
 var start_transform: Transform3D = transform
 var loading: bool = false
+var _reload_queued: bool = false
 var debug: bool = false
 @export var allowTurn: bool = true
-@export var disallow_input: bool = false
+var disallowInput: bool = false
 
 ## 音画延迟补偿（秒），用户可配置。与 AudioServer.get_output_latency() 独立并存。
-var music_delay: float = 0.0
+var musicDelay: float = 0.0
 
 ## 音量 (0.0~1.0)
-var music_volume: float = 1.0
+var musicVolume: float = 1.0
 
 ## 标记首次启动延迟是否已应用（复活时不重置，对齐 Unity gameStarts）
 var _delay_applied: bool = false
@@ -110,17 +112,17 @@ func _ready() -> void:
 			LevelManager.is_end = false
 			reload()
 		LevelManager.load_checkpoint_to_main_line(self)
-		if not level_data:
-			push_error("Player.gd: level_data 未设置，无法应用速度")
+		if not levelData:
+			push_error("Player.gd: levelData 未设置，无法应用速度")
 		else:
-			speed = level_data.speed
+			speed = levelData.speed
 		rotation_degrees = current_direction
 		_cache_scene_references()
 		_pause_managed_animators()
 		emit_signal("on_game_awake")
 	if is_inside_tree():
-		if level_data:
-			level_data.apply_to(self, get_world_3d().space)
+		if levelData:
+			levelData.apply_to(self, get_world_3d().space)
 
 	var debug_overlay_scene: PackedScene = load("res://#Template/[Resources]/DebugOverlay.tscn") as PackedScene
 	if debug_overlay_scene:
@@ -132,14 +134,14 @@ func _ready() -> void:
 	if start_page_scene and not Engine.is_editor_hint():
 		# 加载持久化设置（对齐 Unity PlayerPrefs）
 		var saved: Dictionary = SetLatency.load_settings()
-		music_delay = saved.delay
-		music_volume = saved.volume
+		musicDelay = saved.delay
+		musicVolume = saved.volume
 		GraphicsQuality.load_settings()
 
 		var page: StartPage = start_page_scene.instantiate()
 		add_child(page)
-		page.set_setting("latency", music_delay)
-		page.set_setting("volume", music_volume)
+		page.set_setting("latency", musicDelay)
+		page.set_setting("volume", musicVolume)
 		page.set_setting("quality", GraphicsQuality.get_quality_label())
 		page.set_setting("antialiasing", GraphicsQuality.get_antialiasing_label())
 		page.shadow_checkbox.button_pressed = GraphicsQuality.shadows_enabled
@@ -149,23 +151,37 @@ func _ready() -> void:
 		page.shadow_toggled.connect(_on_shadow_toggled)
 		page.post_toggled.connect(_on_post_toggled)
 		GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
+	if not Engine.is_editor_hint():
+		call_deferred("_clear_scene_reload_guard")
+
+func _clear_scene_reload_guard() -> void:
+	_scene_reload_in_progress = false
 
 func _on_start_from_startpage() -> void:
 	turn()
 
 func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint() and (is_live or LevelManager.GameState == LevelManager.GameStatus.Moving):
+		# Unity 版在 Update() 中推进水平位移；物理帧只处理垂直运动和碰撞状态。
+		var horizontal_velocity: Vector3 = Vector3(velocity.x, 0.0, velocity.z)
+		velocity.x = 0.0
+		velocity.z = 0.0
 		if not is_on_floor():
 			velocity += get_current_gravity() * delta
 		move_and_slide()
-		if is_live and is_on_wall() and not no_death:
+		velocity.x = horizontal_velocity.x
+		velocity.z = horizontal_velocity.z
+		if is_live and is_on_wall() and not noDeath:
 			die()
 		if fly:
 			$".".position.y = y
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or (not is_live and LevelManager.GameState != LevelManager.GameStatus.Moving):
 		return
+
+	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
+		_move_head(delta)
 
 	var is_on_floor_now: bool = is_on_floor() or fly
 	if is_on_floor_now and not past_is_on_floor_effect:
@@ -194,6 +210,10 @@ func _process(_delta: float) -> void:
 	if hen_shin and is_instance_valid(henshin_object):
 		henshin_object.global_position = global_position + henshin_offset
 
+func _move_head(delta: float) -> void:
+	var forward: Vector3 = basis * Vector3.BACK
+	position += forward * speed * delta
+
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
 		# StartPage 显示时，鼠标点击由 StartPage 的信号处理
@@ -202,7 +222,7 @@ func _input(event: InputEvent) -> void:
 			if page and page.visible:
 				return
 		var canStart: bool = LevelManager.GameState == LevelManager.GameStatus.Waiting and not is_start
-		var canPlay: bool = LevelManager.GameState == LevelManager.GameStatus.Playing and not disallow_input
+		var canPlay: bool = LevelManager.GameState == LevelManager.GameStatus.Playing and not disallowInput
 		# Autoplay blocks gameplay turns, but Unity still accepts the click that starts a revived run.
 		if event.is_action_pressed("turn") and is_live and allowTurn and (canStart or canPlay):
 			turn()
@@ -224,6 +244,10 @@ func _input(event: InputEvent) -> void:
 					print("Music time: %.3f" % $MusicPlayer.get_playback_position())
 
 func reload() -> void:
+	if _reload_queued or _scene_reload_in_progress:
+		return
+	_reload_queued = true
+	_scene_reload_in_progress = true
 	LevelManager.main_line_transform = start_transform
 	LevelManager.reset_camera_checkpoint()
 	LevelManager.player_direction_index = _currentDirection
@@ -231,12 +255,34 @@ func reload() -> void:
 	LevelManager.player_second_direction = secondDirection
 	LevelManager.anim_time = 0.0
 	_clear_tail()
-	tree.reload_current_scene()
+	call_deferred("_reload_current_scene")
+
+func _reload_current_scene() -> void:
+	if not is_inside_tree():
+		_reload_queued = false
+		return
+	var current_scene: Node = tree.current_scene
+	if not is_instance_valid(current_scene):
+		_reload_queued = false
+		_scene_reload_in_progress = false
+		loading = false
+		push_error("Player.gd: 当前场景为空，无法重新加载关卡")
+		return
+	var reload_error: Error = tree.reload_current_scene()
+	if reload_error != OK:
+		_reload_queued = false
+		_scene_reload_in_progress = false
+		loading = false
+		push_error("Player.gd: 重新加载关卡失败，错误码: %s" % reload_error)
 
 func _clear_tail() -> void:
 	line = null
 	past_translation = position
-	tail_holder = _get_or_create_player_tail_holder()
+	var holder: Node3D = _get_or_create_player_tail_holder()
+	if not holder:
+		tail_holder = null
+		return
+	tail_holder = holder
 	for child in tail_holder.get_children():
 		var tail: MeshInstance3D = child as MeshInstance3D
 		if child is RigidBody3D:
@@ -278,6 +324,8 @@ func _get_from_pool() -> MeshInstance3D:
 
 func _get_or_create_player_tail_holder() -> Node3D:
 	var root: Node = tree.current_scene
+	if not is_instance_valid(root):
+		return null
 
 	var holder: Node3D = root.get_node_or_null("PlayerTailHolder") as Node3D
 	if not holder:
@@ -289,6 +337,9 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	return holder
 
 func new_line() -> void:
+	var tail_holder: Node3D = _get_or_create_player_tail_holder()
+	if not tail_holder:
+		return
 	_finish_tail_join(line)
 	_spawn_corner_tail(position, rotation)
 	line = _get_from_pool()
@@ -301,7 +352,6 @@ func new_line() -> void:
 	line.set_surface_override_material(0, material)
 	line.visible = show_line_tail or not hen_shin
 
-	var tail_holder: Node3D = _get_or_create_player_tail_holder()
 	var body: RigidBody3D = _create_tail_body()
 	past_translation = position
 	body.position = position
@@ -345,8 +395,6 @@ func _finish_tail_join(tail: MeshInstance3D) -> void:
 	end.y = past_translation.y
 	var join_length: float = maxf(past_translation.distance_to(end), TAIL_INITIAL_LENGTH)
 	_update_tail_body(tail, (past_translation + end) / 2, join_length)
-
-	_create_corner_fill(position)
 
 func _create_tail_body() -> RigidBody3D:
 	var body: RigidBody3D = _tail_body_pool.pop() as RigidBody3D
@@ -409,51 +457,31 @@ func _update_tail_collision(tail: MeshInstance3D, tail_scale: Vector3) -> void:
 	box.size = mesh_aabb.size * tail_scale.abs()
 	collision.position = tail.position + mesh_aabb.get_center() * tail_scale
 
-func _create_corner_fill(at: Vector3) -> void:
-	var fill: MeshInstance3D = _get_from_pool()
-	fill.name = "CornerFill"
-	fill.mesh = mesh
-	fill.position = at
-	fill.rotation = Vector3.ZERO
-	fill.scale = Vector3.ONE
-	fill.set_surface_override_material(0, material)
-	fill.visible = show_line_tail or not hen_shin
-	_get_or_create_player_tail_holder().add_child(fill)
-
 func _spawn_corner_tail(at_position: Vector3, at_rotation: Vector3) -> void:
-	var body: RigidBody3D = _tail_body_pool.pop() as RigidBody3D
-	if not body:
-		body = RigidBody3D.new()
-		var collision: CollisionShape3D = CollisionShape3D.new()
-		collision.name = "CollisionShape3D"
-		var box: BoxShape3D = BoxShape3D.new()
-		box.margin = TAIL_COLLISION_MARGIN
-		collision.shape = box
-		body.add_child(collision)
+	# 拐角只保留一个可模拟刚体，避免无碰撞网格盖住真正的物理尾。
+	var body: RigidBody3D = _create_tail_body()
 	body.name = "CornerTail"
-	_configure_tail_physics(body)
-	var collision: CollisionShape3D = body.get_node_or_null("CollisionShape3D") as CollisionShape3D
-	if collision and collision.shape is BoxShape3D:
-		var box: BoxShape3D = collision.shape as BoxShape3D
-		box.size = Vector3.ONE
-		collision.position = Vector3.ZERO
 	body.position = at_position
 	body.rotation = at_rotation
 
-	var tail_mesh: MeshInstance3D = MeshInstance3D.new()
+	var tail_mesh: MeshInstance3D = _get_from_pool()
 	tail_mesh.name = "TailMesh"
 	tail_mesh.mesh = mesh
+	tail_mesh.position = Vector3.ZERO
+	tail_mesh.rotation = Vector3.ZERO
+	tail_mesh.scale = Vector3.ONE
 	tail_mesh.set_surface_override_material(0, material)
 	tail_mesh.visible = show_line_tail or not hen_shin
-	body.add_child(tail_mesh)
 
 	var tail_holder: Node3D = _get_or_create_player_tail_holder()
 	tail_holder.add_child(body)
+	body.add_child(tail_mesh)
+	_update_tail_collision(tail_mesh, Vector3.ONE)
 
 func get_current_gravity() -> Vector3:
 	if _has_gravity_override:
 		return _gravity_override
-	return level_data.gravity if level_data else Vector3(0.0, -9.8, 0.0)
+	return levelData.gravity if levelData else Vector3(0.0, -9.8, 0.0)
 
 func set_gravity_override(value: Vector3) -> void:
 	_gravity_override = value
@@ -464,18 +492,18 @@ func clear_gravity_override() -> void:
 	_has_gravity_override = false
 
 func get_scene_camera() -> Camera3D:
-	if not is_instance_valid(scene_camera):
-		scene_camera = get_viewport().get_camera_3d()
-	return scene_camera
+	if not is_instance_valid(sceneCamera):
+		sceneCamera = get_viewport().get_camera_3d()
+	return sceneCamera
 
 func get_scene_light() -> DirectionalLight3D:
-	if not is_instance_valid(scene_light):
-		scene_light = get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
-	if not is_instance_valid(scene_light) and get_tree().current_scene:
+	if not is_instance_valid(sceneLight):
+		sceneLight = get_tree().get_first_node_in_group("scene_light") as DirectionalLight3D
+	if not is_instance_valid(sceneLight) and get_tree().current_scene:
 		var lights: Array[Node] = get_tree().current_scene.find_children("*", "DirectionalLight3D", true, false)
 		if not lights.is_empty():
-			scene_light = lights[0] as DirectionalLight3D
-	return scene_light
+			sceneLight = lights[0] as DirectionalLight3D
+	return sceneLight
 
 func get_scene_environment() -> Environment:
 	var camera: Camera3D = get_scene_camera()
@@ -527,7 +555,7 @@ func _sync_henshin_rotation() -> void:
 
 func capture_managed_animation_state() -> void:
 	_managed_animation_states.clear()
-	for animator: AnimationPlayer in played_animators:
+	for animator: AnimationPlayer in playedAnimators:
 		if animator and not animator.current_animation.is_empty():
 			_managed_animation_states.append({
 				"animator": animator,
@@ -550,12 +578,12 @@ func restore_managed_animation_state() -> void:
 			animator.pause()
 
 func _pause_managed_animators() -> void:
-	for animator: AnimationPlayer in played_animators:
+	for animator: AnimationPlayer in playedAnimators:
 		if animator:
 			animator.pause()
 
 func _resume_managed_animators() -> void:
-	for animator: AnimationPlayer in played_animators:
+	for animator: AnimationPlayer in playedAnimators:
 		if animator and not animator.current_animation.is_empty():
 			animator.play()
 
@@ -601,18 +629,18 @@ func turn() -> void:
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
 			new_line()
-		elif music_delay > 0:
+		elif musicDelay > 0:
 			_delay_applied = true
 			# 正值：线立即移动，音乐延后播放（对齐 Unity delay > 0 分支）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
 			new_line()
-			get_tree().create_timer(music_delay).timeout.connect(_play_music_from_level_data)
-		elif music_delay < 0:
+			get_tree().create_timer(musicDelay).timeout.connect(_play_music_from_level_data)
+		elif musicDelay < 0:
 			_delay_applied = true
 			# 负值：音乐立即播放，线原地不动等待后移动（对齐 Unity delay < 0 分支）
 			_play_music_from_level_data()
-			get_tree().create_timer(-music_delay).timeout.connect(_start_game_after_delay)
+			get_tree().create_timer(-musicDelay).timeout.connect(_start_game_after_delay)
 		else:
 			_delay_applied = true
 			# 零值：音画同步启动（原行为）
@@ -621,23 +649,23 @@ func turn() -> void:
 			new_line()
 			_play_music_from_level_data()
 
-## 从 level_data 启动音乐播放（处理 stream_paused / not playing 两种情况）
+## 从 levelData 启动音乐播放（处理 stream_paused / not playing 两种情况）
 func _play_music_from_level_data() -> void:
-	if not level_data or not level_data.levelAudioClip:
+	if not levelData or not levelData.levelAudioClip:
 		return
 	if $MusicPlayer.stream_paused:
 		$MusicPlayer.stream_paused = false
-		$MusicPlayer.volume_db = linear_to_db(max(music_volume, 0.001))
+		$MusicPlayer.volume_db = linear_to_db(max(musicVolume, 0.001))
 	elif not $MusicPlayer.playing:
-		$MusicPlayer.stream = level_data.levelAudioClip
-		var start_time: float = level_data.get_audio_start_time()
+		$MusicPlayer.stream = levelData.levelAudioClip
+		var start_time: float = levelData.get_audio_start_time()
 		_play_music(start_time)
 
 ## 播放音乐，补偿系统音频延迟（AudioServer）并应用用户音量设置
 ## latency: AudioServer.get_output_latency() — 系统硬件延迟自动补偿
-## music_volume: 用户手动调节的音量
+## musicVolume: 用户手动调节的音量
 func _play_music(start_time: float) -> void:
-	$MusicPlayer.volume_db = linear_to_db(max(music_volume, 0.001))
+	$MusicPlayer.volume_db = linear_to_db(max(musicVolume, 0.001))
 	var latency: float = AudioServer.get_output_latency()
 	if latency > 0.0:
 		var adjusted_time: float = max(start_time - latency, 0.0)
@@ -646,7 +674,7 @@ func _play_music(start_time: float) -> void:
 		$MusicPlayer.play(start_time)
 
 
-## music_delay < 0 时：timer 回调，启动游戏移动（对齐 Unity delay < 0 分支的 yield 之后逻辑）
+## musicDelay < 0 时：timer 回调，启动游戏移动（对齐 Unity delay < 0 分支的 yield 之后逻辑）
 func _start_game_after_delay() -> void:
 	LevelManager.GameState = LevelManager.GameStatus.Playing
 	velocity = to_global(Vector3(0, 0, 1) * speed) - position
@@ -654,7 +682,7 @@ func _start_game_after_delay() -> void:
 	new_line()
 
 func _on_Area_body_entered(_body: Node) -> void:
-	if not is_live or no_death:
+	if not is_live or noDeath:
 		return
 
 	die()
@@ -713,13 +741,13 @@ func _random_rotation() -> Vector3:
 func _on_setting_changed(key: String, value: Variant) -> void:
 	match key:
 		"latency":
-			music_delay = float(value)
-			SetLatency.save_settings(music_delay, music_volume)
+			musicDelay = float(value)
+			SetLatency.save_settings(musicDelay, musicVolume)
 		"volume":
-			music_volume = float(value)
+			musicVolume = float(value)
 			if $MusicPlayer.playing:
-				$MusicPlayer.volume_db = linear_to_db(max(music_volume, 0.001))
-			SetLatency.save_settings(music_delay, music_volume)
+				$MusicPlayer.volume_db = linear_to_db(max(musicVolume, 0.001))
+			SetLatency.save_settings(musicDelay, musicVolume)
 		"quality":
 			var quality_level: int = GraphicsQuality.quality_level_from_value(value)
 			GraphicsQuality.set_level(quality_level)

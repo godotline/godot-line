@@ -9,6 +9,9 @@ func _init() -> void:
 	create_material("forward_z", Color(1.0, 0.2, 0.2))
 	create_material("back_z", Color(1.0, 0.85, 0.15))
 
+func _get_gizmo_name() -> String:
+	return "Player Direction"
+
 func _has_gizmo(for_node_3d: Node3D) -> bool:
 	return for_node_3d is Player or _find_fake_player(for_node_3d) != null
 
@@ -25,7 +28,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 
 func _is_direction_enabled(target: Node3D) -> bool:
 	if target is Player:
-		return (target as Player).draw_direction
+		return (target as Player).drawDirection
 	var fake_player: FakePlayer = _find_fake_player(target)
 	if fake_player:
 		return fake_player.drawDirection

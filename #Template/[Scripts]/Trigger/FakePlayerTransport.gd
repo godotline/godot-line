@@ -1,8 +1,8 @@
 @tool
 class_name FakePlayerTransport
-extends Area3D
+extends Node3D
 
-## 假线传送触发器 — 当玩家进入时传送 FakePlayer（与 Unity FakePlayerTransport.cs 一致）
+## 假线传送组件 — 由父级 BaseTrigger 在玩家进入时调用。
 
 enum TransportType {
 	Transform,
@@ -14,19 +14,10 @@ enum TransportType {
 @export var offset: Vector3 = Vector3.ZERO
 @export var transportType: TransportType = TransportType.Transform
 @export var target: Node3D
-@export var position: Vector3 = Vector3.ZERO
 
-var _connected: bool = false
+@export var transport_position: Vector3 = Vector3.ZERO
 
-func _ready() -> void:
-	if Engine.is_editor_hint():
-		return
-	
-	if not _connected:
-		body_entered.connect(_on_body_entered)
-		_connected = true
-
-func _on_body_entered(body: Node3D) -> void:
+func trigger(body: Node3D) -> void:
 	if not fakePlayer or not body is CharacterBody3D:
 		return
 
@@ -38,7 +29,7 @@ func _on_body_entered(body: Node3D) -> void:
 				if target:
 					_set_fake_player_position(target.global_position)
 			TransportType.Vector3:
-				_set_fake_player_position(position)
+				_set_fake_player_position(transport_position)
 
 func _set_fake_player_position(value: Vector3) -> void:
 	if fakePlayer.has_method("set_world_position"):

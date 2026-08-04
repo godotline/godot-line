@@ -18,4 +18,4 @@ func SetAuto(desired: bool = !_active) -> void:
 		return
 	AutoPlayController.Instance.set_holder(_active)
 	if Player.instance:
-		Player.instance.disallow_input = _active
+		Player.instance.disallowInput = _active
