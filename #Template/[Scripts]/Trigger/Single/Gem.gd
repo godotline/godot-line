@@ -121,7 +121,8 @@ func _emit_tail_between(start_position: Vector3, end_position: Vector3) -> void:
 	while distance_along <= segment_length:
 		var emit_position: Vector3 = start_position + direction * distance_along
 		_tail.global_position = emit_position
-		_tail.emit_particle(Transform3D.IDENTITY, Vector3.ZERO, Color.WHITE, Color.WHITE, GPUParticles3D.EMIT_FLAG_POSITION)
+		var particle_transform: Transform3D = Transform3D(Basis.IDENTITY, emit_position)
+		_tail.emit_particle(particle_transform, Vector3.ZERO, Color.WHITE, Color.WHITE, GPUParticles3D.EMIT_FLAG_POSITION)
 		distance_along += spacing
 	_tail_distance_remainder = fmod(_tail_distance_remainder + segment_length, spacing)
 

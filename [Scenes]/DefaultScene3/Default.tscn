@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://nqvkdhtseqb6"]
+
+[ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_ssf0a"]
+[ext_resource type="Resource" uid="uid://ce4h4lm0gxydq" path="res://[Scenes]/DefaultScene3/Default.tres" id="2_cwhkr"]
+[ext_resource type="PackedScene" uid="uid://bhwb4nds1i261" path="res://#Template/CameraRoot3.tscn" id="3_dnrub"]
+[ext_resource type="Script" uid="uid://dr6kymfjs0usi" path="res://#Template/[Scripts]/Level/RoadPaver.gd" id="3_sy5ms"]
+[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="4_wshga"]
+[ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="8_8w8iv"]
+
+[sub_resource type="Environment" id="Environment_ys6ci"]
+fog_enabled = true
+
+[sub_resource type="Animation" id="Animation_wkp8b"]
+length = 0.001
+
+[sub_resource type="Animation" id="3"]
+length = 130.0
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cm0pq"]
+_data = {
+&"RESET": SubResource("Animation_wkp8b"),
+&"level": SubResource("3")
+}
+
+[node name="LevelHolder" type="Node3D" unique_id=542804875]
+
+[node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
+
+[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("1_ssf0a")]
+animation = NodePath("../AnimationPlayer")
+levelData = ExtResource("2_cwhkr")
+
+[node name="Node3D" type="Node3D" parent="BasicOBJ_Group/Player" unique_id=1968713715]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.6166801, 0)
+script = ExtResource("3_sy5ms")
+base_floor = ExtResource("8_8w8iv")
+
+[node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_dnrub")]
+
+[node name="Camera3D" parent="BasicOBJ_Group/CameraRoot" parent_id_path=PackedInt32Array(1925825702) index="0" unique_id=1985620912]
+environment = SubResource("Environment_ys6ci")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="BasicOBJ_Group" unique_id=560431425]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_cm0pq")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="BasicOBJ_Group/AnimationPlayer" unique_id=1995291670]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="BasicOBJ_Group" unique_id=1791213843]
+transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
+shadow_enabled = true
+
+[node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("4_wshga")]
+
+[node name="Scene_Group" type="Node3D" parent="." unique_id=1042175662]
+
+[node name="Scene_001" type="Node3D" parent="Scene_Group" unique_id=514366687]
+
+[node name="Ground" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("8_8w8iv")]
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -1, 0)
+
+[editable path="BasicOBJ_Group/CameraRoot"]

@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bhwb4nds1i261"]
+
+[ext_resource type="Script" uid="uid://5bdkxgltxehk" path="res://#Template/[Scripts]/CameraScripts/CameraFollower3.gd" id="1_follower3"]
+[ext_resource type="Script" uid="uid://coathw0hbc82a" path="res://#Template/[Scripts]/CameraScripts/CameraShake3.gd" id="2_shake3"]
+
+[node name="CameraRoot" type="Node3D" unique_id=1925825702]
+rotation = Vector3(0.7853982, 0.7853982, 0)
+script = ExtResource("1_follower3")
+player_path = NodePath("../Player")
+camera_path = NodePath("Camera3D")
+add_position = Vector3(0, 0, 0)
+rotation_offset = Vector3(45, 45, 0)
+distance_from_object = 25.0
+follow_speed = 1.2
+following = true
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1985620912]
+transform = Transform3D(-1.0000001, 0, -8.7422784e-08, 0, 1.0000001, 0, 8.7422784e-08, 0, -1.0000001, 0, 0, -25)
+script = ExtResource("2_shake3")

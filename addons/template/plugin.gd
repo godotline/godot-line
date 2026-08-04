@@ -5,6 +5,7 @@ const WELCOME_URL := "https://www.cnblogs.com/mmme/p/-/tutorial"
 const MARKER_PATH := "user://.first_run_welcome_done"
 
 const TEMPLATE_DEFAULT := "res://[Scenes]/DefaultScene/Default.tscn"
+const TEMPLATE_DEFAULT3 := "res://[Scenes]/DefaultScene3/Default.tscn"
 const TEMPLATE_SAMPLE := "res://[Scenes]/Sample/Sample.tscn"
 const LEVELS_ROOT := "res://[Scenes]/"
 const DirectionGizmoPlugin := preload("res://addons/template/direction_gizmo_plugin.gd")
@@ -27,7 +28,7 @@ func _enter_tree() -> void:
 	add_inspector_plugin(_event_trigger_inspector_plugin)
 
 	_menu_button = MenuButton.new()
-	_menu_button.text = "模板 2.3.242"
+	_menu_button.text = "模板 2.3.243"
 	_menu_button.tooltip_text = "Template 相关资源"
 	_menu_button.switch_on_hover = true
 
@@ -132,7 +133,8 @@ func _show_new_level_dialog() -> void:
 	tpl_row.add_child(tpl_lbl)
 	var tpl_opts := OptionButton.new()
 	tpl_opts.add_item("DefaultScene", 0)
-	tpl_opts.add_item("Sample", 1)
+	tpl_opts.add_item("DefaultScene3", 1)
+	tpl_opts.add_item("Sample", 2)
 	tpl_opts.custom_minimum_size = Vector2(250, 0)
 	tpl_row.add_child(tpl_opts)
 
@@ -160,7 +162,14 @@ func _show_new_level_dialog() -> void:
 
 	dialog.confirmed.connect(func():
 		var level_name := name_edit.text.strip_edges()
-		var template_path: String = TEMPLATE_DEFAULT if tpl_opts.selected == 0 else TEMPLATE_SAMPLE
+		var template_path: String
+		match tpl_opts.get_selected_id():
+			0:
+				template_path = TEMPLATE_DEFAULT
+			1:
+				template_path = TEMPLATE_DEFAULT3
+			_:
+				template_path = TEMPLATE_SAMPLE
 		var level_id_text := id_edit.text.strip_edges()
 		var level_id := 1
 		if level_id_text.is_valid_int():
