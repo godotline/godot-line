@@ -14,5 +14,3 @@ func _process(delta: float) -> void:
 		_gem_light.light_energy = lerpf(COLLECTION_LIGHT_ENERGY, 0.0, progress)
 		if _collection_light_elapsed >= COLLECTION_LIGHT_DURATION:
 			_gem_light.visible = false
-	if visible:
-		rotate_y(delta * speed)

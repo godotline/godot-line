@@ -6,9 +6,14 @@ class_name TTFGem
 ## by TTF checkpoints to consume their embedded gem without increasing count.
 
 var _counted_as_gem: bool = false
+const TTF_ROTATION_SPEED_RADIANS: float = 1.0471976
+
+func _ready() -> void:
+	speed = TTF_ROTATION_SPEED_RADIANS
+	super._ready()
 
 func _on_body_entered(body: Node) -> void:
-	if _collected or fake or body != Player.instance:
+	if _collected or body != Player.instance:
 		return
 	pick_up(true)
 

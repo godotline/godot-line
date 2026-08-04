@@ -11,12 +11,15 @@ const LEVELS_ROOT := "res://[Scenes]/"
 const DirectionGizmoPlugin := preload("res://addons/template/direction_gizmo_plugin.gd")
 const PluginStoreDialogClass := preload("res://addons/template/plugin_store_dialog.gd")
 const EventTriggerInspectorPluginClass := preload("res://addons/template/event_trigger_inspector_plugin.gd")
+const CheckpointCaptureRuntimeClass := preload("res://addons/template/checkpoint_capture_runtime.gd")
+const CheckpointCaptureDebuggerPluginClass := preload("res://addons/template/checkpoint_capture_debugger.gd")
 
 var _menu_button: MenuButton
 var _new_level_dialog: ConfirmationDialog
 var _store_dialog: ConfirmationDialog
 var _direction_gizmo_plugin: EditorNode3DGizmoPlugin
 var _event_trigger_inspector_plugin: Object
+var _checkpoint_capture_debugger_plugin: EditorDebuggerPlugin
 
 
 func _enter_tree() -> void:
@@ -26,9 +29,12 @@ func _enter_tree() -> void:
 	add_node_3d_gizmo_plugin(_direction_gizmo_plugin)
 	_event_trigger_inspector_plugin = EventTriggerInspectorPluginClass.new()
 	add_inspector_plugin(_event_trigger_inspector_plugin)
+	_checkpoint_capture_debugger_plugin = CheckpointCaptureDebuggerPluginClass.new()
+	_checkpoint_capture_debugger_plugin.call("setup", Callable(self, "_apply_checkpoint_snapshot"))
+	add_debugger_plugin(_checkpoint_capture_debugger_plugin)
 
 	_menu_button = MenuButton.new()
-	_menu_button.text = "模板 2.3.243"
+	_menu_button.text = "模板 2.3.244"
 	_menu_button.tooltip_text = "Template 相关资源"
 	_menu_button.switch_on_hover = true
 
@@ -43,6 +49,9 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
+	if _checkpoint_capture_debugger_plugin:
+		remove_debugger_plugin(_checkpoint_capture_debugger_plugin)
+		_checkpoint_capture_debugger_plugin = null
 	if _direction_gizmo_plugin:
 		remove_node_3d_gizmo_plugin(_direction_gizmo_plugin)
 		_direction_gizmo_plugin = null
@@ -298,3 +307,51 @@ func _sanitize_name(name: String) -> String:
 func _push_error(msg: String) -> void:
 	push_error("[Template 插件] " + msg)
 	printerr("[Template 插件] " + msg)
+
+
+func _apply_checkpoint_snapshot(snapshot: Dictionary) -> void:
+	var edited_root: Node = EditorInterface.get_edited_scene_root()
+	if not edited_root:
+		return
+	var scene_path: String = str(snapshot.get("scene_path", ""))
+	if edited_root.scene_file_path != scene_path:
+		push_warning("[CheckpointCapture] 当前编辑场景与运行场景不一致，已忽略：%s" % scene_path)
+		return
+	var node_path: NodePath = NodePath(str(snapshot.get("node_path", "")))
+	var checkpoint: Node = edited_root.get_node_or_null(node_path)
+	if not checkpoint or not checkpoint is Checkpoint:
+		push_warning("[CheckpointCapture] 本地场景未找到 Checkpoint：%s" % node_path)
+		return
+
+	var updates: Dictionary = {}
+	var values_value: Variant = snapshot.get("values", {})
+	if values_value is Dictionary:
+		var values: Dictionary = values_value as Dictionary
+		for property_name: StringName in CheckpointCaptureRuntimeClass.VALUE_PROPERTIES:
+			if values.has(property_name):
+				updates[property_name] = values[property_name]
+
+	var settings_value: Variant = snapshot.get("settings", {})
+	if settings_value is Dictionary:
+		var settings: Dictionary = settings_value as Dictionary
+		for property_name: StringName in CheckpointCaptureRuntimeClass.SETTINGS_PROPERTIES:
+			var serialized_value: Variant = settings.get(property_name, null)
+			if not serialized_value is Dictionary:
+				continue
+			var restored: Object = dict_to_inst(serialized_value as Dictionary)
+			var resource: Resource = restored as Resource
+			if resource:
+				resource.resource_local_to_scene = true
+				updates[property_name] = resource
+
+	if updates.is_empty():
+		return
+	var undo_redo: EditorUndoRedoManager = get_undo_redo()
+	undo_redo.create_action("自动复制 Checkpoint 参数")
+	for property_name: StringName in updates:
+		undo_redo.add_do_property(checkpoint, property_name, updates[property_name])
+		undo_redo.add_undo_property(checkpoint, property_name, checkpoint.get(property_name))
+	undo_redo.add_do_method(checkpoint, "notify_property_list_changed")
+	undo_redo.add_undo_method(checkpoint, "notify_property_list_changed")
+	undo_redo.commit_action()
+	print("[CheckpointCapture] 已自动复制：%s" % node_path)

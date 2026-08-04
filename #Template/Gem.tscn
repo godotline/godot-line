@@ -5,7 +5,8 @@
 [ext_resource type="Material" uid="uid://yr2s0ybyebck" path="res://#Template/[Materials]/Diamond.tres" id="3_lsh75"]
 [ext_resource type="Texture2D" path="res://#Template/[Resources]/Particle.png" id="4_particle"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_v601g"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_gem"]
+radius = 0.375
 
 [sub_resource type="Gradient" id="Gradient_gem_sprirt"]
 offsets = PackedFloat32Array(0, 0.5382925, 1)
@@ -143,7 +144,7 @@ collision_layer = 0
 script = ExtResource("2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1645236605]
-shape = SubResource("BoxShape3D_v601g")
+shape = SubResource("SphereShape3D_gem")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=996011055]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)

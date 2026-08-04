@@ -134,6 +134,7 @@ func _enter_trigger(body: Node3D) -> void:
 		if music_player and music_player.playing:
 			GameTime = music_player.get_playback_position()
 		PlayerSpeed = body.speed
+		TemplateCheckpointCapture.capture(self)
 
 	# Save to LevelManager (OldCameraFollower only, new camera stores in camera_new)
 	if UsingOldCameraFollower:

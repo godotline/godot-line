@@ -3,8 +3,8 @@
 [ext_resource type="ArrayMesh" uid="uid://bapgfhj4dq6kj" path="res://#Template/[Resources]/Models/Crown.obj" id="1"]
 [ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Trigger/Single/Crown.gd" id="2"]
 [ext_resource type="Texture2D" uid="uid://dkh4268rrxtoj" path="res://#Template/[Resources]/PCrownT.png" id="3_ctg82"]
-[ext_resource type="Texture2D" uid="uid://bb36l0chn1l3s" path="res://#Template/[Resources]/BlackCrown_UnLight.png" id="5_dklm7"]
-[ext_resource type="Texture2D" uid="uid://c6y2vppvx5060" path="res://#Template/[Resources]/BlackCrown_Light.png" id="6_8wqky"]
+[ext_resource type="Texture2D" uid="uid://bvwwwofsragrp" path="res://#Template/[Resources]/CrownInside.png" id="5_inside"]
+[ext_resource type="Texture2D" uid="uid://ibq6myi7ifde" path="res://#Template/[Resources]/CrownOutline.png" id="6_outline"]
 [ext_resource type="Texture2D" uid="uid://mj12gw3q1d3w" path="res://#Template/[Resources]/FX_CrownCircle.png" id="7_circle"]
 [ext_resource type="Texture2D" uid="uid://c4rc47thiqgln" path="res://#Template/[Resources]/Spirit.png" id="8_spirit"]
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="9_trigger"]
@@ -107,8 +107,6 @@ require_playing = false
 
 [node name="CrownCheckpoint" type="Node3D" parent="Area3D"]
 script = ExtResource("2")
-aura_extra_time = 0.8
-light_texture = ExtResource("6_8wqky")
 
 [node name="Crown" type="MeshInstance3D" parent="." unique_id=1455513811]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
@@ -125,9 +123,17 @@ transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 [node name="RevivePosition" type="MeshInstance3D" parent="." unique_id=1500499588]
 mesh = SubResource("BoxMesh_t50w7")
 
-[node name="CrownSprite" type="Sprite3D" parent="." unique_id=1095474833]
+[node name="CrownSprite" type="Node3D" parent="." unique_id=1095474833]
 transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
-texture = ExtResource("5_dklm7")
+
+[node name="CrownOutline" type="Sprite3D" parent="CrownSprite"]
+texture = ExtResource("6_outline")
+modulate = Color(0, 0, 0, 1)
+render_priority = 1
+
+[node name="CrownInside" type="Sprite3D" parent="CrownSprite"]
+texture = ExtResource("5_inside")
+modulate = Color(1, 0.807843, 0, 0)
 
 [node name="FX_CrownAura" type="GPUParticles3D" parent="." unique_id=268301850]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
