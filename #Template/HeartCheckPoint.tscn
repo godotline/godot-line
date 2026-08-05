@@ -1,7 +1,8 @@
 [gd_scene format=4 uid="uid://dup02jc1bhxfc"]
 
-[ext_resource type="Script" uid="uid://cl7pyxuxgg61g" path="res://#Template/[Scripts]/Trigger/Single/HeartCheckpoint.gd" id="1_oq3w0"]
+[ext_resource type="Script" uid="uid://cl7pyxuxgg61g" path="res://#Template/[Scripts]/Trigger/HeartCheckpoint.gd" id="1_oq3w0"]
 [ext_resource type="Material" uid="uid://ktbkvswrq32a" path="res://#Template/[Materials]/Checkpoint1.tres" id="2_oq3w0"]
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="3_trigger"]
 
 [sub_resource type="BoxShape3D" id="2"]
 
@@ -102,16 +103,23 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_08x2n")
 
-[node name="HeartCheckpoint" type="Area3D" unique_id=1805653336]
+[node name="HeartCheckpoint" type="Node3D" unique_id=1805653336]
+
+[node name="Area3D" parent="." instance=ExtResource("3_trigger")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 collision_layer = 0
+require_playing = false
+
+[node name="HeartCheckpoint" type="Node3D" parent="Area3D" node_paths=PackedStringArray("rotator")]
 script = ExtResource("1_oq3w0")
+rotator = NodePath("../../Rotator")
 AutoRecord = true
 
-[node name="CheckpointTrigger" type="CollisionShape3D" parent="." unique_id=18434010]
+[node name="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
 shape = SubResource("2")
 
-[node name="Marker3D" type="Marker3D" parent="CheckpointTrigger" unique_id=626349944]
+[node name="Marker3D" parent="Area3D" index="1"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1721480882]
@@ -128,5 +136,3 @@ mesh = SubResource("ArrayMesh_yroa6")
 
 [node name="Frame" type="MeshInstance3D" parent="Rotator" unique_id=1876299699]
 mesh = SubResource("ArrayMesh_jlccs")
-
-[connection signal="body_entered" from="." to="." method="_on_Crown_body_entered"]

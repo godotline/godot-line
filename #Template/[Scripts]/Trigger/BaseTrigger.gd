@@ -28,7 +28,7 @@ func _ready() -> void:
 
 func _collect_behaviors() -> void:
 	_behaviors.clear()
-	for child in get_children():
+	for child: Node in get_children():
 		if child.has_method("trigger"):
 			_behaviors.append(child)
 
@@ -48,7 +48,7 @@ func _on_body_entered(body: Node3D) -> void:
 
 	triggered.emit(body)
 
-	for behavior in _behaviors:
+	for behavior: Node in _behaviors:
 		if is_instance_valid(behavior):
 			behavior.trigger(body)
 
@@ -61,7 +61,7 @@ func _on_body_exited(body: Node3D) -> void:
 
 	exited.emit(body)
 
-	for behavior in _behaviors:
+	for behavior: Node in _behaviors:
 		if is_instance_valid(behavior) and behavior.has_method("on_exit"):
 			behavior.on_exit(body)
 

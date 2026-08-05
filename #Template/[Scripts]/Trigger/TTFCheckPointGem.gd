@@ -1,5 +1,5 @@
 @tool
-extends "res://#Template/[Scripts]/Trigger/Single/TTFGem.gd"
+extends "res://#Template/[Scripts]/Trigger/TTFGem.gd"
 class_name TTFCheckPointGem
 
 ## Embedded TTF checkpoint gem. Its parent rotator supplies the idle rotation.

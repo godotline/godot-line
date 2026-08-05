@@ -1,9 +1,10 @@
 [gd_scene format=3 uid="uid://cl2ga7ac0dg54"]
 
 [ext_resource type="ArrayMesh" uid="uid://dug07r8y5fnwl" path="res://#Template/[Resources]/Models/Diamond.obj" id="1"]
-[ext_resource type="Script" uid="uid://bd13q1s154gh4" path="res://#Template/[Scripts]/Trigger/Single/Gem.gd" id="2"]
+[ext_resource type="Script" uid="uid://bd13q1s154gh4" path="res://#Template/[Scripts]/Trigger/Gem.gd" id="2"]
 [ext_resource type="Material" uid="uid://yr2s0ybyebck" path="res://#Template/[Materials]/Diamond.tres" id="3_lsh75"]
 [ext_resource type="Texture2D" path="res://#Template/[Resources]/Particle.png" id="4_particle"]
+[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="5_trigger"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_gem"]
 radius = 0.375
@@ -138,12 +139,17 @@ _data = {
 &"diamond": SubResource("Animation_v601g")
 }
 
-[node name="Gem" type="Area3D" unique_id=149611988]
+[node name="Gem" type="Node3D" unique_id=149611988]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="Area3D" parent="." instance=ExtResource("5_trigger")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 collision_layer = 0
+
+[node name="Gem" type="Node3D" parent="Area3D"]
 script = ExtResource("2")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1645236605]
+[node name="CollisionShape3D" parent="Area3D" index="0"]
 shape = SubResource("SphereShape3D_gem")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=996011055]
@@ -194,5 +200,3 @@ light_color = Color(1, 1, 1, 1)
 light_energy = 6.0
 omni_range = 4.0
 shadow_enabled = false
-
-[connection signal="body_entered" from="." to="." method="_on_body_entered"]

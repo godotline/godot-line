@@ -34,7 +34,8 @@ func _enter_tree() -> void:
 	add_debugger_plugin(_checkpoint_capture_debugger_plugin)
 
 	_menu_button = MenuButton.new()
-	_menu_button.text = "模板 2.3.244"
+	var template_version: String = PluginRegistry.get_template_version()
+	_menu_button.text = "模板 %s" % (template_version if not template_version.is_empty() else "未知版本")
 	_menu_button.tooltip_text = "Template 相关资源"
 	_menu_button.switch_on_hover = true
 
@@ -347,11 +348,13 @@ func _apply_checkpoint_snapshot(snapshot: Dictionary) -> void:
 	if updates.is_empty():
 		return
 	var undo_redo: EditorUndoRedoManager = get_undo_redo()
-	undo_redo.create_action("自动复制 Checkpoint 参数")
+	undo_redo.create_action(
+		"自动复制 Checkpoint 参数",
+		UndoRedo.MERGE_DISABLE,
+		edited_root,
+	)
 	for property_name: StringName in updates:
 		undo_redo.add_do_property(checkpoint, property_name, updates[property_name])
 		undo_redo.add_undo_property(checkpoint, property_name, checkpoint.get(property_name))
-	undo_redo.add_do_method(checkpoint, "notify_property_list_changed")
-	undo_redo.add_undo_method(checkpoint, "notify_property_list_changed")
 	undo_redo.commit_action()
 	print("[CheckpointCapture] 已自动复制：%s" % node_path)
