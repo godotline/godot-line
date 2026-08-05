@@ -5,7 +5,6 @@ repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
 plugin_cfg="addons/template/plugin.cfg"
-plugin_script="addons/template/plugin.gd"
 
 # pre-commit runs before the new commit exists, so use the next reachable
 # commit count for a normal commit. The count is independent of file content.
@@ -18,8 +17,8 @@ fi
 
 version="2.3.${commit_count}"
 
-if [[ ! -f "$plugin_cfg" || ! -f "$plugin_script" ]]; then
-    printf 'pre-commit: required plugin files are missing\n' >&2
+if [[ ! -f "$plugin_cfg" ]]; then
+    printf 'pre-commit: required plugin file is missing\n' >&2
     exit 1
 fi
 
@@ -28,15 +27,9 @@ if ! grep -qE '^version="[^"]*"$' "$plugin_cfg"; then
     exit 1
 fi
 
-if ! grep -qE '^[[:space:]]*_menu_button\.text = "模板 [^"]*"$' "$plugin_script"; then
-    printf 'pre-commit: could not find template menu version in %s\n' "$plugin_script" >&2
-    exit 1
-fi
-
 sed -i -E "s/^version=\"[^\"]*\"$/version=\"${version}\"/" "$plugin_cfg"
-sed -i -E "s/^([[:space:]]*_menu_button\.text = \"模板 )[^\"]*(\")$/\1${version}\2/" "$plugin_script"
 
 # The generated version must be part of the commit being created.
-git add -- "$plugin_cfg" "$plugin_script"
+git add -- "$plugin_cfg"
 
 printf 'pre-commit: template version set to %s\n' "$version"

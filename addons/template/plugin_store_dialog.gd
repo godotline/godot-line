@@ -9,6 +9,7 @@ const PluginDownloaderClass := preload("res://addons/template/plugin_downloader.
 var _plugin_list: ItemList
 var _source_edit: LineEdit
 var _refresh_button: Button
+var _download_source_select: OptionButton
 var _name_label: Label
 var _info_label: RichTextLabel
 var _action_button: Button
@@ -20,6 +21,7 @@ var _downloader: PluginDownloader
 var _is_busy: bool = false
 var _manifest_warning: String = ""
 var _is_refreshing: bool = false
+var _template_version: String = ""
 
 
 ## 清理上一次编辑器会话遗留的隔离文件。user:// 不会被 EditorFileSystem 扫描。
@@ -125,6 +127,21 @@ func _build_ui() -> void:
 	_refresh_button.text = "刷新"
 	_refresh_button.pressed.connect(_on_refresh_pressed)
 	source_row.add_child(_refresh_button)
+	var contribute_button: Button = Button.new()
+	contribute_button.text = "贡献插件"
+	contribute_button.tooltip_text = "打开插件注册表的 Pull Requests 页面"
+	contribute_button.pressed.connect(_on_contribute_pressed)
+	source_row.add_child(contribute_button)
+
+	# 下载源
+	var download_row: HBoxContainer = HBoxContainer.new()
+	detail_vbox.add_child(download_row)
+	var download_label: Label = Label.new()
+	download_label.text = "下载源："
+	download_row.add_child(download_label)
+	_download_source_select = OptionButton.new()
+	_download_source_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	download_row.add_child(_download_source_select)
 
 	# 插件名称
 	_name_label = Label.new()
@@ -172,19 +189,26 @@ func _refresh_plugin_list() -> void:
 	_source_edit.editable = false
 	_plugin_list.clear()
 	_status_label.text = "正在读取远程插件清单..."
+	_template_version = PluginRegistry.get_template_version()
 	_all_plugins = await PluginRegistry.fetch_plugins(self, _source_edit.text)
 	_manifest_warning = PluginRegistry.last_load_warning
 	for i in range(_all_plugins.size()):
 		var entry: PluginEntry = _all_plugins[i]
 		var status: String = _get_install_status(entry)
 		var version_warning: String = entry.get_version_warning()
+		var template_warning: String = entry.get_template_version_warning(_template_version)
+		var download_warning: String = entry.get_download_warning()
 		if not version_warning.is_empty():
 			status += "，版本更新"
+		if not template_warning.is_empty():
+			status += "，模板版本不足"
+		if not download_warning.is_empty() and not _is_installed(entry):
+			status += "，不可安装"
 		var display_text: String = "%s  [%s]" % [entry.display_name, status]
 		_plugin_list.add_item(display_text)
 		if _is_installed(entry):
 			_plugin_list.set_item_custom_fg_color(i, Color(0.4, 0.8, 0.4))
-		if not version_warning.is_empty():
+		if not version_warning.is_empty() or not template_warning.is_empty() or (not download_warning.is_empty() and not _is_installed(entry)):
 			_plugin_list.set_item_custom_fg_color(i, Color(0.95, 0.7, 0.25))
 	if _plugin_list.item_count > 0:
 		_plugin_list.select(0)
@@ -202,6 +226,11 @@ func _on_source_submitted(_source_url: String) -> void:
 	await _refresh_plugin_list()
 
 
+func _on_contribute_pressed() -> void:
+	OS.shell_open(PluginRegistry.CONTRIBUTION_URL)
+	_status_label.text = "已打开插件注册表 Pull Requests 页面。"
+
+
 func _on_plugin_selected(index: int) -> void:
 	if index < 0 or index >= _all_plugins.size():
 		return
@@ -209,9 +238,13 @@ func _on_plugin_selected(index: int) -> void:
 
 	if is_instance_valid(_name_label):
 		_name_label.text = entry.display_name
+	_populate_download_sources(entry)
 
 	var status: String = _get_install_status(entry)
 	var desc: String = "[b]版本：[/b] %s\n" % entry.version
+	desc += "[b]当前 Template 版本：[/b] %s\n" % (_template_version if not _template_version.is_empty() else "未知")
+	if not entry.min_template_version.is_empty():
+		desc += "[b]最低 Template 版本：[/b] %s\n" % entry.min_template_version
 	var installed_version: String = entry.get_installed_version()
 	if not installed_version.is_empty():
 		desc += "[b]已安装版本：[/b] %s\n" % installed_version
@@ -222,6 +255,12 @@ func _on_plugin_selected(index: int) -> void:
 	var version_warning: String = entry.get_version_warning()
 	if not version_warning.is_empty():
 		desc += "\n\n[color=#e0a040][b]版本状态：[/b] %s[/color]" % version_warning
+	var template_warning: String = entry.get_template_version_warning(_template_version)
+	if not template_warning.is_empty():
+		desc += "\n\n[color=#e0a040][b]模板版本警告：[/b] %s[/color]" % template_warning
+	var download_warning: String = entry.get_download_warning()
+	if not download_warning.is_empty() and not _is_installed(entry):
+		desc += "\n\n[color=#e05050][b]安装不可用：[/b] %s[/color]" % download_warning
 	if not _manifest_warning.is_empty():
 		desc += "\n\n[color=#e0a040][b]清单警告：[/b] %s[/color]" % _manifest_warning
 	_info_label.text = desc
@@ -241,8 +280,13 @@ func _update_action_button(entry: PluginEntry) -> void:
 		_action_button.text = "一键卸载"
 		_action_button.disabled = false
 	else:
-		_action_button.text = "一键安装"
-		_action_button.disabled = false
+		var download_warning: String = entry.get_download_warning()
+		if not download_warning.is_empty():
+			_action_button.text = "无法安装"
+			_action_button.disabled = true
+		else:
+			_action_button.text = "一键安装"
+			_action_button.disabled = false
 
 
 func _on_action_pressed() -> void:
@@ -260,7 +304,60 @@ func _on_action_pressed() -> void:
 	if installed:
 		_confirm_uninstall(entry)
 	else:
-		_start_install(entry)
+		var download_warning: String = entry.get_download_warning()
+		if not download_warning.is_empty():
+			_status_label.text = "安装不可用：" + download_warning
+			return
+		var download_url: String = _get_selected_download_url(entry)
+		if download_url.is_empty():
+			_status_label.text = "安装不可用：请选择有效的下载源"
+			return
+		var template_warning: String = entry.get_template_version_warning(_template_version)
+		if not template_warning.is_empty():
+			_confirm_install(entry, download_url, template_warning)
+		else:
+			_start_install(entry, download_url)
+
+
+func _populate_download_sources(entry: PluginEntry) -> void:
+	_download_source_select.clear()
+	var sources: Array[Dictionary] = entry.get_download_sources()
+	for i: int in range(sources.size()):
+		var source: Dictionary = sources[i]
+		_download_source_select.add_item(str(source.get("name", "下载源 %d" % (i + 1))), i)
+	if sources.is_empty():
+		_download_source_select.add_item("无可用下载源", 0)
+		_download_source_select.set_item_disabled(0, true)
+		_download_source_select.disabled = true
+	else:
+		_download_source_select.select(0)
+		_download_source_select.disabled = false
+
+
+func _get_selected_download_url(entry: PluginEntry) -> String:
+	var sources: Array[Dictionary] = entry.get_download_sources()
+	var source_id: int = _download_source_select.get_selected_id()
+	if source_id < 0 or source_id >= sources.size():
+		return ""
+	return str(sources[source_id].get("url", "")).strip_edges()
+
+
+func _confirm_install(entry: PluginEntry, download_url: String, template_warning: String) -> void:
+	var dialog: ConfirmationDialog = ConfirmationDialog.new()
+	dialog.title = "模板版本警告"
+	dialog.dialog_text = "插件 %s 需要更高版本的 Template。\n\n%s\n\n仍要继续下载并安装吗？" % [entry.display_name, template_warning]
+	dialog.ok_button_text = "继续安装"
+	dialog.cancel_button_text = "取消"
+	add_child(dialog)
+	dialog.confirmed.connect(func():
+		dialog.queue_free()
+		_start_install(entry, download_url)
+	)
+	dialog.canceled.connect(func():
+		dialog.queue_free()
+		_status_label.text = "已取消安装。"
+	)
+	dialog.popup_centered(Vector2i(460, 220))
 
 
 func _confirm_uninstall(entry: PluginEntry) -> void:
@@ -283,19 +380,19 @@ func _confirm_uninstall(entry: PluginEntry) -> void:
 
 # ===================== 安装 =====================
 
-func _start_install(entry: PluginEntry) -> void:
+func _start_install(entry: PluginEntry, download_url: String) -> void:
 	_is_busy = true
 	_action_button.disabled = true
 	_action_button.text = "正在安装..."
 	_progress_bar.visible = true
 	_progress_bar.value = 0
-	_status_label.text = "正在获取仓库信息..."
+	_status_label.text = "正在下载选定的 ZIP..."
 
 	_downloader = PluginDownloaderClass.new()
 	_downloader.download_progress.connect(_on_download_progress)
 	_downloader.download_complete.connect(_on_download_complete)
 
-	await _downloader.download_plugin(entry, self)
+	await _downloader.download_plugin(entry, self, download_url)
 
 
 func _on_download_progress(file_index: int, total_files: int, current_file: String) -> void:
@@ -533,14 +630,20 @@ func _refresh_plugin_item(entry: PluginEntry) -> void:
 
 	var status: String = _get_install_status(entry)
 	var version_warning: String = entry.get_version_warning()
+	var template_warning: String = entry.get_template_version_warning(_template_version)
+	var download_warning: String = entry.get_download_warning()
 	if not version_warning.is_empty():
 		status += "，版本更新"
+	if not template_warning.is_empty():
+		status += "，模板版本不足"
+	if not download_warning.is_empty() and not _is_installed(entry):
+		status += "，不可安装"
 	var display_text: String = "%s  [%s]" % [entry.display_name, status]
 	_plugin_list.set_item_text(item_index, display_text)
 	_plugin_list.set_item_custom_fg_color(item_index, Color(1, 1, 1))
 	if _is_installed(entry):
 		_plugin_list.set_item_custom_fg_color(item_index, Color(0.4, 0.8, 0.4))
-	if not version_warning.is_empty():
+	if not version_warning.is_empty() or not template_warning.is_empty() or (not download_warning.is_empty() and not _is_installed(entry)):
 		_plugin_list.set_item_custom_fg_color(item_index, Color(0.95, 0.7, 0.25))
 	_plugin_list.select(item_index)
 	_on_plugin_selected(item_index)

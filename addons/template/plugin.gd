@@ -34,7 +34,8 @@ func _enter_tree() -> void:
 	add_debugger_plugin(_checkpoint_capture_debugger_plugin)
 
 	_menu_button = MenuButton.new()
-	_menu_button.text = "模板 2.3.246"
+	var template_version: String = PluginRegistry.get_template_version()
+	_menu_button.text = "模板 %s" % (template_version if not template_version.is_empty() else "未知版本")
 	_menu_button.tooltip_text = "Template 相关资源"
 	_menu_button.switch_on_hover = true
 
