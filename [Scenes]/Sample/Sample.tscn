@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_3w2qj"]
 [ext_resource type="Resource" uid="uid://dp4v3rvs0vl3w" path="res://[Scenes]/Sample/Sample.tres" id="2_uo2eh"]
 [ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_sm0oj"]
-[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="4_u1rsu"]
+[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/LevelUI.tscn" id="4_u1rsu"]
 [ext_resource type="Script" uid="uid://cq7y41sswinln" path="res://#Template/[Scripts]/Guidance/GuidanceController.gd" id="6_etfjh"]
 [ext_resource type="Script" uid="uid://cgl1gfqlue3jc" path="res://#Template/[Scripts]/Auto/AutoPlayController.gd" id="7_fmbnj"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="8_lthrg"]
@@ -99,7 +99,7 @@ libraries/ = SubResource("AnimationLibrary_cm0pq")
 transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
 shadow_enabled = true
 
-[node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("4_u1rsu")]
+[node name="LevelUI" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("4_u1rsu")]
 
 [node name="guide" type="Node3D" parent="BasicOBJ_Group" unique_id=909657525 node_paths=PackedStringArray("box_holder")]
 script = ExtResource("6_etfjh")
@@ -230,6 +230,7 @@ transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 7.882288, 0, 61.789726)
 [node name="Obstacle3" parent="Scene_Group/Scene_001" unique_id=460537276 instance=ExtResource("15_6gt33")]
 transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 18.532341, 4.0459642, 9.804915)
 script = ExtResource("17_j2eg4")
+disableInPlayMode = false
 
 [node name="localpos" type="Node3D" parent="Scene_Group/Scene_001/Obstacle3" unique_id=412952206]
 script = ExtResource("9_0v7qw")

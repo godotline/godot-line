@@ -71,7 +71,7 @@ Button/styles/hover = SubResource("Style_frame_hover")
 Button/styles/pressed = SubResource("Style_frame_hover")
 Button/styles/focus = SubResource("Style_transparent")
 
-[node name="gameui" type="Control"]
+[node name="LevelUI" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

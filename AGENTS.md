@@ -66,7 +66,7 @@ This is the most important architectural detail. **New triggers should use Mode 
 - **Trigger container:** `#Template/Trigger.tscn` — reusable BaseTrigger scene, add component children to it
 - **Start page:** `#Template/[Resources]/StartPage.tscn` — dynamically instantiated by `Player._ready()`
 - **Debug overlay:** `#Template/[Resources]/DebugOverlay.tscn` — dynamically instantiated by `Player._ready()`, toggle with D key (debug builds only)
-- **Game UI:** `#Template/[Resources]/GAMEUI.tscn` — game over screen with revive/replay
+- **Game UI:** `#Template/[Resources]/LevelUI.tscn` — game over screen with revive/replay
 
 ## Input Controls
 

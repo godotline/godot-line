@@ -4,7 +4,7 @@
 [ext_resource type="Resource" uid="uid://ce4h4lm0gxydq" path="res://[Scenes]/DefaultScene3/Default.tres" id="2_cwhkr"]
 [ext_resource type="PackedScene" uid="uid://bhwb4nds1i261" path="res://#Template/CameraRoot3.tscn" id="3_dnrub"]
 [ext_resource type="Script" uid="uid://dr6kymfjs0usi" path="res://#Template/[Scripts]/Level/RoadPaver.gd" id="3_sy5ms"]
-[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/GAMEUI.tscn" id="4_wshga"]
+[ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/LevelUI.tscn" id="4_wshga"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="8_8w8iv"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
@@ -50,7 +50,7 @@ libraries/ = SubResource("AnimationLibrary_cm0pq")
 transform = Transform3D(-0.86602354, -0.43301606, 0.25000072, 0, 0.49999818, 0.86602646, -0.5000033, 0.7499993, -0.4330102, 0, -0.33333334, 0)
 shadow_enabled = true
 
-[node name="gameui" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("4_wshga")]
+[node name="LevelUI" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("4_wshga")]
 
 [node name="Scene_Group" type="Node3D" parent="." unique_id=1042175662]
 
