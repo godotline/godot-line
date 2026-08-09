@@ -237,6 +237,7 @@ func get_reset_data() -> Dictionary:
 	}
 
 func set_reset_data(data: Dictionary) -> void:
+	playing = bool(data.get("playing", false))
 	var saved_speed: Variant = data.get("speed", 12.0)
 	if saved_speed is float or saved_speed is int:
 		speed = float(saved_speed)

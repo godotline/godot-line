@@ -11,21 +11,26 @@ var _revive_states: Array[Dictionary] = []
 var _checkpoint_index: int = 0
 
 func _ready() -> void:
+	add_to_group("checkpoint_actives")
 	if active_on_awake:
 		_apply_all_actives()
-	
+
 	LevelManager.add_revive_listener(_on_revive)
 
 func trigger(_body: Node3D) -> void:
 	if active_on_awake:
 		return
-	
-	_checkpoint_index = LevelManager.checkpoint_count
-	_save_revive_states()
+	capture_checkpoint_state()
 	_apply_all_actives()
 
+func capture_checkpoint_state() -> void:
+	if active_on_awake:
+		return
+	_checkpoint_index = LevelManager.checkpoint_count
+	_save_revive_states()
+
 func _apply_all_actives() -> void:
-	for active_config in actives:
+	for active_config: SingleActive in actives:
 		if active_config and active_config.target:
 			var target: Node = get_node_or_null(active_config.target)
 			if target:
@@ -36,7 +41,7 @@ func _apply_all_actives() -> void:
 
 func _save_revive_states() -> void:
 	_revive_states.clear()
-	for active_config in actives:
+	for active_config: SingleActive in actives:
 		if active_config and active_config.target:
 			var target: Node = get_node_or_null(active_config.target)
 			if target:
@@ -58,7 +63,7 @@ func _on_revive() -> void:
 	LevelManager.CompareCheckpointIndex(_checkpoint_index, func():
 		if not is_instance_valid(self):
 			return
-		for state in _revive_states:
+		for state: Dictionary in _revive_states:
 			if not state.get("dont_revive", false):
 				var target_path: NodePath = state.get("target", NodePath(""))
 				var target: Node = get_node_or_null(target_path)
