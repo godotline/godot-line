@@ -587,6 +587,12 @@ func _resume_managed_animators() -> void:
 		if animator and not animator.current_animation.is_empty():
 			animator.play()
 
+func _resume_fake_players() -> void:
+	for fake_node: Node in get_tree().get_nodes_in_group("fake_players"):
+		var fake: FakePlayer = fake_node as FakePlayer
+		if fake and fake.playing:
+			fake.state = FakePlayer.State.Moving
+
 func _play_land_effect() -> void:
 	if is_instance_valid(land_effect):
 		land_effect.restart()
@@ -627,12 +633,14 @@ func turn() -> void:
 		if _delay_applied:
 			_play_music_from_level_data()
 			LevelManager.GameState = LevelManager.GameStatus.Playing
+			_resume_fake_players()
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
 			new_line()
 		elif musicDelay > 0:
 			_delay_applied = true
 			# 正值：线立即移动，音乐延后播放（对齐 Unity delay > 0 分支）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
+			_resume_fake_players()
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
 			new_line()
 			get_tree().create_timer(musicDelay).timeout.connect(_play_music_from_level_data)
@@ -645,6 +653,7 @@ func turn() -> void:
 			_delay_applied = true
 			# 零值：音画同步启动（原行为）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
+			_resume_fake_players()
 			velocity = to_global(Vector3(0, 0, 1) * speed) - position
 			new_line()
 			_play_music_from_level_data()
@@ -677,6 +686,7 @@ func _play_music(start_time: float) -> void:
 ## musicDelay < 0 时：timer 回调，启动游戏移动（对齐 Unity delay < 0 分支的 yield 之后逻辑）
 func _start_game_after_delay() -> void:
 	LevelManager.GameState = LevelManager.GameStatus.Playing
+	_resume_fake_players()
 	velocity = to_global(Vector3(0, 0, 1) * speed) - position
 
 	new_line()
