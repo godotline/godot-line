@@ -29,6 +29,7 @@ func trigger(body: Node3D) -> void:
 		if no_revive:
 			LevelManager.checkpoint_count = 0
 			LevelManager.crown = 0
+			LevelManager.current_checkpoint = null
 		_play_death_sound()
 		match reason:
 			DieReason.Hit:
