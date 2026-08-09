@@ -9,6 +9,39 @@ extends Resource
 @export var has_emission: bool = false
 @export var intensity: float = 0.0
 
+func capture_state() -> Dictionary:
+	var state: Dictionary = {}
+	var base_material: BaseMaterial3D = material as BaseMaterial3D
+	if not base_material:
+		return state
+	state["setting"] = self
+	state["material"] = base_material
+	state["albedo_color"] = base_material.albedo_color
+	state["emission_enabled"] = base_material.emission_enabled
+	state["emission"] = base_material.emission
+	state["emission_energy_multiplier"] = base_material.emission_energy_multiplier
+	return state
+
+func restore_state(state: Dictionary) -> void:
+	var base_material: BaseMaterial3D = state.get("material") as BaseMaterial3D
+	if not base_material:
+		return
+
+	var albedo_color: Variant = state.get("albedo_color", base_material.albedo_color)
+	if albedo_color is Color:
+		base_material.albedo_color = albedo_color
+	var emission_enabled: Variant = state.get("emission_enabled", base_material.emission_enabled)
+	if emission_enabled is bool:
+		base_material.emission_enabled = emission_enabled
+	var emission: Variant = state.get("emission", base_material.emission)
+	if emission is Color:
+		base_material.emission = emission
+	var emission_energy: Variant = state.get(
+		"emission_energy_multiplier", base_material.emission_energy_multiplier
+	)
+	if emission_energy is float or emission_energy is int:
+		base_material.emission_energy_multiplier = float(emission_energy)
+
 func apply() -> void:
 	if material:
 		material.albedo_color = color

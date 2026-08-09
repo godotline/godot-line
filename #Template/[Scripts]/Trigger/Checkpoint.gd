@@ -32,6 +32,8 @@ enum Direction { First, Second }
 @export_group("Colors")
 @export var material_colors_auto: Array[SingleColor] = []
 @export var material_colors_manual: Array[SingleColor] = []
+@export var image_colors_auto: Array[SingleImageColor] = []
+@export var image_colors_manual: Array[SingleImageColor] = []
 
 signal on_revive
 
@@ -40,9 +42,12 @@ var used_revive: bool = false
 
 var _track_progress: float = 0.0
 var _scene_gravity: Vector3 = Vector3.ZERO
+var _gravity_captured: bool = false
 var _player_first_direction: Vector3 = Vector3.ZERO
 var _player_second_direction: Vector3 = Vector3.ZERO
 var _fake_players_data: Array[Dictionary] = []
+var _material_colors_auto_states: Array[Dictionary] = []
+var _image_colors_auto_states: Array[Dictionary] = []
 
 var _revive_position: Node3D
 var _checkpoint_container: Node3D
@@ -76,6 +81,8 @@ func _enter_trigger(body: Node3D) -> void:
 	used = true
 	LevelManager.current_checkpoint = self
 	LevelManager.checkpoint_count += 1
+	_capture_set_actives()
+	_capture_play_animators()
 
 	# Capture camera settings
 	if not manual_camera:
@@ -93,22 +100,22 @@ func _enter_trigger(body: Node3D) -> void:
 	if not manual_ambient:
 		_capture_ambient()
 
-	# Capture material colors auto
-	for s: SingleColor in material_colors_auto:
-		s.apply()
+	# Capture the values at the checkpoint. Manual settings are applied only on revive.
+	_capture_material_colors()
+	_capture_image_colors()
 
 	# Save player state
 	_player_first_direction = body.firstDirection
 	_player_second_direction = body.secondDirection
 	body.capture_managed_animation_state()
 	_track_progress = body.animation_node.get_current_animation_position() if body.animation_node and body.animation_node.is_playing() else 0.0
-	_scene_gravity = ProjectSettings.get_setting("physics/3d/default_gravity_vector") * ProjectSettings.get_setting("physics/3d/default_gravity")
+	_scene_gravity = body.get_current_gravity()
+	_gravity_captured = true
 
 	if AutoRecord:
-		var music_player: AudioStreamPlayer = body.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-		if music_player and music_player.playing:
-			GameTime = music_player.get_playback_position()
-		PlayerSpeed = body.speed
+		GameTime = AudioManager.time
+	PlayerSpeed = body.speed
+	if AutoRecord:
 		TemplateCheckpointCapture.capture(self)
 
 	# Save to LevelManager (OldCameraFollower only, new camera stores in camera_new)
@@ -116,6 +123,8 @@ func _enter_trigger(body: Node3D) -> void:
 		LevelManager.save_checkpoint(body, OldCameraFollower.instance, _revive_position)
 	else:
 		LevelManager.save_checkpoint(body, null, _revive_position)
+	LevelManager.music_checkpoint_time = GameTime
+	LevelManager.gravity = _scene_gravity
 
 	# Save FakePlayer states
 	_fake_players_data.clear()
@@ -124,6 +133,45 @@ func _enter_trigger(body: Node3D) -> void:
 		var fake: FakePlayer = fp as FakePlayer
 		if fake:
 			_fake_players_data.append(fake.get_reset_data())
+
+func _capture_set_actives() -> void:
+	for component: Node in get_tree().get_nodes_in_group("checkpoint_actives"):
+		if component.has_method("capture_checkpoint_state"):
+			component.call("capture_checkpoint_state")
+
+func _capture_play_animators() -> void:
+	for component: Node in get_tree().get_nodes_in_group("checkpoint_animators"):
+		if component.has_method("capture_checkpoint_state"):
+			component.call("capture_checkpoint_state")
+
+func _restore_play_animators() -> void:
+	for component: Node in get_tree().get_nodes_in_group("checkpoint_animators"):
+		if component.has_method("restore_checkpoint_state"):
+			component.call("restore_checkpoint_state")
+
+func _capture_material_colors() -> void:
+	_material_colors_auto_states.clear()
+	for setting: SingleColor in material_colors_auto:
+		if not setting:
+			continue
+		var state: Dictionary = setting.capture_state()
+		if not state.is_empty():
+			_material_colors_auto_states.append(state)
+
+func _resolve_image_target(setting: SingleImageColor) -> CanvasItem:
+	if not setting or setting.target.is_empty():
+		return null
+	return get_node_or_null(setting.target) as CanvasItem
+
+func _capture_image_colors() -> void:
+	_image_colors_auto_states.clear()
+	for setting: SingleImageColor in image_colors_auto:
+		var image: CanvasItem = _resolve_image_target(setting)
+		if image:
+			_image_colors_auto_states.append({
+				"image": image,
+				"modulate": image.modulate,
+			})
 
 func _capture_fog() -> void:
 	var env: Environment = _get_scene_environment()
@@ -173,6 +221,7 @@ func _restore_fog() -> void:
 		env.fog_light_color = fog.fog_color
 		env.fog_depth_begin = fog.start
 		env.fog_depth_end = fog.end
+		env.background_color = fog.fog_color
 
 func _restore_light() -> void:
 	var main_line: Player = Player.instance
@@ -195,6 +244,33 @@ func _restore_ambient() -> void:
 				env.ambient_light_horizon_color = ambient.equator_color
 				env.ambient_light_ground_color = ambient.ground_color
 
+func _restore_gravity(main_line: Player) -> void:
+	if not _gravity_captured:
+		return
+
+	LevelManager.gravity = _scene_gravity
+	var space: RID = main_line.get_world_3d().space
+	if space.is_valid():
+		PhysicsServer3D.area_set_param(space, PhysicsServer3D.AREA_PARAM_GRAVITY, _scene_gravity.length())
+		PhysicsServer3D.area_set_param(
+			space,
+			PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR,
+			_scene_gravity.normalized() if _scene_gravity.length() > 0.0 else Vector3.DOWN
+		)
+
+	var level_gravity: Vector3 = main_line.levelData.gravity if main_line.levelData else Vector3(0.0, -9.8, 0.0)
+	if level_gravity.is_equal_approx(_scene_gravity):
+		main_line.clear_gravity_override()
+	else:
+		main_line.set_gravity_override(_scene_gravity)
+
+func _restore_player_collider(main_line: Player) -> void:
+	if not main_line.levelData:
+		return
+	var collision: CollisionShape3D = main_line.get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if collision and collision.shape is BoxShape3D:
+		(collision.shape as BoxShape3D).size = main_line.levelData.playerHeadBoxColliderSize
+
 func _get_scene_environment() -> Environment:
 	var main_line: Player = Player.instance
 	if main_line:
@@ -205,6 +281,9 @@ func revive() -> void:
 	var main_line: Player = Player.instance
 	if not main_line:
 		return
+	if LevelManager.crown <= 0:
+		return
+	LevelManager.is_end = false
 
 	# Decrement crown on first revive
 	if not used_revive:
@@ -213,9 +292,15 @@ func revive() -> void:
 
 	# Restore player state
 	LevelManager.load_checkpoint_to_main_line(main_line)
+	if _revive_position:
+		main_line.global_position = _revive_position.global_position
+	main_line.speed = PlayerSpeed
+	_restore_gravity(main_line)
 	main_line.is_live = true
+	main_line.is_end = false
 	main_line.velocity = Vector3.ZERO
 	main_line.is_start = false
+	main_line._delay_applied = false
 	main_line.allowTurn = true
 	main_line.scale = Vector3.ONE
 	main_line._clear_tail()
@@ -244,7 +329,6 @@ func revive() -> void:
 			cf.kill_all_camera_tweens()
 			cf.reset_shake()
 			cf.global_position = main_line.global_position
-			camera_new.set_camera()
 	else:
 		var ocf: OldCameraFollower = OldCameraFollower.instance
 		if ocf:
@@ -259,27 +343,39 @@ func revive() -> void:
 			ocf._is_rotating = false
 
 	# Restore settings
-	if not manual_camera:
-		_restore_camera()
-	if not manual_fog:
-		_restore_fog()
-	if not manual_light:
-		_restore_light()
-	if not manual_ambient:
-		_restore_ambient()
+	# Manual flags control checkpoint capture; configured values are always applied on revive.
+	_restore_camera()
+	_restore_fog()
+	_restore_light()
+	_restore_ambient()
+	_restore_player_collider(main_line)
 	main_line.restore_managed_animation_state()
 
 	# Restore material colors
-	for s: SingleColor in material_colors_auto:
-		s.apply()
-	for s: SingleColor in material_colors_manual:
-		s.apply()
+	for state: Dictionary in _material_colors_auto_states:
+		var setting: SingleColor = state.get("setting") as SingleColor
+		if setting:
+			setting.restore_state(state)
+	for setting: SingleColor in material_colors_manual:
+		if setting:
+			setting.apply()
+
+	# Restore UI image colors captured at this checkpoint.
+	for state: Dictionary in _image_colors_auto_states:
+		var image: CanvasItem = state.get("image") as CanvasItem
+		var modulate: Variant = state.get("modulate", Color.WHITE)
+		if image and modulate is Color:
+			image.modulate = modulate
+	for setting: SingleImageColor in image_colors_manual:
+		var image: CanvasItem = _resolve_image_target(setting)
+		if image and setting:
+			image.modulate = setting.color
 
 	# Restore FakePlayers
 	var fake_players: Array[Node] = main_line.get_tree().get_nodes_in_group("fake_players")
 	for i: int in range(min(fake_players.size(), _fake_players_data.size())):
 		var fake: FakePlayer = fake_players[i] as FakePlayer
-		if fake and _fake_players_data[i].get("playing", false):
+		if fake:
 			fake.set_reset_data(_fake_players_data[i])
 
 	# Restore music to checkpoint position (paused, waiting for player to start)
@@ -305,9 +401,9 @@ func revive() -> void:
 			LevelManager.anim_time = _track_progress
 		else:
 			main_line.animation_node.stop()
+			LevelManager.anim_time = 0.0
 
-	LevelManager.GameState = LevelManager.GameStatus.Waiting
-	LevelManager.emit_revive()
-
-
+	_restore_play_animators()
 	on_revive.emit()
+	LevelManager.emit_revive()
+	LevelManager.DestroyRemain()
