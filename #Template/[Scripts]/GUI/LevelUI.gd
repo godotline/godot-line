@@ -38,7 +38,7 @@ func _show_ui() -> void:
 	_set_progress(revive_fill, progress)
 
 	var can_revive: bool = Player.instance != null and not Player.instance.is_end \
-		and LevelManager.current_checkpoint != null and LevelManager.crown > 0
+		and is_instance_valid(LevelManager.current_checkpoint)
 	normal_page.visible = not can_revive
 	revive_page.visible = can_revive
 	backdrop.color.a = 0.0 if can_revive else 0.639216
@@ -72,7 +72,7 @@ func _on_revive_pressed() -> void:
 		return
 	if Player.instance.is_end:
 		_on_gamereplay_pressed()
-	elif LevelManager.current_checkpoint and LevelManager.crown > 0:
+	elif is_instance_valid(LevelManager.current_checkpoint):
 		LevelManager.current_checkpoint.revive()
 	else:
 		_on_gamereplay_pressed()

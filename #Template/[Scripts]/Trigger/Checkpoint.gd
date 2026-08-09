@@ -281,11 +281,10 @@ func revive() -> void:
 	var main_line: Player = Player.instance
 	if not main_line:
 		return
-	if LevelManager.crown <= 0:
-		return
 	LevelManager.is_end = false
 
-	# Decrement crown on first revive
+	# Unity consumes one collected crown on the first revive at this checkpoint.
+	# Crown count is not a gate: the checkpoint itself determines revive eligibility.
 	if not used_revive:
 		LevelManager.crown = maxi(LevelManager.crown - 1, 0)
 		used_revive = true

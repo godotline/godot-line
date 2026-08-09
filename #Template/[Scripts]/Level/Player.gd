@@ -704,7 +704,10 @@ func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = Le
 		if death_state == LevelManager.GameStatus.Died:
 			velocity = Vector3.ZERO
 		if animation_node: animation_node.pause()
-		LevelManager.GameOverNormal(false)
+		if is_instance_valid(LevelManager.current_checkpoint):
+			LevelManager.GameOverRevive()
+		else:
+			LevelManager.GameOverNormal(false)
 		AudioManager.fade_out()
 		if spawn_particles:
 			$AudioStreamPlayer.play()
