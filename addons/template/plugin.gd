@@ -399,12 +399,20 @@ func _sort_guidance_boxes_in_current_scene() -> void:
 	if holders.is_empty():
 		_push_error("当前场景没有找到 GuidanceBoxHolder")
 		return
+	var player: Player = _find_player_in_scene(scene_root)
+	var player_direction: Vector3 = Vector3.FORWARD
+	var alternate_direction: Vector3 = Vector3.RIGHT
+	if player:
+		player_direction = _direction_from_degrees(player.current_direction)
+		alternate_direction = _direction_from_degrees(
+			player.secondDirection if player.current_direction == player.firstDirection else player.firstDirection
+		)
 
 	var changed_count: int = 0
 	var undo_redo: EditorUndoRedoManager = get_undo_redo()
 	undo_redo.create_action("排序 GuidanceBox")
 	for holder: Node in holders:
-		var ordered: Array[Node] = _sort_holder_boxes(holder)
+		var ordered: Array[Node] = _sort_holder_boxes(holder, player_direction, alternate_direction)
 		if ordered.is_empty():
 			continue
 		var original: Array[Node] = []
@@ -432,7 +440,7 @@ func _collect_guidance_holders(node: Node, holders: Array[Node]) -> void:
 		_collect_guidance_holders(child, holders)
 
 
-func _sort_holder_boxes(holder: Node) -> Array[Node]:
+func _sort_holder_boxes(holder: Node, player_direction: Vector3, alternate_direction: Vector3) -> Array[Node]:
 	var remaining: Array[Node] = []
 	for child: Node in holder.get_children():
 		if _is_guidance_box_root(child):
@@ -452,21 +460,26 @@ func _sort_holder_boxes(holder: Node) -> Array[Node]:
 	remaining.erase(current)
 
 	while not remaining.is_empty():
-		var next: Node = _find_next_guidance_box(current, remaining)
+		var direction: Vector3 = player_direction if ordered.size() % 2 == 1 else alternate_direction
+		var next: Node = _find_next_guidance_box(current, remaining, direction)
 		ordered.append(next)
 		remaining.erase(next)
 		current = next
 	return ordered
 
 
-func _find_next_guidance_box(current: Node, candidates: Array[Node]) -> Node:
+func _direction_from_degrees(rotation_degrees: Vector3) -> Vector3:
+	var rotation_radians: Vector3 = rotation_degrees * (PI / 180.0)
+	var direction: Vector3 = Basis.from_euler(rotation_radians) * Vector3.FORWARD
+	direction.y = 0.0
+	if direction.length_squared() > 0.0001:
+		return direction.normalized()
+	return Vector3.FORWARD
+
+
+func _find_next_guidance_box(current: Node, candidates: Array[Node], player_direction: Vector3) -> Node:
 	var current_3d: Node3D = current as Node3D
-	var direction: Vector3 = Vector3.FORWARD
-	if current_3d:
-		direction = current_3d.global_transform.basis * Vector3.FORWARD
-		direction.y = 0.0
-		if direction.length_squared() > 0.0001:
-			direction = direction.normalized()
+	var direction: Vector3 = player_direction
 
 	var best: Node = candidates[0]
 	var best_distance: float = INF
@@ -494,6 +507,16 @@ func _find_next_guidance_box(current: Node, candidates: Array[Node]) -> Node:
 			best_projection = projection
 			best_is_ahead = is_ahead
 	return best
+
+
+func _find_player_in_scene(node: Node) -> Player:
+	if node is Player:
+		return node as Player
+	for child: Node in node.get_children():
+		var found: Player = _find_player_in_scene(child)
+		if found:
+			return found
+	return null
 
 
 func _is_guidance_box_root(node: Node) -> bool:

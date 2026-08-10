@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 ## CameraTrigger - 相机触发器（纯组件模式）
 ## 作为 BaseTrigger 的子节点，依赖父节点处理碰撞
 ## 也支持 use_time 模式基于时间自动触发
