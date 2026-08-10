@@ -20,7 +20,7 @@ const FRAGMENT_SHRINK_DURATION: float = 0.5
 const FRAGMENT_TORQUE_SCALE: float = 0.2
 const LIGHTNING_DURATION: float = 0.3
 const COLLECTION_LIGHT_ENERGY: float = 6.0
-const LIGHTNING_MATERIAL: Material = preload("res://#Template/[Materials]/CrystalLightning.tres")
+const THUNDER_MATERIAL: Material = preload("res://#Template/[Materials]/CrystalThunder.tres")
 
 @export var speed: float = 40.0
 @export var scan_duration: float = 1.25
@@ -64,7 +64,7 @@ func _create_collection_effect_nodes() -> void:
 		_crystal_thunder.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var lightning_mesh: QuadMesh = QuadMesh.new()
 		lightning_mesh.size = Vector2(0.9, 2.7)
-		lightning_mesh.material = LIGHTNING_MATERIAL
+		lightning_mesh.material = THUNDER_MATERIAL
 		_crystal_thunder.mesh = lightning_mesh
 		_content_root.add_child(_crystal_thunder)
 

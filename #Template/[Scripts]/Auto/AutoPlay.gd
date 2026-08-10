@@ -35,6 +35,8 @@ func _physics_process(_delta: float) -> void:
 	# inside the trigger volume.
 	var player: Player = _player_ref as Player
 	if not is_instance_valid(player):
+		if not monitoring:
+			return
 		player = null
 		for body: Node3D in get_overlapping_bodies():
 			if body is Player:
@@ -59,7 +61,7 @@ func set_active(active: bool) -> void:
 	set_physics_process(true)
 
 func refresh_tracking() -> void:
-	if not _active:
+	if not _active or not monitoring:
 		return
 	_player_ref = null
 	for body: Node3D in get_overlapping_bodies():
