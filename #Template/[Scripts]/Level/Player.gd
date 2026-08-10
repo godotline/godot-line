@@ -103,6 +103,7 @@ var _tail_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
 var _tail_body_pool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
 
 func _ready() -> void:
+	add_to_group("Player")
 	instance = self
 	if not Engine.is_editor_hint():
 		if not LevelManager.camera_checkpoint.has_checkpoint:

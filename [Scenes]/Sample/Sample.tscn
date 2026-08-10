@@ -258,21 +258,21 @@ material_override = ExtResource("20_j2eg4")
 
 [node name="Trigger3" parent="Scene_Group/Scene_001" unique_id=1323296306 instance=ExtResource("11_mq52h")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 5.3776135, -0.5, 15.017628)
+component_script = ExtResource("22_77abe")
 
-[node name="jump" type="Node3D" parent="Scene_Group/Scene_001/Trigger3" unique_id=342149430]
+[node name="Jump" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=2084784200]
 script = ExtResource("21_tdro7")
 height = 2.0
 
-[node name="jumppre" type="Node3D" parent="Scene_Group/Scene_001/Trigger3" unique_id=983390150]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 5.3776135, -0.5, 15.017628)
-top_level = true
+[node name="JumpPredictor" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=1495481976]
 script = ExtResource("22_77abe")
 draw_preview = true
 
 [node name="Trigger4" parent="Scene_Group/Scene_001" unique_id=712157509 instance=ExtResource("11_mq52h")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 15.605786)
+component_script = ExtResource("22_77abe")
 
-[node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177 node_paths=PackedStringArray("target_node")]
+[node name="event" type="Node" parent="Scene_Group/Scene_001/Trigger4" unique_id=1520750393 node_paths=PackedStringArray("target_node")]
 script = ExtResource("23_77abe")
 target_node = NodePath("../../Ground2/Node3D2")
 debug_mode = true

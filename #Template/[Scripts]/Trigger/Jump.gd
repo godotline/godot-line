@@ -1,5 +1,5 @@
 @tool
-extends Node3D
+extends Node
 signal height_changed(new_height: float)
 
 @export var height: float = 1.0:

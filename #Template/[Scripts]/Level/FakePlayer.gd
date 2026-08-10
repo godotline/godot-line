@@ -51,6 +51,7 @@ func _ready() -> void:
 	if not _body:
 		push_error("FakePlayer.gd must be attached below a CharacterBody3D")
 		return
+	_body.add_to_group("FakePlayer")
 	if Engine.is_editor_hint():
 		return
 

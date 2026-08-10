@@ -1,5 +1,5 @@
 @tool
-extends Node3D
+extends Node
 class_name JumpPredictor
 ## JumpPredictor - 跳跃轨迹预测器
 ## 发射模拟玩家显示跳跃轨迹
@@ -53,8 +53,6 @@ var _jump_node: Node
 var _line_mesh: MeshInstance3D
 
 func _ready() -> void:
-	top_level = true
-
 	if not Engine.is_editor_hint() and show_in_game:
 		_start_simulation()
 	elif Engine.is_editor_hint() and draw_preview:
@@ -118,7 +116,7 @@ func _draw_line() -> void:
 		return
 
 	var parent: Node3D = get_parent() as Node3D
-	var base_pos: Vector3 = parent.global_position if parent else global_position
+	var base_pos: Vector3 = parent.global_position if parent else Vector3.ZERO
 
 	var height: float = _jump_node.get("height") if _jump_node else 1.0
 	var gravity_strength: float = 9.8
