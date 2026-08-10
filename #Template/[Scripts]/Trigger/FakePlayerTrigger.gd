@@ -76,8 +76,9 @@ func _find_fake_player(body: Node3D) -> FakePlayer:
 
 func _reset_data() -> void:
 	LevelManager.remove_revive_listener(_reset_data)
-	if _index < LevelManager.checkpoint_count:
+	LevelManager.CompareCheckpointIndex(_index, func() -> void:
 		_used = false
+	)
 
 func _exit_tree() -> void:
 	if _container and is_instance_valid(_container):
