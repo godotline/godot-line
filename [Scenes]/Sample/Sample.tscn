@@ -256,32 +256,29 @@ transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 4.198456, 0.50000095, 12.
 [node name="ScanQuad" parent="Scene_Group/Scene_001/Crystal" index="2" unique_id=540720836]
 material_override = ExtResource("20_j2eg4")
 
-[node name="CrystalThunder" parent="Scene_Group/Scene_001/Crystal" index="3" unique_id=764125258]
-visible = false
-
-[node name="CrystalLight" parent="Scene_Group/Scene_001/Crystal" index="5" unique_id=1137045707]
-light_energy = 0.0
-
 [node name="Trigger3" parent="Scene_Group/Scene_001" unique_id=1323296306 instance=ExtResource("11_mq52h")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 5.3776135, -0.5, 15.017628)
+component_script = ExtResource("22_77abe")
 
-[node name="jump" type="Node3D" parent="Scene_Group/Scene_001/Trigger3" unique_id=342149430]
+[node name="Jump" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=2084784200]
 script = ExtResource("21_tdro7")
 height = 2.0
 
-[node name="jumppre" type="Node3D" parent="Scene_Group/Scene_001/Trigger3" unique_id=983390150]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 5.3776135, -0.5, 15.017628)
-top_level = true
+[node name="JumpPredictor" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=1495481976]
 script = ExtResource("22_77abe")
 draw_preview = true
 
 [node name="Trigger4" parent="Scene_Group/Scene_001" unique_id=712157509 instance=ExtResource("11_mq52h")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 15.605786)
+component_script = ExtResource("22_77abe")
 
-[node name="event" type="Node3D" parent="Scene_Group/Scene_001/Trigger4" unique_id=1348143177 node_paths=PackedStringArray("target_node")]
+[node name="event" type="Node" parent="Scene_Group/Scene_001/Trigger4" unique_id=1520750393 node_paths=PackedStringArray("target_node")]
 script = ExtResource("23_77abe")
 target_node = NodePath("../../Ground2/Node3D2")
 debug_mode = true
+
+[node name="Crystal" parent="." unique_id=2099437324 instance=ExtResource("19_6gt33")]
+transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 0.11323357, -0.26102877, 6.877949)
 
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D2" method="Trigger"]

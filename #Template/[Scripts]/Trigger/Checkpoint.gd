@@ -305,14 +305,11 @@ func revive() -> void:
 	main_line._clear_tail()
 	Engine.time_scale = 1.0
 
-	# Restore direction
-	match direction:
-		Direction.First:
-			if _player_first_direction != Vector3.ZERO:
-				main_line.rotation_degrees = _player_first_direction
-		Direction.Second:
-			if _player_second_direction != Vector3.ZERO:
-				main_line.rotation_degrees = _player_second_direction
+	# Unity parity: the checkpoint direction is authoritative on revive.
+	# InitPlayerPosition restores the direction parameters, then applies the
+	# serialized checkpoint direction to both the player's rotation and state.
+	main_line._currentDirection = 0 if direction == Direction.First else 1
+	main_line.rotation_degrees = main_line.current_direction
 
 	# Clear death particles
 	get_tree().call_group("death_particles", "queue_free")

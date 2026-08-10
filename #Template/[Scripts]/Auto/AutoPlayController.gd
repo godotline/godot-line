@@ -11,9 +11,11 @@ var _holder: Node3D
 var _triggers: Array[Area3D] = []
 var _init_in_progress: bool = false
 var _initialized: bool = false
+var _requested_active: bool = false
 
 func _ready() -> void:
 	Instance = self
+	_requested_active = enable
 	# 等场景切换和其他节点的 _ready() 完成后再读取 current_scene。
 	call_deferred("_init_triggers")
 
@@ -60,7 +62,7 @@ func _init_triggers() -> void:
 
 	_init_in_progress = false
 	_initialized = true
-	set_holder(enable)
+	set_holder(_requested_active)
 
 func _queue_init_retry() -> void:
 	_init_in_progress = false
@@ -86,9 +88,17 @@ func _create_trigger(pos: Vector3, index: int) -> Area3D:
 	return area
 
 func set_holder(active: bool) -> void:
+	_requested_active = active
 	if _holder:
 		_holder.visible = active
 		for trigger in _triggers:
 			if trigger is Area3D:
+				if trigger.has_method("set_active"):
+					trigger.call("set_active", active)
 				trigger.set_deferred("monitoring", active)
 				trigger.set_deferred("monitorable", active)
+				if active and trigger.has_method("refresh_tracking"):
+					trigger.call_deferred("refresh_tracking")
+
+func get_requested_active() -> bool:
+	return _requested_active

@@ -45,13 +45,13 @@ var _trigger_id: int = 0
 
 var _previous_frame_is_grounded: bool = true
 var _last_key_state: bool = false
-var _last_clicked_state: bool = false
 
 func _ready() -> void:
 	_body = _resolve_body()
 	if not _body:
 		push_error("FakePlayer.gd must be attached below a CharacterBody3D")
 		return
+	_body.add_to_group("FakePlayer")
 	if Engine.is_editor_hint():
 		return
 
@@ -73,6 +73,9 @@ func _ready() -> void:
 	if current_scene:
 		current_scene.add_child.call_deferred(_tail_holder)
 	add_to_group("fake_players")
+	if synchronismWithPlayer:
+		# Follow Player.onturn so synchronized FakePlayers also work with autoplay.
+		call_deferred("_connect_player_turn")
 
 	if createTurnTrigger:
 		_trigger_holder = Node3D.new()
@@ -164,11 +167,21 @@ func _process(_delta: float) -> void:
 				if key_pressed and not _last_key_state:
 					_create_turn_trigger()
 				_last_key_state = key_pressed
-			else:
-				var clicked: bool = LevelManager.Clicked
-				if clicked and not _last_clicked_state:
-					_create_turn_trigger()
-				_last_clicked_state = clicked
+
+func _connect_player_turn() -> void:
+	if not synchronismWithPlayer:
+		return
+	var player: Player = Player.instance
+	if not player:
+		if is_inside_tree():
+			call_deferred("_connect_player_turn")
+		return
+	if player and not player.onturn.is_connected(_on_player_turn):
+		player.onturn.connect(_on_player_turn)
+
+func _on_player_turn() -> void:
+	if state == State.Moving:
+		_create_turn_trigger()
 
 func turn() -> void:
 	var current_rotation: Vector3 = _get_world_rotation()
@@ -304,6 +317,9 @@ func _create_turn_trigger() -> void:
 func _exit_tree() -> void:
 	if Engine.is_editor_hint():
 		return
+	var player: Player = Player.instance
+	if player and player.onturn.is_connected(_on_player_turn):
+		player.onturn.disconnect(_on_player_turn)
 	if _tail_holder and is_instance_valid(_tail_holder):
 		_tail_holder.queue_free()
 	if _trigger_holder and is_instance_valid(_trigger_holder):
