@@ -4,6 +4,7 @@ extends Node
 ##
 ## 迁移自 Unity EditorWindow NoteReader.cs
 ## 原项目: MTPIDM001-Introduction/Assets/Editor/DLFM/NoteReader.cs
+## 插件脚本: addons/template/note_reader.gd
 ##
 ## 用法:
 ##   1. 将此脚本挂到场景中的任意节点（或新建一个空节点）
@@ -80,7 +81,7 @@ func _run() -> void:
 		return
 
 	# 获取当前编辑的场景根节点
-	var scene_root: Node = get_tree().edited_scene_root
+	var scene_root: Node = _get_edited_scene_root()
 	if not scene_root:
 		printerr("[NoteReader] 没有打开的场景。请先打开目标场景。")
 		return
@@ -221,7 +222,7 @@ func _create_default_trigger(holder: Node3D, pos: Vector3) -> void:
 	box_shape.size = trigger_size
 	collision.shape = box_shape
 	trigger.add_child(collision)
-	collision.owner = get_tree().edited_scene_root
+	collision.owner = _get_edited_scene_root()
 
 	_add_owned_node(holder, trigger)
 
@@ -229,4 +230,10 @@ func _create_default_trigger(holder: Node3D, pos: Vector3) -> void:
 ## 将节点添加到场景并设置 owner (确保随场景一起保存)
 func _add_owned_node(parent: Node, child: Node) -> void:
 	parent.add_child(child)
-	child.owner = get_tree().edited_scene_root
+	child.owner = _get_edited_scene_root()
+## 在插件临时实例和场景脚本实例两种调用方式下取得当前编辑场景根节点。
+func _get_edited_scene_root() -> Node:
+	var tree: SceneTree = get_tree()
+	if tree and tree.edited_scene_root:
+		return tree.edited_scene_root
+	return EditorInterface.get_edited_scene_root()

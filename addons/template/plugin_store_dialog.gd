@@ -80,6 +80,7 @@ static func _remove_quarantine_tree(dir_path: String) -> void:
 func _ready() -> void:
 	title = "插件商城"
 	min_size = Vector2i(720, 520)
+	unresizable = false
 	ok_button_text = "关闭"
 	get_cancel_button().visible = false
 	confirmed.connect(_on_close)
@@ -344,6 +345,7 @@ func _get_selected_download_url(entry: PluginEntry) -> String:
 
 func _confirm_install(entry: PluginEntry, download_url: String, template_warning: String) -> void:
 	var dialog: ConfirmationDialog = ConfirmationDialog.new()
+	dialog.unresizable = false
 	dialog.title = "模板版本警告"
 	dialog.dialog_text = "插件 %s 需要更高版本的 Template。\n\n%s\n\n仍要继续下载并安装吗？" % [entry.display_name, template_warning]
 	dialog.ok_button_text = "继续安装"
@@ -363,6 +365,7 @@ func _confirm_install(entry: PluginEntry, download_url: String, template_warning
 func _confirm_uninstall(entry: PluginEntry) -> void:
 	# 使用确认对话框，避免误删
 	var dialog := ConfirmationDialog.new()
+	dialog.unresizable = false
 	dialog.title = "确认卸载"
 	dialog.dialog_text = "确定要卸载插件 %s 吗？\n\n插件会先停用并移出 %s/，再从 project.godot 中移除启用记录。重启编辑器后会清理隔离文件。" % [entry.display_name, entry.dest_path]
 	dialog.ok_button_text = "卸载"

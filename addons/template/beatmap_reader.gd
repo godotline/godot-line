@@ -4,6 +4,7 @@ extends Node
 ##
 ## 迁移自 Unity MonoBehaviour BeatmapReader.cs
 ## 原项目: Max/Assets/#Template/[Scripts]/Guideline/BeatmapReader.cs
+## 插件脚本: addons/template/beatmap_reader.gd
 ##
 ## 用法:
 ##   1. 将此脚本挂到场景中的任意节点
@@ -76,7 +77,7 @@ func _create_guideline_taps() -> void:
 		return
 
 	# 获取场景与 Player 参数
-	var scene_root: Node = get_tree().edited_scene_root
+	var scene_root: Node = _get_edited_scene_root()
 	if not scene_root:
 		printerr("[BeatmapReader] 没有打开的场景。")
 		return
@@ -251,4 +252,12 @@ func _set_triggered(node: Node3D, triggered: bool) -> void:
 ## 添加节点并设置 owner (确保随场景保存)
 func _add_owned_node(parent: Node, child: Node) -> void:
 	parent.add_child(child)
-	child.owner = get_tree().edited_scene_root
+	child.owner = _get_edited_scene_root()
+
+
+## 在插件临时实例和场景脚本实例两种调用方式下取得当前编辑场景根节点。
+func _get_edited_scene_root() -> Node:
+	var tree: SceneTree = get_tree()
+	if tree and tree.edited_scene_root:
+		return tree.edited_scene_root
+	return EditorInterface.get_edited_scene_root()

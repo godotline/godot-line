@@ -8,88 +8,86 @@ static var Instance: GuidanceController
 @export var box_holder: Node3D
 @export var guidance_color: Color = Color.WHITE
 @export var line_gap: float = 0.2
-@export var box_size_y: float = 1.0
 
-var _player: CharacterBody3D
+var _player: Player
+var _player_transform: Node3D
 var _boxes: Array[Node3D] = []
 var _holder: Node3D
 var _id: int = 0
 var _box_scene: PackedScene
+var _box_size_y: float = 1.0
 var _started: bool = false
+var _original_created: bool = false
+var _forward: float = 0.0
 
 func _ready() -> void:
 	Instance = self
 	_id = 0
 	_box_scene = load("res://#Template/[Resources]/GuidanceBox.tscn")
-	set_process(false)  ## 默认关闭，用信号驱动
+	if _box_scene:
+		var box_probe: Node3D = _box_scene.instantiate() as Node3D
+		if box_probe:
+			_box_size_y = box_probe.scale.y
+			box_probe.free()
 	if create_boxes:
 		_holder = Node3D.new()
 		_holder.name = "GuidanceBoxHolder"
-		get_tree().current_scene.add_child.call_deferred(_holder)
+		get_tree().current_scene.add_child(_holder)
 	if box_holder:
 		for child in box_holder.get_children():
 			if child is Node3D:
 				_boxes.append(child)
 	for b in _boxes:
 		_set_color(b, guidance_color)
-	if create_lines and not _boxes.is_empty():
+	if create_lines:
 		_generate_lines()
-	# 用信号驱动替代轮询
-	if Player.instance:
-		_connect_player_signals()
-	else:
-		# Player 还没就绪，等一帧
-		await get_tree().process_frame
-		if Player.instance:
-			_connect_player_signals()
+	set_process(true)
 
-func _connect_player_signals() -> void:
-	_player = Player.instance
-	if not _player:
-		return
-	if create_boxes:
-		_player.on_player_start.connect(_on_player_start)
+func _process(_delta: float) -> void:
+	if not is_instance_valid(_player):
+		_player = Player.instance
+		if not is_instance_valid(_player):
+			return
+		_player_transform = _player
 
-func _on_player_start() -> void:
-	if not create_boxes:
-		return
-	if not _holder or not _holder.is_inside_tree():
-		return
-	var box: Node3D = _spawn_box(
-		_player.global_position - Vector3(0, 0.45, 0),
-		_player.firstDirection.y
-	)
-	box.name = "OriginalGuidanceBox"
-	var gb: GuidanceBox = _find_guidance_box(box)
-	if gb:
-		gb.can_be_triggered = false
-	_player.onturn.connect(_on_player_turn)
+	_forward = _player.secondDirection.y if _player.rotation_degrees.y == _player.firstDirection.y else _player.firstDirection.y
+	if create_boxes and not _original_created:
+		var original_box: Node3D = _spawn_box(
+			_player_transform.global_position - Vector3(0, 0.45, 0),
+			_player.firstDirection.y
+		)
+		if original_box:
+			original_box.name = "OriginalGuidanceBox"
+			var original_guidance_box: GuidanceBox = _find_guidance_box(original_box)
+			if original_guidance_box:
+				original_guidance_box.can_be_triggered = false
+			_original_created = true
+
+	if create_boxes and LevelManager.GameState == LevelManager.GameStatus.Playing and not _started:
+		if not _player.onturn.is_connected(_on_player_turn):
+			_player.onturn.connect(_on_player_turn)
+		_started = true
 
 func _find_guidance_box(node: Node) -> GuidanceBox:
+	if node is GuidanceBox:
+		return node as GuidanceBox
 	for child in node.get_children():
-		if child is GuidanceBox:
-			return child
 		var found: GuidanceBox = _find_guidance_box(child)
 		if found:
 			return found
 	return null
 
 func _on_player_turn() -> void:
-	if create_boxes and LevelManager.GameState == LevelManager.GameStatus.Playing:
-		var forward_y: float
-		if _player.rotation_degrees.y == _player.firstDirection.y:
-			forward_y = _player.secondDirection.y
-		else:
-			forward_y = _player.firstDirection.y
-		var box: Node3D = _spawn_box(
-			_player.global_position - Vector3(0, 0.45, 0),
-			forward_y
-		)
+	var box: Node3D = _spawn_box(
+		_player_transform.global_position - Vector3(0, 0.45, 0),
+		_forward
+	)
+	if box:
 		box.name = "GuidanceBox %d" % _id
 		_id += 1
 
 func _spawn_box(pos: Vector3, rot_y: float) -> Node3D:
-	if not _box_scene:
+	if not _box_scene or not is_instance_valid(_holder):
 		push_error("GuidanceController.gd: GuidanceBox 场景未加载，无法生成引导盒")
 		return null
 	var box: Node3D = _box_scene.instantiate() as Node3D
@@ -116,7 +114,7 @@ func _generate_lines() -> void:
 			continue
 		var midpoint: Vector3 = 0.5 * (a.global_position + b.global_position)
 		var dist: float = a.global_position.distance_to(b.global_position)
-		var line_length: float = dist - 0.5 * box_size_y - 2 * line_gap
+		var line_length: float = dist - 0.5 * _box_size_y - 2 * line_gap
 		if line_length <= 0.0:
 			continue
 		var line: MeshInstance3D = MeshInstance3D.new()
