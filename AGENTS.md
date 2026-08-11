@@ -80,6 +80,7 @@ Defined in `project.godot`:
 ## GDScript Conventions
 
 - `lowerCamelCase` for variables and functions
+- **Unity parity ports:** Preserve the Unity source's serialized field and runtime variable names exactly when they are valid GDScript identifiers (for example, `activeOnAwake`, `dontRevive`, and `showInLow`). Do not translate them to `snake_case`; retain Unity method names too when a serialized callback or external call depends on them.
 - `PascalCase` for class names (`class_name`)
 - `UPPER_SNAKE_CASE` for constants
 - `lowerCamelCase` for signals

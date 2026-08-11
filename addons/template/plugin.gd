@@ -50,7 +50,7 @@ func _enter_tree() -> void:
 	popup.add_item("新建关卡", 1)
 	popup.add_item("排序 GuidanceBox", 3)
 	popup.add_item("NoteReader", 4)
-	popup.add_item("BeatmapReaderz", 5)
+	popup.add_item("BeatmapReader", 5)
 	popup.add_separator()
 	popup.add_item("插件商城", 2)
 	popup.id_pressed.connect(_on_menu_item_pressed)
@@ -538,15 +538,15 @@ func _same_node_order(first: Array[Node], second: Array[Node]) -> bool:
 
 
 func _apply_guidance_box_order(holder: Node, ordered: Array[Node]) -> void:
-	var box_index: int = 0
-	for child: Node in holder.get_children():
-		if not _is_guidance_box_root(child):
-			continue
-		var target: Node = ordered[box_index]
-		var target_index: int = holder.get_children().find(target)
-		if target_index != -1:
-			holder.move_child(target, target_index)
-		box_index += 1
+	var guidance_indices: Array[int] = []
+	for child_index: int in range(holder.get_child_count()):
+		var child: Node = holder.get_child(child_index)
+		if _is_guidance_box_root(child):
+			guidance_indices.append(child_index)
+	if guidance_indices.size() != ordered.size():
+		return
+	for box_index: int in range(ordered.size()):
+		holder.move_child(ordered[box_index], guidance_indices[box_index])
 
 
 # ===================== 插件商城 =====================

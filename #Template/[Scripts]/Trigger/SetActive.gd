@@ -1,32 +1,43 @@
+class_name Setactive
 extends Node
 
 ## SetActiveTrigger - 激活/禁用触发器
 ## 触发时激活/禁用指定节点，支持复活时恢复状态
 
 @export_group("激活设置")
-@export var active_on_awake: bool = false
+@export var activeOnAwake: bool = false
 @export var actives: Array[SingleActive] = []
 
-var _revive_states: Array[Dictionary] = []
-var _checkpoint_index: int = 0
+var revives: Array[Dictionary] = []
+var index: int = 0
+
+## Godot 没有 GameObject.SetActive；曲线救国地组合处理状态与可见性。
+static func setActive(target: Node, active: bool) -> void:
+	target.process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+	if target is Node3D:
+		target.visible = active
+	elif target is CanvasItem:
+		target.visible = active
 
 func _ready() -> void:
 	add_to_group("checkpoint_actives")
-	if active_on_awake:
+	if activeOnAwake:
 		_apply_all_actives()
 
 	LevelManager.add_revive_listener(_on_revive)
 
 func trigger(_body: Node3D) -> void:
-	if active_on_awake:
+	if activeOnAwake:
 		return
-	capture_checkpoint_state()
+	index = LevelManager.checkpoint_count
 	_apply_all_actives()
 
 func capture_checkpoint_state() -> void:
-	if active_on_awake:
+	if activeOnAwake:
 		return
-	_checkpoint_index = LevelManager.checkpoint_count
+	_add_revives()
+
+func _add_revives() -> void:
 	_save_revive_states()
 
 func _apply_all_actives() -> void:
@@ -34,45 +45,38 @@ func _apply_all_actives() -> void:
 		if active_config and active_config.target:
 			var target: Node = get_node_or_null(active_config.target)
 			if target:
-				if target is Node3D:
-					target.visible = active_config.active
-				elif target is CanvasItem:
-					target.visible = active_config.active
+				setActive(target, active_config.active)
 
 func _save_revive_states() -> void:
-	_revive_states.clear()
 	for active_config: SingleActive in actives:
 		if active_config and active_config.target:
 			var target: Node = get_node_or_null(active_config.target)
 			if target:
-				var original_visible: bool = false
+				var active: bool = false
 				if target is Node3D:
-					original_visible = target.visible
+					active = target.visible
 				elif target is CanvasItem:
-					original_visible = target.visible
+					active = target.visible
 				
-				_revive_states.append({
+				revives.append({
 					"target": active_config.target,
-					"original_visible": original_visible,
-					"dont_revive": active_config.dont_revive
+					"active": active,
+					"dontRevive": active_config.dontRevive
 				})
 
 func _on_revive() -> void:
 	if not is_instance_valid(self):
 		return
-	LevelManager.CompareCheckpointIndex(_checkpoint_index, func():
+	LevelManager.CompareCheckpointIndex(index, func():
 		if not is_instance_valid(self):
 			return
-		for state: Dictionary in _revive_states:
-			if not state.get("dont_revive", false):
-				var target_path: NodePath = state.get("target", NodePath(""))
+		for revive: Dictionary in revives:
+			if not revive.get("dontRevive", false):
+				var target_path: NodePath = revive.get("target", NodePath(""))
 				var target: Node = get_node_or_null(target_path)
 				if target:
-					var original_visible: bool = state.get("original_visible", false)
-					if target is Node3D:
-						target.visible = original_visible
-					elif target is CanvasItem:
-						target.visible = original_visible
+					var active: bool = revive.get("active", false)
+					setActive(target, active)
 	)
 
 func _exit_tree() -> void:
