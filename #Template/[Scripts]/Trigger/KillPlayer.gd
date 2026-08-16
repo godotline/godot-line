@@ -10,7 +10,6 @@ enum DieReason {
 	Border,    # 出图 — 无音效
 }
 
-const HIT_CLIP: AudioStream = preload("res://#Template/[Resources]/Hit.wav")
 const DROWNED_CLIP: AudioStream = preload("res://#Template/[Resources]/WaterDie.wav")
 
 @export var reason: DieReason = DieReason.Drowned
@@ -30,22 +29,19 @@ func trigger(body: Node3D) -> void:
 			LevelManager.checkpoint_count = 0
 			LevelManager.crown = 0
 			LevelManager.current_checkpoint = null
-		_play_death_sound()
 		match reason:
 			DieReason.Hit:
+				# 对齐 Unity：Hit 音效由 die() 内的 $AudioStreamPlayer（Hit.wav）统一播放，避免重复
 				player.die(true, LevelManager.GameStatus.Died)
 			DieReason.Drowned, DieReason.Border:
+				_play_death_sound()
 				player.die(false, LevelManager.GameStatus.Moving)
 
+## Drowned/Border 死亡音效；Hit 由 die() 内的 $AudioStreamPlayer（Hit.wav）统一播放
 func _play_death_sound() -> void:
 	if custom_death_clip:
 		AudioManager.play_clip(custom_death_clip)
 		return
 
-	match reason:
-		DieReason.Drowned:
-			AudioManager.play_clip(DROWNED_CLIP)
-		DieReason.Hit:
-			AudioManager.play_clip(HIT_CLIP)
-		DieReason.Border:
-			pass
+	if reason == DieReason.Drowned:
+		AudioManager.play_clip(DROWNED_CLIP)

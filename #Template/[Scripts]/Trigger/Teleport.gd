@@ -17,7 +17,7 @@ enum TeleportType {
 @export var target_direction: LevelManager.Direction = LevelManager.Direction.First
 
 func trigger(body: Node3D) -> void:
-	if not body is CharacterBody3D:
+	if not body is Player:
 		return
 	
 	var final_position: Vector3
@@ -29,4 +29,4 @@ func trigger(body: Node3D) -> void:
 		TeleportType.Position:
 			final_position = teleport_position
 	
-	LevelManager.init_player_position(body, final_position, turn, target_direction)
+	LevelManager.init_player_position(body, final_position, false, turn, target_direction)

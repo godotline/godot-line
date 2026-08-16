@@ -107,6 +107,9 @@ func _enter_trigger(body: Node3D) -> void:
 	# Save player state
 	_player_first_direction = body.firstDirection
 	_player_second_direction = body.secondDirection
+	# Unity parity: record the player's live turn state so AutoRecord copies the
+	# correct direction back into the scene instead of the stale editor value.
+	direction = Direction.First if body._currentDirection == 0 else Direction.Second
 	body.capture_managed_animation_state()
 	_track_progress = body.animation_node.get_current_animation_position() if body.animation_node and body.animation_node.is_playing() else 0.0
 	_scene_gravity = body.get_current_gravity()
