@@ -79,7 +79,7 @@ static func _remove_quarantine_tree(dir_path: String) -> void:
 
 func _ready() -> void:
 	title = "插件商城"
-	min_size = Vector2i(720, 520)
+	min_size = Vector2i(800, 520)
 	unresizable = false
 	ok_button_text = "关闭"
 	get_cancel_button().visible = false
@@ -94,13 +94,20 @@ func _build_ui() -> void:
 	main_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_child(main_hbox)
 
-	# 左侧：插件列表
+	# 左侧：插件列表（带水平和竖直滑条）
+	var plugin_scroll := ScrollContainer.new()
+	plugin_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	plugin_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	plugin_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	plugin_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	plugin_scroll.custom_minimum_size = Vector2(300, 0)
+	main_hbox.add_child(plugin_scroll)
+
 	_plugin_list = ItemList.new()
-	_plugin_list.custom_minimum_size = Vector2(300, 0)
-	_plugin_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_plugin_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_plugin_list.auto_height = true
+	_plugin_list.custom_minimum_size = Vector2(600, 0)
 	_plugin_list.item_selected.connect(_on_plugin_selected)
-	main_hbox.add_child(_plugin_list)
+	plugin_scroll.add_child(_plugin_list)
 
 	# 右侧：详情面板
 	_detail_panel = PanelContainer.new()

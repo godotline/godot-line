@@ -102,6 +102,84 @@ New triggers use `CameraFollower.instance.trigger(...)`. Old triggers modify `Ol
 
 Use the editor plugin: **Template > 新建关卡** in the toolbar. Creates `[Scenes]/<name>/<name>.tscn` + `<name>.tres` (LevelData) from template. The plugin deep-copies LevelData and assigns unique saveID.
 
+## Timeline System (`addons/timeline/` + `#Template/[Scripts]/TimeLineExpand/`)
+
+A Unity Timeline clone: editor dock + runtime director + **custom track extension API**.
+
+### Architecture
+
+| Layer | Files | Role |
+|-------|-------|------|
+| Core | `addons/timeline/core/timeline_asset.gd` | `TimelineAsset` — tracks array, duration, deep-duplicate |
+| Core | `addons/timeline/core/timeline_track.gd` | `TimelineTrack` — abstract base; **the extension API** |
+| Core | `addons/timeline/core/timeline_clip.gd` | `TimelineClip` — start/duration/blend_in/blend_out/template |
+| Core | `addons/timeline/core/timeline_behaviour.gd` | `TimelineBehaviour` — per-clip serialized data |
+| Core | `addons/timeline/core/timeline_mixer.gd` | `TimelineMixer` — Unity MixerBehaviour (first-frame cache → blend → restore) |
+| Core | `addons/timeline/core/timeline_director.gd` | `TimelineDirector` (Node) — playback: play/pause/stop/seek, per-track evaluation, clip weights, enter/exit |
+| Core | `addons/timeline/core/timeline_registry.gd` | `TimelineRegistry` (static) — auto-discovers track subclasses via EditorFileSystem |
+| Editor | `addons/timeline/plugin.cfg` + `plugin.gd` | Registers dock (`DOCK_SLOT_BOTTOM`) + inspector plugin |
+| Editor | `addons/timeline/editor/timeline_dock.gd` | Dock UI: toolbar, track rows, ruler, playhead, add-track menu |
+| Demo | `addons/timeline/tracks/*.gd` | Signal/Animation/Transform tracks — proof of extension API |
+| Ports | `#Template/[Scripts]/TimeLineExpand/` | 9 Unity `#TimeLine_ExpandTrack` ports: Fog, Environment, Material, Bloom, DepthOfField, MotionBlur, ColorGrading, Vignette, AmbientOcclusion (each = Track/Clip/Behaviour/Mixer, 36 files) |
+
+### Writing a custom track (extension API)
+
+Create one `.gd` subclassing `TimelineTrack`. The editor's **Add Track** menu picks it up automatically via `TimelineRegistry.discover_editor` (runs in `_enter_tree`; any script whose instance `is TimelineTrack` gets registered; category = parent dir name). No plugin-source changes needed.
+
+```gdscript
+@tool
+class_name MyTrack
+extends TimelineTrack
+
+class MyBehaviour extends TimelineBehaviour:
+	@export var my_value: float = 1.0
+
+class MyClip extends TimelineClip:
+	func _init() -> void:
+		template = MyBehaviour.new()
+
+func _init() -> void:
+	track_color = Color(0.2, 0.8, 0.6)
+
+func get_clip_class() -> Script:
+	return MyClip          # inner-class reference — used by "Add Clip"
+
+func has_mixer() -> bool:
+	return true            # mixer path (Unity CreateTrackMixer) …
+
+func create_mixer() -> TimelineMixer:
+	return MyMixer.new()   # … or use process_clip/on_clip_entered (no mixer)
+```
+
+Mixer contract: `TimelineMixer extends RefCounted`, director sets `mixer.bound` then calls `on_first_frame()` once (guarded by `_first_frame_done`) and `process_frame(inputs, time, delta)` each frame. `inputs` = `Array[Dictionary]` of `{clip, behaviour, weight, clip_time}` (weights ramp via `blend_in`/`blend_out`). `on_playable_destroy()` restores defaults (Unity `OnPlayableDestroy`).
+
+### Director usage
+
+- `TimelineDirector` is a plain Node; `@export var timeline: TimelineAsset` + `autoplay`/`loop`. Dock transport finds the first `TimelineDirector` in the edited scene (add via the dock's "添加 TimelineDirector" button).
+- The director keeps its own `time`; the game's canonical clock is `LevelManager.anim_time`. Tracks may read it for game-sync.
+
+### Godot 4.7 vs Unity port mapping (IMPORTANT — verified)
+
+- **Fog** → `Environment.fog_*`; `FogMode.Linear` ↔ `fog_mode = DEPTH` (fog_depth_begin/end), `Exponential` ↔ `fog_mode = EXPONENTIAL` (fog_density).
+- **Environment (ambient)** → `ambient_light_source` (AmbientSource: BG=0, DISABLED=1, COLOR=2, SKY=3). **No Trilight** — Trilight averages Sky/Equator/Ground into one color.
+- **Material** → bound `GeometryInstance3D` → `material_override` (`StandardMaterial3D`): `albedo_color` + `emission` (HDR native). Unity `[TrackBindingType(typeof(Material))]` → `validate_binding(bound is GeometryInstance3D)`.
+- **Bloom** → **Glow** (`glow_*` on Environment): `glow_intensity`, `glow_hdr_threshold`, `glow_hdr_scale`, `glow_bloom`. No `bloom_*` props exist.
+- **DepthOfField** → **NOT on Environment**; lives on `CameraAttributesPractical` (assigned to `Camera3D.attributes`): `dof_blur_amount`, `dof_blur_far_*`, `dof_blur_near_*`. Mixer creates it if absent.
+- **MotionBlur / Vignette** → **removed in Godot 4** — ports are deliberate no-ops (data preserved, `process_frame` does nothing; comment documents it).
+- **ColorGrading** → `adjustment_*` (+ `tonemap_mode` ToneMapper: LINEAR=0, REINHARDT=1, FILMIC=2, ACES=3, AGX=4). `white_balance_*` does NOT exist (temperature/tint kept as data, not applied).
+- **AmbientOcclusion** → **`ssao_*`** on Environment (`ssao_intensity`, `ssao_radius`, `ssao_enabled`). No `ambient_occlusion_*` props.
+- All mixers resolve the target Environment via: bound `WorldEnvironment` → bound `Camera3D` → `Player.instance.get_scene_camera()` (null-guarded), mirroring `SetFog.gd`.
+
+### Editor plugin notes
+
+- plugin.cfg lives at the **addon root** (`addons/timeline/plugin.cfg`), not in `editor/`.
+- Dock removal uses `remove_control_from_docks` (plural — no singular method in 4.7). Dock slot `DOCK_SLOT_BOTTOM`.
+- All dock mutations are undo-wrapped via `EditorInterface.get_editor_undo_redo()` (AGENTS.md `@tool` convention).
+- Acceptance test asset: `addons/timeline/test/TestTimeline.tres` (TimelineAsset with Fog + Environment tracks and clips — proves ported-track serialization).
+- Demo scene: `addons/timeline/test/TimelineDemo.tscn` + `TimelineDemo.tres` — WorldEnvironment + DemoCamera + DemoCube + TimelineDirector (autoplay) with 4 tracks: Fog (mixer), Environment (mixer), Bloom (mixer, bound to camera), Transform (non-mixer process_clip path, moves/rotates DemoCube). Run it with **F6 (Run Current Scene)** or open it in the editor to see the dock's transport drive the director.
+- Demo track structure: the 3 demo tracks in `addons/timeline/tracks/` use the **4-file layout** (Track/Clip/Behaviour as separate files with `class_name`) so they serialize in `.tres` — inner classes (e.g. `class TransformClip` inside the track file) do NOT deserialize correctly from `.tres` (typed arrays reject them), so keep Clip/Behaviour as standalone `class_name` files.
+- GDScript gotcha: `Color.TRANSPARENT` is `(1,1,1,0)` in Godot, not `(0,0,0,0)` — always init blend accumulators with `Color(0, 0, 0, 0)`.
+
 ## Common Pitfalls
 
 - `LevelManager` is `RefCounted`, not a `Node`. It has no `_process`, no scene tree position. All members are static.
