@@ -173,7 +173,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = horizontal_velocity.x
 		velocity.z = horizontal_velocity.z
 		if is_live and is_on_wall() and not noDeath:
-			die()
+			die(true, LevelManager.GameStatus.Died, true)
 		if fly:
 			$".".position.y = y
 
@@ -696,8 +696,8 @@ func _on_Area_body_entered(_body: Node) -> void:
 	if not is_live or noDeath:
 		return
 
-	die()
-func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = LevelManager.GameStatus.Died) -> void:
+	die(true, LevelManager.GameStatus.Died, true)
+func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = LevelManager.GameStatus.Died, has_collision: bool = false) -> void:
 	if !noclip:
 		is_live = false
 		LevelManager.GameState = death_state
@@ -713,42 +713,26 @@ func die(spawn_particles: bool = true, death_state: LevelManager.GameStatus = Le
 		if spawn_particles:
 			$AudioStreamPlayer.play()
 
-		if not spawn_particles or not deathParticle:
+		# 对齐 Unity：!showLineBody ? null : cubesPrefab — 隐藏身体时不生成碎片
+		# 对齐 Unity：collision?.contacts.Length > 0 — 无碰撞（如 K 键）不爆炸
+		if not spawn_particles or not deathParticle or not show_line_body or not has_collision:
 			return
 
-		var forward_dir: Vector3 = velocity.normalized() if velocity.length() > 0.01 else Vector3.FORWARD
-		var backward_dir: Vector3 = -forward_dir
-
-		for i in 8:
-			var deathParticle_instance: RigidBody3D = deathParticle.instantiate()
-			deathParticle_instance.collision_layer = 1
-			deathParticle_instance.add_to_group("death_particles")
-			var parent: Node = get_parent()
-			if not parent:
-				push_error("Player.gd: 不在场景树中，无法生成死亡粒子")
-				return
-			parent.add_child(deathParticle_instance)
-			var death_mesh: MeshInstance3D = deathParticle_instance.get_node_or_null("MeshInstance3D") as MeshInstance3D
-			if death_mesh:
-				death_mesh.mesh = mesh
-				death_mesh.material_override = material
-			else:
-				push_error("Player.gd: 死亡粒子实例缺少 MeshInstance3D 子节点")
-			deathParticle_instance.global_position = global_position
-			deathParticle_instance.linear_damp = 0.5
-			var random_rot: Vector3 = _random_rotation()
-			deathParticle_instance.rotation = random_rot
-
-			var direction: Vector3 = forward_dir if i < 4 else backward_dir
-			var impulse: Vector3 = direction * speed + _rand_dir() * 0.5
-			deathParticle_instance.apply_central_impulse(impulse)
-			deathParticle_instance.apply_torque(_rand_dir())
-
-func _rand_dir() -> Vector3:
-	return Vector3(randf_range(-speed, speed), randf_range(-speed, speed), randf_range(-speed, speed))
-
-func _random_rotation() -> Vector3:
-	return Vector3(randf_range(0, 360), randf_range(0, 360), randf_range(0, 360))
+		var parent: Node = get_parent()
+		if not parent:
+			push_error("Player.gd: 不在场景树中，无法生成死亡粒子")
+			return
+		var cubes: PlayerCubes = deathParticle.instantiate() as PlayerCubes
+		if not cubes:
+			push_error("Player.gd: deathParticle 必须是 PlayerCubes 场景")
+			return
+		parent.add_child(cubes)
+		cubes.add_to_group("death_particles")
+		cubes.global_position = global_position
+		# 对齐 Unity：Object.Instantiate(cubes, player.transform.position, player.transform.rotation)
+		cubes.rotation = rotation
+		cubes.setup(mesh, material)
+		cubes.play(speed)
 
 ## StartPage 设置变化回调：更新 Player 字段 + 立即持久化 + 实时应用音量
 ## 对齐 Unity SetLatency.cs 的 AddLatency/SubtractLatency/AddVolume/SubtractVolume + SetText + PlayerPrefs.SetFloat

@@ -1,0 +1,118 @@
+[gd_scene format=3 uid="uid://vz84hvotc2fxh"]
+
+[ext_resource type="Script" uid="uid://927sgxo5fgm6b" path="res://#Template/[Scripts]/Level/PlayerCubes.gd" id="1_cubes"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xq6xi"]
+friction = 0.5
+bounce = 0.5
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tb4tw"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_5jtns"]
+
+[node name="PlayerCubes" type="Node3D"]
+script = ExtResource("1_cubes")
+
+[node name="Fragment1" type="RigidBody3D" parent="."]
+visible = false
+freeze = true
+collision_layer = 2
+collision_mask = 6
+physics_material_override = SubResource("PhysicsMaterial_xq6xi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment1"]
+shape = SubResource("BoxShape3D_tb4tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment1"]
+mesh = SubResource("BoxMesh_5jtns")
+
+[node name="Fragment2" type="RigidBody3D" parent="."]
+visible = false
+freeze = true
+collision_layer = 2
+collision_mask = 6
+physics_material_override = SubResource("PhysicsMaterial_xq6xi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment2"]
+shape = SubResource("BoxShape3D_tb4tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment2"]
+mesh = SubResource("BoxMesh_5jtns")
+
+[node name="Fragment3" type="RigidBody3D" parent="."]
+visible = false
+freeze = true
+collision_layer = 2
+collision_mask = 6
+physics_material_override = SubResource("PhysicsMaterial_xq6xi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment3"]
+shape = SubResource("BoxShape3D_tb4tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment3"]
+mesh = SubResource("BoxMesh_5jtns")
+
+[node name="Fragment4" type="RigidBody3D" parent="."]
+visible = false
+freeze = true
+collision_layer = 2
+collision_mask = 6
+physics_material_override = SubResource("PhysicsMaterial_xq6xi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment4"]
+shape = SubResource("BoxShape3D_tb4tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment4"]
+mesh = SubResource("BoxMesh_5jtns")
+
+[node name="Fragment5" type="RigidBody3D" parent="."]
+visible = false
+freeze = true
+collision_layer = 2
+collision_mask = 6
+physics_material_override = SubResource("PhysicsMaterial_xq6xi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment5"]
+shape = SubResource("BoxShape3D_tb4tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment5"]
+mesh = SubResource("BoxMesh_5jtns")
+
+[node name="Fragment6" type="RigidBody3D" parent="."]
+visible = false
+freeze = true
+collision_layer = 2
+collision_mask = 6
+physics_material_override = SubResource("PhysicsMaterial_xq6xi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment6"]
+shape = SubResource("BoxShape3D_tb4tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment6"]
+mesh = SubResource("BoxMesh_5jtns")
+
+[node name="Fragment7" type="RigidBody3D" parent="."]
+visible = false
+freeze = true
+collision_layer = 2
+collision_mask = 6
+physics_material_override = SubResource("PhysicsMaterial_xq6xi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment7"]
+shape = SubResource("BoxShape3D_tb4tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment7"]
+mesh = SubResource("BoxMesh_5jtns")
+
+[node name="Fragment8" type="RigidBody3D" parent="."]
+visible = false
+freeze = true
+collision_layer = 2
+collision_mask = 6
+physics_material_override = SubResource("PhysicsMaterial_xq6xi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment8"]
+shape = SubResource("BoxShape3D_tb4tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment8"]
+mesh = SubResource("BoxMesh_5jtns")
