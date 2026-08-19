@@ -47,6 +47,7 @@ var sprirt: GPUParticles3D
 var tail: GPUParticles3D
 var aura: GPUParticles3D
 var gemLight: OmniLight3D
+var spawnedFragments: Array[RigidBody3D] = []
 
 func _ready() -> void:
 	contentRoot = _resolve_content_root()
@@ -160,6 +161,7 @@ func _spawn_fragments() -> void:
 		var fragment: RigidBody3D = FRAGMENT_SCENE.instantiate() as RigidBody3D
 		fragment.name = "GemFragment_%02d" % index
 		fragmentParent.add_child(fragment)
+		spawnedFragments.append(fragment)
 		fragment.global_position = contentRoot.global_position
 		var scaleFactor: float = randf_range(FRAGMENT_SCALE_MIN, FRAGMENT_SCALE_MAX)
 		var fragmentMesh: MeshInstance3D = fragment.get_node("MeshInstance3D") as MeshInstance3D
@@ -189,6 +191,8 @@ func _spawn_fragments() -> void:
 		shrinkTween.finished.connect(fragment.queue_free)
 
 func _on_revive() -> void:
+	# Unity Gem.ResetData: 复活时销毁收集特效 (Destroy(effect))
+	_clear_fragments()
 	# 只有在宝石之后存档才恢复（存档点索引 >= 宝石索引）
 	var shouldRestore: bool = index >= LevelManager.checkpointCount
 	if shouldRestore:
@@ -206,6 +210,12 @@ func _on_revive() -> void:
 			countedInGemTotal = false
 	_reset_collection_effect()
 	LevelManager.remove_revive_listener(_on_revive)
+
+func _clear_fragments() -> void:
+	for fragment: RigidBody3D in spawnedFragments:
+		if is_instance_valid(fragment):
+			fragment.queue_free()
+	spawnedFragments.clear()
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or not contentRoot or not sprirt:

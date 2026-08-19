@@ -38,6 +38,7 @@ var scanQuad: MeshInstance3D
 var crystalThunder: MeshInstance3D
 var aura: GPUParticles3D
 var crystalLight: OmniLight3D
+var spawnedFragments: Array[RigidBody3D] = []
 
 func _ready() -> void:
 	contentRoot = _resolve_content_root()
@@ -138,6 +139,7 @@ func _spawn_fragments() -> void:
 		var fragment: RigidBody3D = FRAGMENT_SCENE.instantiate() as RigidBody3D
 		fragment.name = "CrystalFragment_%02d" % index
 		fragmentParent.add_child(fragment)
+		spawnedFragments.append(fragment)
 		fragment.global_position = contentRoot.global_position
 		var scaleFactor: float = randf_range(FRAGMENT_SCALE_MIN, FRAGMENT_SCALE_MAX)
 		var fragmentMesh: MeshInstance3D = fragment.get_node("MeshInstance3D") as MeshInstance3D
@@ -183,6 +185,11 @@ func _start_lightning() -> void:
 	crystalLight.visible = true
 
 func _on_revive() -> void:
+	# Unity Crystal.ResetData: 复活时销毁收集特效 (Destroy(effect))
+	for fragment: RigidBody3D in spawnedFragments:
+		if is_instance_valid(fragment):
+			fragment.queue_free()
+	spawnedFragments.clear()
 	LevelManager.CompareCheckpointIndex(index, func():
 		got = false
 		_set_crystal_mesh_visible(true)
