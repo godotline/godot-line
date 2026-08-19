@@ -216,11 +216,8 @@ func _reset_collection_effect() -> void:
 		return
 	sprirtActive = false
 	sprirtElapsed = SPRIRT_LIFETIME
-	sprirt.restart()
 	sprirt.emitting = false
-	tail.restart()
 	tail.emitting = false
-	aura.restart()
 	aura.emitting = false
 	collectionLightElapsed = COLLECTION_LIGHT_DURATION
 	gemLight.light_energy = 0.0

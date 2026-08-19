@@ -206,7 +206,6 @@ func _reset_scan() -> void:
 	scanQuad.visible = false
 	if crystalThunder:
 		crystalThunder.visible = false
-	aura.restart()
 	aura.emitting = false
 	if crystalLight:
 		crystalLight.light_energy = 0.0
