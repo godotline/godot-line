@@ -7,44 +7,16 @@
 [ext_resource type="Texture2D" uid="uid://ibq6myi7ifde" path="res://#Template/[Resources]/CrownOutline.png" id="6_outline"]
 [ext_resource type="Texture2D" uid="uid://mj12gw3q1d3w" path="res://#Template/[Resources]/FX_CrownCircle.png" id="7_circle"]
 [ext_resource type="Texture2D" uid="uid://c4rc47thiqgln" path="res://#Template/[Resources]/Spirit.png" id="8_spirit"]
-[ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="9_trigger"]
+[ext_resource type="Script" uid="uid://bb5lh2cc1yfy4" path="res://#Template/[Scripts]/Trigger/BaseTrigger.gd" id="10_base"]
 
+[sub_resource type="BoxShape3D" id="2"]
+size = Vector3(1, 5, 10)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qoafd"]
 albedo_color = Color(1, 1, 0, 1)
 albedo_texture = ExtResource("3_ctg82")
 
-[sub_resource type="BoxShape3D" id="2"]
-
 [sub_resource type="BoxMesh" id="BoxMesh_t50w7"]
-
-[sub_resource type="Gradient" id="Gradient_dklm7"]
-offsets = PackedFloat32Array(0, 0.11895161, 1)
-colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_8wqky"]
-gradient = SubResource("Gradient_dklm7")
-
-[sub_resource type="Curve" id="Curve_scale"]
-_data = [Vector2(0, 0.49344832), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="CurveTexture" id="CurveTexture_scale"]
-curve = SubResource("Curve_scale")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_aura"]
-angle_min = 45.00001
-angle_max = 270.0
-direction = Vector3(0, 1, 0)
-spread = 25.0
-angular_velocity_min = -20.0
-angular_velocity_max = 20.0
-gravity = Vector3(0, 0, 0)
-scale_max = 2.0
-scale_curve = SubResource("CurveTexture_scale")
-color_ramp = SubResource("GradientTexture1D_8wqky")
-sub_emitter_mode = 4
-sub_emitter_amount_at_start = 1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_particle_aura"]
 transparency = 1
@@ -63,23 +35,13 @@ particles_anim_loop = false
 material = SubResource("StandardMaterial3D_particle_aura")
 size = Vector2(2, 2)
 
-[sub_resource type="Gradient" id="Gradient_bfifm"]
-offsets = PackedFloat32Array(0, 0.110887095, 1)
-colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.5411765, 1, 1, 1, 0)
+[sub_resource type="Curve" id="Curve_scale"]
+_data = [Vector2(0, 0.49344832), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_d4clj"]
-gradient = SubResource("Gradient_bfifm")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_circle"]
-direction = Vector3(0, 1, 0)
-spread = 25.0
-angular_velocity_min = -20.0
-angular_velocity_max = 20.0
-gravity = Vector3(0, 0, 0)
-scale_min = 0.125
-scale_max = 0.5
-scale_curve = SubResource("CurveTexture_scale")
-color_ramp = SubResource("GradientTexture1D_d4clj")
+[sub_resource type="Gradient" id="Gradient_dklm7"]
+offsets = PackedFloat32Array(0, 0.11895161, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_particle_circle"]
 transparency = 1
@@ -98,27 +60,32 @@ particles_anim_loop = false
 material = SubResource("StandardMaterial3D_particle_circle")
 size = Vector2(2, 2)
 
+[sub_resource type="Gradient" id="Gradient_bfifm"]
+offsets = PackedFloat32Array(0, 0.110887095, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.5411765, 1, 1, 1, 0)
+
 [node name="Crown" type="Node3D" unique_id=1805653336]
 
-[node name="Area3D" parent="." instance=ExtResource("9_trigger")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+[node name="Area3D" type="Area3D" parent="." unique_id=220972321]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0, 0, 0)
 collision_layer = 0
+script = ExtResource("10_base")
 requirePlaying = false
 
-[node name="CrownCheckpoint" type="Node3D" parent="Area3D"]
+[node name="CrownCheckpoint" type="Node3D" parent="Area3D" unique_id=1220123700]
 script = ExtResource("2")
 
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1426000116]
+shape = SubResource("2")
+debug_color = Color(0, 1, 0, 1)
+
+[node name="Marker3D" type="Marker3D" parent="Area3D" unique_id=1046499379]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+gizmo_extents = 0.5
+
 [node name="Crown" type="MeshInstance3D" parent="." unique_id=1455513811]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 mesh = ExtResource("1")
 surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
-
-[node name="CollisionShape3D" parent="Area3D" index="0"]
-transform = Transform3D(7.071068, 0, 1.4142135, 0, 5, 0, -7.071068, 0, 1.4142135, 0, 0, 0)
-shape = SubResource("2")
-
-[node name="Marker3D" parent="Area3D" index="1"]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="RevivePosition" type="MeshInstance3D" parent="." unique_id=1500499588]
 mesh = SubResource("BoxMesh_t50w7")
@@ -126,32 +93,48 @@ mesh = SubResource("BoxMesh_t50w7")
 [node name="CrownSprite" type="Node3D" parent="." unique_id=1095474833]
 transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)
 
-[node name="CrownOutline" type="Sprite3D" parent="CrownSprite"]
-texture = ExtResource("6_outline")
+[node name="CrownOutline" type="Sprite3D" parent="CrownSprite" unique_id=1273809823]
 modulate = Color(0, 0, 0, 1)
 render_priority = 1
+texture = ExtResource("6_outline")
 
-[node name="CrownInside" type="Sprite3D" parent="CrownSprite"]
-texture = ExtResource("5_inside")
+[node name="CrownInside" type="Sprite3D" parent="CrownSprite" unique_id=1957055081]
 modulate = Color(1, 0.807843, 0, 0)
+texture = ExtResource("5_inside")
 
-[node name="FX_CrownAura" type="GPUParticles3D" parent="." unique_id=268301850]
+[node name="FX_CrownAura" type="CPUParticles3D" parent="." unique_id=268301850]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 emitting = false
 amount = 5
-sub_emitter = NodePath("FX_CrownCircle")
 one_shot = true
 explosiveness = 1.0
 randomness = 0.1
 local_coords = true
-process_material = SubResource("ParticleProcessMaterial_aura")
-draw_pass_1 = SubResource("QuadMesh_aura")
+mesh = SubResource("QuadMesh_aura")
+direction = Vector3(0, 1, 0)
+spread = 25.0
+gravity = Vector3(0, 0, 0)
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+angle_min = 45.00001
+angle_max = 270.0
+scale_amount_max = 2.0
+scale_amount_curve = SubResource("Curve_scale")
+color_ramp = SubResource("Gradient_dklm7")
 
-[node name="FX_CrownCircle" type="GPUParticles3D" parent="FX_CrownAura" unique_id=2030689913]
+[node name="FX_CrownCircle" type="CPUParticles3D" parent="FX_CrownAura" unique_id=2030689913]
 emitting = false
 amount = 5
 one_shot = true
 explosiveness = 1.0
 local_coords = true
-process_material = SubResource("ParticleProcessMaterial_circle")
-draw_pass_1 = SubResource("QuadMesh_circle")
+mesh = SubResource("QuadMesh_circle")
+direction = Vector3(0, 1, 0)
+spread = 25.0
+gravity = Vector3(0, 0, 0)
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+scale_amount_min = 0.125
+scale_amount_max = 0.5
+scale_amount_curve = SubResource("Curve_scale")
+color_ramp = SubResource("Gradient_bfifm")

@@ -1,34 +1,46 @@
 [gd_scene format=3 uid="uid://dbpinli4l82jf"]
 
-[sub_resource type="Curve" id="Curve_7clfx"]
+[ext_resource type="Texture2D" path="res://#Template/[Resources]/Particle.png" id="1_particle"]
+
+[sub_resource type="Curve" id="Curve_scale"]
 _data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]
 point_count = 2
 
-[sub_resource type="CurveTexture" id="CurveTexture_dpsif"]
-curve = SubResource("Curve_7clfx")
+[sub_resource type="Gradient" id="Gradient_dust"]
+offsets = PackedFloat32Array(0, 0.1, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0)
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_7clfx"]
-spread = 180.0
-flatness = 1.0
-initial_velocity_min = 2.0
-initial_velocity_max = 2.0
-gravity = Vector3(0, 0, 0)
-scale_curve = SubResource("CurveTexture_dpsif")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ty8qn"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dust"]
+transparency = 1
 shading_mode = 0
-disable_receive_shadows = true
+vertex_color_use_as_albedo = true
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("1_particle")
+billboard_mode = 3
+billboard_keep_scale = true
 
-[sub_resource type="SphereMesh" id="SphereMesh_jntxg"]
-material = SubResource("StandardMaterial3D_ty8qn")
+[sub_resource type="QuadMesh" id="QuadMesh_dust"]
+material = SubResource("StandardMaterial3D_dust")
+size = Vector2(1, 1)
 
-[node name="Dust" type="GPUParticles3D"]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+[node name="Dust" type="CPUParticles3D"]
 emitting = false
-amount = 16
-lifetime = 0.5
+amount = 40
+lifetime = 1.0
+lifetime_randomness = 0.75
 one_shot = true
 explosiveness = 1.0
 fixed_fps = 60
-process_material = SubResource("ParticleProcessMaterial_7clfx")
-draw_pass_1 = SubResource("SphereMesh_jntxg")
+direction = Vector3(1, 0, 0)
+spread = 180.0
+flatness = 1.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 4.0
+initial_velocity_max = 6.0
+damping_min = 3.0
+damping_max = 3.0
+scale_amount_min = 0.5
+scale_amount_max = 1.5
+scale_amount_curve = SubResource("Curve_scale")
+color_ramp = SubResource("Gradient_dust")
+mesh = SubResource("QuadMesh_dust")

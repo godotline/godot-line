@@ -8,7 +8,8 @@ const AURA_TWEEN_DURATION: float = 1.25
 
 var crownMeshRenderer: MeshInstance3D
 var crownRenderer: Sprite3D
-var crownAura: GPUParticles3D
+var crownAura: CPUParticles3D
+var crownCircle: CPUParticles3D
 var crownTween: Tween
 var auraTween: Tween
 var particleDisappearTween: Tween
@@ -23,7 +24,8 @@ func _ready() -> void:
 	crownRenderer = container.get_node_or_null("CrownSprite/CrownInside") as Sprite3D
 	if not crownRenderer:
 		crownRenderer = container.get_node_or_null("CrownSprite") as Sprite3D
-	crownAura = container.get_node_or_null("FX_CrownAura") as GPUParticles3D
+	crownAura = container.get_node_or_null("FX_CrownAura") as CPUParticles3D
+	crownCircle = container.get_node_or_null("FX_CrownAura/FX_CrownCircle") as CPUParticles3D
 	if crownAura:
 		_init_particles()
 	call_deferred("_connect_player_start")
@@ -75,8 +77,7 @@ func _take_crown() -> void:
 	_stop_crown_animations()
 	_refresh_particles_color()
 	crownAura.global_position = crownMeshRenderer.global_position
-	crownAura.restart()
-	crownAura.emitting = true
+	_play_particles()
 
 	var targetPosition: Vector3 = crownRenderer.global_position
 	var halfDuration: float = AURA_TWEEN_DURATION / 2.0
@@ -114,8 +115,7 @@ func _show_spirit() -> void:
 	AnimateCrown(true)
 
 func _on_aura_tween_finished() -> void:
-	if crownAura:
-		crownAura.emitting = false
+	_stop_particles()
 	auraTween = null
 
 func AnimateCrown(show: bool) -> void:
@@ -135,9 +135,8 @@ func AnimateCrown(show: bool) -> void:
 		return
 	usedParticalDisappear = true
 	_stop_particle_disappear()
-	crownAura.restart()
-	crownAura.emitting = true
 	crownAura.global_position = crownRenderer.global_position
+	_play_particles()
 	particleDisappearTween = create_tween()
 	var spiritMotion: PropertyTweener = particleDisappearTween.tween_property(
 		crownAura,
@@ -153,18 +152,32 @@ func _on_crown_tween_finished() -> void:
 func _refresh_particles_color() -> void:
 	_set_particle_color(auraColor)
 
+# CPUParticles3D 无 sub-emitter，FX_CrownCircle 由代码与 aura 并行触发
+func _play_particles() -> void:
+	if not crownAura:
+		return
+	crownAura.restart()
+	crownAura.emitting = true
+	if crownCircle:
+		crownCircle.restart()
+		crownCircle.emitting = true
+
+func _stop_particles() -> void:
+	if crownAura:
+		crownAura.emitting = false
+	if crownCircle:
+		crownCircle.emitting = false
+
 func _set_particle_color(color: Color) -> void:
 	if not crownAura:
 		return
-	var systems: Array[GPUParticles3D] = [crownAura]
+	var systems: Array[CPUParticles3D] = [crownAura]
 	for child: Node in crownAura.get_children():
-		var system: GPUParticles3D = child as GPUParticles3D
+		var system: CPUParticles3D = child as CPUParticles3D
 		if system:
 			systems.append(system)
-	for system: GPUParticles3D in systems:
-		var processMaterial: ParticleProcessMaterial = system.process_material as ParticleProcessMaterial
-		if processMaterial:
-			processMaterial.color = color
+	for system: CPUParticles3D in systems:
+		system.color = color
 
 func _stop_crown_fade() -> void:
 	if crownTween and crownTween.is_valid():

@@ -28,6 +28,12 @@
 </p>
 
 <p align="center">
+  <a href="https://www.cnblogs.com/mmme/p/-/tutorial">
+    <img src="https://img.shields.io/badge/%F0%9F%93%96%20%E6%A8%A1%E6%9D%BF%E6%89%8B%E5%86%8C-%E7%82%B9%E5%87%BB%E6%9F%A5%E7%9C%8B-ff6b6b?style=for-the-badge&logo=readthedocs&logoColor=white" alt="模板手册">
+  </a>
+</p>
+
+<p align="center">
   <a href="#-特性">特性</a> •
   <a href="#-快速开始">快速开始</a> •
   <a href="#-输入控制">输入控制</a> •

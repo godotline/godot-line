@@ -186,9 +186,10 @@ func _process(delta: float) -> void:
 		_move_head(delta)
 
 	var isOnFloorNow: bool = is_on_floor() or fly
-	if isOnFloorNow and not pastIsOnFloorEffect:
-		_play_land_effect()
-		emit_signal("on_touch_ground")
+	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
+		if isOnFloorNow and not pastIsOnFloorEffect:
+			_play_land_effect()
+			emit_signal("on_touch_ground")
 	pastIsOnFloorEffect = isOnFloorNow
 
 	if isOnFloorNow:
@@ -596,7 +597,7 @@ func _resume_fake_players() -> void:
 			fake.state = FakePlayer.State.Moving
 
 func _play_land_effect() -> void:
-	var dust: GPUParticles3D = dustParticle.instantiate() as GPUParticles3D
+	var dust: CPUParticles3D = dustParticle.instantiate() as CPUParticles3D
 	get_tree().current_scene.add_child(dust)
 	dust.global_position = global_position + Vector3(0, -0.5, 0)
 	dust.restart()
