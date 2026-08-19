@@ -14,9 +14,6 @@ size = Vector2(2, 2)
 offsets = PackedFloat32Array(0, 0.0662089, 0.334493, 1)
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_crystal_aura"]
-gradient = SubResource("Gradient_crystal_aura")
-
 [sub_resource type="Curve" id="Curve_crystal_aura_scale"]
 _limits = [0.0, 4.0, 0.0, 1.0]
 _data = [Vector2(0, 0.79310346), 1.4613726, 1.4613726, 0, 0, Vector2(1, 4), 0.4642752, 0.4642752, 0, 0]
@@ -79,5 +76,5 @@ angular_velocity_max = 20.0
 gravity = Vector3(0, 0, 0)
 scale_amount_max = 2.0
 scale_amount_curve = SubResource("CurveTexture_crystal_aura_scale")
-color_ramp = SubResource("GradientTexture1D_crystal_aura")
+color_ramp = SubResource("Gradient_crystal_aura")
 mesh = SubResource("QuadMesh_crystal_aura")

@@ -22,9 +22,6 @@ albedo_texture = ExtResource("3_ctg82")
 offsets = PackedFloat32Array(0, 0.11895161, 1)
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_8wqky"]
-gradient = SubResource("Gradient_dklm7")
-
 [sub_resource type="Curve" id="Curve_scale"]
 _data = [Vector2(0, 0.49344832), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
@@ -52,9 +49,6 @@ size = Vector2(2, 2)
 [sub_resource type="Gradient" id="Gradient_bfifm"]
 offsets = PackedFloat32Array(0, 0.110887095, 1)
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.5411765, 1, 1, 1, 0)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_d4clj"]
-gradient = SubResource("Gradient_bfifm")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_particle_circle"]
 transparency = 1
@@ -127,7 +121,7 @@ angular_velocity_max = 20.0
 gravity = Vector3(0, 0, 0)
 scale_amount_max = 2.0
 scale_amount_curve = SubResource("CurveTexture_scale")
-color_ramp = SubResource("GradientTexture1D_8wqky")
+color_ramp = SubResource("Gradient_dklm7")
 mesh = SubResource("QuadMesh_aura")
 
 [node name="FX_CrownCircle" type="CPUParticles3D" parent="FX_CrownAura" unique_id=2030689913]
@@ -144,5 +138,5 @@ gravity = Vector3(0, 0, 0)
 scale_amount_min = 0.125
 scale_amount_max = 0.5
 scale_amount_curve = SubResource("CurveTexture_scale")
-color_ramp = SubResource("GradientTexture1D_d4clj")
+color_ramp = SubResource("Gradient_bfifm")
 mesh = SubResource("QuadMesh_circle")

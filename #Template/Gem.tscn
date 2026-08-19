@@ -13,9 +13,6 @@ radius = 0.375
 offsets = PackedFloat32Array(0, 0.5382925, 1)
 colors = PackedColorArray(1, 1, 1, 0.49019608, 1, 1, 1, 0.49019608, 1, 1, 1, 0)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_gem_sprirt"]
-gradient = SubResource("Gradient_gem_sprirt")
-
 [sub_resource type="Curve" id="Curve_gem_sprirt_scale"]
 max_value = 5.0
 _data = [Vector2(0, 0.9051723), 0.0, 0.0, 0, 0, Vector2(0.8390244, 5), 0.0, 0.0, 0, 0]
@@ -28,15 +25,9 @@ curve = SubResource("Curve_gem_sprirt_scale")
 offsets = PackedFloat32Array(0, 0.0662089, 0.334493, 1)
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.39215687, 1, 1, 1, 0.39215687, 1, 1, 1, 0)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_gem_tail"]
-gradient = SubResource("Gradient_gem_tail")
-
 [sub_resource type="Gradient" id="Gradient_gem_aura"]
 offsets = PackedFloat32Array(0, 0.0662089, 0.334493, 1)
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_gem_aura"]
-gradient = SubResource("Gradient_gem_aura")
 
 [sub_resource type="Curve" id="Curve_gem_aura_scale"]
 max_value = 4.0
@@ -138,7 +129,7 @@ initial_velocity_max = 0.0
 scale_amount_min = 1.0
 scale_amount_max = 1.0
 scale_amount_curve = SubResource("CurveTexture_gem_sprirt_scale")
-color_ramp = SubResource("GradientTexture1D_gem_sprirt")
+color_ramp = SubResource("Gradient_gem_sprirt")
 mesh = SubResource("QuadMesh_gem_aura")
 
 [node name="Tail" type="CPUParticles3D" parent="." unique_id=1137045705]
@@ -158,7 +149,7 @@ initial_velocity_max = 0.0
 scale_amount_min = 0.2
 scale_amount_max = 0.4
 scale_amount_curve = SubResource("CurveTexture_gem_aura_scale")
-color_ramp = SubResource("GradientTexture1D_gem_tail")
+color_ramp = SubResource("Gradient_gem_tail")
 mesh = SubResource("QuadMesh_gem_aura")
 
 [node name="Aura" type="CPUParticles3D" parent="." unique_id=1137045704]
@@ -182,7 +173,7 @@ initial_velocity_max = 0.0
 scale_amount_min = 1.0
 scale_amount_max = 2.0
 scale_amount_curve = SubResource("CurveTexture_gem_aura_scale")
-color_ramp = SubResource("GradientTexture1D_gem_aura")
+color_ramp = SubResource("Gradient_gem_aura")
 mesh = SubResource("QuadMesh_gem_aura")
 
 [node name="GemLight" type="OmniLight3D" parent="." unique_id=1137045706]
