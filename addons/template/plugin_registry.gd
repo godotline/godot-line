@@ -17,15 +17,15 @@ static func get_template_version() -> String:
 	return str(config.get_value("plugin", "version", "")).strip_edges()
 
 
-static func fetch_plugins(owner_node: Node, source_url: String = DEFAULT_MANIFEST_URL) -> Array[PluginEntry]:
+static func fetch_plugins(owner_node: Node, sourceUrl: String = DEFAULT_MANIFEST_URL) -> Array[PluginEntry]:
 	last_load_warning = ""
-	var manifest_url: String = source_url.strip_edges()
-	if manifest_url.is_empty():
-		manifest_url = DEFAULT_MANIFEST_URL
+	var manifestUrl: String = sourceUrl.strip_edges()
+	if manifestUrl.is_empty():
+		manifestUrl = DEFAULT_MANIFEST_URL
 	var http: HTTPRequest = HTTPRequest.new()
 	owner_node.add_child(http)
-	var request_error: int = http.request(manifest_url, ["Accept: application/json", "User-Agent: GodotLine-PluginStore"])
-	if request_error != OK:
+	var requestError: int = http.request(manifestUrl, ["Accept: application/json", "User-Agent: GodotLine-PluginStore"])
+	if requestError != OK:
 		http.queue_free()
 		last_load_warning = "无法连接远程插件清单，已使用内置清单"
 		return get_all_plugins()
@@ -37,19 +37,19 @@ static func fetch_plugins(owner_node: Node, source_url: String = DEFAULT_MANIFES
 		return get_all_plugins()
 
 	var json: JSON = JSON.new()
-	var parse_error: Error = json.parse((result[3] as PackedByteArray).get_string_from_utf8())
-	if parse_error != OK or not json.data is Dictionary:
+	var parseError: Error = json.parse((result[3] as PackedByteArray).get_string_from_utf8())
+	if parseError != OK or not json.data is Dictionary:
 		last_load_warning = "远程插件清单格式无效，已使用内置清单"
 		return get_all_plugins()
 
 	var manifest: Dictionary = json.data
-	var raw_plugins: Variant = manifest.get("plugins", [])
-	if not raw_plugins is Array:
+	var rawPlugins: Variant = manifest.get("plugins", [])
+	if not rawPlugins is Array:
 		last_load_warning = "远程插件清单缺少 plugins 数组，已使用内置清单"
 		return get_all_plugins()
 
 	var plugins: Array[PluginEntry] = []
-	for raw_entry: Variant in raw_plugins:
+	for raw_entry: Variant in rawPlugins:
 		if raw_entry is Dictionary:
 			var entry: PluginEntry = _entry_from_dictionary(raw_entry as Dictionary)
 			if entry != null:
@@ -78,7 +78,7 @@ static func get_all_plugins() -> Array[PluginEntry]:
 		"https://github.com/godotline/plugin_mpm_importer",
 		""
 	)
-	mpm.download_urls = [{
+	mpm.downloadUrls = [{
 		"name": "GitHub",
 		"url": "https://github.com/godotline/plugin_mpm_importer/archive/refs/tags/v0.1.0.zip"
 	}]
@@ -89,39 +89,39 @@ static func get_all_plugins() -> Array[PluginEntry]:
 
 
 ## 根据 id 查找插件
-static func find_plugin(plugin_id: String) -> PluginEntry:
+static func find_plugin(pluginId: String) -> PluginEntry:
 	for entry: PluginEntry in get_all_plugins():
-		if entry.id == plugin_id:
+		if entry.id == pluginId:
 			return entry
 	return null
 
 
 static func _entry_from_dictionary(data: Dictionary) -> PluginEntry:
-	var plugin_id: String = str(data.get("id", "")).strip_edges()
+	var pluginId: String = str(data.get("id", "")).strip_edges()
 	var owner: String = str(data.get("github_owner", data.get("author", ""))).strip_edges()
 	var repo: String = str(data.get("github_repo", "")).strip_edges()
-	if plugin_id.is_empty():
+	if pluginId.is_empty():
 		return null
 	var homepage: String = str(data.get("homepage", "")).strip_edges()
 	if homepage.is_empty() and not owner.is_empty() and not repo.is_empty():
 		homepage = "https://github.com/%s/%s" % [owner, repo]
 	var entry: PluginEntry = PluginEntry.new(
-		plugin_id,
-		str(data.get("display_name", plugin_id)),
+		pluginId,
+		str(data.get("display_name", pluginId)),
 		str(data.get("description", "")),
 		owner,
 		repo,
 		str(data.get("branch", "main")),
-		str(data.get("sub_dir", "addons/%s" % plugin_id)),
-		str(data.get("dest_path", "res://addons/%s" % plugin_id)),
+		str(data.get("sub_dir", "addons/%s" % pluginId)),
+		str(data.get("dest_path", "res://addons/%s" % pluginId)),
 		str(data.get("version", "1.0")),
 		homepage,
 		str(data.get("icon_url", ""))
 	)
 	entry.author = str(data.get("author", owner))
-	entry.download_urls = _parse_download_urls(data.get("download_urls", []))
+	entry.downloadUrls = _parse_download_urls(data.get("download_urls", []))
 	entry.md5 = str(data.get("md5", "")).strip_edges().to_lower()
-	entry.min_template_version = str(data.get("min_template_version", "")).strip_edges()
+	entry.minTemplateVersion = str(data.get("min_template_version", "")).strip_edges()
 	return entry
 
 
@@ -130,17 +130,17 @@ static func _parse_download_urls(raw_sources: Variant) -> Array[Dictionary]:
 	if not raw_sources is Array:
 		return sources
 	for raw_source: Variant in raw_sources:
-		var source_name: String = ""
-		var source_url: String = ""
+		var sourceName: String = ""
+		var sourceUrl: String = ""
 		if raw_source is Dictionary:
-			var source_data: Dictionary = raw_source as Dictionary
-			source_name = str(source_data.get("name", source_data.get("label", ""))).strip_edges()
-			source_url = str(source_data.get("url", "")).strip_edges()
+			var sourceData: Dictionary = raw_source as Dictionary
+			sourceName = str(sourceData.get("name", sourceData.get("label", ""))).strip_edges()
+			sourceUrl = str(sourceData.get("url", "")).strip_edges()
 		elif raw_source is String:
-			source_url = str(raw_source).strip_edges()
-		if source_url.is_empty():
+			sourceUrl = str(raw_source).strip_edges()
+		if sourceUrl.is_empty():
 			continue
-		if source_name.is_empty():
-			source_name = "下载源 %d" % (sources.size() + 1)
-		sources.append({"name": source_name, "url": source_url})
+		if sourceName.is_empty():
+			sourceName = "下载源 %d" % (sources.size() + 1)
+		sources.append({"name": sourceName, "url": sourceUrl})
 	return sources

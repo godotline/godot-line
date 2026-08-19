@@ -2,10 +2,10 @@ extends Node
 ## SetFog - 雾设置组件
 ## 由父节点 BaseTrigger 触发，用 Tween 过渡场景环境雾设置
 
-@export var fog_settings: FogSettings
+@export var fog: FogSettings
 @export var duration: float = 2.0
-@export var ease_type: Tween.EaseType = Tween.EASE_IN_OUT
-@export var trans_type: Tween.TransitionType = Tween.TRANS_LINEAR
+@export var ease: Tween.EaseType = Tween.EASE_IN_OUT
+@export var transType: Tween.TransitionType = Tween.TRANS_LINEAR
 
 signal on_animation_start
 signal on_animation_end
@@ -16,7 +16,7 @@ func trigger(body: Node3D) -> void:
 		apply_fog()
 
 func apply_fog() -> void:
-	if not fog_settings:
+	if not fog:
 		return
 	
 	var camera: Camera3D = get_viewport().get_camera_3d()
@@ -35,15 +35,15 @@ func apply_fog() -> void:
 	on_animation_start.emit()
 	
 	# 设置雾是否启用
-	env.fog_enabled = fog_settings.use_fog
+	env.fog_enabled = fog.useFog
 	
-	if fog_settings.use_fog:
+	if fog.useFog:
 		var tween: Tween = create_tween()
-		tween.set_ease(ease_type)
-		tween.set_trans(trans_type)
-		tween.tween_property(env, "fog_light_color", fog_settings.fog_color, duration)
-		tween.parallel().tween_property(env, "fog_depth_begin", fog_settings.start, duration)
-		tween.parallel().tween_property(env, "fog_depth_end", fog_settings.end, duration)
+		tween.set_ease(ease)
+		tween.set_trans(transType)
+		tween.tween_property(env, "fog_light_color", fog.fogColor, duration)
+		tween.parallel().tween_property(env, "fog_depth_begin", fog.start, duration)
+		tween.parallel().tween_property(env, "fog_depth_end", fog.end, duration)
 		tween.tween_callback(func(): on_animation_end.emit())
 	else:
 		on_animation_end.emit()

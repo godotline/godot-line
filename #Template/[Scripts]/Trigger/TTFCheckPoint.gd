@@ -6,51 +6,51 @@ class_name TTFCheckPoint
 
 @export_group("TTF Visuals")
 @export var rotator: Node3D
-@export var checkpoint_gem: Node3D
-@export var checkpoint_text: Node3D
-@export var rotation_speed: float = 90.0
-@export var bob_frequency: float = 2.0
-@export var bob_amplitude: float = 0.005
-@export var text_target_z: float = 100.0
-@export var text_move_duration: float = 1.5
+@export var checkpointGem: Node3D
+@export var checkPointText: Node3D
+@export var rotationSpeed: float = 90.0
+@export var bobFrequency: float = 2.0
+@export var bobAmplitude: float = 0.005
+@export var textTargetZ: float = 100.0
+@export var textMoveDuration: float = 1.5
 
-var _rotator_start_position: Vector3 = Vector3.ZERO
-var _visual_time: float = 0.0
+var rotatorStartPosition: Vector3 = Vector3.ZERO
+var visualTime: float = 0.0
 
 func _ready() -> void:
 	super._ready()
 	if not rotator:
-		rotator = _checkpoint_container.get_node_or_null("Rotator") as Node3D
-	if not checkpoint_gem and rotator:
-		checkpoint_gem = rotator.get_node_or_null("CheckPoint_Gem/Area3D/Gem") as Node3D
-	if not checkpoint_text:
-		checkpoint_text = _checkpoint_container.get_node_or_null("CheckPointText") as Node3D
+		rotator = checkpointContainer.get_node_or_null("Rotator") as Node3D
+	if not checkpointGem and rotator:
+		checkpointGem = rotator.get_node_or_null("CheckPoint_Gem/Area3D/Gem") as Node3D
+	if not checkPointText:
+		checkPointText = checkpointContainer.get_node_or_null("CheckPointText") as Node3D
 	if rotator:
-		_rotator_start_position = rotator.position
+		rotatorStartPosition = rotator.position
 
 func _process(delta: float) -> void:
-	if not rotator or not _checkpoint_container or not _checkpoint_container.visible:
+	if not rotator or not checkpointContainer or not checkpointContainer.visible:
 		return
-	_visual_time += delta
-	rotator.rotate_y(deg_to_rad(rotation_speed) * delta)
-	var offset_y: float = sin(_visual_time * bob_frequency) * bob_amplitude
-	rotator.position = _rotator_start_position + Vector3.UP * offset_y
+	visualTime += delta
+	rotator.rotate_y(deg_to_rad(rotationSpeed) * delta)
+	var offsetY: float = sin(visualTime * bobFrequency) * bobAmplitude
+	rotator.position = rotatorStartPosition + Vector3.UP * offsetY
 
 func _on_checkpoint_body_entered(body: Node3D) -> void:
-	enter_trigger(body)
+	EnterTrigger(body)
 
-func enter_trigger(body: Node3D) -> void:
+func EnterTrigger(body: Node3D) -> void:
 	if used or not body is Player:
 		return
 
 	_enter_trigger(body)
-	if checkpoint_gem and checkpoint_gem.has_method("pick_up"):
-		checkpoint_gem.call("pick_up", false)
+	if checkpointGem and checkpointGem.has_method("pick_up"):
+		checkpointGem.call("pick_up", false)
 	_move_checkpoint_text()
 
 func _move_checkpoint_text() -> void:
-	if not checkpoint_text:
+	if not checkPointText:
 		return
-	var tween: Tween = checkpoint_text.create_tween()
+	var tween: Tween = checkPointText.create_tween()
 	tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tween.tween_property(checkpoint_text, "position:z", text_target_z, text_move_duration)
+	tween.tween_property(checkPointText, "position:z", textTargetZ, textMoveDuration)

@@ -5,8 +5,8 @@ extends Node
 @export var type: Pyramid.TriggerType = Pyramid.TriggerType.Open
 
 @export_group("Final设置")
-@export var change_direction: bool = false
-@export var final_direction: Vector3 = Vector3.ZERO
+@export var changeDirection: bool = false
+@export var finalDirection: Vector3 = Vector3.ZERO
 
 func trigger(body: Node3D) -> void:
 	# FakePlayer 也使用 CharacterBody3D 宿主，不能把它当作真实玩家触发金字塔。
@@ -18,9 +18,9 @@ func trigger(body: Node3D) -> void:
 		push_error("PyramidTrigger.gd: BaseTrigger 的父节点不是 Pyramid，无法触发")
 		return
 	pyramid.trigger(type)
-	if type == Pyramid.TriggerType.Final and change_direction:
+	if type == Pyramid.TriggerType.Final and changeDirection:
 		var player: Player = Player.instance
 		if player:
-			player.firstDirection = final_direction
-			player.secondDirection = final_direction
-			player.turn()
+			player.firstDirection = finalDirection
+			player.secondDirection = finalDirection
+			player.Turn()

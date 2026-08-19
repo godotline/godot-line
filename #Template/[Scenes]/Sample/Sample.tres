@@ -4,13 +4,13 @@
 [ext_resource type="Script" uid="uid://cpejwvo4pns1" path="res://#Template/[Scripts]/Settings/SingleColor.gd" id="2_fprqh"]
 [ext_resource type="Material" uid="uid://yr2s0ybyebck" path="res://#Template/[Materials]/Diamond.tres" id="3_arvs6"]
 [ext_resource type="Material" uid="uid://jitnvfywue03" path="res://#Template/[Materials]/MainPlayer.tres" id="4_ik288"]
-[ext_resource type="AudioStream" uid="uid://dh17kvleseoac" path="res://#Template/[Music]/Sample.mp3" id="5_wa2rs"]
+[ext_resource type="AudioStream" uid="uid://bap46y5j11f0b" path="res://#Template/[Music]/SampleTrack.mp3" id="5_wa2rs"]
 [ext_resource type="Script" uid="uid://dwvw82b5c55ey" path="res://#Template/[Scripts]/Settings/LevelData.gd" id="6_5d8pd"]
 
 [sub_resource type="Resource" id="Resource_1icaj"]
 script = ExtResource("1_8vicd")
 name = "meny233"
-page_url = "https://space.bilibili.com/340916655"
+pageURL = "https://space.bilibili.com/340916655"
 metadata/_custom_type_script = "uid://cb0rklrw2kuc3"
 
 [sub_resource type="Resource" id="Resource_c57ag"]

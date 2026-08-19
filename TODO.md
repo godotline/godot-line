@@ -56,7 +56,7 @@
 | P2 | Player | musicVolume 独立字段 | ✓ | ✓ | `musicVolume` 和 `musicDelay` 已添加到 Player.gd |
 | P2 | Player | Editor 工具 | ✓ | ✓ | `direction_gizmo_plugin.gd` 四向辅助线；场景 Transform 即起点；FPS 由 DebugOverlay 提供 |
 | P3 | Level | PlayerCubes | ✓ | ✓ | 玩家死亡碎块由 `DeathParticle.tscn` 等效，轨迹路面由 RoadPaver 负责 |
-| P3 | Trigger | TTFCheckPoint 系列 | ✓ | ✓ | `TTFCheckPoint.tscn` 与三个对应脚本已移植 |
+| P3 | Trigger | TTFCheckPoint 系列 | ✓ | ✓ | 四个对应脚本已移植（DLMTP 无对应 prefab，故无 `.tscn`） |
 | P3 | Assets | 3D 模型 / 材质 | 6 OBJ, 16 MAT | ✓ | 源目录 6 个 OBJ 均已导入；可完整翻译的缺失材质已补 `.tres`，Unity 自定义 Shader 由现有 Godot Shader 等效 |
 | P3 | Assets | 音乐文件 | 2 首 | ✓ | 源目录实际只有 `SampleTrack.mp3`、`Shake_It_Up.ogg`，均已导入；原有 `Sample.mp3` 保留 |
 | — | 系统 | BaseTrigger | ✓ | ✓ | Area3D 触发器基类，含 one_shot、require_playing、track_exit、debug_mode |

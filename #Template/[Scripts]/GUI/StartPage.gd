@@ -4,68 +4,68 @@ class_name StartPage
 
 signal start_requested
 signal info_button_pressed
-signal autoplay_toggled(is_on: bool)
+signal autoplay_toggled(isOn: bool)
 signal setting_changed(key: String, value: Variant)
-signal shadow_toggled(is_on: bool)
-signal post_toggled(is_on: bool)
+signal shadow_toggled(isOn: bool)
+signal post_toggled(isOn: bool)
 
-@onready var _ui_container: Control = $UIContainer
-@onready var main_panel: Panel = $UIContainer/MainPanel
-@onready var autoplay_area: HBoxContainer = $UIContainer/RightArea
-@onready var top_bar: HBoxContainer = $UIContainer/TopBar
-@onready var info_btn: Button = $UIContainer/InfoButton
-@onready var bottom_bar: Panel = $UIContainer/BottomBar
-@onready var about_panel: Panel = $UIContainer/AboutPanel
-@onready var about_content: Panel = $UIContainer/AboutPanel/AboutContent
-@onready var about_canvas: Control = $UIContainer/AboutPanel/AboutContent
-@onready var about_hide_canvas: Node = $UIContainer/AboutPanel/AboutContent/HideCanvas
+@onready var uiContainer: Control = $UIContainer
+@onready var mainPanel: Panel = $UIContainer/MainPanel
+@onready var autoplayArea: HBoxContainer = $UIContainer/RightArea
+@onready var topBar: HBoxContainer = $UIContainer/TopBar
+@onready var infoBtn: Button = $UIContainer/InfoButton
+@onready var bottomBar: Panel = $UIContainer/BottomBar
+@onready var aboutPanel: Panel = $UIContainer/AboutPanel
+@onready var aboutContent: Panel = $UIContainer/AboutPanel/AboutContent
+@onready var aboutCanvas: Control = $UIContainer/AboutPanel/AboutContent
+@onready var aboutHideCanvas: Node = $UIContainer/AboutPanel/AboutContent/HideCanvas
 # Setting item mode constants
 const MODE_CYCLIC: int = 0
 const MODE_RANGE: int = 1
 const MODE_LATENCY: int = 2
 
-@onready var _set_auto_play: Node = $SetAutoPlay
+@onready var setAutoPlay: Node = $SetAutoPlay
 
 # Inlined checkbox item references
-@onready var autoplay_checkbox: CheckBox = $UIContainer/RightArea/AutoPlayToggle/CheckBox
-@onready var autoplay_label: Label = $UIContainer/RightArea/AutoPlayToggle/ItemLabel
-@onready var shadow_checkbox: CheckBox = $UIContainer/BottomBar/HBox/ShadowToggle/CheckBox
-@onready var shadow_label: Label = $UIContainer/BottomBar/HBox/ShadowToggle/ItemLabel
-@onready var post_checkbox: CheckBox = $UIContainer/BottomBar/HBox/PostToggle/CheckBox
-@onready var post_label: Label = $UIContainer/BottomBar/HBox/PostToggle/ItemLabel
+@onready var autoplayCheckbox: CheckBox = $UIContainer/RightArea/AutoPlayToggle/CheckBox
+@onready var autoplayLabel: Label = $UIContainer/RightArea/AutoPlayToggle/ItemLabel
+@onready var shadowCheckbox: CheckBox = $UIContainer/BottomBar/HBox/ShadowToggle/CheckBox
+@onready var shadowLabel: Label = $UIContainer/BottomBar/HBox/ShadowToggle/ItemLabel
+@onready var postCheckbox: CheckBox = $UIContainer/BottomBar/HBox/PostToggle/CheckBox
+@onready var postLabel: Label = $UIContainer/BottomBar/HBox/PostToggle/ItemLabel
 
 # Setting item state dictionary: key -> state
-var _setting_states: Dictionary = {}
+var settingStates: Dictionary = {}
 
-var _about_visible: bool = false
+var aboutVisible: bool = false
 
 func _ready() -> void:
 	_init_setting_states()
 	_apply_ported_visuals()
 	_populate_about_from_level_data()
 	if OS.has_feature("template"):
-		autoplay_area.visible = false
-		if _set_auto_play:
-			_set_auto_play.queue_free()
+		autoplayArea.visible = false
+		if setAutoPlay:
+			setAutoPlay.queue_free()
 	else:
 		await get_tree().process_frame
-		if _set_auto_play and _set_auto_play.has_method("get_auto"):
-			autoplay_checkbox.button_pressed = _set_auto_play.get_auto()
+		if setAutoPlay and setAutoPlay.has_method("get_auto"):
+			autoplayCheckbox.button_pressed = setAutoPlay.get_auto()
 
 func _apply_ported_visuals() -> void:
-	var left_icon: Texture2D = load("res://#Template/[Resources]/GUI/arrow_left.png") as Texture2D
-	var right_icon: Texture2D = load("res://#Template/[Resources]/GUI/arrow_right.png") as Texture2D
-	for state: Dictionary in _setting_states.values():
-		var left_buttons: Array[Button] = [state.arrow_left, state.arrow_fine_left, state.arrow_coarse_left]
-		var right_buttons: Array[Button] = [state.arrow_right, state.arrow_fine_right, state.arrow_coarse_right]
-		for button: Button in left_buttons:
+	var leftIcon: Texture2D = load("res://#Template/[Resources]/GUI/arrow_left.png") as Texture2D
+	var rightIcon: Texture2D = load("res://#Template/[Resources]/GUI/arrow_right.png") as Texture2D
+	for state: Dictionary in settingStates.values():
+		var leftButtons: Array[Button] = [state.arrowLeft, state.arrowFineLeft, state.arrowCoarseLeft]
+		var rightButtons: Array[Button] = [state.arrowRight, state.arrowFineRight, state.arrowCoarseRight]
+		for button: Button in leftButtons:
 			button.text = ""
-			button.icon = left_icon
+			button.icon = leftIcon
 			button.expand_icon = true
 			button.custom_minimum_size = Vector2(36.0, 36.0)
-		for button: Button in right_buttons:
+		for button: Button in rightButtons:
 			button.text = ""
-			button.icon = right_icon
+			button.icon = rightIcon
 			button.expand_icon = true
 			button.custom_minimum_size = Vector2(36.0, 36.0)
 
@@ -87,37 +87,37 @@ func _init_setting_states() -> void:
 	# --- Latency (LATENCY) ---
 	var lt: Dictionary = _create_setting_state("latency", $UIContainer/BottomBar/HBox/LatencyItem)
 	lt.mode = MODE_LATENCY
-	lt.min_val = -5.0
-	lt.max_val = 5.0
+	lt.minVal = -5.0
+	lt.maxVal = 5.0
 	lt.step = 0.01
 	lt.value = 0.0
 	lt.suffix = "ms"
-	lt.arrow_left.visible = false
-	lt.arrow_right.visible = false
-	lt.arrow_coarse_left.visible = true
-	lt.arrow_fine_left.visible = true
-	lt.arrow_coarse_right.visible = true
-	lt.arrow_fine_right.visible = true
+	lt.arrowLeft.visible = false
+	lt.arrowRight.visible = false
+	lt.arrowCoarseLeft.visible = true
+	lt.arrowFineLeft.visible = true
+	lt.arrowCoarseRight.visible = true
+	lt.arrowFineRight.visible = true
 	_update_setting_display(lt)
 
 	# --- Volume (RANGE) ---
 	var vl: Dictionary = _create_setting_state("volume", $UIContainer/BottomBar/HBox/VolumeItem)
 	vl.mode = MODE_RANGE
-	vl.min_val = 0.0
-	vl.max_val = 1.0
+	vl.minVal = 0.0
+	vl.maxVal = 1.0
 	vl.step = 0.1
 	vl.value = 1.0
 	vl.suffix = "%"
 	_update_setting_display(vl)
 
 	# --- Checkbox items ---
-	autoplay_label.text = "AUTOPLAY"
-	autoplay_label.add_theme_color_override("font_color", Color(1, 0, 0))
-	autoplay_label.add_theme_font_size_override("font_size", 16)
+	autoplayLabel.text = "AUTOPLAY"
+	autoplayLabel.add_theme_color_override("font_color", Color(1, 0, 0))
+	autoplayLabel.add_theme_font_size_override("font_size", 16)
 
-	autoplay_checkbox.toggled.connect(_on_autoplay_toggled)
-	shadow_checkbox.toggled.connect(_on_shadow_toggled)
-	post_checkbox.toggled.connect(_on_post_toggled)
+	autoplayCheckbox.toggled.connect(_on_autoplay_toggled)
+	shadowCheckbox.toggled.connect(_on_shadow_toggled)
+	postCheckbox.toggled.connect(_on_post_toggled)
 
 func _populate_about_from_level_data() -> void:
 	# Player 使用 class_name + static var instance 模式
@@ -127,23 +127,23 @@ func _populate_about_from_level_data() -> void:
 	var ld: LevelData = player.levelData
 
 	# 设置标题
-	var title_node: Node = about_content.find_child("about_title", true)
-	if title_node is Label:
-		title_node.text = ld.levelTitle
+	var titleNode: Node = aboutContent.find_child("about_title", true)
+	if titleNode is Label:
+		titleNode.text = ld.levelTitle
 
 	# 设置作者列表（带可点击 URL，与 Unity 版 StartPage 一致）
-	var author_container: Node = about_content.find_child("about_authors", true)
-	if author_container:
-		for child in author_container.get_children():
+	var authorContainer: Node = aboutContent.find_child("about_authors", true)
+	if authorContainer:
+		for child in authorContainer.get_children():
 			child.queue_free()
 		for a in ld.authors:
 			var btn: Button = Button.new()
 			btn.text = a.name
 			btn.flat = true
 			btn.add_theme_font_size_override("font_size", 16)
-			if a.page_url:
-				btn.pressed.connect(_open_author_url.bind(a.page_url))
-			author_container.add_child(btn)
+			if a.pageURL:
+				btn.pressed.connect(_open_author_url.bind(a.pageURL))
+			authorContainer.add_child(btn)
 
 static func _open_author_url(url: String) -> void:
 	OS.shell_open(url)
@@ -156,28 +156,28 @@ func _on_main_panel_gui_input(event: InputEvent) -> void:
 		start_requested.emit()
 
 func _on_autoplay_hit_target_pressed() -> void:
-	var is_on: bool = not autoplay_checkbox.button_pressed
-	autoplay_checkbox.set_pressed_no_signal(is_on)
-	_on_autoplay_toggled(is_on)
+	var isOn: bool = not autoplayCheckbox.button_pressed
+	autoplayCheckbox.set_pressed_no_signal(isOn)
+	_on_autoplay_toggled(isOn)
 
 # === About show/hide animation ===
 
 func _show_about() -> void:
-	if _about_visible:
+	if aboutVisible:
 		return
-	_about_visible = true
-	about_panel.visible = true
-	if about_canvas.has_method("show_canvas"):
-		about_canvas.call("show_canvas")
+	aboutVisible = true
+	aboutPanel.visible = true
+	if aboutCanvas.has_method("show_canvas"):
+		aboutCanvas.call("show_canvas")
 
 func _hide_about() -> void:
-	if not _about_visible:
+	if not aboutVisible:
 		return
-	_about_visible = false
-	if about_hide_canvas.has_method("hide_canvas"):
-		about_hide_canvas.call("hide_canvas")
+	aboutVisible = false
+	if aboutHideCanvas.has_method("hide_canvas"):
+		aboutHideCanvas.call("hide_canvas")
 func _on_about_hide_finished() -> void:
-	about_panel.visible = false
+	aboutPanel.visible = false
 
 # === Public API ===
 
@@ -189,34 +189,34 @@ func hide_animated() -> void:
 		return
 
 	# 让所有子节点无视鼠标事件，确保事件穿透到 3D 场景
-	for child in _ui_container.get_children():
+	for child in uiContainer.get_children():
 		if child is Control:
 			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var tween: Tween = create_tween().set_parallel()
 
-	if top_bar and is_instance_valid(top_bar):
-		tween.tween_property(top_bar, "offset_top", -top_bar.size.y - 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
-		tween.tween_property(top_bar, "modulate:a", 0.0, 0.35)
+	if topBar and is_instance_valid(topBar):
+		tween.tween_property(topBar, "offset_top", -topBar.size.y - 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+		tween.tween_property(topBar, "modulate:a", 0.0, 0.35)
 
-	if autoplay_area and is_instance_valid(autoplay_area):
-		tween.tween_property(autoplay_area, "offset_top", -autoplay_area.size.y - 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
-		tween.tween_property(autoplay_area, "modulate:a", 0.0, 0.35)
+	if autoplayArea and is_instance_valid(autoplayArea):
+		tween.tween_property(autoplayArea, "offset_top", -autoplayArea.size.y - 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+		tween.tween_property(autoplayArea, "modulate:a", 0.0, 0.35)
 
-	if about_content and is_instance_valid(about_content):
-		tween.tween_property(about_content, "modulate:a", 0.0, 0.35)
-		tween.tween_property(about_content, "position:y", get_viewport().get_visible_rect().size.y + 100, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	if aboutContent and is_instance_valid(aboutContent):
+		tween.tween_property(aboutContent, "modulate:a", 0.0, 0.35)
+		tween.tween_property(aboutContent, "position:y", get_viewport().get_visible_rect().size.y + 100, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 
-	if bottom_bar and is_instance_valid(bottom_bar):
-		tween.tween_property(bottom_bar, "offset_top", get_viewport().get_visible_rect().size.y + 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
-		tween.tween_property(bottom_bar, "modulate:a", 0.0, 0.35)
+	if bottomBar and is_instance_valid(bottomBar):
+		tween.tween_property(bottomBar, "offset_top", get_viewport().get_visible_rect().size.y + 20, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+		tween.tween_property(bottomBar, "modulate:a", 0.0, 0.35)
 
-	if info_btn and is_instance_valid(info_btn):
-		tween.tween_property(info_btn, "offset_left", -60, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
-		tween.tween_property(info_btn, "modulate:a", 0.0, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	if infoBtn and is_instance_valid(infoBtn):
+		tween.tween_property(infoBtn, "offset_left", -60, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+		tween.tween_property(infoBtn, "modulate:a", 0.0, 0.35).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 
-	if main_panel and is_instance_valid(main_panel):
-		tween.tween_property(main_panel, "modulate:a", 0.0, 0.45)
+	if mainPanel and is_instance_valid(mainPanel):
+		tween.tween_property(mainPanel, "modulate:a", 0.0, 0.45)
 
 	tween.finished.connect(_on_hide_finished)
 
@@ -224,28 +224,28 @@ func _on_hide_finished() -> void:
 	queue_free()
 
 func set_about_content(title: String, authors: Array, credits: String) -> void:
-	var title_node: Node = about_content.find_child("about_title", true)
-	if title_node is Label:
-		title_node.text = title
+	var titleNode: Node = aboutContent.find_child("about_title", true)
+	if titleNode is Label:
+		titleNode.text = title
 
-	var author_container: Node = about_content.find_child("about_authors", true)
-	if author_container:
-		for child in author_container.get_children():
+	var authorContainer: Node = aboutContent.find_child("about_authors", true)
+	if authorContainer:
+		for child in authorContainer.get_children():
 			child.queue_free()
 		for author in authors:
 			var lbl: Label = Label.new()
 			lbl.text = str(author)
 			lbl.add_theme_font_size_override("font_size", 16)
-			author_container.add_child(lbl)
+			authorContainer.add_child(lbl)
 
-	var credits_node: Node = about_content.find_child("about_credits", true)
-	if credits_node is Label:
-		credits_node.text = credits
+	var creditsNode: Node = aboutContent.find_child("about_credits", true)
+	if creditsNode is Label:
+		creditsNode.text = credits
 
 func set_setting(key: String, value: Variant) -> void:
-	if not _setting_states.has(key):
+	if not settingStates.has(key):
 		return
-	var state: Dictionary = _setting_states[key]
+	var state: Dictionary = settingStates[key]
 	if state.mode == MODE_CYCLIC:
 		var idx: int = state.options.find(value)
 		if idx >= 0:
@@ -253,65 +253,65 @@ func set_setting(key: String, value: Variant) -> void:
 		elif state.options.size() > 0:
 			push_warning("StartPage.set_setting: value '%s' not found in options" % str(value))
 	else:
-		state.value = clampf(float(value), state.min_val, state.max_val)
+		state.value = clampf(float(value), state.minVal, state.maxVal)
 	_update_setting_display(state)
 
 func get_setting(key: String) -> Variant:
-	if _setting_states.has(key):
-		return _get_setting_value(_setting_states[key])
+	if settingStates.has(key):
+		return _get_setting_value(settingStates[key])
 	return null
 
 func _create_setting_state(key: String, root: VBoxContainer) -> Dictionary:
-	var title_label: Label = root.get_node_or_null("TitleLabel") as Label
-	var value_label: Label = root.get_node_or_null("Controls/ValueLabel") as Label
-	var arrow_left: Button = root.get_node_or_null("Controls/ArrowLeft") as Button
-	var arrow_right: Button = root.get_node_or_null("Controls/ArrowRight") as Button
-	var arrow_coarse_left: Button = root.get_node_or_null("Controls/ArrowCoarseLeft") as Button
-	var arrow_fine_left: Button = root.get_node_or_null("Controls/ArrowFineLeft") as Button
-	var arrow_coarse_right: Button = root.get_node_or_null("Controls/ArrowCoarseRight") as Button
-	var arrow_fine_right: Button = root.get_node_or_null("Controls/ArrowFineRight") as Button
-	if not title_label or not value_label or not arrow_left or not arrow_right or not arrow_coarse_left or not arrow_fine_left or not arrow_coarse_right or not arrow_fine_right:
+	var titleLabel: Label = root.get_node_or_null("TitleLabel") as Label
+	var valueLabel: Label = root.get_node_or_null("Controls/ValueLabel") as Label
+	var arrowLeft: Button = root.get_node_or_null("Controls/ArrowLeft") as Button
+	var arrowRight: Button = root.get_node_or_null("Controls/ArrowRight") as Button
+	var arrowCoarseLeft: Button = root.get_node_or_null("Controls/ArrowCoarseLeft") as Button
+	var arrowFineLeft: Button = root.get_node_or_null("Controls/ArrowFineLeft") as Button
+	var arrowCoarseRight: Button = root.get_node_or_null("Controls/ArrowCoarseRight") as Button
+	var arrowFineRight: Button = root.get_node_or_null("Controls/ArrowFineRight") as Button
+	if not titleLabel or not valueLabel or not arrowLeft or not arrowRight or not arrowCoarseLeft or not arrowFineLeft or not arrowCoarseRight or not arrowFineRight:
 		push_error("StartPage.gd: 设置项 '%s' 的 UI 子节点缺失，请检查场景结构" % key)
 	var state: Dictionary = {
 		key = key,
 		root = root,
-		title_label = title_label,
-		value_label = value_label,
-		arrow_left = arrow_left,
-		arrow_right = arrow_right,
-		arrow_coarse_left = arrow_coarse_left,
-		arrow_fine_left = arrow_fine_left,
-		arrow_coarse_right = arrow_coarse_right,
-		arrow_fine_right = arrow_fine_right,
+		titleLabel = titleLabel,
+		valueLabel = valueLabel,
+		arrowLeft = arrowLeft,
+		arrowRight = arrowRight,
+		arrowCoarseLeft = arrowCoarseLeft,
+		arrowFineLeft = arrowFineLeft,
+		arrowCoarseRight = arrowCoarseRight,
+		arrowFineRight = arrowFineRight,
 		mode = MODE_CYCLIC,
 		options = [],
 		index = 0,
 		value = 0.0,
-		min_val = 0.0, max_val = 100.0, step = 1.0,
+		minVal = 0.0, maxVal = 100.0, step = 1.0,
 		suffix = "",
 	}
-	_setting_states[key] = state
+	settingStates[key] = state
 
-	state.arrow_left.pressed.connect(_on_setting_left.bind(state))
-	state.arrow_right.pressed.connect(_on_setting_right.bind(state))
-	state.arrow_coarse_left.pressed.connect(_on_setting_coarse_left.bind(state))
-	state.arrow_fine_left.pressed.connect(_on_setting_fine_left.bind(state))
-	state.arrow_coarse_right.pressed.connect(_on_setting_coarse_right.bind(state))
-	state.arrow_fine_right.pressed.connect(_on_setting_fine_right.bind(state))
+	state.arrowLeft.pressed.connect(_on_setting_left.bind(state))
+	state.arrowRight.pressed.connect(_on_setting_right.bind(state))
+	state.arrowCoarseLeft.pressed.connect(_on_setting_coarse_left.bind(state))
+	state.arrowFineLeft.pressed.connect(_on_setting_fine_left.bind(state))
+	state.arrowCoarseRight.pressed.connect(_on_setting_coarse_right.bind(state))
+	state.arrowFineRight.pressed.connect(_on_setting_fine_right.bind(state))
 
 	return state
 
 func _update_setting_display(state: Dictionary) -> void:
 	match state.mode:
 		MODE_CYCLIC:
-			state.value_label.text = str(state.options[state.index]) if state.options.size() > 0 else ""
+			state.valueLabel.text = str(state.options[state.index]) if state.options.size() > 0 else ""
 		MODE_RANGE, MODE_LATENCY:
-			var display_val: Variant = state.value
+			var displayVal: Variant = state.value
 			if state.suffix == "ms":
-				display_val = round(state.value * 1000)
+				displayVal = round(state.value * 1000)
 			elif state.suffix == "%":
-				display_val = round(state.value * 100)
-			state.value_label.text = str(display_val) + state.suffix
+				displayVal = round(state.value * 100)
+			state.valueLabel.text = str(displayVal) + state.suffix
 
 func _get_setting_value(state: Dictionary) -> Variant:
 	if state.mode == MODE_CYCLIC:
@@ -327,7 +327,7 @@ func _on_setting_left(state: Dictionary) -> void:
 				return
 			state.index = (state.index - 1 + state.options.size()) % state.options.size()
 		MODE_RANGE, MODE_LATENCY:
-			state.value = clampf(state.value - state.step, state.min_val, state.max_val)
+			state.value = clampf(state.value - state.step, state.minVal, state.maxVal)
 	setting_changed.emit(state.key, _get_setting_value(state))
 	_update_setting_display(state)
 
@@ -338,31 +338,31 @@ func _on_setting_right(state: Dictionary) -> void:
 				return
 			state.index = (state.index + 1) % state.options.size()
 		MODE_RANGE, MODE_LATENCY:
-			state.value = clampf(state.value + state.step, state.min_val, state.max_val)
+			state.value = clampf(state.value + state.step, state.minVal, state.maxVal)
 	setting_changed.emit(state.key, _get_setting_value(state))
 	_update_setting_display(state)
 
 func _on_setting_fine_left(state: Dictionary) -> void:
 	if state.mode == MODE_LATENCY:
-		state.value = max(state.min_val, state.value - 0.001)
+		state.value = max(state.minVal, state.value - 0.001)
 		setting_changed.emit(state.key, state.value)
 		_update_setting_display(state)
 
 func _on_setting_fine_right(state: Dictionary) -> void:
 	if state.mode == MODE_LATENCY:
-		state.value = min(state.max_val, state.value + 0.001)
+		state.value = min(state.maxVal, state.value + 0.001)
 		setting_changed.emit(state.key, state.value)
 		_update_setting_display(state)
 
 func _on_setting_coarse_left(state: Dictionary) -> void:
 	if state.mode == MODE_LATENCY:
-		state.value = max(state.min_val, state.value - 0.01)
+		state.value = max(state.minVal, state.value - 0.01)
 		setting_changed.emit(state.key, state.value)
 		_update_setting_display(state)
 
 func _on_setting_coarse_right(state: Dictionary) -> void:
 	if state.mode == MODE_LATENCY:
-		state.value = min(state.max_val, state.value + 0.01)
+		state.value = min(state.maxVal, state.value + 0.01)
 		setting_changed.emit(state.key, state.value)
 		_update_setting_display(state)
 
@@ -376,13 +376,13 @@ func _on_info_pressed() -> void:
 	info_button_pressed.emit()
 	_show_about()
 
-func _on_autoplay_toggled(is_on: bool) -> void:
-	autoplay_toggled.emit(is_on)
-	if _set_auto_play and _set_auto_play.has_method("SetAuto"):
-		_set_auto_play.SetAuto(is_on)
+func _on_autoplay_toggled(isOn: bool) -> void:
+	autoplay_toggled.emit(isOn)
+	if setAutoPlay and setAutoPlay.has_method("SetAuto"):
+		setAutoPlay.SetAuto(isOn)
 
-func _on_shadow_toggled(is_on: bool) -> void:
-	shadow_toggled.emit(is_on)
+func _on_shadow_toggled(isOn: bool) -> void:
+	shadow_toggled.emit(isOn)
 
-func _on_post_toggled(is_on: bool) -> void:
-	post_toggled.emit(is_on)
+func _on_post_toggled(isOn: bool) -> void:
+	post_toggled.emit(isOn)

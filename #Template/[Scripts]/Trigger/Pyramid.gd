@@ -10,7 +10,7 @@ enum TriggerType {
 	Stop
 }
 
-@export var waiting_time: float = 5.0
+@export var waitingTime: float = 5.0
 
 var left: Node3D
 var right: Node3D
@@ -35,11 +35,11 @@ func trigger(type: TriggerType) -> void:
 
 func _open_door() -> void:
 	if left:
-		var tween_left: Tween = create_tween().set_trans(Tween.TRANS_LINEAR)
-		tween_left.tween_property(left, "position:x", -width, duration)
+		var tweenLeft: Tween = create_tween().set_trans(Tween.TRANS_LINEAR)
+		tweenLeft.tween_property(left, "position:x", -width, duration)
 	if right:
-		var tween_right: Tween = create_tween().set_trans(Tween.TRANS_LINEAR)
-		tween_right.tween_property(right, "position:x", width, duration)
+		var tweenRight: Tween = create_tween().set_trans(Tween.TRANS_LINEAR)
+		tweenRight.tween_property(right, "position:x", width, duration)
 	LevelManager.add_revive_listener(_reset_door)
 
 func _final() -> void:
@@ -48,18 +48,18 @@ func _final() -> void:
 	LevelManager.GameState = LevelManager.GameStatus.Moving
 
 func _waiting() -> void:
-	get_tree().create_timer(waiting_time).timeout.connect(_complete)
+	get_tree().create_timer(waitingTime).timeout.connect(_complete)
 
 func _stop() -> void:
-	stop_player()
+	StopPlayer()
 
 func _complete() -> void:
 	print("关卡结束")
 	if Player.instance:
-		Player.instance.is_end = true
+		Player.instance.isEnd = true
 	LevelManager.GameOverNormal(true)
 
-func stop_player() -> void:
+func StopPlayer() -> void:
 	if LevelManager.GameState != LevelManager.GameStatus.Completed:
 		get_tree().create_timer(1.0).timeout.connect(_complete)
 		LevelManager.GameState = LevelManager.GameStatus.Completed

@@ -1,24 +1,312 @@
-[gd_scene format=3 uid="uid://bvchtbimvb182"]
+[gd_scene load_steps=5 format=3 uid="uid://bvchtbimvb182"]
 
-[ext_resource type="Script" uid="uid://b32sis3h1d0ie" path="res://#Template/[Scripts]/Level/death_particle.gd" id="1_tb4tw"]
+[ext_resource type="Script" uid="uid://b32sis3h1d0ie" path="res://#Template/[Scripts]/Level/PlayerCubes.gd" id="1_tb4tw"]
+[ext_resource type="Material" uid="uid://jitnvfywue03" path="res://#Template/[Materials]/MainPlayer.tres" id="2_main"]
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xq6xi"]
-friction = 0.5
-bounce = 0.5
+[sub_resource type="BoxShape3D" id="BoxShape3D_frag"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_tb4tw"]
+[sub_resource type="BoxMesh" id="BoxMesh_frag"]
+material = ExtResource("2_main")
 
-[sub_resource type="BoxMesh" id="BoxMesh_5jtns"]
-
-[node name="DeathParticle" type="RigidBody3D" unique_id=1855038404]
-collision_layer = 2
-collision_mask = 6
-physics_material_override = SubResource("PhysicsMaterial_xq6xi")
+[node name="DeathParticle" type="Node3D"]
 script = ExtResource("1_tb4tw")
-shrink_delay = 5.0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1292774119]
-shape = SubResource("BoxShape3D_tb4tw")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=303450816]
-mesh = SubResource("BoxMesh_5jtns")
+[node name="Fragment" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment2" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment2"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment2"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment3" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment3"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment3"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment4" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment4"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment4"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment5" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment5"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment5"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment6" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment6"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment6"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment7" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment7"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment7"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment8" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment8"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment8"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment9" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment9"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment9"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment10" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment10"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment10"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment11" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment11"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment11"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment12" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment12"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment12"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment13" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment13"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment13"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment14" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment14"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment14"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment15" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment15"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment15"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment16" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment16"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment16"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment17" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment17"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment17"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment18" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment18"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment18"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment19" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment19"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment19"]
+mesh = SubResource("BoxMesh_frag")
+
+
+[node name="Fragment20" type="RigidBody3D" parent="."]
+visible = false
+mass = 100.0
+angular_damp = 0.05
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fragment20"]
+disabled = true
+shape = SubResource("BoxShape3D_frag")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Fragment20"]
+mesh = SubResource("BoxMesh_frag")

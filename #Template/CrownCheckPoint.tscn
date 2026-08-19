@@ -103,7 +103,7 @@ size = Vector2(2, 2)
 [node name="Area3D" parent="." instance=ExtResource("9_trigger")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 collision_layer = 0
-require_playing = false
+requirePlaying = false
 
 [node name="CrownCheckpoint" type="Node3D" parent="Area3D"]
 script = ExtResource("2")

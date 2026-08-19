@@ -1,14 +1,14 @@
 extends Node3D
 
-@export var base_floor: PackedScene
-@export var road_width: float = 2.0
-@export var road_height: float = 1.0
+@export var baseFloor: PackedScene
+@export var roadWidth: float = 2.0
+@export var roadHeight: float = 1.0
 
 var player: Player
-var road_holder: Node3D
-var road_object: StaticBody3D
+var roadHolder: Node3D
+var roadObject: StaticBody3D
 var road: StaticBody3D
-var road_index: int = 0
+var roadIndex: int = 0
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -20,73 +20,73 @@ func _ready() -> void:
 	if not player:
 		push_error("RoadPaver.gd: Player.instance 未找到，无法铺路")
 		return
-	if not base_floor:
-		push_error("RoadPaver.gd: base_floor 场景为空，无法铺路")
+	if not baseFloor:
+		push_error("RoadPaver.gd: baseFloor 场景为空，无法铺路")
 		return
 
-	var current_scene: Node = get_tree().current_scene
-	if not current_scene:
+	var currentScene: Node = get_tree().current_scene
+	if not currentScene:
 		push_error("RoadPaver.gd: 当前场景为空，无法创建 RoadHolder")
 		return
 
-	road_holder = Node3D.new()
-	road_holder.name = "RoadHolder"
+	roadHolder = Node3D.new()
+	roadHolder.name = "RoadHolder"
 
-	var on_turn: Signal = player.onturn
-	if not on_turn.is_connected(_on_player_turn):
-		on_turn.connect(_on_player_turn)
+	var onTurn: Signal = player.onturn
+	if not onTurn.is_connected(_on_player_turn):
+		onTurn.connect(_on_player_turn)
 
 	call_deferred("_attach_road_holder")
 
 func _attach_road_holder() -> void:
-	if not is_instance_valid(road_holder):
+	if not is_instance_valid(roadHolder):
 		return
-	var current_scene: Node = get_tree().current_scene
-	if not current_scene:
+	var currentScene: Node = get_tree().current_scene
+	if not currentScene:
 		push_error("RoadPaver.gd: 当前场景为空，无法创建 RoadHolder")
 		return
-	if not road_holder.is_inside_tree():
-		current_scene.add_child(road_holder)
-	if not road_object:
+	if not roadHolder.is_inside_tree():
+		currentScene.add_child(roadHolder)
+	if not roadObject:
 		_prepare_road_object()
-	if road_object and not road:
+	if roadObject and not road:
 		_create_road()
 
 func _prepare_road_object() -> void:
-	if not base_floor:
+	if not baseFloor:
 		return
 
-	var instance: Node = base_floor.instantiate()
-	base_floor = null
-	road_object = instance as StaticBody3D
-	if road_object:
+	var instance: Node = baseFloor.instantiate()
+	baseFloor = null
+	roadObject = instance as StaticBody3D
+	if roadObject:
 		return
 
-	push_error("RoadPaver.gd: base_floor 根节点必须是 StaticBody3D")
+	push_error("RoadPaver.gd: baseFloor 根节点必须是 StaticBody3D")
 	if instance:
 		instance.queue_free()
 
 func _create_road() -> void:
-	if not player or not road_holder or not road_object:
+	if not player or not roadHolder or not roadObject:
 		return
 
-	var next_road: StaticBody3D = road_object.duplicate() as StaticBody3D
-	if not next_road:
-		push_error("RoadPaver.gd: road_object 复制失败")
+	var nextRoad: StaticBody3D = roadObject.duplicate() as StaticBody3D
+	if not nextRoad:
+		push_error("RoadPaver.gd: roadObject 复制失败")
 		return
 
-	next_road.name = "Road %d" % road_index
-	road_index += 1
-	road_holder.add_child(next_road)
-	next_road.owner = road_holder
-	next_road.scale = Vector3(road_width, road_height, road_width)
-	next_road.global_position = _get_road_position()
-	next_road.global_rotation = player.global_rotation
-	road = next_road
+	nextRoad.name = "Road %d" % roadIndex
+	roadIndex += 1
+	roadHolder.add_child(nextRoad)
+	nextRoad.owner = roadHolder
+	nextRoad.scale = Vector3(roadWidth, roadHeight, roadWidth)
+	nextRoad.global_position = _get_road_position()
+	nextRoad.global_rotation = player.global_rotation
+	road = nextRoad
 
 func _get_road_position() -> Vector3:
-	var vertical_offset: float = 0.5 * (road_height + 1.0)
-	return player.global_position - Vector3(0.0, vertical_offset, 0.0)
+	var verticalOffset: float = 0.5 * (roadHeight + 1.0)
+	return player.global_position - Vector3(0.0, verticalOffset, 0.0)
 
 func _on_player_turn() -> void:
 	# Player emits onturn before applying its new rotation; defer until the turn is complete.
@@ -98,8 +98,8 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(player) or not is_instance_valid(road):
 		return
 
-	var distance: float = player.speed * delta
-	road.scale = Vector3(road_width, road_height, road.scale.z + distance)
-	var local_translation: Vector3 = Vector3(0.0, 0.0, 0.5 * distance)
-	var rotation_basis: Basis = road.global_transform.basis.orthonormalized()
-	road.global_position += rotation_basis * local_translation
+	var distance: float = player.Speed * delta
+	road.scale = Vector3(roadWidth, roadHeight, road.scale.z + distance)
+	var localTranslation: Vector3 = Vector3(0.0, 0.0, 0.5 * distance)
+	var rotationBasis: Basis = road.global_transform.basis.orthonormalized()
+	road.global_position += rotationBasis * localTranslation

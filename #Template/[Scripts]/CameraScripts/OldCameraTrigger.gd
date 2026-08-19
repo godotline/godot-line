@@ -1,39 +1,39 @@
 extends Area3D
 
 @export_group("Camera Settings")
-@export var add_offset: bool = false
+@export var addOffset: bool = false
 @export var offset: Vector3 = Vector3.ZERO
-@export var camera_rotation: Vector3 = Vector3(54.0, 45.0, 0.0)
-@export var camera_scale: Vector3 = Vector3.ONE
-@export_range(0.0, 179.0) var field_of_view: float = 80.0
+@export var cameraRotation: Vector3 = Vector3(54.0, 45.0, 0.0)
+@export var cameraScale: Vector3 = Vector3.ONE
+@export_range(0.0, 179.0) var fieldOfView: float = 80.0
 @export var follow: bool = true
 
 @export_group("Animation")
 @export var duration: float = 2.0
-@export var transition_type: Tween.TransitionType = Tween.TRANS_SINE
-@export var ease_type: Tween.EaseType = Tween.EASE_IN_OUT
-@export var rotation_mode: OldCameraFollower.RotateMode = OldCameraFollower.RotateMode.FAST_BEYOND_360
-@export var can_be_triggered: bool = true
+@export var transitionType: Tween.TransitionType = Tween.TRANS_SINE
+@export var easeType: Tween.EaseType = Tween.EASE_IN_OUT
+@export var rotationMode: OldCameraFollower.RotateMode = OldCameraFollower.RotateMode.FAST_BEYOND_360
+@export var canBeTriggered: bool = true
 
 @export_group("时间判定")
-@export var use_time: bool = false
-@export var trigger_time: float = 0.0
+@export var useTime: bool = false
+@export var triggerTime: float = 0.0
 
 signal on_finished
 
 var _follower: OldCameraFollower
-var _time_triggered: bool = false
+var timeTriggered: bool = false
 
 
 func _ready() -> void:
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
-	set_process(use_time)
+	set_process(useTime)
 
 
 func _process(_delta: float) -> void:
-	if use_time and not _time_triggered and LevelManager.anim_time >= trigger_time:
-		_time_triggered = true
+	if useTime and not timeTriggered and LevelManager.animTime >= triggerTime:
+		timeTriggered = true
 		_apply_camera()
 		set_process(false)
 
@@ -43,7 +43,7 @@ func _on_body_entered(body: Node3D) -> void:
 
 
 func trigger(body: Node3D) -> void:
-	if use_time or not can_be_triggered:
+	if useTime or not canBeTriggered:
 		return
 	if body is CharacterBody3D:
 		_apply_camera()
@@ -52,7 +52,7 @@ func trigger(body: Node3D) -> void:
 ## Matches Unity OldCameraTrigger.Trigger(): manual use is enabled when
 ## collision triggering has been disabled.
 func trigger_manually() -> void:
-	if not can_be_triggered:
+	if not canBeTriggered:
 		_apply_camera()
 
 
@@ -63,15 +63,15 @@ func _apply_camera() -> void:
 		return
 
 	_follower.follow = follow
-	_follower.trigger(
-		add_offset,
+	_follower.Trigger(
+		addOffset,
 		offset,
-		camera_rotation,
-		camera_scale,
-		field_of_view,
+		cameraRotation,
+		cameraScale,
+		fieldOfView,
 		duration,
-		transition_type,
-		ease_type,
-		rotation_mode,
+		transitionType,
+		easeType,
+		rotationMode,
 		func() -> void: on_finished.emit()
 	)

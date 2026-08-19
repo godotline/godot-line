@@ -1,8 +1,8 @@
 extends Node
 class_name CameraColorFromSprite
 
-@export var texture_rect: TextureRect
-@export var sample_count: int = 100
+@export var textureRect: TextureRect
+@export var sampleCount: int = 100
 @export var camera: Camera3D
 
 var _timer: Timer
@@ -18,14 +18,14 @@ func _ready() -> void:
 	_get_color()
 
 func _get_color() -> void:
-	if not texture_rect or not texture_rect.texture:
+	if not textureRect or not textureRect.texture:
 		return
 	
-	var image: Image = texture_rect.texture.get_image()
+	var image: Image = textureRect.texture.get_image()
 	if not image:
 		return
 	
-	var main_color: Color = _get_main_color(image)
+	var mainColor: Color = _get_main_color(image)
 	
 	# Set camera background color
 	if camera:
@@ -34,32 +34,32 @@ func _get_color() -> void:
 			env = Environment.new()
 			camera.environment = env
 		env.background_mode = Environment.BG_COLOR
-		env.background_color = main_color
+		env.background_color = mainColor
 
 func _get_main_color(image: Image) -> Color:
-	var color_count: Dictionary = {}
+	var colorCount: Dictionary = {}
 	var width: int = image.get_width()
 	var height: int = image.get_height()
 	
-	for i in sample_count:
+	for i in sampleCount:
 		var x: int = randi() % width
 		var y: int = randi() % height
 		var color: Color = image.get_pixel(x, y)
 		
 		# Use color as key (convert to string for dictionary)
-		var color_key: String = "%f,%f,%f,%f" % [color.r, color.g, color.b, color.a]
-		if color_count.has(color_key):
-			color_count[color_key]["count"] += 1
+		var colorKey: String = "%f,%f,%f,%f" % [color.r, color.g, color.b, color.a]
+		if colorCount.has(colorKey):
+			colorCount[colorKey]["count"] += 1
 		else:
-			color_count[color_key] = {"color": color, "count": 1}
+			colorCount[colorKey] = {"color": color, "count": 1}
 	
-	var main_color: Color = Color.WHITE
-	var max_count: int = 0
+	var mainColor: Color = Color.WHITE
+	var maxCount: int = 0
 	
-	for key in color_count:
-		var data: Dictionary = color_count[key]
-		if data["count"] > max_count:
-			max_count = data["count"]
-			main_color = data["color"]
+	for key in colorCount:
+		var data: Dictionary = colorCount[key]
+		if data["count"] > maxCount:
+			maxCount = data["count"]
+			mainColor = data["color"]
 	
-	return main_color
+	return mainColor

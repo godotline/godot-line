@@ -6,7 +6,7 @@ extends RefCounted
 
 ## 播放一次性音效（自动创建 AudioStreamPlayer，播放完后自动销毁）
 ##  Unity 等效: AudioManager.PlayClip(clip, volume)
-static func play_clip(clip: AudioStream, volume: float = 1.0) -> void:
+static func PlayClip(clip: AudioStream, volume: float = 1.0) -> void:
 	if not clip or not Player.instance:
 		return
 	var player: AudioStreamPlayer = AudioStreamPlayer.new()
@@ -18,7 +18,7 @@ static func play_clip(clip: AudioStream, volume: float = 1.0) -> void:
 
 ## 播放背景音乐，返回 AudioStreamPlayer 以便后续控制
 ##  Unity 等效: AudioManager.PlayTrack(clip, volume) → AudioSource
-static func play_track(clip: AudioStream, volume: float = 1.0) -> AudioStreamPlayer:
+static func PlayTrack(clip: AudioStream, volume: float = 1.0) -> AudioStreamPlayer:
 	if not clip or not Player.instance:
 		return null
 	var player: AudioStreamPlayer = AudioStreamPlayer.new()
@@ -39,7 +39,7 @@ static var time: float:
 			p.play(value)
 
 ## 音乐播放速度（音高偏移，1.0 = 正常）
-static var pitch: float:
+static var Pitch: float:
 	get:
 		var p: AudioStreamPlayer = _get_music_player()
 		return p.pitch_scale if p else 1.0
@@ -49,7 +49,7 @@ static var pitch: float:
 			p.pitch_scale = value
 
 ## 音乐音量（线性 0.0 ~ 1.0）
-static var volume: float:
+static var Volume: float:
 	get:
 		var p: AudioStreamPlayer = _get_music_player()
 		return db_to_linear(p.volume_db) if p else 0.0
@@ -59,7 +59,7 @@ static var volume: float:
 			p.volume_db = linear_to_db(max(value, 0.001))
 
 ## 音乐播放进度（0.0 ~ 1.0），考虑 useCustomLevelTime
-static var progress: float:
+static var Progress: float:
 	get:
 		var player: Player = Player.instance
 		if not player:
@@ -72,26 +72,26 @@ static var progress: float:
 		return p.get_playback_position() / max(p.stream.get_length(), 0.001)
 
 ## 停止音乐
-static func stop() -> void:
+static func Stop() -> void:
 	var p: AudioStreamPlayer = _get_music_player()
 	if p:
 		p.stop()
 
 ## 恢复播放音乐
-static func play() -> void:
+static func Play() -> void:
 	var p: AudioStreamPlayer = _get_music_player()
 	if p:
 		p.play()
 
 ## 淡出音乐到目标音量后停止
 ##  Unity 等效: AudioManager.FadeOut(volume, duration)
-static func fade_out(target_volume: float = 0.0, duration: float = 10.0) -> void:
+static func FadeOut(targetVolume: float = 0.0, duration: float = 10.0) -> void:
 	var p: AudioStreamPlayer = _get_music_player()
 	if not p:
 		return
 	var tween: Tween = p.create_tween()
-	tween.tween_property(p, "volume_db", linear_to_db(max(target_volume, 0.001)), duration)
-	tween.finished.connect(func(): stop())
+	tween.tween_property(p, "volume_db", linear_to_db(max(targetVolume, 0.001)), duration)
+	tween.finished.connect(func(): Stop())
 
 static func _get_music_player() -> AudioStreamPlayer:
 	if not Player.instance:

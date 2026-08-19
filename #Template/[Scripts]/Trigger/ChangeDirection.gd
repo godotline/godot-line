@@ -11,8 +11,8 @@ enum ChangeType {
 @export var type: ChangeType = ChangeType.Direction
 
 @export_group("Direction 模式")
-@export var first_direction: Vector3 = Vector3(0, 90, 0)
-@export var second_direction: Vector3 = Vector3.ZERO
+@export var firstDirection: Vector3 = Vector3(0, 90, 0)
+@export var secondDirection: Vector3 = Vector3.ZERO
 
 func trigger(body: Node3D) -> void:
 	if not body is CharacterBody3D:
@@ -21,9 +21,9 @@ func trigger(body: Node3D) -> void:
 	match type:
 		ChangeType.Direction:
 			if "firstDirection" in body:
-				body.firstDirection = first_direction
+				body.firstDirection = firstDirection
 			if "secondDirection" in body:
-				body.secondDirection = second_direction
+				body.secondDirection = secondDirection
 		ChangeType.Turn:
-			if body.has_method("turn"):
-				body.turn()
+			if body.has_method("Turn"):
+				body.Turn()

@@ -20,6 +20,6 @@ func SetAuto(desired: bool = !_active) -> void:
 	_user_set = true
 	_active = desired
 	if AutoPlayController.Instance:
-		AutoPlayController.Instance.set_holder(_active)
+		AutoPlayController.Instance.SetHolder(_active)
 	if Player.instance:
 		Player.instance.disallowInput = _active

@@ -1,14 +1,15 @@
-[gd_scene format=3 uid="uid://nqvkdhtseqb6"]
+[gd_scene format=3 uid="uid://bm1086mivcf7v"]
 
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_ssf0a"]
-[ext_resource type="Resource" uid="uid://ce4h4lm0gxydq" path="res://[Scenes]/DefaultScene3/Default.tres" id="2_cwhkr"]
-[ext_resource type="PackedScene" uid="uid://bhwb4nds1i261" path="res://#Template/CameraRoot3.tscn" id="3_dnrub"]
-[ext_resource type="Script" uid="uid://dr6kymfjs0usi" path="res://#Template/[Scripts]/Level/RoadPaver.gd" id="3_sy5ms"]
+[ext_resource type="Resource" uid="uid://bflra16kjrdhi" path="res://#Template/[Scenes]/DefaultScene/Default.tres" id="2_cwhkr"]
+[ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_dnrub"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/LevelUI.tscn" id="4_wshga"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="8_8w8iv"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
+fog_mode = 1
+fog_density = 1.0
 
 [sub_resource type="Animation" id="Animation_wkp8b"]
 length = 0.001
@@ -30,14 +31,9 @@ _data = {
 animation = NodePath("../AnimationPlayer")
 levelData = ExtResource("2_cwhkr")
 
-[node name="Node3D" type="Node3D" parent="BasicOBJ_Group/Player" unique_id=1968713715]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.6166801, 0)
-script = ExtResource("3_sy5ms")
-base_floor = ExtResource("8_8w8iv")
-
 [node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_dnrub")]
 
-[node name="Camera3D" parent="BasicOBJ_Group/CameraRoot" parent_id_path=PackedInt32Array(1925825702) index="0" unique_id=1985620912]
+[node name="Camera3D" parent="BasicOBJ_Group/CameraRoot/Rotator/Scale" parent_id_path=PackedInt32Array(1925825702, 1568144045) index="0" unique_id=1985620912]
 environment = SubResource("Environment_ys6ci")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="BasicOBJ_Group" unique_id=560431425]

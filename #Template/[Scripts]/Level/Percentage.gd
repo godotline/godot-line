@@ -1,19 +1,19 @@
 @tool
 extends Node3D
 
-@export var selected_percent: int = 10 : set = _set_selected_percent
+@export var percent: int = 10 : set = _set_selected_percent
 
-var _percent_nodes: Dictionary = {}
-var _percent_values: Array[int] = []
-var _is_ready: bool = false
-var _owner_restore: Dictionary = {}
-var _display_node: MeshInstance3D
-var _pending_refresh: bool = false
+var percentNodes: Dictionary = {}
+var percentValues: Array[int] = []
+var isReady: bool = false
+var ownerRestore: Dictionary = {}
+var displayNode: MeshInstance3D
+var pendingRefresh: bool = false
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		return
-	_is_ready = true
+	isReady = true
 	_refresh()
 
 func _notification(what: int) -> void:
@@ -26,73 +26,73 @@ func _notification(what: int) -> void:
 
 func _refresh() -> void:
 	_collect_percent_nodes()
-	if _percent_values.is_empty():
+	if percentValues.is_empty():
 		return
-	if _display_node == null or not is_instance_valid(_display_node):
-		_display_node = _percent_nodes[_percent_values[0]]
-	if selected_percent not in _percent_nodes:
-		selected_percent = _percent_values[0]
-	_apply_selection(selected_percent)
-	_pending_refresh = false
+	if displayNode == null or not is_instance_valid(displayNode):
+		displayNode = percentNodes[percentValues[0]]
+	if percent not in percentNodes:
+		percent = percentValues[0]
+	_apply_selection(percent)
+	pendingRefresh = false
 
 func _collect_percent_nodes() -> void:
-	_percent_nodes.clear()
-	_percent_values.clear()
+	percentNodes.clear()
+	percentValues.clear()
 	for child in get_children():
 		if child is MeshInstance3D:
-			var name_str: String = str(child.name)
-			if name_str.is_valid_int():
-				var value: int = int(name_str)
-				_percent_nodes[value] = child
-				_percent_values.append(value)
-	_percent_values.sort()
+			var nameStr: String = str(child.name)
+			if nameStr.is_valid_int():
+				var value: int = int(nameStr)
+				percentNodes[value] = child
+				percentValues.append(value)
+	percentValues.sort()
 
 func _set_selected_percent(value: int) -> void:
-	selected_percent = value
+	percent = value
 	if not Engine.is_editor_hint():
 		return
-	if not _is_ready:
-		_pending_refresh = true
+	if not isReady:
+		pendingRefresh = true
 		call_deferred("_refresh")
 		return
-	if _percent_nodes.is_empty():
+	if percentNodes.is_empty():
 		_collect_percent_nodes()
-		if _percent_values.is_empty():
+		if percentValues.is_empty():
 			return
-		if _display_node == null:
-			_display_node = _percent_nodes[_percent_values[0]]
-	if selected_percent in _percent_nodes:
-		_apply_selection(selected_percent)
+		if displayNode == null:
+			displayNode = percentNodes[percentValues[0]]
+	if percent in percentNodes:
+		_apply_selection(percent)
 
 func _apply_selection(value: int) -> void:
-	if _display_node != null and _display_node.mesh is TextMesh:
-		var text_mesh: TextMesh = _display_node.mesh as TextMesh
-		text_mesh.text = "%d%%" % value
-	for key in _percent_nodes.keys():
-		var node: MeshInstance3D = _percent_nodes[key]
-		node.visible = node == _display_node
+	if displayNode != null and displayNode.mesh is TextMesh:
+		var textMesh: TextMesh = displayNode.mesh as TextMesh
+		textMesh.text = "%d%%" % value
+	for key in percentNodes.keys():
+		var node: MeshInstance3D = percentNodes[key]
+		node.visible = node == displayNode
 
 func _prepare_scene_for_save() -> void:
 	_collect_percent_nodes()
-	if _percent_values.is_empty():
+	if percentValues.is_empty():
 		return
-	if _display_node == null:
-		_display_node = _percent_nodes[_percent_values[0]]
-	_apply_selection(selected_percent)
-	_owner_restore.clear()
+	if displayNode == null:
+		displayNode = percentNodes[percentValues[0]]
+	_apply_selection(percent)
+	ownerRestore.clear()
 	var root: Node = get_tree().edited_scene_root
 	if root == null:
 		return
-	for key in _percent_nodes.keys():
-		var node: MeshInstance3D = _percent_nodes[key]
-		_owner_restore[node] = node.owner
-		if node == _display_node:
+	for key in percentNodes.keys():
+		var node: MeshInstance3D = percentNodes[key]
+		ownerRestore[node] = node.owner
+		if node == displayNode:
 			node.owner = root
 		else:
 			node.owner = null
 
 func _restore_scene_after_save() -> void:
-	for node in _owner_restore.keys():
+	for node in ownerRestore.keys():
 		if is_instance_valid(node):
-			node.owner = _owner_restore[node]
-	_owner_restore.clear()
+			node.owner = ownerRestore[node]
+	ownerRestore.clear()

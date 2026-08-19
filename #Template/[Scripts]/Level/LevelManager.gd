@@ -19,24 +19,24 @@ enum Direction {
 ## ========== 游戏状态管理 ==========
 
 static var GameState: GameStatus = GameStatus.Waiting
-static var get_input: bool = true
+static var getInput: bool = true
 
 ## 帧缓存 — Clicked 状态（每帧只计算一次）
-static var _clicked_cached: bool = false
-static var _clicked_frame: int = -1
+static var clickedCached: bool = false
+static var clickedFrame: int = -1
 
 static var Clicked: bool:
 	get:
-		if not get_input:
+		if not getInput:
 			return false
-		var current_frame: int = Engine.get_process_frames()
-		if current_frame != _clicked_frame:
-			_clicked_cached = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) \
+		var currentFrame: int = Engine.get_process_frames()
+		if currentFrame != clickedFrame:
+			clickedCached = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) \
 				or Input.is_key_pressed(KEY_SPACE) \
 				or Input.is_key_pressed(KEY_ENTER) \
 				or Input.is_key_pressed(KEY_KP_ENTER)
-			_clicked_frame = current_frame
-		return _clicked_cached
+			clickedFrame = currentFrame
+		return clickedCached
 
 static var DefaultGravity: Vector3:
 	get:
@@ -64,52 +64,52 @@ static var CameraPosition: Vector3:
 
 signal player_revived
 
-static var _revive_listeners: Array[Callable] = []
+static var reviveListeners: Array[Callable] = []
 
 static func add_revive_listener(callable: Callable) -> void:
-	if callable not in _revive_listeners:
-		_revive_listeners.append(callable)
+	if callable not in reviveListeners:
+		reviveListeners.append(callable)
 
 static func remove_revive_listener(callable: Callable) -> void:
-	_revive_listeners.erase(callable)
+	reviveListeners.erase(callable)
 
 static func emit_revive() -> void:
-	var listeners_snapshot: Array[Callable] = _revive_listeners.duplicate()
-	for listener in listeners_snapshot:
+	var listenersSnapshot: Array[Callable] = reviveListeners.duplicate()
+	for listener in listenersSnapshot:
 		if listener.is_valid():
 			listener.call()
 		else:
 			# 移除无效的 listener
-			_revive_listeners.erase(listener)
+			reviveListeners.erase(listener)
 
 static func reset_revive_listeners() -> void:
-	_revive_listeners.clear()
+	reviveListeners.clear()
 
 ## ========== 持久化检查点数据 ==========
 
 ## 检查点尚未建立时为空，建立后保存主线变换。
-static var main_line_transform: Variant = null
-static var revive_position: Vector3 = Vector3.ZERO
-static var is_turn: bool = false
-static var player_direction_index: int = 0
-static var anim_time: float = 0.0
-static var music_checkpoint_time: float = 0.0
-static var is_end: bool = false
+static var mainLineTransform: Variant = null
+static var revivePosition: Vector3 = Vector3.ZERO
+static var isTurn: bool = false
+static var playerDirectionIndex: int = 0
+static var animTime: float = 0.0
+static var musicCheckpointTime: float = 0.0
+static var isEnd: bool = false
 static var percent: int = 0
-static var line_crossing_crown: int = 0
+static var lineCrossingCrown: int = 0
 static var crowns: Array[int] = [0, 0, 0]
-static var is_relive: bool = false
+static var isRelive: bool = false
 static var gem: int = 0
 static var crown: int = 0
-static var current_checkpoint: Node = null
-static var checkpoint_count: int = 0
-static var player_speed: float = 12.0
+static var currentCheckpoint: Node = null
+static var checkpointCount: int = 0
+static var playerSpeed: float = 12.0
 static var gravity: Vector3 = Vector3(0, -9.8, 0)
-static var player_first_direction: Vector3 = Vector3.ZERO
-static var player_second_direction: Vector3 = Vector3.ZERO
+static var playerFirstDirection: Vector3 = Vector3.ZERO
+static var playerSecondDirection: Vector3 = Vector3.ZERO
 
 ## 相机跟随器检查点数据，整合为字典结构
-static var camera_checkpoint: Dictionary = {
+static var cameraCheckpoint: Dictionary = {
 	"has_checkpoint": false,
 	"restore_pending": false,
 	"offset": Vector3.ZERO,
@@ -129,73 +129,73 @@ static var camera_checkpoint: Dictionary = {
 ## 保存检查点（Crown 触发时调用）
 ## ============================================================
 
-static func save_checkpoint(main_line: PhysicsBody3D, camera_follower: Node3D, revive_pos: Node3D = null) -> void:
-	if revive_pos:
-		revive_position = revive_pos.global_position
-	main_line_transform = main_line.transform
-	is_turn = main_line._currentDirection == 1
-	player_direction_index = main_line._currentDirection
-	player_first_direction = main_line.firstDirection
-	player_second_direction = main_line.secondDirection
-	player_speed = main_line.speed
+static func save_checkpoint(mainLine: PhysicsBody3D, cameraFollower: Node3D, revivePos: Node3D = null) -> void:
+	if revivePos:
+		revivePosition = revivePos.global_position
+	mainLineTransform = mainLine.transform
+	isTurn = mainLine._currentDirection == 1
+	playerDirectionIndex = mainLine._currentDirection
+	playerFirstDirection = mainLine.firstDirection
+	playerSecondDirection = mainLine.secondDirection
+	playerSpeed = mainLine.Speed
 	gravity = ProjectSettings.get_setting("physics/3d/default_gravity_vector") * ProjectSettings.get_setting("physics/3d/default_gravity")
-	if main_line.animation_node and main_line.animation_node.current_animation:
-		anim_time = main_line.animation_node.current_animation_position
+	if mainLine.animationNode and mainLine.animationNode.current_animation:
+		animTime = mainLine.animationNode.current_animation_position
 
-	if camera_follower:
-		camera_checkpoint.offset = camera_follower.add_position
-		camera_checkpoint.rotation_degrees = camera_follower.rotation_offset
-		camera_checkpoint.rotation_offset = camera_follower.rotation_offset
-		camera_checkpoint.distance = camera_follower.distance_from_object
-		camera_checkpoint.follow_speed = camera_follower.follow_speed
-		camera_checkpoint.rotate_mode = camera_follower._current_rotate_mode
-		camera_checkpoint.base_rotation = camera_follower._base_rotation
-		camera_checkpoint.target_add_position = camera_follower._target_add_position
-		camera_checkpoint.target_follow_speed = camera_follower._target_follow_speed
-		camera_checkpoint.target_distance = camera_follower._target_distance
-		camera_checkpoint.target_rotation = camera_follower._target_rotation
-		camera_checkpoint.has_checkpoint = true
-		print("LevelManager: save_checkpoint offset=", camera_checkpoint.offset, " rot=", camera_checkpoint.rotation_degrees, " rot_offset=", camera_checkpoint.rotation_offset, " target_add_pos=", camera_checkpoint.target_add_position, " target_rot=", camera_checkpoint.target_rotation, " mode=", camera_checkpoint.rotate_mode, " base_rot=", camera_checkpoint.base_rotation)
+	if cameraFollower:
+		cameraCheckpoint.offset = cameraFollower.addPosition
+		cameraCheckpoint.rotation_degrees = cameraFollower.rotationOffset
+		cameraCheckpoint.rotation_offset = cameraFollower.rotationOffset
+		cameraCheckpoint.distance = cameraFollower.distanceFromObject
+		cameraCheckpoint.follow_speed = cameraFollower.followSpeed
+		cameraCheckpoint.rotate_mode = cameraFollower.currentRotateMode
+		cameraCheckpoint.base_rotation = cameraFollower.baseRotation
+		cameraCheckpoint.target_add_position = cameraFollower.targetAddPosition
+		cameraCheckpoint.target_follow_speed = cameraFollower.targetFollowSpeed
+		cameraCheckpoint.target_distance = cameraFollower.targetDistance
+		cameraCheckpoint.target_rotation = cameraFollower.targetRotation
+		cameraCheckpoint.has_checkpoint = true
+		print("LevelManager: save_checkpoint offset=", cameraCheckpoint.offset, " rot=", cameraCheckpoint.rotation_degrees, " rot_offset=", cameraCheckpoint.rotation_offset, " target_add_pos=", cameraCheckpoint.target_add_position, " target_rot=", cameraCheckpoint.target_rotation, " mode=", cameraCheckpoint.rotate_mode, " base_rot=", cameraCheckpoint.base_rotation)
 
-	var music_player: AudioStreamPlayer = main_line.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-	if not music_player:
+	var musicPlayer: AudioStreamPlayer = mainLine.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+	if not musicPlayer:
 		push_error("LevelManager.gd: MusicPlayer 节点未找到，无法保存音乐检查点时间")
-	elif music_player.playing:
-		music_checkpoint_time = music_player.get_playback_position()
+	elif musicPlayer.playing:
+		musicCheckpointTime = musicPlayer.get_playback_position()
 
 ## ============================================================
 ## 加载检查点到游戏对象
 ## ============================================================
 
-static func load_checkpoint_to_main_line(main_line: CharacterBody3D) -> void:
-	if main_line_transform:
-		main_line.transform = main_line_transform
-		if revive_position != Vector3.ZERO:
-			main_line.global_position = revive_position
-		main_line.is_turn = is_turn
-		main_line._currentDirection = player_direction_index
-		main_line.firstDirection = player_first_direction
-		main_line.secondDirection = player_second_direction
-		main_line.speed = player_speed
-	PhysicsServer3D.area_set_param(main_line.get_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY, gravity.length())
-	PhysicsServer3D.area_set_param(main_line.get_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR, gravity.normalized() if gravity.length() > 0 else Vector3.DOWN)
+static func load_checkpoint_to_main_line(mainLine: CharacterBody3D) -> void:
+	if mainLineTransform:
+		mainLine.transform = mainLineTransform
+		if revivePosition != Vector3.ZERO:
+			mainLine.global_position = revivePosition
+		mainLine.isTurn = isTurn
+		mainLine._currentDirection = playerDirectionIndex
+		mainLine.firstDirection = playerFirstDirection
+		mainLine.secondDirection = playerSecondDirection
+		mainLine.Speed = playerSpeed
+	PhysicsServer3D.area_set_param(mainLine.get_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY, gravity.length())
+	PhysicsServer3D.area_set_param(mainLine.get_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR, gravity.normalized() if gravity.length() > 0 else Vector3.DOWN)
 
 
 static func load_to_camera_follower(cf: Node3D) -> void:
-	var cp: Dictionary = camera_checkpoint
+	var cp: Dictionary = cameraCheckpoint
 	if not cp.has_checkpoint:
 		return
-	cf.add_position = cp.offset
-	cf.rotation_offset = cp.rotation_offset
-	cf.distance_from_object = cp.distance
-	cf.follow_speed = cp.follow_speed
-	cf._current_rotate_mode = cp.rotate_mode
-	cf._base_rotation = cp.base_rotation
-	cf._target_add_position = cp.get("target_add_position", cf.add_position)
-	cf._target_follow_speed = cp.get("target_follow_speed", cf.follow_speed)
-	cf._target_distance = cp.get("target_distance", cf.distance_from_object)
-	cf._target_rotation = cp.get("target_rotation", cf.rotation_offset)
-	print("LevelManager: load_to_camera_follower add_pos=", cf.add_position, " rot_offset=", cf.rotation_offset, " mode=", cf._current_rotate_mode, " base_rot=", cf._base_rotation, " target_add_pos=", cf._target_add_position, " target_rot=", cf._target_rotation, " target_speed=", cf._target_follow_speed, " target_dist=", cf._target_distance)
+	cf.addPosition = cp.offset
+	cf.rotationOffset = cp.rotation_offset
+	cf.distanceFromObject = cp.distance
+	cf.followSpeed = cp.follow_speed
+	cf.currentRotateMode = cp.rotate_mode
+	cf.baseRotation = cp.base_rotation
+	cf.targetAddPosition = cp.get("target_add_position", cf.addPosition)
+	cf.targetFollowSpeed = cp.get("target_follow_speed", cf.followSpeed)
+	cf.targetDistance = cp.get("target_distance", cf.distanceFromObject)
+	cf.targetRotation = cp.get("target_rotation", cf.rotationOffset)
+	print("LevelManager: load_to_camera_follower add_pos=", cf.addPosition, " rot_offset=", cf.rotationOffset, " mode=", cf.currentRotateMode, " base_rot=", cf.baseRotation, " target_add_pos=", cf.targetAddPosition, " target_rot=", cf.targetRotation, " target_speed=", cf.targetFollowSpeed, " target_dist=", cf.targetDistance)
 
 
 ## ============================================================
@@ -203,32 +203,32 @@ static func load_to_camera_follower(cf: Node3D) -> void:
 ## ============================================================
 
 static func reset_to_defaults() -> void:
-	main_line_transform = null
-	revive_position = Vector3.ZERO
+	mainLineTransform = null
+	revivePosition = Vector3.ZERO
 	reset_camera_checkpoint()
 
-	player_speed = 12.0
+	playerSpeed = 12.0
 	gravity = Vector3(0, -9.8, 0)
-	player_first_direction = Vector3.ZERO
-	player_second_direction = Vector3.ZERO
-	player_direction_index = 0
-	is_turn = false
-	anim_time = 0.0
-	music_checkpoint_time = 0.0
-	is_end = false
+	playerFirstDirection = Vector3.ZERO
+	playerSecondDirection = Vector3.ZERO
+	playerDirectionIndex = 0
+	isTurn = false
+	animTime = 0.0
+	musicCheckpointTime = 0.0
+	isEnd = false
 	percent = 0
-	line_crossing_crown = 0
+	lineCrossingCrown = 0
 	crowns = [0, 0, 0]
-	is_relive = false
+	isRelive = false
 	gem = 0
 	crown = 0
-	current_checkpoint = null
-	checkpoint_count = 0
+	currentCheckpoint = null
+	checkpointCount = 0
 	GameState = GameStatus.Waiting
 
 ## 重置相机检查点为默认值
 static func reset_camera_checkpoint() -> void:
-	camera_checkpoint = {
+	cameraCheckpoint = {
 		"has_checkpoint": false,
 		"restore_pending": false,
 		"offset": Vector3.ZERO,
@@ -253,17 +253,17 @@ static func GameOverNormal(complete: bool) -> void:
 		percent = 100
 	elif Player.instance:
 		var p: Player = Player.instance
-		var music_player: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-		if music_player and music_player.stream:
-			var total_sec: float = p.levelData.levelTotalTime if p.levelData and p.levelData.useCustomLevelTime else music_player.stream.get_length()
-			var current_sec: float = music_player.get_playback_position()
-			percent = int((current_sec / total_sec) * 100) if total_sec > 0 else 0
+		var musicPlayer: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+		if musicPlayer and musicPlayer.stream:
+			var totalSec: float = p.levelData.levelTotalTime if p.levelData and p.levelData.useCustomLevelTime else musicPlayer.stream.get_length()
+			var currentSec: float = musicPlayer.get_playback_position()
+			percent = int((currentSec / totalSec) * 100) if totalSec > 0 else 0
 
 	if GameState == GameStatus.Died or GameState == GameStatus.Completed or GameState == GameStatus.Moving:
 		if Player.instance and Player.instance.has_method("get_block_count"):
 			pass
 		# 触发UI显示，由LevelUI.gd监听on_game_end信号
-		is_end = true
+		isEnd = true
 		if Player.instance:
 			Player.instance.on_game_end.emit()
 
@@ -271,12 +271,12 @@ static func GameOverRevive() -> void:
 	if GameState == GameStatus.Died or GameState == GameStatus.Moving:
 		if Player.instance:
 			var p: Player = Player.instance
-			var music_player: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-			if music_player and music_player.stream:
-				var total_sec: float = p.levelData.levelTotalTime if p.levelData and p.levelData.useCustomLevelTime else music_player.stream.get_length()
-				var current_sec: float = music_player.get_playback_position()
-				percent = int((current_sec / total_sec) * 100) if total_sec > 0 else 0
-		is_end = true
+			var musicPlayer: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+			if musicPlayer and musicPlayer.stream:
+				var totalSec: float = p.levelData.levelTotalTime if p.levelData and p.levelData.useCustomLevelTime else musicPlayer.stream.get_length()
+				var currentSec: float = musicPlayer.get_playback_position()
+				percent = int((currentSec / totalSec) * 100) if totalSec > 0 else 0
+		isEnd = true
 		if Player.instance:
 			Player.instance.on_game_end.emit()
 
@@ -285,19 +285,19 @@ static func GameOverRevive() -> void:
 ## ============================================================
 
 ## 传送：设置玩家位置、强制相机跟随、改变朝向
-static func init_player_position(player: CharacterBody3D, position: Vector3, force_camera: bool = false, do_turn: bool = false, target_dir: Direction = Direction.First) -> void:
+static func InitPlayerPosition(player: CharacterBody3D, position: Vector3, forceCamera: bool = false, doTurn: bool = false, targetDir: Direction = Direction.First) -> void:
 	player.global_position = position
 
-	if do_turn:
-		var dir_index: int = 0 if target_dir == Direction.First else 1
-		player._currentDirection = dir_index
-		player.rotation_degrees = player.current_direction
+	if doTurn:
+		var dirIndex: int = 0 if targetDir == Direction.First else 1
+		player._currentDirection = dirIndex
+		player.rotation_degrees = player.currentDirection
 		# 转向后重新计算速度方向
-		player.velocity = player.to_global(Vector3(0, 0, 1) * player.speed) - player.global_position
+		player.velocity = player.to_global(Vector3(0, 0, 1) * player.Speed) - player.global_position
 
 	player.new_line()
 
-	if force_camera:
+	if forceCamera:
 		var cf: CameraFollower = CameraFollower.instance
 		if cf:
 			cf.position = position
@@ -312,7 +312,7 @@ static func DestroyRemain() -> void:
 	GameState = GameStatus.Waiting
 
 static func CompareCheckpointIndex(index: int, callback: Callable = Callable()) -> Variant:
-	if index > checkpoint_count - 1:
+	if index > checkpointCount - 1:
 		if callback.is_valid():
 			callback.call()
 			return null

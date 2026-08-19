@@ -32,30 +32,30 @@ const TAIL_RATE_OVER_DISTANCE: float = 30.0
 @export var speed: float = DEFAULT_ROTATION_SPEED_RADIANS
 @export var fake: bool = false
 
-var _collected: bool = false
-var _counted_in_gem_total: bool = false
-var _checkpoint_index: int = -1
-var _collection_light_elapsed: float = COLLECTION_LIGHT_DURATION
-var _sprirt_active: bool = false
-var _sprirt_elapsed: float = SPRIRT_LIFETIME
-var _sprirt_velocity: Vector3 = Vector3.ZERO
-var _tail_distance_remainder: float = 0.0
+var got: bool = false
+var countedInGemTotal: bool = false
+var index: int = -1
+var collectionLightElapsed: float = COLLECTION_LIGHT_DURATION
+var sprirtActive: bool = false
+var sprirtElapsed: float = SPRIRT_LIFETIME
+var sprirtVelocity: Vector3 = Vector3.ZERO
+var tailDistanceRemainder: float = 0.0
 
-var _content_root: Node3D
-var _trigger_area: Area3D
-var _sprirt: GPUParticles3D
-var _tail: GPUParticles3D
-var _aura: GPUParticles3D
-var _gem_light: OmniLight3D
+var contentRoot: Node3D
+var triggerArea: Area3D
+var sprirt: GPUParticles3D
+var tail: GPUParticles3D
+var aura: GPUParticles3D
+var gemLight: OmniLight3D
 
 func _ready() -> void:
-	_content_root = _resolve_content_root()
-	_trigger_area = get_parent() as Area3D
-	_sprirt = _content_root.get_node_or_null("Sprirt") as GPUParticles3D
-	_tail = _content_root.get_node_or_null("Tail") as GPUParticles3D
-	_aura = _content_root.get_node_or_null("Aura") as GPUParticles3D
-	_gem_light = _content_root.get_node_or_null("GemLight") as OmniLight3D
-	if not _sprirt or not _tail or not _aura or not _gem_light:
+	contentRoot = _resolve_content_root()
+	triggerArea = get_parent() as Area3D
+	sprirt = contentRoot.get_node_or_null("Sprirt") as GPUParticles3D
+	tail = contentRoot.get_node_or_null("Tail") as GPUParticles3D
+	aura = contentRoot.get_node_or_null("Aura") as GPUParticles3D
+	gemLight = contentRoot.get_node_or_null("GemLight") as OmniLight3D
+	if not sprirt or not tail or not aura or not gemLight:
 		push_error("Gem.gd: 收集物视觉节点不完整")
 		return
 	_reset_collection_effect()
@@ -70,175 +70,175 @@ func trigger(body: Node3D) -> void:
 	_on_body_entered(body)
 
 func _on_body_entered(body: Node3D) -> void:
-	if _collected or fake or body != Player.instance:
+	if got or fake or body != Player.instance:
 		return
-	_collected = true
-	_checkpoint_index = LevelManager.checkpoint_count
+	got = true
+	index = LevelManager.checkpointCount
 	_set_monitoring(false)
-	_counted_in_gem_total = LevelManager.gem < MAX_GEM_COUNT
-	if _counted_in_gem_total:
+	countedInGemTotal = LevelManager.gem < MAX_GEM_COUNT
+	if countedInGemTotal:
 		LevelManager.gem += 1
 	if Player.instance and Player.instance.has_signal("on_get_gem"):
 		Player.instance.on_get_gem.emit()
-	var mesh: MeshInstance3D = _content_root.get_node_or_null("MeshInstance3D") as MeshInstance3D
+	var mesh: MeshInstance3D = contentRoot.get_node_or_null("MeshInstance3D") as MeshInstance3D
 	if mesh:
 		mesh.visible = false
-	var anim_player: AnimationPlayer = _content_root.get_node_or_null("AnimationPlayer") as AnimationPlayer
-	if anim_player:
-		anim_player.play("diamond")
+	var animPlayer: AnimationPlayer = contentRoot.get_node_or_null("AnimationPlayer") as AnimationPlayer
+	if animPlayer:
+		animPlayer.play("diamond")
 	_start_collection_effect()
 	_spawn_fragments()
 	# 注册复活回调
 	LevelManager.add_revive_listener(_on_revive)
 
 func _start_collection_effect() -> void:
-	var effect_origin: Vector3 = _content_root.global_position
-	_sprirt.global_transform = Transform3D(Basis.IDENTITY, effect_origin + Vector3(
+	var effectOrigin: Vector3 = contentRoot.global_position
+	sprirt.global_transform = Transform3D(Basis.IDENTITY, effectOrigin + Vector3(
 		randf_range(-0.5, 0.5),
 		randf_range(-0.5, 0.5),
 		randf_range(-0.5, 0.5)
 	))
-	_sprirt_velocity = Vector3(
+	sprirtVelocity = Vector3(
 		randf_range(0.0, SPRIRT_VELOCITY_X_MAX),
 		randf_range(0.0, SPRIRT_VELOCITY_Y_MAX),
 		randf_range(0.0, SPRIRT_VELOCITY_Z_MAX)
 	)
-	_sprirt_elapsed = 0.0
-	_sprirt_active = true
-	_sprirt.restart()
-	_sprirt.emitting = true
+	sprirtElapsed = 0.0
+	sprirtActive = true
+	sprirt.restart()
+	sprirt.emitting = true
 
-	_tail.global_transform = Transform3D(Basis.IDENTITY, _sprirt.global_position)
-	_tail_distance_remainder = 0.0
-	_tail.restart()
-	_tail.emitting = false
+	tail.global_transform = Transform3D(Basis.IDENTITY, sprirt.global_position)
+	tailDistanceRemainder = 0.0
+	tail.restart()
+	tail.emitting = false
 
-	_aura.global_transform = Transform3D(Basis.IDENTITY, effect_origin)
-	_aura.restart()
-	_aura.emitting = true
+	aura.global_transform = Transform3D(Basis.IDENTITY, effectOrigin)
+	aura.restart()
+	aura.emitting = true
 
-	_collection_light_elapsed = 0.0
-	_gem_light.light_energy = COLLECTION_LIGHT_ENERGY
-	_gem_light.visible = true
+	collectionLightElapsed = 0.0
+	gemLight.light_energy = COLLECTION_LIGHT_ENERGY
+	gemLight.visible = true
 
 func _update_sprirt(delta: float) -> void:
-	if not _sprirt_active:
+	if not sprirtActive:
 		return
-	var start_position: Vector3 = _sprirt.global_position
-	_sprirt_velocity.y += SPRIRT_GRAVITY * delta
-	var end_position: Vector3 = start_position + _sprirt_velocity * delta
-	_emit_tail_between(start_position, end_position)
-	_sprirt.global_position = end_position
-	_tail.global_position = end_position
-	_sprirt_elapsed += delta
-	if _sprirt_elapsed >= SPRIRT_LIFETIME:
-		_sprirt_active = false
-		_sprirt.emitting = false
+	var startPosition: Vector3 = sprirt.global_position
+	sprirtVelocity.y += SPRIRT_GRAVITY * delta
+	var endPosition: Vector3 = startPosition + sprirtVelocity * delta
+	_emit_tail_between(startPosition, endPosition)
+	sprirt.global_position = endPosition
+	tail.global_position = endPosition
+	sprirtElapsed += delta
+	if sprirtElapsed >= SPRIRT_LIFETIME:
+		sprirtActive = false
+		sprirt.emitting = false
 
-func _emit_tail_between(start_position: Vector3, end_position: Vector3) -> void:
-	var segment: Vector3 = end_position - start_position
-	var segment_length: float = segment.length()
-	if segment_length <= 0.000001:
+func _emit_tail_between(startPosition: Vector3, endPosition: Vector3) -> void:
+	var segment: Vector3 = endPosition - startPosition
+	var segmentLength: float = segment.length()
+	if segmentLength <= 0.000001:
 		return
 	var spacing: float = 1.0 / TAIL_RATE_OVER_DISTANCE
-	var distance_along: float = spacing - _tail_distance_remainder
-	var direction: Vector3 = segment / segment_length
-	while distance_along <= segment_length:
-		var emit_position: Vector3 = start_position + direction * distance_along
-		_tail.global_position = emit_position
-		var particle_transform: Transform3D = Transform3D(Basis.IDENTITY, emit_position)
-		_tail.emit_particle(particle_transform, Vector3.ZERO, Color.WHITE, Color.WHITE, GPUParticles3D.EMIT_FLAG_POSITION)
-		distance_along += spacing
-	_tail_distance_remainder = fmod(_tail_distance_remainder + segment_length, spacing)
+	var distanceAlong: float = spacing - tailDistanceRemainder
+	var direction: Vector3 = segment / segmentLength
+	while distanceAlong <= segmentLength:
+		var emitPosition: Vector3 = startPosition + direction * distanceAlong
+		tail.global_position = emitPosition
+		var particleTransform: Transform3D = Transform3D(Basis.IDENTITY, emitPosition)
+		tail.emit_particle(particleTransform, Vector3.ZERO, Color.WHITE, Color.WHITE, GPUParticles3D.EMIT_FLAG_POSITION)
+		distanceAlong += spacing
+	tailDistanceRemainder = fmod(tailDistanceRemainder + segmentLength, spacing)
 
 func _spawn_fragments() -> void:
-	var fragment_parent: Node = _content_root.get_parent()
-	var fragment_count: int = randi_range(FRAGMENT_COUNT_MIN, FRAGMENT_COUNT_MAX)
-	var source_mesh: MeshInstance3D = _content_root.get_node_or_null("MeshInstance3D") as MeshInstance3D
-	var source_material: Material = source_mesh.get_active_material(0) if source_mesh else null
-	for index: int in fragment_count:
+	var fragmentParent: Node = contentRoot.get_parent()
+	var fragmentCount: int = randi_range(FRAGMENT_COUNT_MIN, FRAGMENT_COUNT_MAX)
+	var sourceMesh: MeshInstance3D = contentRoot.get_node_or_null("MeshInstance3D") as MeshInstance3D
+	var sourceMaterial: Material = sourceMesh.get_active_material(0) if sourceMesh else null
+	for index: int in fragmentCount:
 		var fragment: RigidBody3D = FRAGMENT_SCENE.instantiate() as RigidBody3D
 		fragment.name = "GemFragment_%02d" % index
-		fragment_parent.add_child(fragment)
-		fragment.global_position = _content_root.global_position
-		var scale_factor: float = randf_range(FRAGMENT_SCALE_MIN, FRAGMENT_SCALE_MAX)
-		var fragment_mesh: MeshInstance3D = fragment.get_node("MeshInstance3D") as MeshInstance3D
-		fragment_mesh.scale *= scale_factor
-		if source_material:
-			fragment_mesh.material_override = source_material
+		fragmentParent.add_child(fragment)
+		fragment.global_position = contentRoot.global_position
+		var scaleFactor: float = randf_range(FRAGMENT_SCALE_MIN, FRAGMENT_SCALE_MAX)
+		var fragmentMesh: MeshInstance3D = fragment.get_node("MeshInstance3D") as MeshInstance3D
+		fragmentMesh.scale *= scaleFactor
+		if sourceMaterial:
+			fragmentMesh.material_override = sourceMaterial
 
 		# Unity GetGem：30° 向上圆锥初速 1–3，再叠加世界 XYZ 各 -4–4。
 		var azimuth: float = randf_range(0.0, TAU)
-		var cos_angle: float = randf_range(cos(FRAGMENT_CONE_ANGLE_RADIANS), 1.0)
-		var sin_angle: float = sqrt(1.0 - cos_angle * cos_angle)
-		var cone_direction: Vector3 = Vector3(cos(azimuth) * sin_angle, cos_angle, sin(azimuth) * sin_angle)
-		var start_speed: float = randf_range(FRAGMENT_START_SPEED_MIN, FRAGMENT_START_SPEED_MAX)
-		var launch_velocity: Vector3 = cone_direction * start_speed + Vector3(
+		var cosAngle: float = randf_range(cos(FRAGMENT_CONE_ANGLE_RADIANS), 1.0)
+		var sinAngle: float = sqrt(1.0 - cosAngle * cosAngle)
+		var coneDirection: Vector3 = Vector3(cos(azimuth) * sinAngle, cosAngle, sin(azimuth) * sinAngle)
+		var startSpeed: float = randf_range(FRAGMENT_START_SPEED_MIN, FRAGMENT_START_SPEED_MAX)
+		var launchVelocity: Vector3 = coneDirection * startSpeed + Vector3(
 			randf_range(FRAGMENT_AXIS_SPEED_MIN, FRAGMENT_AXIS_SPEED_MAX),
 			randf_range(FRAGMENT_AXIS_SPEED_MIN, FRAGMENT_AXIS_SPEED_MAX),
 			randf_range(FRAGMENT_AXIS_SPEED_MIN, FRAGMENT_AXIS_SPEED_MAX)
 		)
 		fragment.gravity_scale = FRAGMENT_GRAVITY_SCALE
-		fragment.apply_central_impulse(launch_velocity * fragment.mass)
+		fragment.apply_central_impulse(launchVelocity * fragment.mass)
 		fragment.apply_torque_impulse(Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * FRAGMENT_TORQUE_SCALE)
 
-		var fragment_lifetime: float = randf_range(FRAGMENT_LIFETIME_MIN, FRAGMENT_LIFETIME_MAX)
-		var shrink_tween: Tween = fragment.create_tween()
-		shrink_tween.tween_interval(fragment_lifetime)
-		shrink_tween.tween_property(fragment_mesh, "scale", Vector3.ZERO, FRAGMENT_SHRINK_DURATION)
-		shrink_tween.finished.connect(fragment.queue_free)
+		var fragmentLifetime: float = randf_range(FRAGMENT_LIFETIME_MIN, FRAGMENT_LIFETIME_MAX)
+		var shrinkTween: Tween = fragment.create_tween()
+		shrinkTween.tween_interval(fragmentLifetime)
+		shrinkTween.tween_property(fragmentMesh, "scale", Vector3.ZERO, FRAGMENT_SHRINK_DURATION)
+		shrinkTween.finished.connect(fragment.queue_free)
 
 func _on_revive() -> void:
 	# 只有在宝石之后存档才恢复（存档点索引 >= 宝石索引）
-	var should_restore: bool = _checkpoint_index >= LevelManager.checkpoint_count
-	if should_restore:
+	var shouldRestore: bool = index >= LevelManager.checkpointCount
+	if shouldRestore:
 		# 宝石在存档点之前，需要恢复
-		_collected = false
-		var mesh: MeshInstance3D = _content_root.get_node_or_null("MeshInstance3D") as MeshInstance3D
+		got = false
+		var mesh: MeshInstance3D = contentRoot.get_node_or_null("MeshInstance3D") as MeshInstance3D
 		if mesh:
 			mesh.visible = true
-		var anim_player: AnimationPlayer = _content_root.get_node_or_null("AnimationPlayer") as AnimationPlayer
-		if anim_player:
-			anim_player.play("RESET")
+		var animPlayer: AnimationPlayer = contentRoot.get_node_or_null("AnimationPlayer") as AnimationPlayer
+		if animPlayer:
+			animPlayer.play("RESET")
 		_set_monitoring(true)
-		if _counted_in_gem_total:
+		if countedInGemTotal:
 			LevelManager.gem = maxi(LevelManager.gem - 1, 0)
-			_counted_in_gem_total = false
+			countedInGemTotal = false
 	_reset_collection_effect()
 	LevelManager.remove_revive_listener(_on_revive)
 
 func _process(delta: float) -> void:
-	if Engine.is_editor_hint() or not _content_root or not _sprirt:
+	if Engine.is_editor_hint() or not contentRoot or not sprirt:
 		return
 	_update_sprirt(delta)
-	if _collection_light_elapsed < COLLECTION_LIGHT_DURATION:
-		_collection_light_elapsed += delta
-		var light_progress: float = clampf(_collection_light_elapsed / COLLECTION_LIGHT_DURATION, 0.0, 1.0)
-		_gem_light.light_energy = lerpf(COLLECTION_LIGHT_ENERGY, 0.0, light_progress)
-		if _collection_light_elapsed >= COLLECTION_LIGHT_DURATION:
-			_gem_light.visible = false
-	if not _content_root.visible:
+	if collectionLightElapsed < COLLECTION_LIGHT_DURATION:
+		collectionLightElapsed += delta
+		var lightProgress: float = clampf(collectionLightElapsed / COLLECTION_LIGHT_DURATION, 0.0, 1.0)
+		gemLight.light_energy = lerpf(COLLECTION_LIGHT_ENERGY, 0.0, lightProgress)
+		if collectionLightElapsed >= COLLECTION_LIGHT_DURATION:
+			gemLight.visible = false
+	if not contentRoot.visible:
 		return
-	_content_root.rotate_y(delta * speed)
+	contentRoot.rotate_y(delta * speed)
 
 func _reset_collection_effect() -> void:
-	if not _sprirt or not _tail or not _aura or not _gem_light:
+	if not sprirt or not tail or not aura or not gemLight:
 		return
-	_sprirt_active = false
-	_sprirt_elapsed = SPRIRT_LIFETIME
-	_sprirt.restart()
-	_sprirt.emitting = false
-	_tail.restart()
-	_tail.emitting = false
-	_aura.restart()
-	_aura.emitting = false
-	_collection_light_elapsed = COLLECTION_LIGHT_DURATION
-	_gem_light.light_energy = 0.0
-	_gem_light.visible = false
+	sprirtActive = false
+	sprirtElapsed = SPRIRT_LIFETIME
+	sprirt.restart()
+	sprirt.emitting = false
+	tail.restart()
+	tail.emitting = false
+	aura.restart()
+	aura.emitting = false
+	collectionLightElapsed = COLLECTION_LIGHT_DURATION
+	gemLight.light_energy = 0.0
+	gemLight.visible = false
 
 func _set_monitoring(value: bool) -> void:
-	if _trigger_area:
-		_trigger_area.set_deferred("monitoring", value)
+	if triggerArea:
+		triggerArea.set_deferred("monitoring", value)
 
 func _exit_tree() -> void:
 	if not Engine.is_editor_hint():
