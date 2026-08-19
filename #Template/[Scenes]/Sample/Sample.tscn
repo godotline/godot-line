@@ -173,12 +173,13 @@ transform = Transform3D(2.1093316, 0, 0, 0, 1, 0, 0, 0, 10.958137, -0.005569935,
 script = ExtResource("9_0v7qw")
 startValue = Vector3(0.028666973, -1.7388914, 22.715809)
 endOffset = Vector3(0, 5, 0)
-duration = 2.0
+triggeredByTime = false
 
 [node name="Node3D2" type="Node3D" parent="Scene_Group/Scene_001/Ground2" unique_id=431550219]
 script = ExtResource("10_7en4s")
 startValue = Vector3(1, 1, 1)
 endOffset = Vector3(1, 5, 3)
+triggeredByTime = false
 
 [node name="Trigger" parent="Scene_Group/Scene_001" unique_id=608483111 instance=ExtResource("11_mq52h")]
 transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 2.2444015, -0.5, 2.7034848)
@@ -234,7 +235,7 @@ transform = Transform3D(-1, 0, 1.509958e-07, 0, 1, 0, -1.509958e-07, 0, -1, 33.5
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 7.882288, 0, 61.789726)
 
 [node name="Obstacle3" parent="Scene_Group/Scene_001" unique_id=460537276 instance=ExtResource("15_6gt33")]
-transform = Transform3D(8.999994, 0, 0, 0, 9, 0, 0, 0, 8.999994, 18.532341, 4.0459642, 9.804915)
+transform = Transform3D(9, 0, 0, 0, 9, 0, 0, 0, 9, 18.532341, 4.0459642, 9.804915)
 script = ExtResource("17_j2eg4")
 disableInPlayMode = false
 
@@ -243,10 +244,13 @@ script = ExtResource("9_0v7qw")
 transformType = 1
 startValue = Vector3(18.532341, 4.0459642, 9.804915)
 endOffset = Vector3(0, 10, 0)
+triggeredByTime = false
 
 [node name="LocalRotAnimator" type="Node3D" parent="Scene_Group/Scene_001/Obstacle3" unique_id=418376129]
 script = ExtResource("23_s0ncg")
-endOffset = Vector3(0, 360, 0)
+rotateMode = 1
+endOffset = Vector3(0, 6.2831855, 0)
+duration = 4.0
 
 [node name="Obstacle4" parent="Scene_Group/Scene_001" unique_id=1353085919 instance=ExtResource("15_6gt33")]
 transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 28.07723, 23.695015)
@@ -259,7 +263,7 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 3.5433593, -0.5, 10.875
 
 [node name="Jump" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=2084784200]
 script = ExtResource("21_tdro7")
-height = 2.0
+power = 626.1
 
 [node name="JumpPredictor" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=1495481976]
 script = ExtResource("22_77abe")

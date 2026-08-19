@@ -129,6 +129,7 @@ Use the editor plugin: **Template > 新建关卡** in the toolbar. Creates `[Sce
 - Player tail (ObjectPool, 256 MeshInstance3D) and RoadMaker road are **two independent systems**.
 - `FogSettings` resource drives fog, not a standalone FogColorChanger script.
 - Physics layers: 1=Player, 2=BaseFloor, 3=BaseWall.
+- **Godot 4.7 editor does NOT restore `[editable path="..."]` on load** (verified: `Node.is_editable_instance()` is `false` after reopening a scene whose file has the `[editable]` section). Consequence: **instanced-child property overrides** (e.g. a `CollisionShape3D`/`Marker3D` override node under an `instance=Trigger.tscn` subtree) are **silently stripped whenever the editor saves that scene**, reverting to the base shape (the "scale变成0" bug). Root-instance overrides (transform, collision_layer, etc.) DO survive. **Fix pattern: bake the instanced children as local nodes** (write `[node name="Area3D" type="Area3D"]` + `script = BaseTrigger.gd` + local `CollisionShape3D`/`Marker3D` instead of `instance=Trigger.tscn`). Already applied to `CrownCheckPoint.tscn` and `HeartCheckPoint.tscn` (1×5×10 axis-aligned trigger). `Gem.tscn` still uses the fragile override pattern (SphereShape3D on the instanced CollisionShape3D) — do not save it from the editor without converting. `Crystal.tscn`/`Pyramid.tscn` are safe (no instanced-child overrides).
 
 ## Performance Best Practices
 
@@ -232,3 +233,15 @@ The following snake_case methods are intentionally left as-is — they are Godot
 - **GitHub proxy**: repo uses proxy at `127.0.0.1:7897`. Must be running for git/gh operations.
 - **`AudioManager.Time`**: cannot be renamed to `Time` (shadows Godot native `Time` class). Kept as `time`.
 - **`OnClick`/`StopTweens`/`BtnHide`/`BtnShow`**: HideCanvas/ShowCanvas had pre-existing recursive-placeholder compatibility aliases (`func X():\n\tX()`) that were removed during rename. The real renamed methods are the sole definitions now.
+
+### ✅ Completed — Trigger Behavior Parity (post-v2.3)
+
+Audit of 20 Unity trigger pairs; fixed the remaining real functional differences. All Godot files verified parse-clean via gdmcp `analyze_script`.
+
+| Area | Change |
+|------|--------|
+| `Teleport.gd` | Fixed `InitPlayerPosition` arg-order bug (was passing `turn` as `forceCamera`, `targetDirection` as `doTurn`). Now `InitPlayerPosition(body, finalPosition, true, turn, targetDirection)` — always snaps camera like Unity `LevelManager.cs:143`. Only caller is Teleport; `Checkpoint`'s mention is a comment. |
+| `Jump.gd` / `JumpPredictor.gd` | `height` renamed to Unity's `power` (`=500.0`). Initial velocity = `power / 100.0` (Unity Player rigidbody `m_Mass: 100` in `Player.prefab`). Signal `height_changed` → `power_changed`. Added `changeDirection` (Unity `Jump.cs`). Predictor now draws from `power`. |
+| `Speed.gd` | Added Unity `setFakePlayer`/`player` support (`Speed.cs`): with `setFakePlayer` the Player is unaffected; FakePlayer/`obstacle` bodies set `player.speed` via a direct `container.body_entered` hook (like `FakePlayerTrigger`), since BaseTrigger only dispatches Player bodies. `_sync_velocity` (immediate velocity update) kept as a Godot adaptation. |
+| `SetFog.gd` | Now always tweens (Unity `FogSettings.SetFog` tweens regardless of `useFog`) and adds `background_color` tween — matches Unity `camera.backgroundColor = fogColor`. |
+| `AnimatorBase.gd` | `triggeredByTime` default flipped `false`→`true` (Unity default). Added `offsetTime` (fires `duration` earlier, Unity `InitTime()`). `duration` default `1.0`→`2.0`. **Sample.tscn's `LocalRotAnimator` is explicitly pinned `triggeredByTime = false`** to preserve its event-wired behavior. |

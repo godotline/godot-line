@@ -27,7 +27,6 @@ const SPRIRT_GRAVITY: float = -0.5
 const SPRIRT_VELOCITY_X_MAX: float = 10.0
 const SPRIRT_VELOCITY_Y_MAX: float = 50.0
 const SPRIRT_VELOCITY_Z_MAX: float = 50.0
-const TAIL_RATE_OVER_DISTANCE: float = 30.0
 
 @export var speed: float = DEFAULT_ROTATION_SPEED_RADIANS
 @export var fake: bool = false
@@ -39,21 +38,21 @@ var collectionLightElapsed: float = COLLECTION_LIGHT_DURATION
 var sprirtActive: bool = false
 var sprirtElapsed: float = SPRIRT_LIFETIME
 var sprirtVelocity: Vector3 = Vector3.ZERO
-var tailDistanceRemainder: float = 0.0
 
 var contentRoot: Node3D
 var triggerArea: Area3D
-var sprirt: GPUParticles3D
-var tail: GPUParticles3D
-var aura: GPUParticles3D
+var sprirt: CPUParticles3D
+var tail: CPUParticles3D
+var aura: CPUParticles3D
 var gemLight: OmniLight3D
+var spawnedFragments: Array[RigidBody3D] = []
 
 func _ready() -> void:
 	contentRoot = _resolve_content_root()
 	triggerArea = get_parent() as Area3D
-	sprirt = contentRoot.get_node_or_null("Sprirt") as GPUParticles3D
-	tail = contentRoot.get_node_or_null("Tail") as GPUParticles3D
-	aura = contentRoot.get_node_or_null("Aura") as GPUParticles3D
+	sprirt = contentRoot.get_node_or_null("Sprirt") as CPUParticles3D
+	tail = contentRoot.get_node_or_null("Tail") as CPUParticles3D
+	aura = contentRoot.get_node_or_null("Aura") as CPUParticles3D
 	gemLight = contentRoot.get_node_or_null("GemLight") as OmniLight3D
 	if not sprirt or not tail or not aura or not gemLight:
 		push_error("Gem.gd: 收集物视觉节点不完整")
@@ -109,9 +108,8 @@ func _start_collection_effect() -> void:
 	sprirt.emitting = true
 
 	tail.global_transform = Transform3D(Basis.IDENTITY, sprirt.global_position)
-	tailDistanceRemainder = 0.0
 	tail.restart()
-	tail.emitting = false
+	tail.emitting = true
 
 	aura.global_transform = Transform3D(Basis.IDENTITY, effectOrigin)
 	aura.restart()
@@ -124,32 +122,15 @@ func _start_collection_effect() -> void:
 func _update_sprirt(delta: float) -> void:
 	if not sprirtActive:
 		return
-	var startPosition: Vector3 = sprirt.global_position
 	sprirtVelocity.y += SPRIRT_GRAVITY * delta
-	var endPosition: Vector3 = startPosition + sprirtVelocity * delta
-	_emit_tail_between(startPosition, endPosition)
+	var endPosition: Vector3 = sprirt.global_position + sprirtVelocity * delta
 	sprirt.global_position = endPosition
 	tail.global_position = endPosition
 	sprirtElapsed += delta
 	if sprirtElapsed >= SPRIRT_LIFETIME:
 		sprirtActive = false
 		sprirt.emitting = false
-
-func _emit_tail_between(startPosition: Vector3, endPosition: Vector3) -> void:
-	var segment: Vector3 = endPosition - startPosition
-	var segmentLength: float = segment.length()
-	if segmentLength <= 0.000001:
-		return
-	var spacing: float = 1.0 / TAIL_RATE_OVER_DISTANCE
-	var distanceAlong: float = spacing - tailDistanceRemainder
-	var direction: Vector3 = segment / segmentLength
-	while distanceAlong <= segmentLength:
-		var emitPosition: Vector3 = startPosition + direction * distanceAlong
-		tail.global_position = emitPosition
-		var particleTransform: Transform3D = Transform3D(Basis.IDENTITY, emitPosition)
-		tail.emit_particle(particleTransform, Vector3.ZERO, Color.WHITE, Color.WHITE, GPUParticles3D.EMIT_FLAG_POSITION)
-		distanceAlong += spacing
-	tailDistanceRemainder = fmod(tailDistanceRemainder + segmentLength, spacing)
+		tail.emitting = false
 
 func _spawn_fragments() -> void:
 	var fragmentParent: Node = contentRoot.get_parent()
@@ -160,6 +141,7 @@ func _spawn_fragments() -> void:
 		var fragment: RigidBody3D = FRAGMENT_SCENE.instantiate() as RigidBody3D
 		fragment.name = "GemFragment_%02d" % index
 		fragmentParent.add_child(fragment)
+		spawnedFragments.append(fragment)
 		fragment.global_position = contentRoot.global_position
 		var scaleFactor: float = randf_range(FRAGMENT_SCALE_MIN, FRAGMENT_SCALE_MAX)
 		var fragmentMesh: MeshInstance3D = fragment.get_node("MeshInstance3D") as MeshInstance3D
@@ -189,6 +171,8 @@ func _spawn_fragments() -> void:
 		shrinkTween.finished.connect(fragment.queue_free)
 
 func _on_revive() -> void:
+	# Unity Gem.ResetData: 复活时销毁收集特效 (Destroy(effect))
+	_clear_fragments()
 	# 只有在宝石之后存档才恢复（存档点索引 >= 宝石索引）
 	var shouldRestore: bool = index >= LevelManager.checkpointCount
 	if shouldRestore:
@@ -206,6 +190,12 @@ func _on_revive() -> void:
 			countedInGemTotal = false
 	_reset_collection_effect()
 	LevelManager.remove_revive_listener(_on_revive)
+
+func _clear_fragments() -> void:
+	for fragment: RigidBody3D in spawnedFragments:
+		if is_instance_valid(fragment):
+			fragment.queue_free()
+	spawnedFragments.clear()
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or not contentRoot or not sprirt:
@@ -226,11 +216,8 @@ func _reset_collection_effect() -> void:
 		return
 	sprirtActive = false
 	sprirtElapsed = SPRIRT_LIFETIME
-	sprirt.restart()
 	sprirt.emitting = false
-	tail.restart()
 	tail.emitting = false
-	aura.restart()
 	aura.emitting = false
 	collectionLightElapsed = COLLECTION_LIGHT_DURATION
 	gemLight.light_energy = 0.0

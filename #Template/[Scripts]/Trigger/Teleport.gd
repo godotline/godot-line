@@ -29,4 +29,5 @@ func trigger(body: Node3D) -> void:
 		TeleportType.Position:
 			finalPosition = position
 	
-	LevelManager.InitPlayerPosition(body, finalPosition, turn, targetDirection)
+	# Unity 签名: InitPlayerPosition(player, position, changeDirection, direction) 且总是强制相机跟随
+	LevelManager.InitPlayerPosition(body, finalPosition, true, turn, targetDirection)
