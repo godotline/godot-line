@@ -484,21 +484,21 @@ offset_right = 300.0
 offset_bottom = 185.0
 script = ExtResource("7_show_canvas")
 duration = 0.5
-invoke_before_animation = true
-auto_hide_on_ready = true
-hidden_offset_y = 400.0
-hidden_rotation_degrees = 15.0
+invokeBeforeAnimation = true
+autoHideOnReady = true
+hiddenOffsetY = 400.0
+hiddenRotationDegrees = 15.0
 theme_override_styles/panel = SubResource("6")
 
 [node name="HideCanvas" type="Node" parent="UIContainer/AboutPanel/AboutContent"]
 script = ExtResource("8_hide_canvas")
 duration = 0.5
-auto_hide_on_ready = true
-invoke_before_animation = true
-hidden_offset_y = 400.0
-hidden_rotation_degrees = -15.0
-fade_delay = 0.3
-fade_duration = 0.2
+autoHideOnEnable = true
+invokeBeforeAnimation = true
+hiddenOffsetY = 400.0
+hiddenRotationDegrees = -15.0
+fadeDelay = 0.3
+fadeDuration = 0.2
 
 [node name="AboutVBox" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutContent" unique_id=61138793]
 layout_mode = 1

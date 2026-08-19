@@ -28,7 +28,7 @@ transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 100)
 
 [node name="PyramidTrigger" type="Node3D" parent="OpenTrigger" unique_id=829783754]
 script = ExtResource("6_pyrtr")
-change_direction = true
+changeDirection = true
 
 [node name="FinalTurn" parent="." unique_id=658946201 instance=ExtResource("2_tulby")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 45.342495)
@@ -39,18 +39,18 @@ type = 1
 
 [node name="WaitingForWin" parent="." unique_id=317890779 instance=ExtResource("2_tulby")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 0)
-require_playing = false
+requirePlaying = false
 
 [node name="PyramidTrigger" type="Node3D" parent="WaitingForWin" unique_id=1301256065]
 script = ExtResource("6_pyrtr")
 type = 2
-change_direction = true
+changeDirection = true
 
 [node name="StopPlayer" parent="." unique_id=1231749146 instance=ExtResource("2_tulby")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, -53.41746)
-require_playing = false
+requirePlaying = false
 
 [node name="PyramidTrigger" type="Node3D" parent="StopPlayer" unique_id=1617173312]
 script = ExtResource("6_pyrtr")
 type = 3
-change_direction = true
+changeDirection = true

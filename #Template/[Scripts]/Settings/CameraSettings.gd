@@ -2,7 +2,7 @@ class_name CameraSettings
 extends Resource
 
 @export var offset: Vector3 = Vector3.ZERO
-@export var rotation: Vector3 = Vector3.ZERO
+@export_custom(PROPERTY_HINT_RANGE, "-360,360,0.1,radians_as_degrees,or_greater,or_less") var rotation: Vector3 = Vector3.ZERO
 @export var scale: Vector3 = Vector3.ONE
 @export var fov: float = 60.0
 @export var follow: bool = true
@@ -17,9 +17,9 @@ func get_camera() -> CameraSettings:
 
 	if follower.rotator:
 		settings.offset = follower.rotator.position
-		settings.rotation = follower.rotator.rotation_degrees
-	if follower.scale_node:
-		settings.scale = follower.scale_node.scale
+		settings.rotation = follower.rotator.rotation
+	if follower.scaleNode:
+		settings.scale = follower.scaleNode.scale
 	if follower.camera:
 		settings.fov = follower.camera.fov
 	settings.follow = follower.follow
@@ -35,10 +35,10 @@ func set_camera() -> void:
 
 	if follower.rotator:
 		follower.rotator.position = offset
-		follower.rotator.rotation_degrees = rotation
-	if follower.scale_node:
-		follower.scale_node.scale = scale
-		follower.scale_node.position = Vector3.ZERO
+		follower.rotator.rotation = rotation
+	if follower.scaleNode:
+		follower.scaleNode.scale = scale
+		follower.scaleNode.position = Vector3.ZERO
 	if follower.camera:
 		follower.camera.fov = fov
 	follower.follow = follow

@@ -6,4 +6,4 @@ extends Resource
 
 @export var target: NodePath
 @export var active: bool = true
-@export var dont_revive: bool = false
+@export var dontRevive: bool = false

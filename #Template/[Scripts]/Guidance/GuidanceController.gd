@@ -3,11 +3,11 @@ class_name GuidanceController
 
 static var Instance: GuidanceController
 
-@export var create_boxes: bool = false
-@export var create_lines: bool = true
-@export var box_holder: Node3D
-@export var guidance_color: Color = Color.WHITE
-@export var line_gap: float = 0.2
+@export var createBoxes: bool = false
+@export var createLines: bool = true
+@export var boxHolder: Node3D
+@export var guidanceBoxColor: Color = Color.WHITE
+@export var lineGap: float = 0.2
 
 var _player: Player
 var _player_transform: Node3D
@@ -25,21 +25,21 @@ func _ready() -> void:
 	_id = 0
 	_box_scene = load("res://#Template/[Resources]/GuidanceBox.tscn")
 	if _box_scene:
-		var box_probe: Node3D = _box_scene.instantiate() as Node3D
-		if box_probe:
-			_box_size_y = box_probe.scale.y
-			box_probe.free()
-	if create_boxes:
+		var boxProbe: Node3D = _box_scene.instantiate() as Node3D
+		if boxProbe:
+			_box_size_y = boxProbe.scale.y
+			boxProbe.free()
+	if createBoxes:
 		_holder = Node3D.new()
 		_holder.name = "GuidanceBoxHolder"
 		get_tree().current_scene.add_child(_holder)
-	if box_holder:
-		for child in box_holder.get_children():
+	if boxHolder:
+		for child in boxHolder.get_children():
 			if child is Node3D:
 				_boxes.append(child)
 	for b in _boxes:
-		_set_color(b, guidance_color)
-	if create_lines:
+		_set_color(b, guidanceBoxColor)
+	if createLines:
 		_generate_lines()
 	set_process(true)
 
@@ -51,19 +51,19 @@ func _process(_delta: float) -> void:
 		_player_transform = _player
 
 	_forward = _player.secondDirection.y if _player.rotation_degrees.y == _player.firstDirection.y else _player.firstDirection.y
-	if create_boxes and not _original_created:
-		var original_box: Node3D = _spawn_box(
+	if createBoxes and not _original_created:
+		var originalBox: Node3D = _spawn_box(
 			_player_transform.global_position - Vector3(0, 0.45, 0),
 			_player.firstDirection.y
 		)
-		if original_box:
-			original_box.name = "OriginalGuidanceBox"
-			var original_guidance_box: GuidanceBox = _find_guidance_box(original_box)
-			if original_guidance_box:
-				original_guidance_box.can_be_triggered = false
+		if originalBox:
+			originalBox.name = "OriginalGuidanceBox"
+			var originalGuidanceBox: GuidanceBox = _find_guidance_box(originalBox)
+			if originalGuidanceBox:
+				originalGuidanceBox.canBeTriggered = false
 			_original_created = true
 
-	if create_boxes and LevelManager.GameState == LevelManager.GameStatus.Playing and not _started:
+	if createBoxes and LevelManager.GameState == LevelManager.GameStatus.Playing and not _started:
 		if not _player.onturn.is_connected(_on_player_turn):
 			_player.onturn.connect(_on_player_turn)
 		_started = true
@@ -99,7 +99,7 @@ func _spawn_box(pos: Vector3, rot_y: float) -> Node3D:
 func _set_color(box: Node3D, color: Color) -> void:
 	var gb: GuidanceBox = _find_guidance_box(box)
 	if gb:
-		gb.set_color(color)
+		gb.SetColor(color)
 
 func _generate_lines() -> void:
 	for i in range(_boxes.size()):
@@ -110,17 +110,17 @@ func _generate_lines() -> void:
 		if not is_instance_valid(a) or not is_instance_valid(b):
 			continue
 		var gb: GuidanceBox = _find_guidance_box(a)
-		if gb and not gb.have_line:
+		if gb and not gb.haveLine:
 			continue
 		var midpoint: Vector3 = 0.5 * (a.global_position + b.global_position)
 		var dist: float = a.global_position.distance_to(b.global_position)
-		var line_length: float = dist - 0.5 * _box_size_y - 2 * line_gap
-		if line_length <= 0.0:
+		var lineLength: float = dist - 0.5 * _box_size_y - 2 * lineGap
+		if lineLength <= 0.0:
 			continue
 		var line: MeshInstance3D = MeshInstance3D.new()
 		line.mesh = BoxMesh.new()
 		var mat: StandardMaterial3D = StandardMaterial3D.new()
-		mat.albedo_color = guidance_color
+		mat.albedo_color = guidanceBoxColor
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		line.set_surface_override_material(0, mat)
 		var wrapper: Node3D = Node3D.new()
@@ -132,5 +132,5 @@ func _generate_lines() -> void:
 		var right: Vector3 = direction.cross(up).normalized()
 		var forward: Vector3 = right.cross(direction).normalized()
 		wrapper.global_transform.basis = Basis(right, direction, forward)
-		wrapper.set_scale(Vector3(0.15, line_length, 0.15))
+		wrapper.set_scale(Vector3(0.15, lineLength, 0.15))
 		wrapper.name = "%s - Line" % a.name

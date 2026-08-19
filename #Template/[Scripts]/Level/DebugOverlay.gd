@@ -1,44 +1,44 @@
 extends CanvasLayer
 class_name DebugOverlay
 
-var _label: Label
-var _previous_debug: bool = false
-var _poll_timer: Timer
-var _refresh_timer: Timer
-var _cached_camera: Camera3D
+var label: Label
+var previousDebug: bool = false
+var pollTimer: Timer
+var refreshTimer: Timer
+var cachedCamera: Camera3D
 
 func _ready() -> void:
 	layer = 100
 	visible = false
 
-	_label = Label.new()
-	_label.position = Vector2(10, 10)
-	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_label.add_theme_font_size_override("font_size", 16)
-	_label.add_theme_color_override("font_color", Color.WHITE)
-	_label.add_theme_color_override("font_shadow_color", Color.BLACK)
-	_label.add_theme_constant_override("shadow_offset_x", 1)
-	_label.add_theme_constant_override("shadow_offset_y", 1)
-	add_child(_label)
+	label = Label.new()
+	label.position = Vector2(10, 10)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	add_child(label)
 
 	# 创建轮询定时器
-	_poll_timer = Timer.new()
-	_poll_timer.wait_time = 0.5
-	_poll_timer.one_shot = false
-	_poll_timer.autostart = true
-	_poll_timer.timeout.connect(_poll_debug)
-	add_child(_poll_timer)
+	pollTimer = Timer.new()
+	pollTimer.wait_time = 0.5
+	pollTimer.one_shot = false
+	pollTimer.autostart = true
+	pollTimer.timeout.connect(_poll_debug)
+	add_child(pollTimer)
 
 	# 创建刷新定时器（初始停止）
-	_refresh_timer = Timer.new()
-	_refresh_timer.wait_time = 0.1
-	_refresh_timer.one_shot = false
-	_refresh_timer.autostart = false
-	_refresh_timer.timeout.connect(_update_label)
-	add_child(_refresh_timer)
+	refreshTimer = Timer.new()
+	refreshTimer.wait_time = 0.1
+	refreshTimer.one_shot = false
+	refreshTimer.autostart = false
+	refreshTimer.timeout.connect(_update_label)
+	add_child(refreshTimer)
 
 	# 缓存相机引用
-	_cached_camera = get_viewport().get_camera_3d()
+	cachedCamera = get_viewport().get_camera_3d()
 
 
 func _poll_debug() -> void:
@@ -46,14 +46,14 @@ func _poll_debug() -> void:
 		return
 	if not Player.instance:
 		return
-	var debug_on: bool = Player.instance.debug
-	if debug_on != _previous_debug:
-		_previous_debug = debug_on
-		visible = debug_on
-		if debug_on:
-			_refresh_timer.start()
+	var debugOn: bool = Player.instance.debug
+	if debugOn != previousDebug:
+		previousDebug = debugOn
+		visible = debugOn
+		if debugOn:
+			refreshTimer.start()
 		else:
-			_refresh_timer.stop()
+			refreshTimer.stop()
 
 
 func _update_label() -> void:
@@ -64,12 +64,12 @@ func _update_label() -> void:
 	lines.append("FPS: %d" % fps)
 
 	if p.levelData:
-		var music_player: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-		if music_player and music_player.stream:
-			var progress: float = music_player.get_playback_position() / music_player.stream.get_length() if music_player.stream.get_length() > 0 else 0.0
-			var current_sec: float = music_player.get_playback_position()
-			var total_sec: float = p.levelData.levelTotalTime if p.levelData.useCustomLevelTime else music_player.stream.get_length()
-			lines.append("进度: %d%% (%.1f秒/%.1f秒)" % [int(progress * 100), current_sec, total_sec])
+		var musicPlayer: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+		if musicPlayer and musicPlayer.stream:
+			var progress: float = musicPlayer.get_playback_position() / musicPlayer.stream.get_length() if musicPlayer.stream.get_length() > 0 else 0.0
+			var currentSec: float = musicPlayer.get_playback_position()
+			var totalSec: float = p.levelData.levelTotalTime if p.levelData.useCustomLevelTime else musicPlayer.stream.get_length()
+			lines.append("进度: %d%% (%.1f秒/%.1f秒)" % [int(progress * 100), currentSec, totalSec])
 
 	lines.append("游戏状态: %s" % LevelManager.GameStatus.keys()[LevelManager.GameState])
 
@@ -81,13 +81,13 @@ func _update_label() -> void:
 
 	var cam: OldCameraFollower = OldCameraFollower.instance
 	if cam:
-		lines.append("相机偏移: (%.2f, %.2f, %.2f)" % [cam.add_position.x, cam.add_position.y, cam.add_position.z])
+		lines.append("相机偏移: (%.2f, %.2f, %.2f)" % [cam.addPosition.x, cam.addPosition.y, cam.addPosition.z])
 		lines.append("相机角度: (%.1f, %.1f, %.1f)" % [cam.rotation_degrees.x, cam.rotation_degrees.y, cam.rotation_degrees.z])
-		lines.append("相机距离: %.1f" % cam.distance_from_object)
-	elif _cached_camera:
-		lines.append("相机位置: (%.2f, %.2f, %.2f)" % [_cached_camera.global_position.x, _cached_camera.global_position.y, _cached_camera.global_position.z])
-		lines.append("相机角度: (%.1f, %.1f, %.1f)" % [_cached_camera.rotation_degrees.x, _cached_camera.rotation_degrees.y, _cached_camera.rotation_degrees.z])
-	if _cached_camera:
-		lines.append("视场大小: %.1f" % _cached_camera.fov)
+		lines.append("相机距离: %.1f" % cam.distanceFromObject)
+	elif cachedCamera:
+		lines.append("相机位置: (%.2f, %.2f, %.2f)" % [cachedCamera.global_position.x, cachedCamera.global_position.y, cachedCamera.global_position.z])
+		lines.append("相机角度: (%.1f, %.1f, %.1f)" % [cachedCamera.rotation_degrees.x, cachedCamera.rotation_degrees.y, cachedCamera.rotation_degrees.z])
+	if cachedCamera:
+		lines.append("视场大小: %.1f" % cachedCamera.fov)
 
-	_label.text = "\n".join(lines)
+	label.text = "\n".join(lines)

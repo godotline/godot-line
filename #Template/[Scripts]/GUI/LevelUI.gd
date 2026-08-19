@@ -1,18 +1,18 @@
 extends Control
 
 var levelname: String = "level name"
-var _shown: bool = false
-var _replay_requested: bool = false
+var shown: bool = false
+var replayRequested: bool = false
 
-@onready var normal_page: Control = $NormalPage
-@onready var revive_page: Control = $RevivePage
-@onready var backdrop: ColorRect = $ColorRect
-@onready var title_label: Label = $NormalPage/title
-@onready var normal_percentage: Label = $NormalPage/percentage
-@onready var normal_fill: TextureRect = $NormalPage/ProgressFrame/Fill
-@onready var collectible_label: Label = $NormalPage/Collectible/diamond
-@onready var revive_percentage: Label = $RevivePage/percentage
-@onready var revive_fill: TextureRect = $RevivePage/ProgressFrame/Fill
+@onready var normalPage: Control = $NormalPage
+@onready var revivePage: Control = $RevivePage
+@onready var background: ColorRect = $ColorRect
+@onready var title: Label = $NormalPage/title
+@onready var percentage: Label = $NormalPage/percentage
+@onready var barFill: TextureRect = $NormalPage/ProgressFrame/Fill
+@onready var block: Label = $NormalPage/Collectible/diamond
+@onready var percentageRevive: Label = $RevivePage/percentage
+@onready var barFillRevive: TextureRect = $RevivePage/ProgressFrame/Fill
 
 func _ready() -> void:
 	if Player.instance and Player.instance.levelData:
@@ -24,24 +24,24 @@ func _ready() -> void:
 		Player.instance.on_game_end.connect(_show_ui)
 
 func _show_ui() -> void:
-	if _shown:
+	if shown:
 		return
-	_shown = true
+	shown = true
 
 	var progress: float = clampf(float(LevelManager.percent) / 100.0, 0.0, 1.0)
-	var percentage_text: String = "%d%%" % LevelManager.percent
-	title_label.text = levelname
-	normal_percentage.text = percentage_text
-	revive_percentage.text = percentage_text
-	collectible_label.text = "%d/10" % LevelManager.gem
-	_set_progress(normal_fill, progress)
-	_set_progress(revive_fill, progress)
+	var percentageText: String = "%d%%" % LevelManager.percent
+	title.text = levelname
+	percentage.text = percentageText
+	percentageRevive.text = percentageText
+	block.text = "%d/10" % LevelManager.gem
+	_set_progress(barFill, progress)
+	_set_progress(barFillRevive, progress)
 
-	var can_revive: bool = Player.instance != null and not Player.instance.is_end \
-		and is_instance_valid(LevelManager.current_checkpoint)
-	normal_page.visible = not can_revive
-	revive_page.visible = can_revive
-	backdrop.color.a = 0.0 if can_revive else 0.639216
+	var canRevive: bool = Player.instance != null and not Player.instance.isEnd \
+		and is_instance_valid(LevelManager.currentCheckpoint)
+	normalPage.visible = not canRevive
+	revivePage.visible = canRevive
+	background.color.a = 0.0 if canRevive else 0.639216
 	visible = true
 
 func _set_progress(fill: TextureRect, progress: float) -> void:
@@ -50,63 +50,63 @@ func _set_progress(fill: TextureRect, progress: float) -> void:
 
 func _on_back_pressed() -> void:
 	get_tree().quit()
-	LevelManager.is_end = false
-	LevelManager.is_relive = false
-	LevelManager.camera_checkpoint.restore_pending = false
+	LevelManager.isEnd = false
+	LevelManager.isRelive = false
+	LevelManager.cameraCheckpoint.restore_pending = false
 	LevelManager.gem = 0
 	LevelManager.crown = 0
 	LevelManager.percent = 0
 
 func _on_cancel_revive_pressed() -> void:
-	revive_page.visible = false
-	normal_page.visible = true
-	backdrop.color.a = 0.639216
+	revivePage.visible = false
+	normalPage.visible = true
+	background.color.a = 0.639216
 
 func _on_revive_pressed() -> void:
-	_shown = false
+	shown = false
 	visible = false
-	LevelManager.is_end = false
+	LevelManager.isEnd = false
 	if not Player.instance:
 		push_error("LevelUI.gd: Player.instance 为空，无法复活")
 		_on_gamereplay_pressed()
 		return
-	if Player.instance.is_end:
+	if Player.instance.isEnd:
 		_on_gamereplay_pressed()
-	elif is_instance_valid(LevelManager.current_checkpoint):
-		LevelManager.current_checkpoint.revive()
+	elif is_instance_valid(LevelManager.currentCheckpoint):
+		LevelManager.currentCheckpoint.revive()
 	else:
 		_on_gamereplay_pressed()
 
 func _on_gamereplay_pressed() -> void:
-	if _replay_requested:
+	if replayRequested:
 		return
-	_replay_requested = true
+	replayRequested = true
 	LevelManager.reset_to_defaults()
 
-	# Wait for a previous scene switch to settle before reading current_scene.
+	# Wait for a previous scene switch to settle before reading currentScene.
 	await get_tree().process_frame
 	if not is_inside_tree():
 		return
-	var current_scene: Node = get_tree().current_scene
-	if not is_instance_valid(current_scene):
-		_replay_requested = false
+	var currentScene: Node = get_tree().current_scene
+	if not is_instance_valid(currentScene):
+		replayRequested = false
 		push_error("LevelUI.gd: 当前场景为空，无法重新加载关卡")
 		return
 
-	var loading_scene: PackedScene = load("res://#Template/[Resources]/LoadingPage.tscn") as PackedScene
-	if loading_scene:
-		var loading_page: LoadingPage = loading_scene.instantiate() as LoadingPage
-		if loading_page:
-			current_scene.add_child(loading_page)
-			var reveal_tween: Tween = loading_page.reveal(_get_loading_background_color())
-			await reveal_tween.finished
+	var loadingScene: PackedScene = load("res://#Template/[Resources]/LoadingPage.tscn") as PackedScene
+	if loadingScene:
+		var loadingPage: LoadingPage = loadingScene.instantiate() as LoadingPage
+		if loadingPage:
+			currentScene.add_child(loadingPage)
+			var revealTween: Tween = loadingPage.reveal(_get_loading_background_color())
+			await revealTween.finished
 	if not is_inside_tree():
 		return
 	var player: Player = Player.instance
 	if is_instance_valid(player):
 		player.reload()
 	else:
-		_replay_requested = false
+		replayRequested = false
 		push_error("LevelUI.gd: Player.instance 为空，无法重新加载关卡")
 
 func _get_loading_background_color() -> Color:

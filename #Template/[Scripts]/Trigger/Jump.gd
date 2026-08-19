@@ -17,8 +17,8 @@ func _ready() -> void:
 func trigger(body: Node3D) -> void:
 	var character: CharacterBody3D = body as CharacterBody3D
 	if character:
-		var jump_speed: float = sqrt(2 * 9.8 * height)
-		character.velocity += Vector3(0, jump_speed, 0)
+		var jumpSpeed: float = sqrt(2 * 9.8 * height)
+		character.velocity += Vector3(0, jumpSpeed, 0)
 		if Player.instance and Player.instance.has_signal("on_player_jump"):
 			Player.instance.on_player_jump.emit()
 

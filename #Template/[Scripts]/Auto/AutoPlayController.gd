@@ -9,48 +9,48 @@ static var Instance: AutoPlayController
 
 var _holder: Node3D
 var _triggers: Array[Area3D] = []
-var _init_in_progress: bool = false
+var initInProgress: bool = false
 var _initialized: bool = false
-var _requested_active: bool = false
+var requestedActive: bool = false
 
 func _ready() -> void:
 	Instance = self
-	_requested_active = enable
+	requestedActive = enable
 	# 等场景切换和其他节点的 _ready() 完成后再读取 current_scene。
 	call_deferred("_init_triggers")
 
 func _init_triggers() -> void:
-	if _init_in_progress or _initialized:
+	if initInProgress or _initialized:
 		return
-	_init_in_progress = true
+	initInProgress = true
 	await get_tree().process_frame
 	if not is_inside_tree():
-		_init_in_progress = false
+		initInProgress = false
 		return
 
-	var current_scene: Node = get_tree().current_scene
-	if not is_instance_valid(current_scene):
+	var currentScene: Node = get_tree().current_scene
+	if not is_instance_valid(currentScene):
 		_queue_init_retry()
 		return
 
-	var guidance_controller: GuidanceController = GuidanceController.Instance
-	if not is_instance_valid(guidance_controller):
+	var guidanceController: GuidanceController = GuidanceController.Instance
+	if not is_instance_valid(guidanceController):
 		_queue_init_retry()
 		return
-	var box_holder: Node3D = guidance_controller.box_holder
-	if not is_instance_valid(box_holder):
+	var boxHolder: Node3D = guidanceController.boxHolder
+	if not is_instance_valid(boxHolder):
 		_queue_init_retry()
 		return
 
-	var boxes: Array[Node] = box_holder.get_children()
+	var boxes: Array[Node] = boxHolder.get_children()
 	if boxes.is_empty():
-		_init_in_progress = false
+		initInProgress = false
 		_initialized = true
 		return
 
 	_holder = Node3D.new()
 	_holder.name = "AutoPlayHolder"
-	current_scene.add_child(_holder)
+	currentScene.add_child(_holder)
 
 	# 从第二个 box 开始创建触发器（与 Unity 版一致，跳过第 0 个）
 	for i in range(1, boxes.size()):
@@ -60,12 +60,12 @@ func _init_triggers() -> void:
 		var trigger: Area3D = _create_trigger(box.global_position, i)
 		_triggers.append(trigger)
 
-	_init_in_progress = false
+	initInProgress = false
 	_initialized = true
-	set_holder(_requested_active)
+	SetHolder(requestedActive)
 
 func _queue_init_retry() -> void:
-	_init_in_progress = false
+	initInProgress = false
 	if is_inside_tree():
 		call_deferred("_init_triggers")
 
@@ -87,8 +87,8 @@ func _create_trigger(pos: Vector3, index: int) -> Area3D:
 	area.global_position = pos
 	return area
 
-func set_holder(active: bool) -> void:
-	_requested_active = active
+func SetHolder(active: bool) -> void:
+	requestedActive = active
 	if _holder:
 		_holder.visible = active
 		for trigger in _triggers:
@@ -101,4 +101,4 @@ func set_holder(active: bool) -> void:
 					trigger.call_deferred("refresh_tracking")
 
 func get_requested_active() -> bool:
-	return _requested_active
+	return requestedActive

@@ -29,9 +29,9 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 func _is_direction_enabled(target: Node3D) -> bool:
 	if target is Player:
 		return (target as Player).drawDirection
-	var fake_player: FakePlayer = _find_fake_player(target)
-	if fake_player:
-		return fake_player.drawDirection
+	var fakePlayer: FakePlayer = _find_fake_player(target)
+	if fakePlayer:
+		return fakePlayer.drawDirection
 	return false
 
 func _find_fake_player(node: Node3D) -> FakePlayer:
@@ -45,6 +45,6 @@ func _find_fake_player(node: Node3D) -> FakePlayer:
 	return null
 
 func _add_world_direction(gizmo: EditorNode3DGizmo, target: Node3D, world_direction: Vector3, material_name: String) -> void:
-	var local_direction: Vector3 = target.global_basis.inverse() * world_direction.normalized()
-	var points: PackedVector3Array = PackedVector3Array([Vector3.ZERO, local_direction * DIRECTION_LENGTH])
+	var localDirection: Vector3 = target.global_basis.inverse() * world_direction.normalized()
+	var points: PackedVector3Array = PackedVector3Array([Vector3.ZERO, localDirection * DIRECTION_LENGTH])
 	gizmo.add_lines(points, get_material(material_name, gizmo), false)

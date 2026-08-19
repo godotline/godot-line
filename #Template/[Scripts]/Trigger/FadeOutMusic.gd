@@ -4,4 +4,4 @@ extends Node3D
 
 func trigger(body: Node3D) -> void:
 	if body is Player and LevelManager.GameState == LevelManager.GameStatus.Playing:
-		AudioManager.fade_out(0.0, duration)
+		AudioManager.FadeOut(0.0, duration)

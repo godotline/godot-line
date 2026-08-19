@@ -14,28 +14,6 @@ size = Vector3(0.5, 1, 0.5)
 [sub_resource type="BoxMesh" id="2"]
 material = ExtResource("4_osvj6")
 
-[sub_resource type="Curve" id="Curve_7clfx"]
-_data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]
-point_count = 2
-
-[sub_resource type="CurveTexture" id="CurveTexture_dpsif"]
-curve = SubResource("Curve_7clfx")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_7clfx"]
-spread = 180.0
-flatness = 1.0
-initial_velocity_min = 2.0
-initial_velocity_max = 2.0
-gravity = Vector3(0, 0, 0)
-scale_curve = SubResource("CurveTexture_dpsif")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ty8qn"]
-shading_mode = 0
-disable_receive_shadows = true
-
-[sub_resource type="SphereMesh" id="SphereMesh_jntxg"]
-material = SubResource("StandardMaterial3D_ty8qn")
-
 [node name="Player" type="CharacterBody3D" unique_id=1905697100]
 collision_mask = 2
 axis_lock_angular_x = true
@@ -62,16 +40,5 @@ stream = ExtResource("2")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1827097049]
 mesh = SubResource("2")
-
-[node name="LandEffect" type="GPUParticles3D" parent="." unique_id=1594388987]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.5, 0)
-emitting = false
-amount = 16
-lifetime = 0.5
-one_shot = true
-explosiveness = 1.0
-fixed_fps = 60
-process_material = SubResource("ParticleProcessMaterial_7clfx")
-draw_pass_1 = SubResource("SphereMesh_jntxg")
 
 [connection signal="body_entered" from="Area3D" to="." method="_on_Area_body_entered"]

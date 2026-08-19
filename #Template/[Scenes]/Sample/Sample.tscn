@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bqherwtx8m1op"]
 
 [ext_resource type="PackedScene" uid="uid://brdmblcywuklx" path="res://#Template/Player.tscn" id="1_3w2qj"]
-[ext_resource type="Resource" uid="uid://dp4v3rvs0vl3w" path="res://[Scenes]/Sample/Sample.tres" id="2_uo2eh"]
+[ext_resource type="Resource" uid="uid://dp4v3rvs0vl3w" path="res://#Template/[Scenes]/Sample/Sample.tres" id="2_uo2eh"]
 [ext_resource type="PackedScene" uid="uid://be4vgpeo0nv84" path="res://#Template/CameraRoot.tscn" id="3_sm0oj"]
 [ext_resource type="PackedScene" uid="uid://wx3awwdt8xdy" path="res://#Template/[Resources]/LevelUI.tscn" id="4_u1rsu"]
 [ext_resource type="Script" uid="uid://cq7y41sswinln" path="res://#Template/[Scripts]/Guidance/GuidanceController.gd" id="6_etfjh"]
@@ -18,16 +18,15 @@
 [ext_resource type="PackedScene" uid="uid://dbmrq55p4ik62" path="res://#Template/FakePlayer.tscn" id="15_fmoim"]
 [ext_resource type="Script" uid="uid://dwfmi5egh11fa" path="res://#Template/[Scripts]/Settings/OldCameraSettings.gd" id="15_qvrir"]
 [ext_resource type="Script" uid="uid://bfhukfse7kskq" path="res://#Template/[Scripts]/Settings/FogSettings.gd" id="16_n0hkk"]
-[ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Gem.tscn" id="16_s0yhu"]
 [ext_resource type="Script" uid="uid://dqs5yftnojwpe" path="res://#Template/[Scripts]/Level/DisableInPlayMode.gd" id="17_j2eg4"]
 [ext_resource type="Script" uid="uid://f5lnff32rrn5" path="res://#Template/[Scripts]/Settings/LightSettings.gd" id="17_w5hru"]
 [ext_resource type="Script" uid="uid://6ex7d7l6f7kl" path="res://#Template/[Scripts]/Settings/AmbientSettings.gd" id="18_44jhc"]
 [ext_resource type="PackedScene" uid="uid://cgj86xrh55cfr" path="res://#Template/Pyramid.tscn" id="18_emri0"]
 [ext_resource type="PackedScene" uid="uid://c757j6a6ewnbb" path="res://#Template/Crystal.tscn" id="19_6gt33"]
-[ext_resource type="Material" uid="uid://cnxil1uef6kon" path="res://#Template/[Materials]/CrystalScan.tres" id="20_j2eg4"]
 [ext_resource type="Script" uid="uid://cu08nct5ud6vc" path="res://#Template/[Scripts]/Trigger/Jump.gd" id="21_tdro7"]
 [ext_resource type="Script" uid="uid://bdbb1ogxk0fcr" path="res://#Template/[Scripts]/Trigger/JumpPredictor.gd" id="22_77abe"]
 [ext_resource type="Script" uid="uid://cu3xuawfji3m2" path="res://#Template/[Scripts]/Trigger/EventTrigger.gd" id="23_77abe"]
+[ext_resource type="Script" uid="uid://dypjr6kswkpyo" path="res://#Template/[Scripts]/Animator/LocalRotAnimator.gd" id="23_s0ncg"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
@@ -46,33 +45,33 @@ _data = {
 &"level": SubResource("3")
 }
 
-[sub_resource type="Resource" id="Resource_qvrir"]
+[sub_resource type="Resource" id="Resource_q7sod"]
 resource_local_to_scene = true
 script = ExtResource("14_2sj2s")
-rotation = Vector3(54, 45, 0)
+rotation = Vector3(0.942478, 0.785398, 0)
 fov = 75.0
 
-[sub_resource type="Resource" id="Resource_n0hkk"]
+[sub_resource type="Resource" id="Resource_s0ncg"]
 resource_local_to_scene = true
 script = ExtResource("15_qvrir")
 
-[sub_resource type="Resource" id="Resource_w5hru"]
+[sub_resource type="Resource" id="Resource_wh4l1"]
 resource_local_to_scene = true
 script = ExtResource("16_n0hkk")
-fog_color = Color(0.518, 0.553, 0.608, 1)
+fogColor = Color(0.518, 0.553, 0.608, 1)
 start = 10.0
 end = 100.0
 
-[sub_resource type="Resource" id="Resource_44jhc"]
+[sub_resource type="Resource" id="Resource_14asg"]
 resource_local_to_scene = true
 script = ExtResource("17_w5hru")
-rotation = Vector3(-60.000114, 149.99977, 0)
-shadow_strength = 1.0
+rotation = Vector3(-1.0472, 2.61799, 0)
+shadowStrength = 1.0
 
-[sub_resource type="Resource" id="Resource_h2w7o"]
+[sub_resource type="Resource" id="Resource_rptew"]
 resource_local_to_scene = true
 script = ExtResource("18_44jhc")
-lighting_type = 0
+lightingType = 0
 
 [node name="LevelHolder" type="Node3D" unique_id=542804875]
 
@@ -101,9 +100,9 @@ shadow_enabled = true
 
 [node name="LevelUI" parent="BasicOBJ_Group" unique_id=75582180 instance=ExtResource("4_u1rsu")]
 
-[node name="guide" type="Node3D" parent="BasicOBJ_Group" unique_id=909657525 node_paths=PackedStringArray("box_holder")]
+[node name="guide" type="Node3D" parent="BasicOBJ_Group" unique_id=909657525 node_paths=PackedStringArray("boxHolder")]
 script = ExtResource("6_etfjh")
-box_holder = NodePath("../../Scene_Group/GuidanceBoxHolder")
+boxHolder = NodePath("../../Scene_Group/GuidanceBoxHolder")
 
 [node name="auto" type="Node3D" parent="BasicOBJ_Group" unique_id=1051986727]
 script = ExtResource("7_fmbnj")
@@ -161,6 +160,9 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 33.8
 [node name="Scene_001" type="Node3D" parent="Scene_Group" unique_id=514366687]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.034236908, -0.761029, 4.2663374)
 
+[node name="Crystal2" parent="Scene_Group/Scene_001" unique_id=2099437324 instance=ExtResource("19_6gt33")]
+transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 0.07899666, 0.50000024, 2.6116118)
+
 [node name="Ground" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("8_lthrg")]
 transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 300, 0, -1, 0)
 
@@ -169,14 +171,14 @@ transform = Transform3D(2.1093316, 0, 0, 0, 1, 0, 0, 0, 10.958137, -0.005569935,
 
 [node name="Node3D" type="Node3D" parent="Scene_Group/Scene_001/Ground2" unique_id=795488879]
 script = ExtResource("9_0v7qw")
-start_value = Vector3(0.028666973, -1.7388914, 22.715809)
-end_offset = Vector3(0, 5, 0)
+startValue = Vector3(0.028666973, -1.7388914, 22.715809)
+endOffset = Vector3(0, 5, 0)
 duration = 2.0
 
 [node name="Node3D2" type="Node3D" parent="Scene_Group/Scene_001/Ground2" unique_id=431550219]
 script = ExtResource("10_7en4s")
-start_value = Vector3(1, 1, 1)
-end_offset = Vector3(1, 5, 3)
+startValue = Vector3(1, 1, 1)
+endOffset = Vector3(1, 5, 3)
 
 [node name="Trigger" parent="Scene_Group/Scene_001" unique_id=608483111 instance=ExtResource("11_mq52h")]
 transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 2.2444015, -0.5, 2.7034848)
@@ -187,22 +189,34 @@ targetPlayer = NodePath("../../FakePlayer/FakePlayerComponent")
 type = 2
 
 [node name="Trigger2" parent="Scene_Group/Scene_001" unique_id=237830721 instance=ExtResource("11_mq52h")]
-transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 3.599347, -0.50000095, 8.274333)
+transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, -2.2184198, -0.50000095, 15.765557)
 
 [node name="FakePlayerTrigger" type="Node3D" parent="Scene_Group/Scene_001/Trigger2" unique_id=1494374801 node_paths=PackedStringArray("targetPlayer")]
 script = ExtResource("12_1fvat")
 targetPlayer = NodePath("../../FakePlayer/FakePlayerComponent")
 
-[node name="Crown" parent="Scene_Group/Scene_001" unique_id=1805653336 instance=ExtResource("13_hkwba")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.353553, -9.536743e-07, 15.392802)
+[node name="FakePlayer" parent="Scene_Group/Scene_001" unique_id=226051297 instance=ExtResource("15_fmoim")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5376909, 0, 10.573014)
+floor_constant_speed = true
+floor_block_on_wall = false
+floor_max_angle = 1.5707964
+floor_snap_length = 1.0
 
-[node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" index="3"]
-GameTime = 2.371338
-camera_new = SubResource("Resource_qvrir")
-camera_old = SubResource("Resource_n0hkk")
-fog = SubResource("Resource_w5hru")
-light = SubResource("Resource_44jhc")
-ambient = SubResource("Resource_h2w7o")
+[node name="FakePlayerComponent" parent="Scene_Group/Scene_001/FakePlayer" index="0"]
+startPosition = Vector3(-2.503454, -0.761029, 14.839352)
+isWall = true
+
+[node name="Crown" parent="Scene_Group/Scene_001" unique_id=1805653336 instance=ExtResource("13_hkwba")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.168884, -9.536743e-07, 16.516552)
+
+[node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" index="2"]
+GameTime = 2.4613333
+direction = 1
+cameraNew = SubResource("Resource_q7sod")
+cameraOld = SubResource("Resource_s0ncg")
+fog = SubResource("Resource_wh4l1")
+light = SubResource("Resource_14asg")
+ambient = SubResource("Resource_rptew")
 
 [node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0"]
 render_priority = 0
@@ -213,14 +227,6 @@ transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 14.330317, 38.845993, 0.5, 32.94
 [node name="Obstacle2" parent="Scene_Group/Scene_001" unique_id=298826961 instance=ExtResource("15_6gt33")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 14.330317, 29.313358, 0.5, 43.874218)
 
-[node name="FakePlayer" parent="Scene_Group/Scene_001" unique_id=226051297 instance=ExtResource("15_fmoim")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5376909, 0, 7.029239)
-
-[node name="FakePlayerComponent" parent="Scene_Group/Scene_001/FakePlayer" index="0"]
-startPosition = Vector3(-2.5376909, 0, 7.029239)
-isWall = true
-synchronismWithPlayer = true
-
 [node name="Pyramid" parent="Scene_Group/Scene_001" unique_id=1497290031 instance=ExtResource("18_emri0")]
 transform = Transform3D(-1, 0, 1.509958e-07, 0, 1, 0, -1.509958e-07, 0, -1, 33.540188, -0.28812522, 95.13104)
 
@@ -228,24 +234,19 @@ transform = Transform3D(-1, 0, 1.509958e-07, 0, 1, 0, -1.509958e-07, 0, -1, 33.5
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 7.882288, 0, 61.789726)
 
 [node name="Obstacle3" parent="Scene_Group/Scene_001" unique_id=460537276 instance=ExtResource("15_6gt33")]
-transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 18.532341, 4.0459642, 9.804915)
+transform = Transform3D(8.999994, 0, 0, 0, 9, 0, 0, 0, 8.999994, 18.532341, 4.0459642, 9.804915)
 script = ExtResource("17_j2eg4")
 disableInPlayMode = false
 
 [node name="localpos" type="Node3D" parent="Scene_Group/Scene_001/Obstacle3" unique_id=412952206]
 script = ExtResource("9_0v7qw")
-transform_type = 1
-start_value = Vector3(18.532341, 4.0459642, 9.804915)
-end_offset = Vector3(0, 10, 0)
+transformType = 1
+startValue = Vector3(18.532341, 4.0459642, 9.804915)
+endOffset = Vector3(0, 10, 0)
 
-[node name="Gem" parent="Scene_Group/Scene_001" unique_id=149611988 instance=ExtResource("16_s0yhu")]
-transform = Transform3D(1.9999998, 0, 0, 0, 2, 0, 0, 0, 1.9999998, 0.17272472, 0.15720987, 5.287298)
-
-[node name="Gem" parent="Scene_Group/Scene_001/Gem/Area3D" index="3"]
-speed = 1.0
-
-[node name="GemLight" parent="Scene_Group/Scene_001/Gem" index="6" unique_id=1137045706]
-light_energy = 0.0
+[node name="LocalRotAnimator" type="Node3D" parent="Scene_Group/Scene_001/Obstacle3" unique_id=418376129]
+script = ExtResource("23_s0ncg")
+endOffset = Vector3(0, 360, 0)
 
 [node name="Obstacle4" parent="Scene_Group/Scene_001" unique_id=1353085919 instance=ExtResource("15_6gt33")]
 transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 28.07723, 23.695015)
@@ -253,12 +254,8 @@ transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 28.0
 [node name="Crystal" parent="Scene_Group/Scene_001" unique_id=521365085 instance=ExtResource("19_6gt33")]
 transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 4.198456, 0.50000095, 12.258225)
 
-[node name="ScanQuad" parent="Scene_Group/Scene_001/Crystal" index="2" unique_id=540720836]
-material_override = ExtResource("20_j2eg4")
-
 [node name="Trigger3" parent="Scene_Group/Scene_001" unique_id=1323296306 instance=ExtResource("11_mq52h")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 5.3776135, -0.5, 15.017628)
-component_script = ExtResource("22_77abe")
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 3.5433593, -0.5, 10.8759365)
 
 [node name="Jump" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=2084784200]
 script = ExtResource("21_tdro7")
@@ -266,28 +263,21 @@ height = 2.0
 
 [node name="JumpPredictor" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=1495481976]
 script = ExtResource("22_77abe")
-draw_preview = true
+direction = 0
+drawPreview = true
 
 [node name="Trigger4" parent="Scene_Group/Scene_001" unique_id=712157509 instance=ExtResource("11_mq52h")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 15.605786)
-component_script = ExtResource("22_77abe")
 
-[node name="event" type="Node" parent="Scene_Group/Scene_001/Trigger4" unique_id=1520750393 node_paths=PackedStringArray("target_node")]
+[node name="event" type="Node" parent="Scene_Group/Scene_001/Trigger4" unique_id=1520750393 node_paths=PackedStringArray("targetNode")]
 script = ExtResource("23_77abe")
-target_node = NodePath("../../Ground2/Node3D2")
-debug_mode = true
-
-[node name="Crystal" parent="." unique_id=2099437324 instance=ExtResource("19_6gt33")]
-transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 0.11323357, -0.26102877, 6.877949)
+targetNode = NodePath("../../Obstacle3/LocalRotAnimator")
 
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D2" method="Trigger"]
+[connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Obstacle3/LocalRotAnimator" method="Trigger"]
 
 [editable path="BasicOBJ_Group/CameraRoot"]
-[editable path="Scene_Group/Scene_001/Trigger"]
-[editable path="Scene_Group/Scene_001/Trigger2"]
-[editable path="Scene_Group/Scene_001/Crown"]
 [editable path="Scene_Group/Scene_001/FakePlayer"]
+[editable path="Scene_Group/Scene_001/Crown"]
 [editable path="Scene_Group/Scene_001/Pyramid"]
-[editable path="Scene_Group/Scene_001/Gem"]
-[editable path="Scene_Group/Scene_001/Crystal"]

@@ -5,17 +5,17 @@ const MESSAGE: StringName = &"template_checkpoint:captured"
 const VALUE_PROPERTIES: Array[StringName] = [
 	&"AutoRecord",
 	&"GameTime",
-	&"PlayerSpeed",
-	&"UsingOldCameraFollower",
+	&"playerSpeed",
+	&"usingOldCameraFollower",
 	&"direction",
-	&"manual_camera",
-	&"manual_fog",
-	&"manual_light",
-	&"manual_ambient",
+	&"manualCamera",
+	&"manualFog",
+	&"manualLight",
+	&"manualAmbient",
 ]
 const SETTINGS_PROPERTIES: Array[StringName] = [
-	&"camera_new",
-	&"camera_old",
+	&"cameraNew",
+	&"cameraOld",
 	&"fog",
 	&"light",
 	&"ambient",
@@ -24,8 +24,8 @@ const SETTINGS_PROPERTIES: Array[StringName] = [
 static func capture(checkpoint: Node) -> void:
 	if not EngineDebugger.is_active():
 		return
-	var current_scene: Node = checkpoint.get_tree().current_scene
-	if not current_scene or current_scene.scene_file_path.is_empty():
+	var currentScene: Node = checkpoint.get_tree().current_scene
+	if not currentScene or currentScene.scene_file_path.is_empty():
 		return
 
 	var values: Dictionary = {}
@@ -39,8 +39,8 @@ static func capture(checkpoint: Node) -> void:
 			settings[property_name] = inst_to_dict(resource)
 
 	EngineDebugger.send_message(MESSAGE, [{
-		"scene_path": current_scene.scene_file_path,
-		"node_path": str(current_scene.get_path_to(checkpoint)),
+		"scene_path": currentScene.scene_file_path,
+		"node_path": str(currentScene.get_path_to(checkpoint)),
 		"values": values,
 		"settings": settings,
 	}])

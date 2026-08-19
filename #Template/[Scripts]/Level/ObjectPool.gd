@@ -4,33 +4,33 @@ extends RefCounted
 ## 通用对象池（与 Unity ObjectPool<T> 一致）
 ## 用 queue（先进先出）管理对象，满额时循环复用最旧的对象
 
-var _pool: Array[Node] = []
-var _size: int = 256
+var pool: Array[Node] = []
+var size: int = 256
 
 func _init(size: int = 256):
-	_size = size
+	self.size = size
 
 func is_full() -> bool:
-	return _pool.size() >= _size
+	return pool.size() >= size
 
-func add(obj: Node) -> void:
-	_pool.append(obj)
+func Add(obj: Node) -> void:
+	pool.append(obj)
 
 ## 取出最近放入的对象（栈顶）—— O(1) 避免 pop_front 的 O(n) 移动
 func pop() -> Node:
-	if _pool.is_empty():
+	if pool.is_empty():
 		return null
-	return _pool.pop_back()
+	return pool.pop_back()
 
 ## 清空并销毁所有对象
 func destroy_all() -> void:
-	for obj in _pool:
+	for obj in pool:
 		if is_instance_valid(obj):
 			obj.queue_free()
-	_pool.clear()
+	pool.clear()
 
 func get_size() -> int:
-	return _size
+	return size
 
 func get_count() -> int:
-	return _pool.size()
+	return pool.size()

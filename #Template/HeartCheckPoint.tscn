@@ -108,7 +108,7 @@ shadow_mesh = SubResource("ArrayMesh_08x2n")
 [node name="Area3D" parent="." instance=ExtResource("3_trigger")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 collision_layer = 0
-require_playing = false
+requirePlaying = false
 
 [node name="HeartCheckpoint" type="Node3D" parent="Area3D" node_paths=PackedStringArray("rotator")]
 script = ExtResource("1_oq3w0")

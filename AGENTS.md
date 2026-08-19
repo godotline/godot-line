@@ -6,6 +6,12 @@ Godot 4.7 Dancing Line game template (GDScript). No CLI build/test/lint — all 
 
 **README says 4.6 but `project.godot` config/features is 4.7.** Trust `project.godot`.
 
+## Research Rule
+
+- Use the tavily search tool for web research (Godot API questions, known issues, docs). **Never download Godot engine source files** (e.g. via `curl` of GitHub raw files) — prefer tavily search results and official docs pages instead.
+- **DeepWiki MCP** (configured in `opencode.json`, remote server `https://mcp.deepwiki.com/mcp`) provides AI-powered docs for GitHub repos — e.g. `godotengine/godot` for engine internals like `ScriptServer::set_scripting_enabled()` / `GDScript::can_instantiate()` behavior. Use it for engine source questions instead of downloading source.
+- Prefer the `gdmcp` skill's CLI (port 9080) for inspecting the running Godot editor (script states, `can_instantiate()`, editor logs, expression evaluation) over static analysis alone.
+
 ## Project Structure
 
 ```
@@ -14,16 +20,19 @@ Godot 4.7 Dancing Line game template (GDScript). No CLI build/test/lint — all 
   [Resources]/       — PackedScenes, LevelData, models, UI
   [Materials]/       — .tres material resources
   [Music]/           — Audio files
+  [Scenes]/          — Template level scenes (DefaultScene/, Sample/) used by the "新建关卡" plugin
   *.tscn             — Template scenes (Player, trigger, Gem, etc.) — directly in #Template/ root, NOT in a [Scenes] subfolder
-[Scenes]/            — Level scenes only
-  DefaultScene/      — Default.tscn (the main playable scene)
-  Sample/            — Sample.tscn
+[Scenes]/            — Created levels only (the "新建关卡" plugin writes new levels here)
 addons/
   godot_mcp/         — MCP server plugin (do not modify unless asked)
   template/          — Editor plugin: toolbar menu, "新建关卡" dialog
 ```
 
 **Bracket-named directories** (`[Scripts]`, `[Resources]`, etc.) are a project convention, not Godot special syntax.
+
+## Universal Add Component Panel (Editor Inspector Plugin)
+
+`addons/template/component_inspector_plugin.gd` (+ `component_add_panel.gd`) registers an `EditorInspectorPlugin` that shows a "组件" (Add Component) panel at the bottom of the Inspector for **every Node** — no script attachment required. The panel contains only an "Add Component" button that calls `EditorInterface.popup_quick_open(callback, [&"Script"])` — the native quick-open dialog (godot-proposals #3745 was implemented in 4.7). Adds the selected script as a child node with undo/redo, owner assignment, `mark_scene_as_unsaved`, and auto-selects the new node. If the host has a `refresh_behaviors()` method (e.g. `BaseTrigger`), it is called on add/undo. `BaseTrigger` no longer has its own `componentScript` export — use this panel instead. Also: in the editor, `Script.can_instantiate()` returns `false` for **non-@tool** scripts by design (the editor disables scripting "except for tool" scripts — `ScriptServer::set_scripting_enabled(false)` in `EditorNode`) — never use it as a validity guard in editor tooling; `script.new()` works fine for non-tool scripts in the editor.
 
 ## Deleted / Renamed Files (Do Not Recreate)
 
@@ -61,7 +70,7 @@ This is the most important architectural detail. **New triggers should use Mode 
 
 ## Key Scenes and Entrypoints
 
-- **Default scene:** `[Scenes]/DefaultScene/Default.tscn` (not Sample — Sample exists but Default is the primary)
+- **Default scene:** `#Template/[Scenes]/DefaultScene/Default.tscn` (not Sample — Sample exists but Default is the primary)
 - **Player scene:** `#Template/Player.tscn` — instantiated inside level scenes under `BasicOBJ_Group/Player`
 - **Trigger container:** `#Template/Trigger.tscn` — reusable BaseTrigger scene, add component children to it
 - **Start page:** `#Template/[Resources]/StartPage.tscn` — dynamically instantiated by `Player._ready()`
@@ -99,7 +108,7 @@ New triggers use `CameraFollower.instance.trigger(...)`. Old triggers modify `Ol
 
 ## Level Creation
 
-Use the editor plugin: **Template > 新建关卡** in the toolbar. Creates `[Scenes]/<name>/<name>.tscn` + `<name>.tres` (LevelData) from template. The plugin deep-copies LevelData and assigns unique saveID.
+Use the editor plugin: **Template > 新建关卡** in the toolbar. Creates `[Scenes]/<name>/<name>.tscn` + `<name>.tres` (LevelData) from the `#Template/[Scenes]/` templates. The plugin deep-copies LevelData and assigns unique saveID.
 
 ## Common Pitfalls
 

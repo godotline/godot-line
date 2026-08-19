@@ -3,7 +3,7 @@ extends Node3D
 class_name FallPredictor
 
 @export_group("预测设置")
-@export var show_in_game: bool = false
+@export var showInGame: bool = false
 @export var speed: int = 12:
 	set(value):
 		speed = value
@@ -24,43 +24,43 @@ class_name FallPredictor
 		color = value
 		_draw_line()
 
-var _mesh_instance: MeshInstance3D
+var lineRenderer: MeshInstance3D
 
 func _ready() -> void:
-	_mesh_instance = MeshInstance3D.new()
-	_mesh_instance.name = "PredictorLine"
-	add_child(_mesh_instance)
-	if Engine.is_editor_hint() or show_in_game:
+	lineRenderer = MeshInstance3D.new()
+	lineRenderer.name = "PredictorLine"
+	add_child(lineRenderer)
+	if Engine.is_editor_hint() or showInGame:
 		_draw_line()
 
 func _draw_line() -> void:
-	if not _mesh_instance:
+	if not lineRenderer:
 		return
 
 	if count <= 0:
-		_mesh_instance.mesh = null
+		lineRenderer.mesh = null
 		return
 
-	var gravity_strength: float = 9.8
+	var gravityStrength: float = 9.8
 	if ProjectSettings.has_setting("physics/3d/default_gravity"):
-		gravity_strength = ProjectSettings.get_setting("physics/3d/default_gravity")
+		gravityStrength = ProjectSettings.get_setting("physics/3d/default_gravity")
 
-	var immediate_mesh: ImmediateMesh = ImmediateMesh.new()
-	immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+	var immediateMesh: ImmediateMesh = ImmediateMesh.new()
+	immediateMesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 
 	var x: float = 0.0
 	var y: float = 0.0
 
 	for i in count:
-		immediate_mesh.surface_add_vertex(Vector3(x, y, 0.0))
+		immediateMesh.surface_add_vertex(Vector3(x, y, 0.0))
 		x += 1.0
-		y = -(0.5 * gravity_strength * pow(x / speed, 2))
+		y = -(0.5 * gravityStrength * pow(x / speed, 2))
 
-	immediate_mesh.surface_end()
+	immediateMesh.surface_end()
 
-	_mesh_instance.mesh = immediate_mesh
+	lineRenderer.mesh = immediateMesh
 
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.albedo_color = color
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_mesh_instance.material_override = material
+	lineRenderer.material_override = material

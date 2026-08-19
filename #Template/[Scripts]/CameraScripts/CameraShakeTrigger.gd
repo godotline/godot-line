@@ -14,4 +14,4 @@ func _on_body_entered(body: Node3D) -> void:
 		if not follower:
 			follower = OldCameraFollower.instance
 		if follower:
-			follower.do_shake(power, duration)
+			follower.DoShake(power, duration)

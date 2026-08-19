@@ -9,117 +9,108 @@ signal hide_complete
 signal hide_animation_finished
 
 @export_range(0.0, 10.0, 0.05) var duration: float = 0.5
-@export var auto_hide_on_ready: bool = true
-@export var invoke_before_animation: bool = true
-@export var hidden_offset_y: float = 400.0
-@export var hidden_rotation_degrees: float = -15.0
-@export_range(0.0, 10.0, 0.05) var fade_delay: float = 0.3
-@export_range(0.0, 10.0, 0.05) var fade_duration: float = 0.2
+@export var autoHideOnEnable: bool = true
+@export var invokeBeforeAnimation: bool = true
+@export var hiddenOffsetY: float = 400.0
+@export var hiddenRotationDegrees: float = -15.0
+@export_range(0.0, 10.0, 0.05) var fadeDelay: float = 0.3
+@export_range(0.0, 10.0, 0.05) var fadeDuration: float = 0.2
 
-var _canvas: Control = null
-var _hide_tween: Tween = null
-var _completion: Callable = Callable()
-var _completion_invoked: bool = false
-var _is_hiding: bool = false
-var _rest_offset_top: float = 0.0
-var _rest_offset_bottom: float = 0.0
+var canvas: Control = null
+var hideTween: Tween = null
+var onComplete: Callable = Callable()
+var completionInvoked: bool = false
+var isHiding: bool = false
+var restOffsetTop: float = 0.0
+var restOffsetBottom: float = 0.0
 
 func _ready() -> void:
-	_canvas = get_parent() as Control
-	if _canvas == null:
+	canvas = get_parent() as Control
+	if canvas == null:
 		push_error("HideCanvas requires a Control parent")
 		return
 
-	_rest_offset_top = _canvas.offset_top
-	_rest_offset_bottom = _canvas.offset_bottom
-	if auto_hide_on_ready:
+	restOffsetTop = canvas.offset_top
+	restOffsetBottom = canvas.offset_bottom
+	if autoHideOnEnable:
 		call_deferred("_apply_auto_hide")
 
 func _apply_auto_hide() -> void:
-	if is_instance_valid(_canvas):
-		btn_hide()
+	if is_instance_valid(canvas):
+		BtnHide()
 
-func on_click() -> void:
+func OnClick() -> void:
 	hide_canvas()
 
-func hide_canvas(on_complete: Callable = Callable()) -> void:
-	if _canvas == null or _is_hiding:
+func hide_canvas(onComplete: Callable = Callable()) -> void:
+	if canvas == null or isHiding:
 		return
 
-	stop_tweens()
+	StopTweens()
 
-	if _canvas.has_method("mark_hidden"):
-		_canvas.call("mark_hidden")
-	elif _canvas.has_method("stop_tweens"):
-		_canvas.call("stop_tweens")
+	if canvas.has_method("mark_hidden"):
+		canvas.call("mark_hidden")
+	elif canvas.has_method("stop_tweens"):
+		canvas.call("stop_tweens")
 
-	_is_hiding = true
-	_completion = on_complete
-	_completion_invoked = false
-	if invoke_before_animation:
+	isHiding = true
+	self.onComplete = onComplete
+	completionInvoked = false
+	if invokeBeforeAnimation:
 		_invoke_completion()
 
-	_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if duration <= 0.0:
 		_set_hidden_state()
 		_finish_hide()
 		return
 
-	_hide_tween = create_tween().set_parallel(true)
-	_hide_tween.tween_property(_canvas, "offset_top", _rest_offset_top + hidden_offset_y, duration).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
-	_hide_tween.tween_property(_canvas, "offset_bottom", _rest_offset_bottom + hidden_offset_y, duration).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
-	_hide_tween.tween_property(_canvas, "rotation_degrees", hidden_rotation_degrees, duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-	_hide_tween.tween_property(_canvas, "modulate:a", 0.0, fade_duration).set_delay(fade_delay).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_LINEAR)
-	_hide_tween.finished.connect(_finish_hide)
+	hideTween = create_tween().set_parallel(true)
+	hideTween.tween_property(canvas, "offset_top", restOffsetTop + hiddenOffsetY, duration).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
+	hideTween.tween_property(canvas, "offset_bottom", restOffsetBottom + hiddenOffsetY, duration).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
+	hideTween.tween_property(canvas, "rotation_degrees", hiddenRotationDegrees, duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	hideTween.tween_property(canvas, "modulate:a", 0.0, fadeDuration).set_delay(fadeDelay).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_LINEAR)
+	hideTween.finished.connect(_finish_hide)
 
-func stop_tweens() -> void:
-	if _hide_tween != null and _hide_tween.is_valid():
-		_hide_tween.kill()
-	_hide_tween = null
-	_is_hiding = false
+func StopTweens() -> void:
+	if hideTween != null and hideTween.is_valid():
+		hideTween.kill()
+	hideTween = null
+	isHiding = false
 
-func btn_hide() -> void:
-	stop_tweens()
-	_completion = Callable()
-	_completion_invoked = false
+func BtnHide() -> void:
+	StopTweens()
+	onComplete = Callable()
+	completionInvoked = false
 	_set_hidden_state()
 
 func _set_hidden_state() -> void:
-	if _canvas == null:
+	if canvas == null:
 		return
-	_canvas.offset_top = _rest_offset_top + hidden_offset_y
-	_canvas.offset_bottom = _rest_offset_bottom + hidden_offset_y
-	_canvas.rotation_degrees = -hidden_rotation_degrees
-	_canvas.modulate.a = 0.0
-	_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_is_hiding = false
+	canvas.offset_top = restOffsetTop + hiddenOffsetY
+	canvas.offset_bottom = restOffsetBottom + hiddenOffsetY
+	canvas.rotation_degrees = -hiddenRotationDegrees
+	canvas.modulate.a = 0.0
+	canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	isHiding = false
 
 func _finish_hide() -> void:
-	_hide_tween = null
+	hideTween = null
 	_set_hidden_state()
-	if not invoke_before_animation:
+	if not invokeBeforeAnimation:
 		_invoke_completion()
 	hide_animation_finished.emit()
 
 func _invoke_completion() -> void:
-	if _completion_invoked:
+	if completionInvoked:
 		return
-	_completion_invoked = true
-	var callback: Callable = _completion
-	_completion = Callable()
+	completionInvoked = true
+	var callback: Callable = onComplete
+	onComplete = Callable()
 	if callback.is_valid():
 		callback.call()
 	hide_complete.emit()
 
 # Compatibility names for scene/event code ported directly from Unity.
-func OnClick() -> void:
-	on_click()
-
-func Hide(on_complete: Callable = Callable()) -> void:
-	hide_canvas(on_complete)
-
-func StopTweens() -> void:
-	stop_tweens()
-
-func BtnHide() -> void:
-	btn_hide()
+func Hide(onComplete: Callable = Callable()) -> void:
+	hide_canvas(onComplete)

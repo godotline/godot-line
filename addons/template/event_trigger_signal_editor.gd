@@ -36,7 +36,7 @@ func _build_ui() -> void:
 	add_child(title)
 
 	var description: Label = Label.new()
-	description.text = "在下方 target_node 属性中拖入节点，再选择无参数方法。"
+	description.text = "在下方 targetNode 属性中拖入节点，再选择无参数方法。"
 	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	description.add_theme_color_override("font_color", Color(0.65, 0.65, 0.65))
 	add_child(description)
@@ -55,27 +55,27 @@ func _build_ui() -> void:
 	_method_picker.item_selected.connect(_on_method_selected)
 	add_child(_method_picker)
 
-	var action_row: HBoxContainer = HBoxContainer.new()
-	add_child(action_row)
+	var actionRow: HBoxContainer = HBoxContainer.new()
+	add_child(actionRow)
 
 	_connect_button = Button.new()
 	_connect_button.text = "连接回调"
 	_connect_button.tooltip_text = "将选中的无参数方法连接到 triggered 信号"
 	_connect_button.pressed.connect(_connect_selected_callback)
-	action_row.add_child(_connect_button)
+	actionRow.add_child(_connect_button)
 
-	var refresh_button: Button = Button.new()
-	refresh_button.text = "刷新"
-	refresh_button.tooltip_text = "重新读取目标节点和信号连接"
-	refresh_button.pressed.connect(_refresh_editor)
-	action_row.add_child(refresh_button)
+	var refreshButton: Button = Button.new()
+	refreshButton.text = "刷新"
+	refreshButton.tooltip_text = "重新读取目标节点和信号连接"
+	refreshButton.pressed.connect(_refresh_editor)
+	actionRow.add_child(refreshButton)
 
 	var separator: HSeparator = HSeparator.new()
 	add_child(separator)
 
-	var connections_title: Label = Label.new()
-	connections_title.text = "已连接回调"
-	add_child(connections_title)
+	var connectionsTitle: Label = Label.new()
+	connectionsTitle.text = "已连接回调"
+	add_child(connectionsTitle)
 
 	_connections_box = VBoxContainer.new()
 	_connections_box.add_theme_constant_override("separation", 4)
@@ -121,7 +121,7 @@ func _refresh_target_editor() -> void:
 		_set_method_editor_enabled(false)
 		return
 
-	_target_node = _source.get("target_node") as Node
+	_target_node = _source.get("targetNode") as Node
 	if not is_instance_valid(_target_node):
 		_target_status.text = "未选择目标节点"
 		_method_label.text = "选择无参数方法"
@@ -139,11 +139,11 @@ func _refresh_target_editor() -> void:
 		return
 
 	_method_label.text = "选择无参数方法"
-	var connected_method: StringName = _get_connected_method(_target_node)
-	var selected_index: int = methods.find(String(connected_method))
-	if selected_index < 0:
-		selected_index = 0
-	_method_picker.select(selected_index)
+	var connectedMethod: StringName = _get_connected_method(_target_node)
+	var selectedIndex: int = methods.find(String(connectedMethod))
+	if selectedIndex < 0:
+		selectedIndex = 0
+	_method_picker.select(selectedIndex)
 	_set_method_editor_enabled(true)
 
 
@@ -160,12 +160,12 @@ func _get_connected_method(target: Node) -> StringName:
 func _get_scene_tree_path(target: Node) -> String:
 	if not is_instance_valid(target):
 		return ""
-	var scene_root: Node = EditorInterface.get_edited_scene_root()
-	if is_instance_valid(scene_root) and (target == scene_root or scene_root.is_ancestor_of(target)):
-		var relative_path: String = str(scene_root.get_path_to(target))
-		if relative_path == "." or relative_path.is_empty():
-			return scene_root.name
-		return "%s/%s" % [scene_root.name, relative_path]
+	var sceneRoot: Node = EditorInterface.get_edited_scene_root()
+	if is_instance_valid(sceneRoot) and (target == sceneRoot or sceneRoot.is_ancestor_of(target)):
+		var relativePath: String = str(sceneRoot.get_path_to(target))
+		if relativePath == "." or relativePath.is_empty():
+			return sceneRoot.name
+		return "%s/%s" % [sceneRoot.name, relativePath]
 	return str(target.get_path()).trim_prefix("/root/")
 
 
@@ -177,17 +177,17 @@ func _set_method_editor_enabled(enabled: bool) -> void:
 func _update_connect_button() -> void:
 	if not is_instance_valid(_connect_button) or not is_instance_valid(_method_picker):
 		return
-	var can_connect: bool = is_instance_valid(_target_node) and not _method_picker.disabled and _method_picker.selected >= 0
-	if can_connect:
+	var canConnect: bool = is_instance_valid(_target_node) and not _method_picker.disabled and _method_picker.selected >= 0
+	if canConnect:
 		var method: StringName = StringName(_method_picker.get_item_text(_method_picker.selected))
 		var callback: Callable = Callable(_target_node, method)
 		if _source.is_connected(&"triggered", callback):
-			var connection_flags: int = _get_connection_flags(callback)
-			_connect_button.text = "已连接" if connection_flags & CONNECT_PERSIST else "保存连接"
-			_connect_button.disabled = (connection_flags & CONNECT_PERSIST) != 0
+			var connectionFlags: int = _get_connection_flags(callback)
+			_connect_button.text = "已连接" if connectionFlags & CONNECT_PERSIST else "保存连接"
+			_connect_button.disabled = (connectionFlags & CONNECT_PERSIST) != 0
 			return
 	_connect_button.text = "连接回调"
-	_connect_button.disabled = not can_connect
+	_connect_button.disabled = not canConnect
 
 
 func _connect_selected_callback() -> void:
@@ -223,20 +223,20 @@ func _refresh_connection_list() -> void:
 			continue
 
 		var row: HBoxContainer = HBoxContainer.new()
-		var callback_path: String = "%s.%s()" % [_get_scene_tree_path(target), String(callback.get_method())]
-		var callback_link: LinkButton = LinkButton.new()
-		callback_link.text = callback_path
-		callback_link.tooltip_text = "%s\n点击跳转到目标节点" % callback_path
-		callback_link.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		callback_link.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		callback_link.pressed.connect(_select_callback_target.bind(target))
-		row.add_child(callback_link)
+		var callbackPath: String = "%s.%s()" % [_get_scene_tree_path(target), String(callback.get_method())]
+		var callbackLink: LinkButton = LinkButton.new()
+		callbackLink.text = callbackPath
+		callbackLink.tooltip_text = "%s\n点击跳转到目标节点" % callbackPath
+		callbackLink.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		callbackLink.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		callbackLink.pressed.connect(_select_callback_target.bind(target))
+		row.add_child(callbackLink)
 
-		var disconnect_button: Button = Button.new()
-		disconnect_button.text = "断开"
-		disconnect_button.tooltip_text = "断开这条 triggered 回调"
-		disconnect_button.pressed.connect(_disconnect_callback.bind(target, callback.get_method()))
-		row.add_child(disconnect_button)
+		var disconnectButton: Button = Button.new()
+		disconnectButton.text = "断开"
+		disconnectButton.tooltip_text = "断开这条 triggered 回调"
+		disconnectButton.pressed.connect(_disconnect_callback.bind(target, callback.get_method()))
+		row.add_child(disconnectButton)
 		_connections_box.add_child(row)
 
 
@@ -260,29 +260,29 @@ func _add_status(text: String) -> void:
 
 
 func _get_callback_methods(target: Node) -> Array[String]:
-	var method_names: Array[String] = []
+	var methodNames: Array[String] = []
 	var script: Script = target.get_script() as Script
 	while script:
-		var method_list: Array = script.get_script_method_list()
-		for method_info: Dictionary in method_list:
-			var method_name: String = String(method_info.get("name", ""))
+		var methodList: Array = script.get_script_method_list()
+		for method_info: Dictionary in methodList:
+			var methodName: String = String(method_info.get("name", ""))
 			var arguments: Array = method_info.get("args", [])
-			if method_name.is_empty() or method_name.begins_with("_") or not arguments.is_empty():
+			if methodName.is_empty() or methodName.begins_with("_") or not arguments.is_empty():
 				continue
-			if not target.has_method(method_name) or method_name in method_names:
+			if not target.has_method(methodName) or methodName in methodNames:
 				continue
-			method_names.append(method_name)
+			methodNames.append(methodName)
 		script = script.get_base_script() as Script
-	method_names.sort()
-	return method_names
+	methodNames.sort()
+	return methodNames
 
 
 func _get_connection_flags(callback: Callable) -> int:
 	if not is_instance_valid(_source):
 		return 0
 	for connection: Dictionary in _source.get_signal_connection_list(&"triggered"):
-		var connected_callback: Callable = connection.get("callable", Callable())
-		if connected_callback == callback:
+		var connectedCallback: Callable = connection.get("callable", Callable())
+		if connectedCallback == callback:
 			return int(connection.get("flags", 0))
 	return 0
 
@@ -294,11 +294,11 @@ func _connect_callback(target: Node, method: StringName) -> void:
 	if _source.is_connected(&"triggered", callback):
 		return
 
-	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("连接 EventTrigger 回调")
-	undo_redo.add_do_method(_source, "connect", &"triggered", callback, CONNECT_PERSIST)
-	undo_redo.add_undo_method(_source, "disconnect", &"triggered", callback)
-	undo_redo.commit_action()
+	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undoRedo.create_action("连接 EventTrigger 回调")
+	undoRedo.add_do_method(_source, "connect", &"triggered", callback, CONNECT_PERSIST)
+	undoRedo.add_undo_method(_source, "disconnect", &"triggered", callback)
+	undoRedo.commit_action()
 	_source.notify_property_list_changed()
 	EditorInterface.mark_scene_as_unsaved()
 	_refresh_editor()
@@ -307,17 +307,17 @@ func _connect_callback(target: Node, method: StringName) -> void:
 func _persist_callback(callback: Callable) -> void:
 	if not is_instance_valid(_source) or not _source.is_connected(&"triggered", callback):
 		return
-	var connection_flags: int = _get_connection_flags(callback)
-	if connection_flags & CONNECT_PERSIST:
+	var connectionFlags: int = _get_connection_flags(callback)
+	if connectionFlags & CONNECT_PERSIST:
 		return
 
-	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("保存 EventTrigger 回调")
-	undo_redo.add_do_method(_source, "disconnect", &"triggered", callback)
-	undo_redo.add_do_method(_source, "connect", &"triggered", callback, CONNECT_PERSIST)
-	undo_redo.add_undo_method(_source, "disconnect", &"triggered", callback)
-	undo_redo.add_undo_method(_source, "connect", &"triggered", callback, connection_flags)
-	undo_redo.commit_action()
+	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undoRedo.create_action("保存 EventTrigger 回调")
+	undoRedo.add_do_method(_source, "disconnect", &"triggered", callback)
+	undoRedo.add_do_method(_source, "connect", &"triggered", callback, CONNECT_PERSIST)
+	undoRedo.add_undo_method(_source, "disconnect", &"triggered", callback)
+	undoRedo.add_undo_method(_source, "connect", &"triggered", callback, connectionFlags)
+	undoRedo.commit_action()
 	_source.notify_property_list_changed()
 	EditorInterface.mark_scene_as_unsaved()
 	_refresh_editor()
@@ -330,11 +330,11 @@ func _disconnect_callback(target: Node, method: StringName) -> void:
 	if not _source.is_connected(&"triggered", callback):
 		return
 
-	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("断开 EventTrigger 回调")
-	undo_redo.add_do_method(_source, "disconnect", &"triggered", callback)
-	undo_redo.add_undo_method(_source, "connect", &"triggered", callback, _get_connection_flags(callback))
-	undo_redo.commit_action()
+	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undoRedo.create_action("断开 EventTrigger 回调")
+	undoRedo.add_do_method(_source, "disconnect", &"triggered", callback)
+	undoRedo.add_undo_method(_source, "connect", &"triggered", callback, _get_connection_flags(callback))
+	undoRedo.commit_action()
 	_source.notify_property_list_changed()
 	EditorInterface.mark_scene_as_unsaved()
 	_refresh_editor()

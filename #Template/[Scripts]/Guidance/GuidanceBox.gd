@@ -1,10 +1,10 @@
 extends Area3D
 class_name GuidanceBox
 
-@export var trigger_distance: float = 1.0
-@export var appear_distance: float = 600.0
-@export var can_be_triggered: bool = true
-@export var have_line: bool = true
+@export var triggerDistance: float = 1.0
+@export var appearDistance: float = 600.0
+@export var canBeTriggered: bool = true
+@export var haveLine: bool = true
 
 var _player: Player
 var _root: Node3D
@@ -35,8 +35,8 @@ func _try_initialize() -> bool:
 
 	# Unity: if (Distance > appearDistance) Disappear(false);
 	# Unity 的 Distance 返回 sqrMagnitude，直接对比 appearDistance（不做平方）
-	var dist_sq: float = global_position.distance_squared_to(_player.global_position)
-	if dist_sq > appear_distance:
+	var distSq: float = global_position.distance_squared_to(_player.global_position)
+	if distSq > appearDistance:
 		_disappear(false)
 	return true
 
@@ -51,14 +51,14 @@ func _process(_delta: float) -> void:
 	if not is_instance_valid(_player):
 		_initialized = false
 		return
-	var dist_sq: float = global_position.distance_squared_to(_player.global_position)
+	var distSq: float = global_position.distance_squared_to(_player.global_position)
 
 	# Unity Update(): if (!triggered && Distance <= appearDistance && !Renderer.enabled) Appear();
-	if not _displayed and dist_sq <= appear_distance:
+	if not _displayed and distSq <= appearDistance:
 		_appear()
 
 	# 触发检测：仅在点击时才检查近距离
-	if LevelManager.Clicked and can_be_triggered and dist_sq <= trigger_distance * trigger_distance:
+	if LevelManager.Clicked and canBeTriggered and distSq <= triggerDistance * triggerDistance:
 		if LevelManager.GameState == LevelManager.GameStatus.Playing and not _player.disallowInput:
 			_trigger()
 
@@ -72,7 +72,7 @@ func _trigger() -> void:
 	await get_tree().create_timer(1.0).timeout
 	effect.queue_free()
 
-func set_color(color: Color) -> void:
+func SetColor(color: Color) -> void:
 	if not _sprite:
 		_sprite = $"../Sprite3D"
 		# If still null, warn and skip
@@ -85,7 +85,7 @@ func set_color(color: Color) -> void:
 func _appear() -> void:
 	if not _displayed:
 		_displayed = true
-		_index = LevelManager.checkpoint_count
+		_index = LevelManager.checkpointCount
 		_root.visible = true
 		_sprite.visible = true
 		LevelManager.add_revive_listener(_reset_data)
