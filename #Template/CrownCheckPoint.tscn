@@ -32,20 +32,6 @@ point_count = 2
 [sub_resource type="CurveTexture" id="CurveTexture_scale"]
 curve = SubResource("Curve_scale")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_aura"]
-angle_min = 45.00001
-angle_max = 270.0
-direction = Vector3(0, 1, 0)
-spread = 25.0
-angular_velocity_min = -20.0
-angular_velocity_max = 20.0
-gravity = Vector3(0, 0, 0)
-scale_max = 2.0
-scale_curve = SubResource("CurveTexture_scale")
-color_ramp = SubResource("GradientTexture1D_8wqky")
-sub_emitter_mode = 4
-sub_emitter_amount_at_start = 1
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_particle_aura"]
 transparency = 1
 blend_mode = 1
@@ -69,17 +55,6 @@ colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.5411765, 1, 1, 1, 0)
 
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_d4clj"]
 gradient = SubResource("Gradient_bfifm")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_circle"]
-direction = Vector3(0, 1, 0)
-spread = 25.0
-angular_velocity_min = -20.0
-angular_velocity_max = 20.0
-gravity = Vector3(0, 0, 0)
-scale_min = 0.125
-scale_max = 0.5
-scale_curve = SubResource("CurveTexture_scale")
-color_ramp = SubResource("GradientTexture1D_d4clj")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_particle_circle"]
 transparency = 1
@@ -135,23 +110,39 @@ render_priority = 1
 texture = ExtResource("5_inside")
 modulate = Color(1, 0.807843, 0, 0)
 
-[node name="FX_CrownAura" type="GPUParticles3D" parent="." unique_id=268301850]
+[node name="FX_CrownAura" type="CPUParticles3D" parent="." unique_id=268301850]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 emitting = false
 amount = 5
-sub_emitter = NodePath("FX_CrownCircle")
 one_shot = true
 explosiveness = 1.0
 randomness = 0.1
 local_coords = true
-process_material = SubResource("ParticleProcessMaterial_aura")
-draw_pass_1 = SubResource("QuadMesh_aura")
+angle_min = 45.00001
+angle_max = 270.0
+direction = Vector3(0, 1, 0)
+spread = 25.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+scale_amount_max = 2.0
+scale_amount_curve = SubResource("CurveTexture_scale")
+color_ramp = SubResource("GradientTexture1D_8wqky")
+mesh = SubResource("QuadMesh_aura")
 
-[node name="FX_CrownCircle" type="GPUParticles3D" parent="FX_CrownAura" unique_id=2030689913]
+[node name="FX_CrownCircle" type="CPUParticles3D" parent="FX_CrownAura" unique_id=2030689913]
 emitting = false
 amount = 5
 one_shot = true
 explosiveness = 1.0
 local_coords = true
-process_material = SubResource("ParticleProcessMaterial_circle")
-draw_pass_1 = SubResource("QuadMesh_circle")
+direction = Vector3(0, 1, 0)
+spread = 25.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+scale_amount_min = 0.125
+scale_amount_max = 0.5
+scale_amount_curve = SubResource("CurveTexture_scale")
+color_ramp = SubResource("GradientTexture1D_d4clj")
+mesh = SubResource("QuadMesh_circle")

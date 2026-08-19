@@ -260,7 +260,7 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 3.5433593, -0.5, 10.875
 
 [node name="Jump" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=2084784200]
 script = ExtResource("21_tdro7")
-height = 2.0
+power = 626.1
 
 [node name="JumpPredictor" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=1495481976]
 script = ExtResource("22_77abe")

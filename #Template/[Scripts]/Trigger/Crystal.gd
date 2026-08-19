@@ -36,7 +36,7 @@ var triggerArea: Area3D
 var hexahedron: MeshInstance3D
 var scanQuad: MeshInstance3D
 var crystalThunder: MeshInstance3D
-var aura: GPUParticles3D
+var aura: CPUParticles3D
 var crystalLight: OmniLight3D
 var spawnedFragments: Array[RigidBody3D] = []
 
@@ -45,7 +45,7 @@ func _ready() -> void:
 	triggerArea = get_parent() as Area3D
 	hexahedron = contentRoot.get_node_or_null("Hexahedron") as MeshInstance3D
 	scanQuad = contentRoot.get_node_or_null("ScanQuad") as MeshInstance3D
-	aura = contentRoot.get_node_or_null("Aura") as GPUParticles3D
+	aura = contentRoot.get_node_or_null("Aura") as CPUParticles3D
 	if not hexahedron or not scanQuad or not aura:
 		push_error("Crystal.gd: 收集物视觉节点不完整")
 		return

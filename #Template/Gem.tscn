@@ -46,45 +46,6 @@ point_count = 2
 [sub_resource type="CurveTexture" id="CurveTexture_gem_aura_scale"]
 curve = SubResource("Curve_gem_aura_scale")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gem_sprirt"]
-angular_velocity_min = 100.0
-angular_velocity_max = 100.0
-gravity = Vector3(0, 0, 0)
-initial_velocity_min = 0.0
-initial_velocity_max = 0.0
-scale_min = 1.0
-scale_max = 1.0
-scale_curve = SubResource("CurveTexture_gem_sprirt_scale")
-color_ramp = SubResource("GradientTexture1D_gem_sprirt")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gem_tail"]
-angle_min = 45.0
-angle_max = 270.0
-angular_velocity_min = -20.0
-angular_velocity_max = 20.0
-gravity = Vector3(0, 0, 0)
-initial_velocity_min = 0.0
-initial_velocity_max = 0.0
-scale_min = 0.2
-scale_max = 0.4
-scale_curve = SubResource("CurveTexture_gem_aura_scale")
-color_ramp = SubResource("GradientTexture1D_gem_tail")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gem_aura"]
-angle_min = 45.0
-angle_max = 270.0
-angular_velocity_min = -20.0
-angular_velocity_max = 20.0
-gravity = Vector3(0, 0, 0)
-initial_velocity_min = 0.0
-initial_velocity_max = 0.0
-emission_shape = 3
-emission_box_extents = Vector3(0.5, 0.5, 0.5)
-scale_min = 1.0
-scale_max = 2.0
-scale_curve = SubResource("CurveTexture_gem_aura_scale")
-color_ramp = SubResource("GradientTexture1D_gem_aura")
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gem_aura"]
 transparency = 1
 blend_mode = 1
@@ -160,7 +121,7 @@ surface_material_override/0 = ExtResource("3_lsh75")
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=889977260]
 libraries/ = SubResource("AnimationLibrary_hg8oc")
 
-[node name="Sprirt" type="GPUParticles3D" parent="." unique_id=1137045703]
+[node name="Sprirt" type="CPUParticles3D" parent="." unique_id=1137045703]
 top_level = true
 emitting = false
 amount = 1
@@ -169,20 +130,38 @@ one_shot = true
 explosiveness = 1.0
 randomness = 0.1
 local_coords = true
-process_material = SubResource("ParticleProcessMaterial_gem_sprirt")
-draw_pass_1 = SubResource("QuadMesh_gem_aura")
+angular_velocity_min = 100.0
+angular_velocity_max = 100.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 0.0
+scale_amount_min = 1.0
+scale_amount_max = 1.0
+scale_amount_curve = SubResource("CurveTexture_gem_sprirt_scale")
+color_ramp = SubResource("GradientTexture1D_gem_sprirt")
+mesh = SubResource("QuadMesh_gem_aura")
 
-[node name="Tail" type="GPUParticles3D" parent="." unique_id=1137045705]
+[node name="Tail" type="CPUParticles3D" parent="." unique_id=1137045705]
 top_level = true
 emitting = false
 amount = 128
 lifetime = 0.05
 one_shot = false
 local_coords = false
-process_material = SubResource("ParticleProcessMaterial_gem_tail")
-draw_pass_1 = SubResource("QuadMesh_gem_aura")
+angle_min = 45.0
+angle_max = 270.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 0.0
+scale_amount_min = 0.2
+scale_amount_max = 0.4
+scale_amount_curve = SubResource("CurveTexture_gem_aura_scale")
+color_ramp = SubResource("GradientTexture1D_gem_tail")
+mesh = SubResource("QuadMesh_gem_aura")
 
-[node name="Aura" type="GPUParticles3D" parent="." unique_id=1137045704]
+[node name="Aura" type="CPUParticles3D" parent="." unique_id=1137045704]
 top_level = true
 emitting = false
 amount = 3
@@ -191,8 +170,20 @@ one_shot = true
 explosiveness = 1.0
 randomness = 0.1
 local_coords = true
-process_material = SubResource("ParticleProcessMaterial_gem_aura")
-draw_pass_1 = SubResource("QuadMesh_gem_aura")
+emission_shape = 3
+emission_box_extents = Vector3(0.5, 0.5, 0.5)
+angle_min = 45.0
+angle_max = 270.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 0.0
+scale_amount_min = 1.0
+scale_amount_max = 2.0
+scale_amount_curve = SubResource("CurveTexture_gem_aura_scale")
+color_ramp = SubResource("GradientTexture1D_gem_aura")
+mesh = SubResource("QuadMesh_gem_aura")
 
 [node name="GemLight" type="OmniLight3D" parent="." unique_id=1137045706]
 visible = false

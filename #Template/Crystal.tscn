@@ -25,18 +25,6 @@ point_count = 2
 [sub_resource type="CurveTexture" id="CurveTexture_crystal_aura_scale"]
 curve = SubResource("Curve_crystal_aura_scale")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_crystal_aura"]
-emission_shape = 3
-emission_box_extents = Vector3(0.5, 0.5, 0.5)
-angle_min = 45.0
-angle_max = 270.0
-angular_velocity_min = -20.0
-angular_velocity_max = 20.0
-gravity = Vector3(0, 0, 0)
-scale_max = 2.0
-scale_curve = SubResource("CurveTexture_crystal_aura_scale")
-color_ramp = SubResource("GradientTexture1D_crystal_aura")
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_crystal_aura"]
 transparency = 1
 blend_mode = 1
@@ -73,7 +61,7 @@ material_override = ExtResource("4_scan")
 cast_shadow = 0
 mesh = SubResource("QuadMesh_scan")
 
-[node name="Aura" type="GPUParticles3D" parent="." unique_id=1137045706]
+[node name="Aura" type="CPUParticles3D" parent="." unique_id=1137045706]
 top_level = true
 emitting = false
 amount = 3
@@ -82,5 +70,14 @@ one_shot = true
 explosiveness = 1.0
 randomness = 0.1
 local_coords = true
-process_material = SubResource("ParticleProcessMaterial_crystal_aura")
-draw_pass_1 = SubResource("QuadMesh_crystal_aura")
+emission_shape = 3
+emission_box_extents = Vector3(0.5, 0.5, 0.5)
+angle_min = 45.0
+angle_max = 270.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+scale_amount_max = 2.0
+scale_amount_curve = SubResource("CurveTexture_crystal_aura_scale")
+color_ramp = SubResource("GradientTexture1D_crystal_aura")
+mesh = SubResource("QuadMesh_crystal_aura")
