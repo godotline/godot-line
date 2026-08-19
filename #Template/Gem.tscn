@@ -18,9 +18,6 @@ max_value = 5.0
 _data = [Vector2(0, 0.9051723), 0.0, 0.0, 0, 0, Vector2(0.8390244, 5), 0.0, 0.0, 0, 0]
 point_count = 2
 
-[sub_resource type="CurveTexture" id="CurveTexture_gem_sprirt_scale"]
-curve = SubResource("Curve_gem_sprirt_scale")
-
 [sub_resource type="Gradient" id="Gradient_gem_tail"]
 offsets = PackedFloat32Array(0, 0.0662089, 0.334493, 1)
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.39215687, 1, 1, 1, 0.39215687, 1, 1, 1, 0)
@@ -33,9 +30,6 @@ colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 max_value = 4.0
 _data = [Vector2(0, 0.79310346), 1.4613726, 1.4613726, 0, 0, Vector2(1, 4), 0.4642752, 0.4642752, 0, 0]
 point_count = 2
-
-[sub_resource type="CurveTexture" id="CurveTexture_gem_aura_scale"]
-curve = SubResource("Curve_gem_aura_scale")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gem_aura"]
 transparency = 1
@@ -128,7 +122,7 @@ initial_velocity_min = 0.0
 initial_velocity_max = 0.0
 scale_amount_min = 1.0
 scale_amount_max = 1.0
-scale_amount_curve = SubResource("CurveTexture_gem_sprirt_scale")
+scale_amount_curve = SubResource("Curve_gem_sprirt_scale")
 color_ramp = SubResource("Gradient_gem_sprirt")
 mesh = SubResource("QuadMesh_gem_aura")
 
@@ -148,7 +142,7 @@ initial_velocity_min = 0.0
 initial_velocity_max = 0.0
 scale_amount_min = 0.2
 scale_amount_max = 0.4
-scale_amount_curve = SubResource("CurveTexture_gem_aura_scale")
+scale_amount_curve = SubResource("Curve_gem_aura_scale")
 color_ramp = SubResource("Gradient_gem_tail")
 mesh = SubResource("QuadMesh_gem_aura")
 
@@ -172,7 +166,7 @@ initial_velocity_min = 0.0
 initial_velocity_max = 0.0
 scale_amount_min = 1.0
 scale_amount_max = 2.0
-scale_amount_curve = SubResource("CurveTexture_gem_aura_scale")
+scale_amount_curve = SubResource("Curve_gem_aura_scale")
 color_ramp = SubResource("Gradient_gem_aura")
 mesh = SubResource("QuadMesh_gem_aura")
 

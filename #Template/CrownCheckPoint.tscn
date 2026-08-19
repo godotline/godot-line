@@ -26,9 +26,6 @@ colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0)
 _data = [Vector2(0, 0.49344832), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
 
-[sub_resource type="CurveTexture" id="CurveTexture_scale"]
-curve = SubResource("Curve_scale")
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_particle_aura"]
 transparency = 1
 blend_mode = 1
@@ -120,7 +117,7 @@ angular_velocity_min = -20.0
 angular_velocity_max = 20.0
 gravity = Vector3(0, 0, 0)
 scale_amount_max = 2.0
-scale_amount_curve = SubResource("CurveTexture_scale")
+scale_amount_curve = SubResource("Curve_scale")
 color_ramp = SubResource("Gradient_dklm7")
 mesh = SubResource("QuadMesh_aura")
 
@@ -137,6 +134,6 @@ angular_velocity_max = 20.0
 gravity = Vector3(0, 0, 0)
 scale_amount_min = 0.125
 scale_amount_max = 0.5
-scale_amount_curve = SubResource("CurveTexture_scale")
+scale_amount_curve = SubResource("Curve_scale")
 color_ramp = SubResource("Gradient_bfifm")
 mesh = SubResource("QuadMesh_circle")
