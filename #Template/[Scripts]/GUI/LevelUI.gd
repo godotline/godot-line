@@ -1,4 +1,7 @@
+class_name LevelUI
 extends Control
+
+static var instance: LevelUI = null
 
 var levelname: String = "level name"
 var shown: bool = false
@@ -7,6 +10,7 @@ var replayRequested: bool = false
 @onready var normalPage: Control = $NormalPage
 @onready var revivePage: Control = $RevivePage
 @onready var background: ColorRect = $ColorRect
+@onready var hideScreen: ColorRect = $HideScreen
 @onready var title: Label = $NormalPage/title
 @onready var percentage: Label = $NormalPage/percentage
 @onready var barFill: TextureRect = $NormalPage/ProgressFrame/Fill
@@ -15,6 +19,7 @@ var replayRequested: bool = false
 @onready var barFillRevive: TextureRect = $RevivePage/ProgressFrame/Fill
 
 func _ready() -> void:
+	instance = self
 	if Player.instance and Player.instance.levelData:
 		levelname = Player.instance.levelData.levelTitle
 	else:
@@ -22,6 +27,10 @@ func _ready() -> void:
 	visible = false
 	if Player.instance:
 		Player.instance.on_game_end.connect(_show_ui)
+
+func _exit_tree() -> void:
+	if instance == self:
+		instance = null
 
 func _show_ui() -> void:
 	if shown:
@@ -64,7 +73,6 @@ func _on_cancel_revive_pressed() -> void:
 
 func _on_revive_pressed() -> void:
 	shown = false
-	visible = false
 	LevelManager.isEnd = false
 	if not Player.instance:
 		push_error("LevelUI.gd: Player.instance 为空，无法复活")
@@ -73,9 +81,34 @@ func _on_revive_pressed() -> void:
 	if Player.instance.isEnd:
 		_on_gamereplay_pressed()
 	elif is_instance_valid(LevelManager.currentCheckpoint):
+		# The UI stays visible while Checkpoint.revive() runs the HideScreen
+		# fog-colored fade, matching Unity's Revival() -> LevelUI.HideScreen.
 		LevelManager.currentCheckpoint.revive()
 	else:
 		_on_gamereplay_pressed()
+
+## Unity parity: LevelUI.HideScreen. Fades a full-screen overlay to `color`,
+## runs `fadeIn` while the screen is opaque (the scene reset happens hidden),
+## then fades back out and runs `fadeOut`.
+func HideScreen(color: Color, duration: float, fadeIn: Callable, fadeOut: Callable) -> void:
+	hideScreen.color = Color(color.r, color.g, color.b, 0.0)
+	hideScreen.mouse_filter = Control.MOUSE_FILTER_STOP
+	var tween: Tween = create_tween()
+	tween.tween_property(hideScreen, "color:a", 1.0, duration)
+	tween.tween_callback(func() -> void:
+		_reset_ui()
+		fadeIn.call()
+	)
+	tween.tween_property(hideScreen, "color:a", 0.0, duration)
+	tween.tween_callback(func() -> void:
+		hideScreen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fadeOut.call()
+	)
+
+func _reset_ui() -> void:
+	normalPage.visible = false
+	revivePage.visible = false
+	background.color.a = 0.0
 
 func _on_gamereplay_pressed() -> void:
 	if replayRequested:

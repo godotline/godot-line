@@ -15,17 +15,17 @@ Godot 4.7 Dancing Line game template (GDScript). No CLI build/test/lint — all 
 ## Project Structure
 
 ```
-#Template/           — Core template: scenes, scripts, resources, materials
-  [Scripts]/         — All GDScript source (10 subdirectories)
-  [Resources]/       — PackedScenes, LevelData, models, UI
-  [Materials]/       — .tres material resources
-  [Music]/           — Audio files
-  [Scenes]/          — Template level scenes (DefaultScene/, Sample/) used by the "新建关卡" plugin
-  *.tscn             — Template scenes (Player, trigger, Gem, etc.) — directly in #Template/ root, NOT in a [Scenes] subfolder
-[Scenes]/            — Created levels only (the "新建关卡" plugin writes new levels here)
+#Template/             — Core template: scenes, scripts, resources, materials
+  [Scripts]/           — All GDScript source (10 subdirectories)
+  [Resources]/         — PackedScenes, LevelData, models, UI
+  [Materials]/         — .tres material resources
+  [Music]/             — Audio files
+  [Scenes]/            — Template level scenes (DefaultScene/, Sample/) used by the "新建关卡" plugin
+  *.tscn               — Template scenes (Player, trigger, Gem, etc.) — directly in #Template/ root, NOT in a [Scenes] subfolder
+[Scenes]/              — Created levels only (the "新建关卡" plugin writes new levels here)
 addons/
-  godot_mcp/         — MCP server plugin (do not modify unless asked)
-  template/          — Editor plugin: toolbar menu, "新建关卡" dialog
+  godot_mcp/           — MCP server plugin (do not modify unless asked)
+  template/            — Editor plugin: toolbar menu, "新建关卡" dialog
 ```
 
 **Bracket-named directories** (`[Scripts]`, `[Resources]`, etc.) are a project convention, not Godot special syntax.
@@ -57,14 +57,23 @@ This is the most important architectural detail. **New triggers should use Mode 
 | **Self-contained** (Mode 2) | `extends BaseTrigger` (Area3D) | Itself | `OldCameraShakeTrigger.gd` |
 | **Legacy** (Mode 3) | `extends Area3D` | Itself via `body_entered` | `OldCameraTrigger.gd`, `CameraShakeTrigger.gd`, `GuidanceBox.gd` |
 
-**Mode 1 (pure component):** Implement `trigger(body: Node3D)` method. Place as child of a `BaseTrigger` node (or `trigger.tscn` instance). `BaseTrigger` uses duck typing — it calls `trigger(body)` on any child that has that method. No inheritance required.
+**Mode 1 (pure component):** Implement `trigger(body)` method. Place as child of a `BaseTrigger` node (or `trigger.tscn` instance). `BaseTrigger` uses duck typing — it calls `trigger(body)` on any child that has that method. No inheritance required.
 
 **BaseTrigger** (`#Template/[Scripts]/Trigger/BaseTrigger.gd`): `class_name BaseTrigger extends Area3D`. Exports: `one_shot`, `require_playing`, `track_exit`, `debug_mode`. Collects behaviors in `_ready()` via `_collect_behaviors()`.
+
+## Checkpoint / Crown — Unity Alignment Notes
+
+The Checkpoint/Crown system is ported 1:1 from Unity `Checkpoint.cs` / `Crown.cs`. Two intentional semantic differences from Unity (do not "fix"):
+
+- **`trackProgress` is stored in seconds, not percent.** Unity `Checkpoint.cs` saves `(int)player.SoundTrackProgress * 100` (0–100); Godot stores the AnimationPlayer position in seconds (`Checkpoint.gd` line ~111). They are equivalent for Godot's timeline model — don't convert.
+- **`LevelManager.checkpointCount` counts crowns too.** Unity keeps crowns in a separate `player.Crowns` list and only regular checkpoints in `player.Checkpoints`; Godot increments `checkpointCount` in the base `Checkpoint._enter_trigger`, so crowns also advance it. Gems use the same counter (`index >= LevelManager.checkpointCount`), so the restore math stays internally consistent. This is a deliberate Godot design for crown-as-checkpoint levels.
+
+**Revive screen fade (Unity parity):** `Checkpoint.revive()` (and `Crown.revive()`/`TTFCheckPoint` via `super`) wraps the scene reset in `LevelUI.HideScreen(fogColor, 0.32, ...)` — the same fog-colored screen flash Unity's `Revival()` does. `revive()` kills all tweens *before* `HideScreen` creates its fade tween (mirroring `DOTween.Clear()` ordering), runs the reset (`_reset_scene`) while the screen is opaque, and only sets `allowTurn = true` (and hides the UI) after the screen fades back out. `LevelUI.gd` has `class_name LevelUI` + `static var instance` (set in `_ready()`, cleared in `_exit_tree()`). The overlay is a full-screen `ColorRect` child of `LevelUI.tscn` named `HideScreen` (mouse_filter IGNORE at rest, STOP during fade).
 
 ## Core Singletons (All Static / RefCounted)
 
 - **`LevelManager`** — `class_name LevelManager extends RefCounted`. All static. Game state machine (`GameStatus` enum), checkpoint data, revive listener system (`add_revive_listener`/`emit_revive`). NOT a Node — cannot use `_process` or signals in the traditional sense.
-- **`AudioManager`** — `class_name AudioManager extends RefCounted`. All static. `play_clip()`, `play_track()`, `fade_out()`, `stop()`. Gets music player from `Player.instance.get_node("MusicPlayer")`.
+- **`AudioManager`** — `class_name AudioManager extends RefCounted`. All static. `PlayClip()`, `PlayTrack()`, `FadeOut()`, `Stop()`. Gets music player from `Player.instance.get_node("MusicPlayer")`.
 - **`SetLatency`** — `class_name SetLatency extends RefCounted`. Persists delay/volume to ConfigFile at `user://settings.cfg`.
 - **`Player.instance`** — Static var on Player (CharacterBody3D). Set in `_ready()`.
 
@@ -104,7 +113,7 @@ Two camera systems coexist, toggled by `Checkpoint.UsingOldCameraFollower`:
 - **New:** `CameraFollower` (class_name, static var instance) + `CameraTrigger.gd` (pure component) + `CameraShakeTrigger.gd`
 - **Old:** `OldCameraFollower` (class_name, static var instance) + `OldCameraTrigger.gd` (legacy Area3D) + `OldCameraShakeTrigger.gd`
 
-New triggers use `CameraFollower.instance.trigger(...)`. Old triggers modify `OldCameraFollower` properties directly.
+New triggers use `CameraFollower.instance.Trigger(...)`. Old triggers modify `OldCameraFollower` properties directly.
 
 ## Level Creation
 
@@ -164,3 +173,62 @@ func _ready() -> void:
 ```
 
 **Note:** `SetFog.gd` uses `get_viewport().get_camera_3d()` but only on trigger activation (not per-frame), so it's acceptable.
+
+## Unity Alignment Status (v2.3)
+
+### ✅ Completed — Function Name Alignment (PascalCase)
+
+All snake_case methods that have a direct Unity PascalCase counterpart have been renamed. Full list:
+
+| Godot File | Renamed Methods |
+|------------|----------------|
+| `Player.gd` | `PlayerDeath`, `Turn`, `ResetHenshinState`, `ClearPool` (FakePlayer), `StopPlayer` (Pyramid), `Speed` (var) |
+| `LevelManager.gd` | `InitPlayerPosition`, `DestroyRemain`, `CompareCheckpointIndex`, `GameOverNormal`/`GameOverRevive`, `SetFPSLimit`, `GetColorByContent` |
+| `AudioManager.gd` | `PlayClip`, `PlayTrack`, `FadeOut`, `Stop`, `Play`, `Pitch`, `Volume`, `Progress` (only `Time` kept as `time` — shadows Godot native `Time` class) |
+| `ObjectPool.gd` | `Add` |
+| `CameraFollower.gd` / `OldCameraFollower.gd` | `DoShake`, `KillAll`, `KillAllCameraTweens`, `ResetShake`, `Trigger` |
+| `AutoPlayController.gd` | `SetHolder` |
+| `AutoPlay.gd` | `SetActive` |
+| `Crown.gd` | `AnimateCrown` |
+| `HideCanvas.gd` / `ShowCanvas.gd` | `BtnHide`, `BtnShow`, `StopTweens`, `OnClick` |
+| `TTFGem.gd` | `PickUp` |
+| `TTFCheckPoint.gd` | `EnterTrigger` |
+| `GuidanceBox.gd` | `SetColor` |
+
+### ✅ Completed — Remove Orphaned Assets
+
+Deleted: `crown_get_1/2/3.wav`, `BlackCrown_Light/UnLight.png`, `PerfactCrownLight/NoLight.png`, `Models/PerfactCrown.obj`, `ui/` (6 png), `Sample.mp3`, `Shake_It_Up.ogg`, `CameraFollower3/Trigger3/Shake3.gd`, `DefaultScene3/`, `beatmap_reader.gd`, `note_reader.gd` (renamed to `NoteReader.gd`).
+
+### ✅ Completed — Dust Particle Extraction
+
+`#Template/[Resources]/Dust.tscn` (GPUParticles3D) created. Player.gd uses `dustParticle` preload, instantiates on land at -0.5 below player, destroys after 2s. Removed inline LandEffect node from Player.tscn.
+
+### ✅ Completed — DeathParticle → PlayerCubes (Unity Remain.prefab)
+
+`DeathParticle.tscn` rewritten: Node3D root + 20 Fragment (RigidBody3D, mass=100, angular_damp=0.05, default hidden+disabled). `death_particle.gd` → `PlayerCubes.gd` (`class_name PlayerCubes`). `Play()` activates fragments, random scale/rotation, `apply_central_impulse()`. `PlayerDeath()` accepts `hasCollision` param (default `true` for wall death, `false` for KillPlayer/K key).
+
+### ❌ Not Renamed (Godot-Specific, No Unity Counterpart)
+
+The following snake_case methods are intentionally left as-is — they are Godot-specific conventions:
+
+- `trigger(body)` — Duck-typed Mode-1 component interface (BaseTrigger convention)
+- `_on_*` / `_ready` / `_process` / `_physics_process` — Godot engine callbacks
+- `set_camera`/`get_camera` — CameraSettings resource accessors (not Unity `CameraFollower.SetCamera`)
+- `save_settings`/`load_settings` — SetLatency (Unity uses `AddLatency`/`SubtractLatency` — different design)
+- `revive()` — Checkpoint internal method (Unity `RevivePlayer` is on Player, different)
+- `reload`/`new_line`/`enable_henshin` — Player-specific (no Unity equivalent)
+- `hide_animated`/`show_ui`/`reveal` — GUI-specific
+- `apply_*`/`capture_*`/`restore_*`/`get_*` — Internal state management
+- `destroy_all` — ObjectPool (Unity has `DestoryAll` — typo, not replicated)
+- `pop` — ObjectPool (Unity `First()` — different semantics: pop vs peek)
+- `refresh_tracking`/`refresh_behaviors` — AutoPlay/BaseTrigger internal
+- `trigger_manually`/`trigger_animation`/`apply_tweened` — Animator-specific
+- All `@export` variables (scene-binding) — left as camelCase per Godot convention
+
+### ⚠️ Known Issues
+
+- **Tags partially rewritten** (v2.3 release): tags v1.0-stable through v2.2 were force-pushed with rewritten author (meny2333). v1.2.0 rejected (annotated tagger email). Not restored by user choice.
+- **Merge commit author**: v2.3 merge commit shows "meny" (GitHub profile name) instead of "meny2333". The work commit (40b3919) has correct author.
+- **GitHub proxy**: repo uses proxy at `127.0.0.1:7897`. Must be running for git/gh operations.
+- **`AudioManager.Time`**: cannot be renamed to `Time` (shadows Godot native `Time` class). Kept as `time`.
+- **`OnClick`/`StopTweens`/`BtnHide`/`BtnShow`**: HideCanvas/ShowCanvas had pre-existing recursive-placeholder compatibility aliases (`func X():\n\tX()`) that were removed during rename. The real renamed methods are the sole definitions now.
