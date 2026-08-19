@@ -186,9 +186,10 @@ func _process(delta: float) -> void:
 		_move_head(delta)
 
 	var isOnFloorNow: bool = is_on_floor() or fly
-	if isOnFloorNow and not pastIsOnFloorEffect:
-		_play_land_effect()
-		emit_signal("on_touch_ground")
+	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
+		if isOnFloorNow and not pastIsOnFloorEffect:
+			_play_land_effect()
+			emit_signal("on_touch_ground")
 	pastIsOnFloorEffect = isOnFloorNow
 
 	if isOnFloorNow:

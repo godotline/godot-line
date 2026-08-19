@@ -136,6 +136,7 @@ func Trigger() -> void:
 	var targetValue: Vector3 = endOffset
 	if transformType == TransformType.Add:
 		targetValue = startValue + endOffset
+	targetValue = _adjust_target_value(startValue, targetValue, transformType == TransformType.Add)
 	tween.tween_property(target, _get_property_name(), targetValue, duration).set_trans(TransitionType).set_ease(EaseType)
 	tween.tween_callback(func():
 		on_animation_end.emit()
@@ -169,3 +170,7 @@ func _set_value(_target: Node3D, _value: Vector3) -> void:
 
 func _get_property_name() -> String:
 	return ""
+
+# 虚方法：旋转类子类可覆写以应用 RotateMode 等旋转路径调整
+func _adjust_target_value(_start: Vector3, targetValue: Vector3, _isAdd: bool) -> Vector3:
+	return targetValue

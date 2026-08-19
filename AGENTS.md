@@ -129,6 +129,7 @@ Use the editor plugin: **Template > 新建关卡** in the toolbar. Creates `[Sce
 - Player tail (ObjectPool, 256 MeshInstance3D) and RoadMaker road are **two independent systems**.
 - `FogSettings` resource drives fog, not a standalone FogColorChanger script.
 - Physics layers: 1=Player, 2=BaseFloor, 3=BaseWall.
+- **Godot 4.7 editor does NOT restore `[editable path="..."]` on load** (verified: `Node.is_editable_instance()` is `false` after reopening a scene whose file has the `[editable]` section). Consequence: **instanced-child property overrides** (e.g. a `CollisionShape3D`/`Marker3D` override node under an `instance=Trigger.tscn` subtree) are **silently stripped whenever the editor saves that scene**, reverting to the base shape (the "scale变成0" bug). Root-instance overrides (transform, collision_layer, etc.) DO survive. **Fix pattern: bake the instanced children as local nodes** (write `[node name="Area3D" type="Area3D"]` + `script = BaseTrigger.gd` + local `CollisionShape3D`/`Marker3D` instead of `instance=Trigger.tscn`). Already applied to `CrownCheckPoint.tscn` and `HeartCheckPoint.tscn` (1×5×10 axis-aligned trigger). `Gem.tscn` still uses the fragile override pattern (SphereShape3D on the instanced CollisionShape3D) — do not save it from the editor without converting. `Crystal.tscn`/`Pyramid.tscn` are safe (no instanced-child overrides).
 
 ## Performance Best Practices
 
