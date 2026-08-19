@@ -247,6 +247,7 @@ endOffset = Vector3(0, 10, 0)
 [node name="LocalRotAnimator" type="Node3D" parent="Scene_Group/Scene_001/Obstacle3" unique_id=418376129]
 script = ExtResource("23_s0ncg")
 endOffset = Vector3(0, 360, 0)
+triggeredByTime = false
 
 [node name="Obstacle4" parent="Scene_Group/Scene_001" unique_id=1353085919 instance=ExtResource("15_6gt33")]
 transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 28.07723, 23.695015)

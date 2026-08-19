@@ -232,3 +232,15 @@ The following snake_case methods are intentionally left as-is — they are Godot
 - **GitHub proxy**: repo uses proxy at `127.0.0.1:7897`. Must be running for git/gh operations.
 - **`AudioManager.Time`**: cannot be renamed to `Time` (shadows Godot native `Time` class). Kept as `time`.
 - **`OnClick`/`StopTweens`/`BtnHide`/`BtnShow`**: HideCanvas/ShowCanvas had pre-existing recursive-placeholder compatibility aliases (`func X():\n\tX()`) that were removed during rename. The real renamed methods are the sole definitions now.
+
+### ✅ Completed — Trigger Behavior Parity (post-v2.3)
+
+Audit of 20 Unity trigger pairs; fixed the remaining real functional differences. All Godot files verified parse-clean via gdmcp `analyze_script`.
+
+| Area | Change |
+|------|--------|
+| `Teleport.gd` | Fixed `InitPlayerPosition` arg-order bug (was passing `turn` as `forceCamera`, `targetDirection` as `doTurn`). Now `InitPlayerPosition(body, finalPosition, true, turn, targetDirection)` — always snaps camera like Unity `LevelManager.cs:143`. Only caller is Teleport; `Checkpoint`'s mention is a comment. |
+| `Jump.gd` / `JumpPredictor.gd` | `height` renamed to Unity's `power` (`=500.0`). Initial velocity = `power / 100.0` (Unity Player rigidbody `m_Mass: 100` in `Player.prefab`). Signal `height_changed` → `power_changed`. Added `changeDirection` (Unity `Jump.cs`). Predictor now draws from `power`. |
+| `Speed.gd` | Added Unity `setFakePlayer`/`player` support (`Speed.cs`): with `setFakePlayer` the Player is unaffected; FakePlayer/`obstacle` bodies set `player.speed` via a direct `container.body_entered` hook (like `FakePlayerTrigger`), since BaseTrigger only dispatches Player bodies. `_sync_velocity` (immediate velocity update) kept as a Godot adaptation. |
+| `SetFog.gd` | Now always tweens (Unity `FogSettings.SetFog` tweens regardless of `useFog`) and adds `background_color` tween — matches Unity `camera.backgroundColor = fogColor`. |
+| `AnimatorBase.gd` | `triggeredByTime` default flipped `false`→`true` (Unity default). Added `offsetTime` (fires `duration` earlier, Unity `InitTime()`). `duration` default `1.0`→`2.0`. **Sample.tscn's `LocalRotAnimator` is explicitly pinned `triggeredByTime = false`** to preserve its event-wired behavior. |

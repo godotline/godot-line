@@ -37,13 +37,12 @@ func apply_fog() -> void:
 	# 设置雾是否启用
 	env.fog_enabled = fog.useFog
 	
-	if fog.useFog:
-		var tween: Tween = create_tween()
-		tween.set_ease(ease)
-		tween.set_trans(transType)
-		tween.tween_property(env, "fog_light_color", fog.fogColor, duration)
-		tween.parallel().tween_property(env, "fog_depth_begin", fog.start, duration)
-		tween.parallel().tween_property(env, "fog_depth_end", fog.end, duration)
-		tween.tween_callback(func(): on_animation_end.emit())
-	else:
-		on_animation_end.emit()
+	# Unity FogSettings.SetFog 无论 useFog 都同时补间雾颜色/距离/相机背景色
+	var tween: Tween = create_tween()
+	tween.set_ease(ease)
+	tween.set_trans(transType)
+	tween.tween_property(env, "fog_light_color", fog.fogColor, duration)
+	tween.parallel().tween_property(env, "fog_depth_begin", fog.start, duration)
+	tween.parallel().tween_property(env, "fog_depth_end", fog.end, duration)
+	tween.parallel().tween_property(env, "background_color", fog.fogColor, duration)
+	tween.tween_callback(func(): on_animation_end.emit())

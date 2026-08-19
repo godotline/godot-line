@@ -9,13 +9,14 @@ enum TransformType { New, Add }
 @export var transformType: TransformType = TransformType.New
 @export var startValue: Vector3 = Vector3(0,0,0)
 @export var endOffset: Vector3 = Vector3(0,0,0)
-@export var duration: float = 1.0
+@export var duration: float = 2.0  # Unity 默认 2f
 @export var TransitionType: Tween.TransitionType = Tween.TRANS_SINE
 @export var EaseType: Tween.EaseType = Tween.EASE_IN_OUT
 
 @export_group("触发设置")
-@export var triggeredByTime: bool = false
+@export var triggeredByTime: bool = true  # Unity 默认 true
 @export var triggerTime: float = 0.0
+@export var offsetTime: bool = false  # Unity AnimatorBase.offsetTime: 提前 duration 触发
 @export var dontRevive: bool = false
 
 var isPlaying: bool = false
@@ -104,8 +105,12 @@ func _process(_delta: float) -> void:
 		var player: Player = Player.instance
 		if player:
 			cachedMusicPlayer = player.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-	if cachedMusicPlayer and cachedMusicPlayer.playing and cachedMusicPlayer.get_playback_position() > triggerTime:
+	if cachedMusicPlayer and cachedMusicPlayer.playing and cachedMusicPlayer.get_playback_position() > _effectiveTriggerTime():
 		Trigger()
+
+## Unity InitTime(): offsetTime 时提前 duration 触发
+func _effectiveTriggerTime() -> float:
+	return triggerTime - duration if offsetTime else triggerTime
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSFORM_CHANGED and Engine.is_editor_hint() and not isPlaying and _initialized:
