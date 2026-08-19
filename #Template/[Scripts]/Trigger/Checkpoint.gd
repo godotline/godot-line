@@ -35,6 +35,8 @@ enum Direction { First, Second }
 @export var imageColorsAuto: Array[SingleImageColor] = []
 @export var imageColorsManual: Array[SingleImageColor] = []
 
+const REVIVE_FADE_DURATION: float = 0.32
+
 signal on_revive
 
 var used: bool = false
@@ -284,12 +286,34 @@ func revive() -> void:
 		return
 	LevelManager.isEnd = false
 
+	# Unity parity: DOTween.Clear() runs before HideScreen creates its fade tween.
+	for tween: Tween in get_tree().get_processed_tweens():
+		tween.kill()
+
 	# Unity consumes one collected crown on the first revive at this checkpoint.
 	# Crown count is not a gate: the checkpoint itself determines revive eligibility.
 	if not usedRevive:
 		LevelManager.crown = maxi(LevelManager.crown - 1, 0)
 		usedRevive = true
 
+	# Unity parity: the scene reset runs hidden behind a fog-colored screen fade
+	# (LevelUI.HideScreen). The player only regains turning control once the
+	# screen has fully revealed the restored scene.
+	var ui: LevelUI = LevelUI.instance
+	if ui:
+		ui.HideScreen(
+			fog.fogColor if fog else Color(0, 0, 0, 1),
+			REVIVE_FADE_DURATION,
+			func() -> void: _reset_scene(mainLine),
+			func() -> void:
+				mainLine.allowTurn = true
+				ui.visible = false
+		)
+	else:
+		_reset_scene(mainLine)
+		mainLine.allowTurn = true
+
+func _reset_scene(mainLine: Player) -> void:
 	# Restore player state
 	LevelManager.load_checkpoint_to_main_line(mainLine)
 	if revivePosition:
@@ -301,7 +325,6 @@ func revive() -> void:
 	mainLine.velocity = Vector3.ZERO
 	mainLine.gameStarts = false
 	mainLine.delayApplied = false
-	mainLine.allowTurn = true
 	mainLine.scale = Vector3.ONE
 	mainLine._clear_tail()
 	Engine.time_scale = 1.0
@@ -314,10 +337,6 @@ func revive() -> void:
 
 	# Clear death particles
 	get_tree().call_group("death_particles", "queue_free")
-
-	# Kill all tweens
-	for tween: Tween in get_tree().get_processed_tweens():
-		tween.kill()
 
 	# Restore camera
 	if not usingOldCameraFollower:
