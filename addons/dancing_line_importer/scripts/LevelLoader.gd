@@ -16,6 +16,10 @@ const OBSTACLE_TEMPLATE: String = "res://#Template/Obstacle.tscn"
 const JumpClass: Script = preload("res://#Template/[Scripts]/Trigger/Jump.gd")
 const KillPlayerClass: Script = preload("res://#Template/[Scripts]/Trigger/KillPlayer.gd")
 const CameraTriggerClass: Script = preload("res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd")
+const SpeedClass: Script = preload("res://#Template/[Scripts]/Trigger/Speed.gd")
+const GravityTriggerClass: Script = preload("res://#Template/[Scripts]/Trigger/GravityTrigger.gd")
+const SetFogClass: Script = preload("res://#Template/[Scripts]/Trigger/SetFog.gd")
+const CameraShakeClass: Script = preload("res://#Template/[Scripts]/CameraScripts/CameraShakeTrigger.gd")
 
 const MODEL_SEARCH_PATHS: Array[String] = [
 	"res://#Template/[Resources]/Models/",
@@ -534,33 +538,90 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 	var custom: Dictionary = customData as Dictionary if customData is Dictionary else {}
 	var triggerType: int = toIntSafe(custom.get("type", 0))
 
+	var dataStr: String = str(custom.get("data", ""))
+
 	match triggerType:
-		0: # CameraTrigger
+		0: # CameraTrigger (ARPhros CameraTrigger)
 			triggerRoot.name = "%s_%d" % ["CameraTrigger", objId]
 			var camComp: Node = CameraTriggerClass.new()
 			camComp.name = "CameraTrigger"
-			if custom.has("duration"):
-				camComp.set("duration", float(custom.get("duration", 2.0)))
-			if custom.has("fov"):
-				camComp.set("fieldOfView", float(custom.get("fov", 80.0)))
+			# 数据格式示例: "True|15, 45, 0|True|0, 3, 0|True|25|True|5000|linear|0|True|True|0"
+			var parts: PackedStringArray = dataStr.split("|")
+			if parts.size() >= 7:
+				var fovVal: float = float(parts[5]) if parts[5].is_valid_float() else 80.0
+				camComp.set("fieldOfView", fovVal)
+				if parts.size() >= 8:
+					var smoothFactor: float = float(parts[7]) if parts[7].is_valid_float() else 5000.0
+					camComp.set("duration", 2.0 if smoothFactor <= 0 else clamp(5000.0 / smoothFactor, 0.1, 5.0))
 			triggerRoot.add_child(camComp)
+
 		1: # JumpTrigger
 			triggerRoot.name = "%s_%d" % ["JumpTrigger", objId]
 			var jumpComp: Node = JumpClass.new()
 			jumpComp.name = "Jump"
-			if custom.has("power"):
-				jumpComp.set("power", float(custom.get("power", 500.0)))
-			if custom.has("changeDirection"):
-				jumpComp.set("changeDirection", bool(custom.get("changeDirection", false)))
+			# 数据格式: "0, 660, 0|False|True|True"
+			var parts: PackedStringArray = dataStr.split("|")
+			if parts.size() > 0:
+				var powerCoords: PackedStringArray = parts[0].split(",")
+				if powerCoords.size() >= 2:
+					var py: float = float(powerCoords[1].strip_edges())
+					jumpComp.set("power", py if py > 0 else 500.0)
+				else:
+					jumpComp.set("power", float(parts[0]) if parts[0].is_valid_float() else 500.0)
 			triggerRoot.add_child(jumpComp)
-		2: # SpeedTrigger (原版 ARPhros type 2)
+
+		2: # SpeedTrigger (ARPhros type 2)
 			triggerRoot.name = "%s_%d" % ["SpeedTrigger", objId]
+			var speedComp: Node = SpeedClass.new()
+			speedComp.name = "Speed"
+			var spd: float = float(dataStr.strip_edges()) if dataStr.strip_edges().is_valid_float() else 12.0
+			if spd > 0.0:
+				speedComp.set("speed", spd)
+			triggerRoot.add_child(speedComp)
+
 		3: # DeathTrigger
 			triggerRoot.name = "%s_%d" % ["DeathTrigger", objId]
 			var killComp: Node = KillPlayerClass.new()
 			killComp.name = "KillPlayer"
-			killComp.set("reason", 1) # Drowned or Hit
+			killComp.set("reason", 1) # Drowned / Hit
 			triggerRoot.add_child(killComp)
+
+		4: # ShakeCameraTrigger
+			triggerRoot.name = "%s_%d" % ["CameraShakeTrigger", objId]
+			var shakeComp: Node = CameraShakeClass.new()
+			shakeComp.name = "CameraShakeTrigger"
+			triggerRoot.add_child(shakeComp)
+
+		13: # FovTrigger
+			triggerRoot.name = "%s_%d" % ["FovTrigger", objId]
+			var camComp: Node = CameraTriggerClass.new()
+			camComp.name = "CameraTrigger"
+			var parts: PackedStringArray = dataStr.split("|")
+			if parts.size() >= 1:
+				camComp.set("fieldOfView", float(parts[0]) if parts[0].is_valid_float() else 80.0)
+			if parts.size() >= 2:
+				camComp.set("duration", float(parts[1]) if parts[1].is_valid_float() else 1.0)
+			triggerRoot.add_child(camComp)
+
+		22: # FogTrigger
+			triggerRoot.name = "%s_%d" % ["FogTrigger", objId]
+			var fogComp: Node = SetFogClass.new()
+			fogComp.name = "SetFog"
+			triggerRoot.add_child(fogComp)
+
+		24: # GravityTrigger
+			triggerRoot.name = "%s_%d" % ["GravityTrigger", objId]
+			var gravComp: Node = GravityTriggerClass.new()
+			gravComp.name = "GravityTrigger"
+			# 数据格式: "0, -50, 0"
+			var gravCoords: PackedStringArray = dataStr.split(",")
+			if gravCoords.size() >= 3:
+				var gx: float = float(gravCoords[0].strip_edges())
+				var gy: float = float(gravCoords[1].strip_edges())
+				var gz: float = float(gravCoords[2].strip_edges())
+				gravComp.set("gravity", Vector3(gx, gy, gz))
+			triggerRoot.add_child(gravComp)
+
 		_:
 			triggerRoot.name = "%s_%d" % [str(objData.get("name", "Trigger")), objId]
 

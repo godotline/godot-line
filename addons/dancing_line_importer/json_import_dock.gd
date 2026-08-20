@@ -248,9 +248,17 @@ func _createLevelDataResource(data: Dictionary, safeName: String, dataPath: Stri
 
 func _setOwnerRecursive(node: Node, owner: Node) -> void:
 	if node != owner:
-		node.owner = owner
-	for child: Node in node.get_children():
-		_setOwnerRecursive(child, owner)
+		# 只有纯原生本地创建的节点才设置 owner；
+		# 已经实例化为 PackedScene 的子场景节点（如 Player.tscn, CameraRoot.tscn, LevelUI.tscn）
+		# 及其内部的子节点，绝不能把内部子节点的 owner 改为场景根节点，否则在保存时会引发同名节点冲突！
+		if node.scene_file_path.is_empty():
+			node.owner = owner
+			for child: Node in node.get_children():
+				_setOwnerRecursive(child, owner)
+		else:
+			# 如果该节点本身是子场景实例的根节点（如 Player 节点），它自身的 owner 需要是根场景
+			node.owner = owner
+			# 但它的内部子节点保留其原始 scene 所有权，不再深入递归修改 owner
 
 
 func _buildScene(data: Dictionary, levelDataResource: LevelData) -> Node:

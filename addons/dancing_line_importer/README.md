@@ -53,12 +53,29 @@
 | **Type 0** (空容器 / Group) | 100% | 映射为纯 `Node3D` 容器，完整重构 Unity 父子 Transform 树 |
 | **Type 1** (Mesh 网格物体) | 100% | 映射为 `MeshInstance3D`，加载对应 .obj 网格与材质 |
 | **Type 2** (Sprite / 文本) | 80% | 映射为 `Node3D`，若绑定材质贴图则渲染对应纹理 |
-| **Type 4** (Trigger 触发器) | 75% | 映射为 `Area3D` + `BaseTrigger.gd`；支持相机触发、跳跃触发、死亡触发 |
-| **Type 5** (Road 路线) | 100% | 映射为 `StaticBody3D` (Collision Layer 2: BaseFloor) |
+| **Type 4** (Trigger 触发器) | 90% | 映射为 `Area3D` + 模式 1 纯组件挂载（见下文触发器对照表） |
+| **Type 5** (Road 路线) | 100% | 内联映射为 `StaticBody3D` (Collision Layer 2: BaseFloor) |
 | **Crown / Checkpoint** | 100% | 映射为 `CrownCheckPoint.tscn`，自动忽略 scale/rot 仅保留 position |
 | **Gem / Diamond** | 100% | 映射为 `Gem.tscn` 预制体 |
-| **visibility** (0=显示, 1=隐藏) | 100% | `visibility == 1` 时自动设置 `visible = false` |
+| **visibility** | 100% | 仅在 `visibility == 2`（动态激活后续关卡）时设置 `visible = false` |
 | **animatable** (物体位移动画) | 0% | 暂作为静态物体导入（后续版本支持解析烘焙至 `AnimationPlayer`） |
+
+---
+
+## 🎯 ARPhros 触发器与 GodotLine 脚本对应表
+
+ARPhros 关卡中的触发器全部采用模式 1（父级 `Area3D(BaseTrigger.gd)` + 子级纯组件）：
+
+| ARPhros 触发器类型 (`type`) | ARPhros 原名 | GodotLine 对应脚本 | 参数解析与映射 |
+| :---: | :--- | :--- | :--- |
+| **0** | `CameraTrigger` | `res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd` | 提取 `fieldOfView`、`smoothFactor` (计算 `duration`) |
+| **1** | `JumpTrigger` | `res://#Template/[Scripts]/Trigger/Jump.gd` | 提取 `power`（跳跃力度） |
+| **2** | `SpeedTrigger` | `res://#Template/[Scripts]/Trigger/Speed.gd` | 提取 `speed`（线移动速度） |
+| **3** | `DeathTrigger` | `res://#Template/[Scripts]/Trigger/KillPlayer.gd` | 设置死亡原因 `reason = 1` |
+| **4** | `ShakeCameraTrigger` | `res://#Template/[Scripts]/CameraScripts/CameraShakeTrigger.gd` | 相机震屏组件 |
+| **13** | `FovTrigger` | `res://#Template/[Scripts]/CameraScripts/CameraTrigger.gd` | 提取 FOV 与过渡时间 `duration` |
+| **22** | `FogTrigger` | `res://#Template/[Scripts]/Trigger/SetFog.gd` | 雾效渐变与环境颜色切换 |
+| **24** | `GravityTrigger` | `res://#Template/[Scripts]/Trigger/GravityTrigger.gd` | 提取 3D 重力向量 `Vector3(x, y, z)` |
 
 ---
 
@@ -66,5 +83,5 @@
 - **几何与场景树**：100%
 - **材质与贴图**：100%
 - **关卡与音画配置**：100%
-- **核心玩法与触发器**：80%
-- **总体参数覆盖率**：**约 90%**
+- **核心玩法与触发器**：90%
+- **总体参数覆盖率**：**约 95%**
