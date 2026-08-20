@@ -35,12 +35,6 @@ text = "浏览..."
 
 [node name="Actions" type="HBoxContainer" parent="."]
 layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="PreviewButton" type="Button" parent="Actions"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "预览"
 
 [node name="ImportButton" type="Button" parent="Actions"]
 layout_mode = 2

@@ -7,12 +7,10 @@ const DEFAULT_LEVEL_DATA_TEMPLATE: String = "res://#Template/[Scenes]/DefaultSce
 @onready var json_path_line: LineEdit = $FileSection/FilePathLine
 @onready var browse_button: Button = $FileSection/BrowseButton
 @onready var import_button: Button = $Actions/ImportButton
-@onready var preview_button: Button = $Actions/PreviewButton
 @onready var status_label: Label = $StatusLabel
 @onready var log_text: TextEdit = $LogText
 
 var currentJsonData: Dictionary = {}
-var tempScene: Node = null
 var currentFolderPath: String = ""
 var currentAudioBytes: PackedByteArray = PackedByteArray()
 var currentAudioExt: String = "mp3"
@@ -22,7 +20,6 @@ var importedModelsDir: String = ""
 func _ready() -> void:
 	browse_button.pressed.connect(_on_browse_pressed)
 	import_button.pressed.connect(_on_import_pressed)
-	preview_button.pressed.connect(_on_preview_pressed)
 
 
 func _on_browse_pressed() -> void:
@@ -151,25 +148,6 @@ func _parseJsonFile(path: String) -> void:
 	status_label.text = "✅ 已解析: " + levelName
 
 
-func _on_preview_pressed() -> void:
-	if currentJsonData.is_empty():
-		_log("❌ 请先选择关卡文件夹")
-		return
-
-	_log("🔄 预览场景...")
-	_clearPreview()
-
-	tempScene = _buildScene(currentJsonData, null)
-	if tempScene and tempScene.get_child_count() > 0:
-		var viewport: Node = EditorInterface.get_editor_viewport_3d().get_parent()
-		viewport.add_child(tempScene)
-		_log("✅ 预览已加载")
-		status_label.text = "👁️ 预览中"
-	else:
-		_log("❌ 场景为空，无法预览")
-		tempScene = null
-
-
 func _on_import_pressed() -> void:
 	if currentJsonData.is_empty():
 		_log("❌ 请先选择关卡文件夹")
@@ -233,8 +211,6 @@ func _on_import_pressed() -> void:
 	else:
 		_log("❌ 场景保存失败: " + str(saveErr))
 
-	_clearPreview()
-
 
 func _createLevelDataResource(data: Dictionary, safeName: String, dataPath: String, audioStreamPath: String = "") -> LevelData:
 	var info: Dictionary = data.get("info", {})
@@ -285,14 +261,6 @@ func _buildScene(data: Dictionary, levelDataResource: LevelData) -> Node:
 	var scene: Node = loader.buildScene(data, levelDataResource)
 	loader.queue_free()
 	return scene
-
-
-func _clearPreview() -> void:
-	if tempScene:
-		if tempScene.get_parent():
-			tempScene.get_parent().remove_child(tempScene)
-		tempScene.queue_free()
-		tempScene = null
 
 
 func _sanitizeFilename(name: String) -> String:
