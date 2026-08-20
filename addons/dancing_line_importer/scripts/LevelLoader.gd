@@ -25,11 +25,13 @@ const MODEL_SEARCH_PATHS: Array[String] = [
 ]
 
 var loadedMeshes: Dictionary = {}
+var loadedTextures: Dictionary = {}
 var extraSearchPaths: Array[String] = []
 
 
 func buildScene(data: Dictionary, levelDataResource: LevelData = null) -> Node3D:
 	loadedMeshes.clear()
+	loadedTextures.clear()
 
 	var rootScene: Node3D = Node3D.new()
 	rootScene.name = "LevelHolder"
@@ -291,6 +293,7 @@ func _createLevelUI(parent: Node) -> void:
 func _createObjects(parent: Node, data: Dictionary) -> void:
 	var meshes: Array = data.get("meshes", [])
 	var materials: Array = data.get("materials", [])
+	var sprites: Array = data.get("sprites", [])
 	var objects: Array = data.get("objects", [])
 
 	var nodeMap: Dictionary = {}
@@ -301,7 +304,7 @@ func _createObjects(parent: Node, data: Dictionary) -> void:
 			continue
 		var objData: Dictionary = rawObj as Dictionary
 		var objId: int = toIntSafe(objData.get("id", -1))
-		var node: Node = _createSingleObject(objData, meshes, materials)
+		var node: Node = _createSingleObject(objData, meshes, materials, sprites)
 		if node:
 			nodeMap[objId] = node
 			var parentId: int = toIntSafe(objData.get("parentId", -1))
@@ -325,36 +328,45 @@ func _createObjects(parent: Node, data: Dictionary) -> void:
 		parent.add_child(rootNode)
 
 
-func _createSingleObject(objData: Dictionary, meshes: Array, materials: Array) -> Node:
+func _createSingleObject(objData: Dictionary, meshes: Array, materials: Array, sprites: Array = []) -> Node:
 	var rawType: Variant = objData.get("type", 1)
 	var type: int = toIntSafe(rawType)
 	var objName: String = str(objData.get("name", "unnamed")).to_lower()
 
+	var node: Node = null
 	match type:
 		0:
-			# Type 0: 空容器 / Group 节点 (Empty GameObject)
-			return _createGroupObject(objData)
+			node = _createGroupObject(objData)
 		1, 6, 7, 8:
-			# Type 1: 真正带有 Mesh 的物体
 			if objName.contains("cube") or objName.contains("box"):
-				return _createObstacleBox(objData, materials)
+				node = _createObstacleBox(objData, materials, sprites)
 			elif objName.contains("gem") or objName.contains("diamond"):
-				return _createGemInstance(objData)
+				node = _createGemInstance(objData)
 			elif objName.contains("crown"):
-				return _createCrownInstance(objData)
+				node = _createCrownInstance(objData)
 			else:
-				return _createMeshObject(objData, meshes, materials)
+				node = _createMeshObject(objData, meshes, materials, sprites)
 		2:
-			# Type 2: 某些情况下是 Sprite/光源/文本，若无 Mesh 则当 Group
-			return _createGroupObject(objData)
+			node = _createGroupObject(objData)
 		3:
-			return _createDirectionalLightObject(objData)
+			node = _createDirectionalLightObject(objData)
 		4:
-			return _createTriggerObject(objData)
+			node = _createTriggerObject(objData)
 		5, 9, 11:
-			return _createRoadObject(objData, materials)
+			node = _createRoadObject(objData, materials, sprites)
 		_:
-			return _createGroupObject(objData)
+			node = _createGroupObject(objData)
+
+	# 处理 visibility 属性
+	# 0: 正常可见 (Visible)
+	# 1: 隐藏 (Hidden / EditorOnly / Invisible)
+	# 2: 仅在运行时特定逻辑激活
+	if node is Node3D:
+		var vis: int = toIntSafe(objData.get("visibility", 0))
+		if vis == 1:
+			(node as Node3D).visible = false
+
+	return node
 
 
 # ==================== 具体物体类型 ====================
@@ -371,7 +383,7 @@ func _createGroupObject(objData: Dictionary) -> Node3D:
 	groupNode.scale = unityToGodotScale(scale)
 	return groupNode
 
-func _createRoadObject(objData: Dictionary, materials: Array) -> Node:
+func _createRoadObject(objData: Dictionary, materials: Array, sprites: Array = []) -> Node:
 	var groundScene: PackedScene = load(GROUND_TEMPLATE) as PackedScene
 	var roadNode: Node3D
 	if groundScene:
@@ -398,7 +410,7 @@ func _createRoadObject(objData: Dictionary, materials: Array) -> Node:
 	var scale: Vector3 = getVector3FromDict(objData, "scale", Vector3.ONE)
 	roadNode.scale = unityToGodotScale(scale)
 
-	var mat: Material = _createStandardMaterial(objData, materials)
+	var mat: Material = _createStandardMaterial(objData, materials, sprites)
 	var meshNode: MeshInstance3D = roadNode.get_node_or_null("MeshInstance3D") as MeshInstance3D
 	if meshNode and mat:
 		meshNode.material_override = mat
@@ -406,7 +418,7 @@ func _createRoadObject(objData: Dictionary, materials: Array) -> Node:
 	return roadNode
 
 
-func _createObstacleBox(objData: Dictionary, materials: Array) -> Node:
+func _createObstacleBox(objData: Dictionary, materials: Array, sprites: Array = []) -> Node:
 	var obsScene: PackedScene = load(OBSTACLE_TEMPLATE) as PackedScene
 	var obsNode: Node3D
 	if obsScene:
@@ -433,7 +445,7 @@ func _createObstacleBox(objData: Dictionary, materials: Array) -> Node:
 	var scale: Vector3 = getVector3FromDict(objData, "scale", Vector3.ONE)
 	obsNode.scale = unityToGodotScale(scale)
 
-	var mat: Material = _createStandardMaterial(objData, materials)
+	var mat: Material = _createStandardMaterial(objData, materials, sprites)
 	var meshNode: MeshInstance3D = obsNode.get_node_or_null("MeshInstance3D") as MeshInstance3D
 	if meshNode and mat:
 		meshNode.material_override = mat
@@ -473,15 +485,11 @@ func _createCrownInstance(objData: Dictionary) -> Node:
 	crownNode.name = "%s_%d" % [str(objData.get("name", "CrownCheckpoint")), objId]
 	var pos: Vector3 = getVector3FromDict(objData, "position")
 	crownNode.position = unityToGodotPosition(pos)
-	var rot: Vector3 = getVector3FromDict(objData, "eulerAngles")
-	crownNode.rotation = unityToGodotRotation(rot)
-	var scale: Vector3 = getVector3FromDict(objData, "scale", Vector3.ONE)
-	crownNode.scale = unityToGodotScale(scale)
-
+	# 忽略 arproj 中的 scale 和 rotation，仅复制 position
 	return crownNode
 
 
-func _createMeshObject(objData: Dictionary, meshes: Array, materials: Array) -> Node:
+func _createMeshObject(objData: Dictionary, meshes: Array, materials: Array, sprites: Array = []) -> Node:
 	var meshNode: MeshInstance3D = MeshInstance3D.new()
 	var objId: int = toIntSafe(objData.get("id", 0))
 	meshNode.name = "%s_%d" % [str(objData.get("name", "Mesh")), objId]
@@ -497,7 +505,7 @@ func _createMeshObject(objData: Dictionary, meshes: Array, materials: Array) -> 
 		mesh = _createBuiltinMesh(objData)
 	meshNode.mesh = mesh
 
-	var material: Material = _createStandardMaterial(objData, materials)
+	var material: Material = _createStandardMaterial(objData, materials, sprites)
 	if material:
 		meshNode.material_override = material
 
@@ -505,17 +513,13 @@ func _createMeshObject(objData: Dictionary, meshes: Array, materials: Array) -> 
 
 
 func _createTriggerObject(objData: Dictionary) -> Node:
-	var triggerScene: PackedScene = load(TRIGGER_TEMPLATE) as PackedScene
-	var triggerRoot: Area3D
-	if triggerScene:
-		triggerRoot = triggerScene.instantiate() as Area3D
-	else:
-		triggerRoot = Area3D.new()
-		triggerRoot.set_script(preload("res://#Template/[Scripts]/Trigger/BaseTrigger.gd"))
-		var col: CollisionShape3D = CollisionShape3D.new()
-		var box: BoxShape3D = BoxShape3D.new()
-		col.shape = box
-		triggerRoot.add_child(col)
+	var triggerRoot: Area3D = Area3D.new()
+	triggerRoot.set_script(preload("res://#Template/[Scripts]/Trigger/BaseTrigger.gd"))
+
+	var col: CollisionShape3D = CollisionShape3D.new()
+	var box: BoxShape3D = BoxShape3D.new()
+	col.shape = box
+	triggerRoot.add_child(col)
 
 	var objId: int = toIntSafe(objData.get("id", 0))
 	var pos: Vector3 = getVector3FromDict(objData, "position")
@@ -548,8 +552,8 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 			if custom.has("changeDirection"):
 				jumpComp.set("changeDirection", bool(custom.get("changeDirection", false)))
 			triggerRoot.add_child(jumpComp)
-		2: # CrownTrigger -> 建议替换为 CrownCheckPoint
-			return _createCrownInstance(objData)
+		2: # SpeedTrigger (原版 ARPhros type 2)
+			triggerRoot.name = "%s_%d" % ["SpeedTrigger", objId]
 		3: # DeathTrigger
 			triggerRoot.name = "%s_%d" % ["DeathTrigger", objId]
 			var killComp: Node = KillPlayerClass.new()
@@ -749,12 +753,13 @@ func _createBuiltinMesh(objData: Dictionary) -> Mesh:
 		return box
 
 
-func _createStandardMaterial(objData: Dictionary, materials: Array) -> StandardMaterial3D:
+func _createStandardMaterial(objData: Dictionary, materials: Array, sprites: Array = []) -> StandardMaterial3D:
 	var name: String = str(objData.get("name", "")).to_lower()
 	var custom: Dictionary = _parseCustom(objData)
 
 	var materialIds: Array = _getMaterialIds(custom)
 	var baseColor: Color = _getDefaultColor(name)
+	var spriteId: int = -1
 
 	if not materialIds.is_empty():
 		var matId: int = toIntSafe(materialIds[0])
@@ -777,12 +782,50 @@ func _createStandardMaterial(objData: Dictionary, materials: Array) -> StandardM
 			if colorData is Dictionary:
 				var c: Dictionary = colorData as Dictionary
 				baseColor = Color(float(c.get("r", baseColor.r)), float(c.get("g", baseColor.g)), float(c.get("b", baseColor.b)), float(c.get("a", baseColor.a)))
+			spriteId = toIntSafe(foundMat.get("spriteId", -1))
 
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.albedo_color = baseColor
 	material.roughness = 0.5
 	material.metallic = 0.0
+
+	# 如果材质绑定了纹理 (spriteId)
+	if spriteId != -1 and not sprites.is_empty():
+		var tex: Texture2D = _loadTextureBySpriteId(spriteId, sprites)
+		if tex:
+			material.albedo_texture = tex
+
 	return material
+
+
+func _loadTextureBySpriteId(spriteId: int, sprites: Array) -> Texture2D:
+	var fileName: String = ""
+	for rawSprite: Variant in sprites:
+		if rawSprite is Dictionary:
+			var s: Dictionary = rawSprite as Dictionary
+			if toIntSafe(s.get("id", -1)) == spriteId:
+				fileName = str(s.get("fileName", ""))
+				break
+	if fileName.is_empty() and spriteId >= 0 and spriteId < sprites.size():
+		var rawSprite: Variant = sprites[spriteId]
+		if rawSprite is Dictionary:
+			fileName = str((rawSprite as Dictionary).get("fileName", ""))
+
+	if fileName.is_empty():
+		return null
+
+	if loadedTextures.has(fileName):
+		return loadedTextures[fileName] as Texture2D
+
+	for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
+		var fullPath: String = basePath + fileName
+		if ResourceLoader.exists(fullPath):
+			var res: Resource = load(fullPath)
+			if res is Texture2D:
+				loadedTextures[fileName] = res
+				return res as Texture2D
+
+	return null
 
 
 func _getDefaultColor(name: String) -> Color:

@@ -192,7 +192,7 @@ func _on_import_pressed() -> void:
 	var levelName: String = str(info.get("levelName", "Level"))
 	var safeName: String = _sanitizeFilename(levelName)
 	var levelDir: String = "res://[Scenes]/" + safeName + "/"
-	var scenePath: String = levelDir + safeName + ".tscn"
+	var scenePath: String = levelDir + safeName + ".scn"
 	var dataPath: String = levelDir + safeName + ".tres"
 
 	DirAccess.make_dir_recursive_absolute(levelDir)
