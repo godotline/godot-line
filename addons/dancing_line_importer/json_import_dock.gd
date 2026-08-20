@@ -249,6 +249,10 @@ func _createLevelDataResource(data: Dictionary, safeName: String, dataPath: Stri
 func _setOwnerRecursive(node: Node, owner: Node) -> void:
 	if node != owner:
 		node.owner = owner
+	# 如果该节点本身是子场景实例（如 Player.tscn, CameraRoot.tscn, LevelUI.tscn），
+	# 它的根节点 owner 设为主场景，但其内部子节点保留原本预制体的内部所有权，绝不能遍历修改！
+	if node != owner and not node.scene_file_path.is_empty():
+		return
 	for child: Node in node.get_children():
 		_setOwnerRecursive(child, owner)
 
