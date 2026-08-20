@@ -177,15 +177,10 @@ func _on_import_pressed() -> void:
 
 	_log("🔄 生成关卡资源与场景...")
 
-	# 如果有模型需要等待导入完成
-	if not importedModelsDir.is_empty():
+	# 仅在后台仍在扫描时等待，若已扫描完成则直接跳过，避免重复触发 scan
+	if not importedModelsDir.is_empty() and EditorInterface.get_resource_filesystem().is_scanning():
 		_log("⏳ 等待模型资源导入...")
-		if EditorInterface.get_resource_filesystem().is_scanning():
-			await EditorInterface.get_resource_filesystem().filesystem_changed
-		else:
-			# 触发扫描并等待
-			EditorInterface.get_resource_filesystem().scan()
-			await EditorInterface.get_resource_filesystem().filesystem_changed
+		await EditorInterface.get_resource_filesystem().filesystem_changed
 		_log("✅ 模型资源导入完成")
 
 	var info: Dictionary = currentJsonData.get("info", {})
