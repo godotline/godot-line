@@ -36,7 +36,7 @@ addons/
 |------|------|---------------|------|
 | **模式 1：纯组件（推荐）** | `extends Node` / `Node3D` | 父级 `BaseTrigger` 节点 | `Jump.gd`, `Gem.gd`, `Checkpoint.gd`, `Speed.gd` |
 | **模式 2：自包含** | `extends BaseTrigger` (Area3D) | 自身 | `OldCameraShakeTrigger.gd` |
-| **模式 3：遗留模式** | `extends Area3D` | 自身监听 `body_entered` | `OldCameraTrigger.gd`, `CameraShakeTrigger.gd`, `GuidanceBox.gd` |
+| **模式 3：遗留模式** | `extends Area3D` | 自身监听 `body_entered` | `OldCameraTrigger.gd`, `CameraShakeTrigger.gd` |
 
 ### 模式 1 规范
 - 实现 `trigger(body)` 方法即可。

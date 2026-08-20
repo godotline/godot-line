@@ -1,6 +1,6 @@
 @tool
 class_name FakePlayerTrigger
-extends Node3D
+extends Node
 
 ## 假线控制触发器组件 — Turn / ChangeDirection / SetState。
 ## 作为 BaseTrigger 的子节点使用，由父节点负责碰撞检测。
