@@ -117,6 +117,7 @@ func _start_collection_effect() -> void:
 	aura.emitting = true
 
 	collectionLightElapsed = 0.0
+	gemLight.omni_range = 4.0
 	gemLight.light_energy = COLLECTION_LIGHT_ENERGY
 	gemLight.visible = true
 
@@ -222,6 +223,7 @@ func _reset_collection_effect() -> void:
 	aura.emitting = false
 	collectionLightElapsed = COLLECTION_LIGHT_DURATION
 	gemLight.light_energy = 0.0
+	gemLight.omni_range = 0.0
 	gemLight.visible = false
 
 func _set_monitoring(value: bool) -> void:

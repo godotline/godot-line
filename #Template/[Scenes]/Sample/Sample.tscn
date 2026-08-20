@@ -27,6 +27,7 @@
 [ext_resource type="Script" uid="uid://bdbb1ogxk0fcr" path="res://#Template/[Scripts]/Trigger/JumpPredictor.gd" id="22_77abe"]
 [ext_resource type="Script" uid="uid://cu3xuawfji3m2" path="res://#Template/[Scripts]/Trigger/EventTrigger.gd" id="23_77abe"]
 [ext_resource type="Script" uid="uid://dypjr6kswkpyo" path="res://#Template/[Scripts]/Animator/LocalRotAnimator.gd" id="23_s0ncg"]
+[ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Gem.tscn" id="28_s0ncg"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 fog_enabled = true
@@ -45,30 +46,30 @@ _data = {
 &"level": SubResource("3")
 }
 
-[sub_resource type="Resource" id="Resource_q7sod"]
+[sub_resource type="Resource" id="Resource_wh4l1"]
 resource_local_to_scene = true
 script = ExtResource("14_2sj2s")
 rotation = Vector3(0.942478, 0.785398, 0)
 fov = 75.0
 
-[sub_resource type="Resource" id="Resource_s0ncg"]
+[sub_resource type="Resource" id="Resource_14asg"]
 resource_local_to_scene = true
 script = ExtResource("15_qvrir")
 
-[sub_resource type="Resource" id="Resource_wh4l1"]
+[sub_resource type="Resource" id="Resource_rptew"]
 resource_local_to_scene = true
 script = ExtResource("16_n0hkk")
 fogColor = Color(0.518, 0.553, 0.608, 1)
 start = 10.0
 end = 100.0
 
-[sub_resource type="Resource" id="Resource_14asg"]
+[sub_resource type="Resource" id="Resource_skrbu"]
 resource_local_to_scene = true
 script = ExtResource("17_w5hru")
 rotation = Vector3(-1.0472, 2.61799, 0)
 shadowStrength = 1.0
 
-[sub_resource type="Resource" id="Resource_rptew"]
+[sub_resource type="Resource" id="Resource_d7stf"]
 resource_local_to_scene = true
 script = ExtResource("18_44jhc")
 lightingType = 0
@@ -215,11 +216,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.168884, -9.536743e-07, 16.
 [node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" parent_id_path=PackedInt32Array(1805653336, 220972321) index="0" unique_id=1220123700]
 GameTime = 2.4613333
 direction = 1
-cameraNew = SubResource("Resource_q7sod")
-cameraOld = SubResource("Resource_s0ncg")
-fog = SubResource("Resource_wh4l1")
-light = SubResource("Resource_14asg")
-ambient = SubResource("Resource_rptew")
+cameraNew = SubResource("Resource_wh4l1")
+cameraOld = SubResource("Resource_14asg")
+fog = SubResource("Resource_rptew")
+light = SubResource("Resource_skrbu")
+ambient = SubResource("Resource_d7stf")
 
 [node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0" unique_id=1273809823]
 render_priority = 0
@@ -283,6 +284,9 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505,
 [node name="event" type="Node" parent="Scene_Group/Scene_001/Trigger4" unique_id=1520750393 node_paths=PackedStringArray("targetNode")]
 script = ExtResource("23_77abe")
 targetNode = NodePath("../../Obstacle3/LocalRotAnimator")
+
+[node name="Gem" parent="." unique_id=149611988 instance=ExtResource("28_s0ncg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18910122, -0.6038189, 12.246883)
 
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D2" method="Trigger"]

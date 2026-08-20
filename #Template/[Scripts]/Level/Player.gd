@@ -117,9 +117,10 @@ var disallowInput: bool = false
 
 ## 标记首次启动延迟是否已应用（复活时不重置，对齐 Unity gameStarts）
 var delayApplied: bool = false
+var allowCreateTail: bool = true
+var didCreateTail: bool = false
 
 ## ========== Tail 对象池 ==========
-const TAIL_POOL_SIZE: int = 256
 const TAIL_COLLISION_LAYER: int = 1 << 3
 const TAIL_COLLISION_MASK: int = (1 << 1) | (1 << 2)
 const TAIL_JOIN_OVERLAP: float = 0.025
@@ -128,12 +129,14 @@ const TAIL_INITIAL_LENGTH: float = 1.0
 const TAIL_MASS: float = 1000.0
 const TAIL_LINEAR_DAMP: float = 1.0
 const TAIL_ANGULAR_DAMP: float = 2.0
-var tailPool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
-var tailBodyPool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
+var tailPool: ObjectPool = ObjectPool.new(100)
+var tailBodyPool: ObjectPool = ObjectPool.new(100)
 
 func _ready() -> void:
 	add_to_group("Player")
 	instance = self
+	tailPool.size = poolSize
+	tailBodyPool.size = poolSize
 	if characterMaterial:
 		material = characterMaterial
 		if $MeshInstance3D:
@@ -246,8 +249,23 @@ func _process(delta: float) -> void:
 			emit_signal("on_leave_ground")
 	previousFrameIsGrounded = isOnFloorNow
 
-	if henShin and is_instance_valid(henshinObject):
-		henshinObject.global_position = global_position + objectOffset
+	if henShin:
+		didCreateTail = false
+		if is_instance_valid(henshinObject):
+			henshinObject.global_position = global_position + objectOffset
+		if not showLineTail:
+			line = null
+			allowCreateTail = false
+		if $MeshInstance3D:
+			$MeshInstance3D.visible = showLineBody
+	else:
+		if not didCreateTail:
+			allowCreateTail = true
+			if isOnFloorNow:
+				new_line()
+			if $MeshInstance3D:
+				$MeshInstance3D.visible = true
+			didCreateTail = true
 
 func _move_head(delta: float) -> void:
 	var forward: Vector3 = basis * Vector3.BACK
@@ -315,22 +333,19 @@ func _reload_current_scene() -> void:
 		loading = false
 		push_error("Player.gd: 重新加载关卡失败，错误码: %s" % reloadError)
 
-func _clear_tail() -> void:
+func ClearPool() -> void:
 	line = null
 	tailPosition = position
 	var holder: Node3D = _get_or_create_player_tail_holder()
-	if not holder:
-		tailHolder = null
-		return
-	tailHolder = holder
-	for child in tailHolder.get_children():
-		var tail: MeshInstance3D = child as MeshInstance3D
-		if child is RigidBody3D:
-			tail = child.get_node_or_null("TailMesh") as MeshInstance3D
-		if tail:
-			_return_to_pool(tail)
-		else:
-			child.queue_free()
+	if holder:
+		for child in holder.get_children():
+			if is_instance_valid(child):
+				child.queue_free()
+	tailPool.DestoryAll()
+	tailBodyPool.DestoryAll()
+
+func _clear_tail() -> void:
+	ClearPool()
 
 func _return_to_pool(tail: MeshInstance3D) -> void:
 	var body: RigidBody3D = tail.get_parent() as RigidBody3D
@@ -357,10 +372,18 @@ func _return_to_pool(tail: MeshInstance3D) -> void:
 		tail.queue_free()
 
 func _get_from_pool() -> MeshInstance3D:
-	var tail: MeshInstance3D = tailPool.pop() as MeshInstance3D
-	if not tail:
-		return MeshInstance3D.new()
-	return tail
+	if not tailPool.full:
+		var tail: MeshInstance3D = MeshInstance3D.new()
+		tailPool.Add(tail)
+		return tail
+	else:
+		var tail: MeshInstance3D = tailPool.First() as MeshInstance3D
+		if not is_instance_valid(tail):
+			tail = MeshInstance3D.new()
+		elif tail.get_parent():
+			tail.get_parent().remove_child(tail)
+		tailPool.Add(tail)
+		return tail
 
 func _get_or_create_player_tail_holder() -> Node3D:
 	var root: Node = tree.current_scene
@@ -377,6 +400,8 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	return holder
 
 func new_line() -> void:
+	if not allowCreateTail:
+		return
 	var tailHolder: Node3D = _get_or_create_player_tail_holder()
 	if not tailHolder:
 		return
@@ -437,18 +462,34 @@ func _finish_tail_join(tail: MeshInstance3D) -> void:
 	_update_tail_body(tail, (tailPosition + end) / 2, joinLength)
 
 func _create_tail_body() -> RigidBody3D:
-	var body: RigidBody3D = tailBodyPool.pop() as RigidBody3D
-	if not body:
-		body = RigidBody3D.new()
+	if not tailBodyPool.full:
+		var body: RigidBody3D = RigidBody3D.new()
 		var collision: CollisionShape3D = CollisionShape3D.new()
 		collision.name = "CollisionShape3D"
 		var box: BoxShape3D = BoxShape3D.new()
 		box.margin = TAIL_COLLISION_MARGIN
 		collision.shape = box
 		body.add_child(collision)
-	body.name = "TailRigidBody"
-	_configure_tail_physics(body)
-	return body
+		tailBodyPool.Add(body)
+		body.name = "TailRigidBody"
+		_configure_tail_physics(body)
+		return body
+	else:
+		var body: RigidBody3D = tailBodyPool.First() as RigidBody3D
+		if not is_instance_valid(body):
+			body = RigidBody3D.new()
+			var collision: CollisionShape3D = CollisionShape3D.new()
+			collision.name = "CollisionShape3D"
+			var box: BoxShape3D = BoxShape3D.new()
+			box.margin = TAIL_COLLISION_MARGIN
+			collision.shape = box
+			body.add_child(collision)
+		elif body.get_parent():
+			body.get_parent().remove_child(body)
+		tailBodyPool.Add(body)
+		body.name = "TailRigidBody"
+		_configure_tail_physics(body)
+		return body
 
 func _configure_tail_physics(body: RigidBody3D) -> void:
 	body.collision_layer = TAIL_COLLISION_LAYER
@@ -554,25 +595,6 @@ func get_scene_environment() -> Environment:
 func _cache_scene_references() -> void:
 	get_scene_camera()
 	get_scene_light()
-
-func enable_henshin(model: Node3D, offset: Vector3, showTail: bool, showBody: bool, rotationTime: float) -> void:
-	if not model:
-		push_warning("Player.gd: Henshin requires a henshinObject")
-		return
-	if henshinObject and henshinObject != model:
-		henshinObject.visible = false
-	henShin = true
-	henshinObject = model
-	objectOffset = offset
-	showLineTail = showTail
-	showLineBody = showBody
-	self.rotationTime = rotationTime
-	henshinObject.visible = true
-	henshinObject.global_position = global_position + objectOffset
-	_sync_henshin_rotation()
-	$MeshInstance3D.visible = showLineBody
-	if not showLineTail:
-		_clear_tail()
 
 func ResetHenshinState() -> void:
 	if henshinObject:

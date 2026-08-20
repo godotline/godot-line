@@ -9,43 +9,6 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_gem"]
 radius = 0.375
 
-[sub_resource type="Animation" id="Animation_ptpe0"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("MeshInstance3D:scale")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector3(0.5, 0.5, 0.5)]
-}
-
-[sub_resource type="Animation" id="Animation_v601g"]
-resource_name = "diamond"
-length = 0.2
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("MeshInstance3D:scale")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.2),
-"transitions": PackedFloat32Array(3.03143, 0.307786),
-"update": 0,
-"values": [Vector3(0.5, 0.5, 0.5), Vector3(0, 0, 0)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_hg8oc"]
-_data = {
-&"RESET": SubResource("Animation_ptpe0"),
-&"diamond": SubResource("Animation_v601g")
-}
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gem_aura"]
 transparency = 1
 blend_mode = 1
@@ -85,7 +48,6 @@ offsets = PackedFloat32Array(0, 0.0662089, 0.334493, 1)
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 
 [node name="Gem" type="Node3D" unique_id=149611988]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="Area3D" type="Area3D" parent="." unique_id=1594876525]
 collision_layer = 0
@@ -99,15 +61,10 @@ shape = SubResource("SphereShape3D_gem")
 debug_color = Color(0, 1, 0, 1)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=996011055]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 mesh = ExtResource("1")
 surface_material_override/0 = ExtResource("3_lsh75")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=889977260]
-libraries/ = SubResource("AnimationLibrary_hg8oc")
-
 [node name="Sprirt" type="CPUParticles3D" parent="." unique_id=1137045703]
-top_level = true
 emitting = false
 amount = 1
 lifetime = 7.0
@@ -123,7 +80,6 @@ scale_amount_curve = SubResource("Curve_gem_sprirt_scale")
 color_ramp = SubResource("Gradient_gem_sprirt")
 
 [node name="Tail" type="CPUParticles3D" parent="." unique_id=1137045705]
-top_level = true
 emitting = false
 amount = 128
 lifetime = 0.05
@@ -139,7 +95,6 @@ scale_amount_curve = SubResource("Curve_gem_aura_scale")
 color_ramp = SubResource("Gradient_gem_tail")
 
 [node name="Aura" type="CPUParticles3D" parent="." unique_id=1137045704]
-top_level = true
 emitting = false
 amount = 3
 lifetime = 0.5
@@ -162,4 +117,4 @@ color_ramp = SubResource("Gradient_gem_aura")
 [node name="GemLight" type="OmniLight3D" parent="." unique_id=1137045706]
 visible = false
 light_energy = 0.0
-omni_range = 4.0
+omni_range = 0.0

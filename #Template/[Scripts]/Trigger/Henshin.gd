@@ -16,11 +16,16 @@ func trigger(body: Node3D) -> void:
 	if not player:
 		return
 	if not enableHenshin:
-		player.ResetHenshinState()
-		return
-	player.enable_henshin(henshinObject, objectOffset, showLineTail, showLineBody, animationTime)
-	match facing:
-		Facing.FirstDirection:
-			henshinObject.rotation_degrees = player.firstDirection if henshinObject else Vector3.ZERO
-		Facing.SecondDirection:
-			henshinObject.rotation_degrees = player.secondDirection if henshinObject else Vector3.ZERO
+		Player.instance.ResetHenshinState()
+	else:
+		Player.instance.henShin = enableHenshin
+		Player.instance.henshinObject = henshinObject
+		Player.instance.objectOffset = objectOffset
+		Player.instance.showLineTail = showLineTail
+		Player.instance.showLineBody = showLineBody
+		Player.instance.rotationTime = animationTime
+
+		if facing == Facing.FirstDirection:
+			Player.instance.henshinObject.rotation_degrees = Player.instance.firstDirection
+		elif facing == Facing.SecondDirection:
+			Player.instance.henshinObject.rotation_degrees = Player.instance.secondDirection
