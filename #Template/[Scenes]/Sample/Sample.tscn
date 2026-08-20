@@ -78,10 +78,12 @@ lightingType = 0
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
 [node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 node_paths=PackedStringArray("sceneCamera", "sceneLight") instance=ExtResource("1_3w2qj")]
-animation = NodePath("../AnimationPlayer")
+levelData = ExtResource("2_uo2eh")
 sceneCamera = NodePath("../CameraRoot/Rotator/Scale/Camera3D")
 sceneLight = NodePath("../DirectionalLight3D")
-levelData = ExtResource("2_uo2eh")
+firstDirection = Vector3(0, 0, 0)
+secondDirection = Vector3(0, 90, 0)
+animation = NodePath("../AnimationPlayer")
 
 [node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_sm0oj")]
 
@@ -210,7 +212,7 @@ isWall = true
 [node name="Crown" parent="Scene_Group/Scene_001" unique_id=1805653336 instance=ExtResource("13_hkwba")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.168884, -9.536743e-07, 16.516552)
 
-[node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" index="2"]
+[node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" parent_id_path=PackedInt32Array(1805653336, 220972321) index="0" unique_id=1220123700]
 GameTime = 2.4613333
 direction = 1
 cameraNew = SubResource("Resource_q7sod")
@@ -219,7 +221,7 @@ fog = SubResource("Resource_wh4l1")
 light = SubResource("Resource_14asg")
 ambient = SubResource("Resource_rptew")
 
-[node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0"]
+[node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0" unique_id=1273809823]
 render_priority = 0
 
 [node name="Obstacle" parent="Scene_Group/Scene_001" unique_id=359263919 instance=ExtResource("15_6gt33")]
@@ -235,9 +237,7 @@ transform = Transform3D(-1, 0, 1.509958e-07, 0, 1, 0, -1.509958e-07, 0, -1, 33.5
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 7.882288, 0, 61.789726)
 
 [node name="Obstacle3" parent="Scene_Group/Scene_001" unique_id=460537276 instance=ExtResource("15_6gt33")]
-transform = Transform3D(9, 0, 0, 0, 9, 0, 0, 0, 9, 18.532341, 4.0459642, 9.804915)
-script = ExtResource("17_j2eg4")
-disableInPlayMode = false
+transform = Transform3D(9, 0, 0, 0, 9, 0, 0, 0, 9, 19.652412, 4.0459642, 9.804915)
 
 [node name="localpos" type="Node3D" parent="Scene_Group/Scene_001/Obstacle3" unique_id=412952206]
 script = ExtResource("9_0v7qw")
@@ -252,8 +252,15 @@ rotateMode = 1
 endOffset = Vector3(0, 6.2831855, 0)
 duration = 4.0
 
+[node name="DisableInPlayMode" type="Node" parent="Scene_Group/Scene_001/Obstacle3" unique_id=1168296430]
+script = ExtResource("17_j2eg4")
+disableInPlayMode = false
+
 [node name="Obstacle4" parent="Scene_Group/Scene_001" unique_id=1353085919 instance=ExtResource("15_6gt33")]
 transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 28.07723, 23.695015)
+
+[node name="DisableInPlayMode" type="Node" parent="Scene_Group/Scene_001/Obstacle4" unique_id=618902218]
+script = ExtResource("17_j2eg4")
 
 [node name="Crystal" parent="Scene_Group/Scene_001" unique_id=521365085 instance=ExtResource("19_6gt33")]
 transform = Transform3D(0.8, 0, 0, 0, 1, 0, 0, 0, 0.8, 4.198456, 0.50000095, 12.258225)

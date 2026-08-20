@@ -85,8 +85,9 @@ func _on_body_entered(body: Node3D) -> void:
 	var animPlayer: AnimationPlayer = contentRoot.get_node_or_null("AnimationPlayer") as AnimationPlayer
 	if animPlayer:
 		animPlayer.play("diamond")
-	_start_collection_effect()
-	_spawn_fragments()
+	if GraphicsQuality.qualityLevel > 0:
+		_start_collection_effect()
+		_spawn_fragments()
 	# 注册复活回调
 	LevelManager.add_revive_listener(_on_revive)
 

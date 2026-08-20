@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 ## Plays an AudioStream either from a BaseTrigger collision or a direct method call.
 @export var clip: AudioStream

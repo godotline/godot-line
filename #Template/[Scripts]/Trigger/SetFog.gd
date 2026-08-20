@@ -18,11 +18,16 @@ func trigger(body: Node3D) -> void:
 func apply_fog() -> void:
 	if not fog:
 		return
-	
-	var camera: Camera3D = get_viewport().get_camera_3d()
-	if not camera:
-		return
-	var env: Environment = camera.get_environment()
+
+	var env: Environment = null
+	if Player.instance:
+		env = Player.instance.get_scene_environment()
+	if not env:
+		var camera: Camera3D = get_viewport().get_camera_3d()
+		if camera:
+			env = camera.get_environment()
+	if not env:
+		env = get_tree().root.get_world_3d().environment
 	if not env:
 		return
 
@@ -30,13 +35,15 @@ func apply_fog() -> void:
 	if not env.resource_local_to_scene:
 		env = env.duplicate()
 		env.resource_local_to_scene = true
-		camera.environment = env
+		var camera: Camera3D = Player.instance.get_scene_camera() if Player.instance else get_viewport().get_camera_3d()
+		if camera:
+			camera.environment = env
 
 	on_animation_start.emit()
-	
+
 	# 设置雾是否启用
 	env.fog_enabled = fog.useFog
-	
+
 	# Unity FogSettings.SetFog 无论 useFog 都同时补间雾颜色/距离/相机背景色
 	var tween: Tween = create_tween()
 	tween.set_ease(ease)
@@ -45,4 +52,5 @@ func apply_fog() -> void:
 	tween.parallel().tween_property(env, "fog_depth_begin", fog.start, duration)
 	tween.parallel().tween_property(env, "fog_depth_end", fog.end, duration)
 	tween.parallel().tween_property(env, "background_color", fog.fogColor, duration)
-	tween.tween_callback(func(): on_animation_end.emit())
+	tween.tween_callback(func() -> void: on_animation_end.emit())
+

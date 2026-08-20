@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 ## Switches the player to a scene-authored alternative visual.
 enum Facing { DontChange, FirstDirection, SecondDirection }

@@ -22,8 +22,53 @@ signal onturn
 
 @onready var y: float = $".".position.y
 var Speed: float
-@export var firstDirection: Vector3 = Vector3(0, 0, 0)
-@export var secondDirection: Vector3 = Vector3(0, 90, 0)
+
+## ========== Data ==========
+@export_group("Data")
+@export var levelData: LevelData
+
+## ========== Settings ==========
+@export_group("Settings")
+@export var sceneCamera: Camera3D
+@export var sceneLight: DirectionalLight3D
+@export var characterMaterial: Material
+@export var alphaMaterial: Material
+@export var startPosition: Vector3 = Vector3.ZERO
+@export var firstDirection: Vector3 = Vector3(0, 90, 0)
+@export var secondDirection: Vector3 = Vector3.ZERO
+@export_range(1, 1000, 1, "or_greater") var poolSize: int = 100
+@export var playedAnimators: Array[AnimationPlayer] = []
+@export var playedTimelines: Array[AnimationPlayer] = []
+@export var allowTurn: bool = true
+@export var noDeath: bool = false
+@export var drawDirection: bool = false:
+	set(value):
+		drawDirection = value
+		if Engine.is_editor_hint():
+			update_gizmos()
+@export var musicDelay: float = 0.0
+@export_range(0.0, 1.0, 0.01) var musicVolume: float = 1.0
+
+@export_group("Editor Tools")
+@export_tool_button("Get Start Position", "Position")
+var getStartPositionButton: Callable = func() -> void:
+	if Engine.is_editor_hint():
+		var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+		if undoRedo:
+			undoRedo.create_action("Get Start Position")
+			undoRedo.add_do_property(self, "startPosition", position)
+			undoRedo.add_undo_property(self, "startPosition", startPosition)
+			undoRedo.add_do_method(self, "notify_property_list_changed")
+			undoRedo.add_undo_method(self, "notify_property_list_changed")
+			undoRedo.commit_action()
+			return
+	startPosition = position
+	notify_property_list_changed()
+
+@export_group("Other")
+@export var animation: NodePath
+@export var deathParticle: PackedScene
+
 var _currentDirection: int = 0
 
 var currentDirection: Vector3:
@@ -32,15 +77,9 @@ var currentDirection: Vector3:
 
 var fly: bool = false
 var noclip: bool = false
-@export var animation: NodePath
 var isTurn: bool = false
 var isEnd: bool = false
 var tailHolder: Node3D
-@export var sceneCamera: Camera3D
-@export var sceneLight: DirectionalLight3D
-@export var noDeath: bool = false
-@export var drawDirection: bool = false
-@export var playedAnimators: Array[AnimationPlayer] = []
 
 @onready var mesh: Mesh = $MeshInstance3D.mesh
 @onready var tailPosition: Vector3 = position
@@ -61,10 +100,6 @@ var showLineTail: bool = true
 var showLineBody: bool = true
 var rotationTime: float = 0.0
 
-@export var levelData: LevelData
-
-@export var deathParticle: PackedScene
-
 var timeout: float = 0.1
 var isLive: bool = true
 var line: MeshInstance3D
@@ -78,14 +113,7 @@ var startTransform: Transform3D = transform
 var loading: bool = false
 var reloadQueued: bool = false
 var debug: bool = false
-@export var allowTurn: bool = true
 var disallowInput: bool = false
-
-## 音画延迟补偿（秒），用户可配置。与 AudioServer.get_output_latency() 独立并存。
-var musicDelay: float = 0.0
-
-## 音量 (0.0~1.0)
-var musicVolume: float = 1.0
 
 ## 标记首次启动延迟是否已应用（复活时不重置，对齐 Unity gameStarts）
 var delayApplied: bool = false
@@ -106,6 +134,12 @@ var tailBodyPool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
 func _ready() -> void:
 	add_to_group("Player")
 	instance = self
+	if characterMaterial:
+		material = characterMaterial
+		if $MeshInstance3D:
+			$MeshInstance3D.set_surface_override_material(0, characterMaterial)
+	elif not material and $MeshInstance3D:
+		material = $MeshInstance3D.get_surface_override_material(0)
 	if not Engine.is_editor_hint():
 		if not LevelManager.cameraCheckpoint.has_checkpoint:
 			LevelManager.reset_to_defaults()
@@ -113,6 +147,8 @@ func _ready() -> void:
 		if LevelManager.isEnd == true:
 			LevelManager.isEnd = false
 			reload()
+		if not LevelManager.cameraCheckpoint.has_checkpoint:
+			LevelManager.InitPlayerPosition(self, startPosition, false)
 		LevelManager.load_checkpoint_to_main_line(self)
 		if not levelData:
 			push_error("Player.gd: levelData 未设置，无法应用速度")
@@ -251,7 +287,8 @@ func reload() -> void:
 		return
 	reloadQueued = true
 	sceneReloadInProgress = true
-	LevelManager.mainLineTransform = startTransform
+	LevelManager.mainLineTransform = Transform3D(Basis.from_euler(firstDirection * (PI / 180.0)), startPosition)
+	LevelManager.revivePosition = startPosition
 	LevelManager.reset_camera_checkpoint()
 	LevelManager.playerDirectionIndex = _currentDirection
 	LevelManager.playerFirstDirection = firstDirection
@@ -334,7 +371,7 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	if not holder:
 		holder = Node3D.new()
 		holder.name = "PlayerTailHolder"
-		root.add_child(holder)
+		root.add_child.call_deferred(holder)
 
 	tailHolder = holder
 	return holder
@@ -566,6 +603,14 @@ func capture_managed_animation_state() -> void:
 				"position": animator.current_animation_position,
 				"playing": animator.is_playing()
 			})
+	for timeline: AnimationPlayer in playedTimelines:
+		if timeline and not timeline.current_animation.is_empty():
+			managedAnimationStates.append({
+				"animator": timeline,
+				"animation": timeline.current_animation,
+				"position": timeline.current_animation_position,
+				"playing": timeline.is_playing()
+			})
 
 func restore_managed_animation_state() -> void:
 	for state: Dictionary in managedAnimationStates:
@@ -584,11 +629,17 @@ func _pause_managed_animators() -> void:
 	for animator: AnimationPlayer in playedAnimators:
 		if animator:
 			animator.pause()
+	for timeline: AnimationPlayer in playedTimelines:
+		if timeline:
+			timeline.pause()
 
 func _resume_managed_animators() -> void:
 	for animator: AnimationPlayer in playedAnimators:
 		if animator and not animator.current_animation.is_empty():
 			animator.play()
+	for timeline: AnimationPlayer in playedTimelines:
+		if timeline and not timeline.current_animation.is_empty():
+			timeline.play()
 
 func _resume_fake_players() -> void:
 	for fakeNode: Node in get_tree().get_nodes_in_group("fake_players"):

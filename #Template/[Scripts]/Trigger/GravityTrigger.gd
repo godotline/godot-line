@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 ## Applies a level-local gravity override. Add this as a BaseTrigger child.
 @export var gravity: Vector3 = Vector3(0.0, -9.8, 0.0)

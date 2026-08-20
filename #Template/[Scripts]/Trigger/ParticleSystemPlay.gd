@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 # 支持 CPUParticles3D 和 GPUParticles3D（两者均有 emitting/restart API）
 @export var particlesystem: Node

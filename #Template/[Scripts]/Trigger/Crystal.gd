@@ -126,9 +126,10 @@ func _on_body_entered(body: Node3D) -> void:
 	if Player.instance and Player.instance.has_signal("on_get_gem"):
 		# Crystal 使用与 Unity 事件 6 对应的收集通知；当前模板没有独立 Crystal 信号。
 		Player.instance.on_get_gem.emit()
-	_start_scan()
-	_start_lightning()
-	_spawn_fragments()
+	if GraphicsQuality.qualityLevel > 0:
+		_start_scan()
+		_start_lightning()
+		_spawn_fragments()
 
 func _spawn_fragments() -> void:
 	var fragmentParent: Node = contentRoot.get_parent()
