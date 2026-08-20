@@ -178,7 +178,6 @@ func _on_import_pressed() -> void:
 			audioFile.store_buffer(currentAudioBytes)
 			audioFile.close()
 			_log("🎵 音频文件已保存至: " + audioStreamPath)
-			EditorInterface.get_resource_filesystem().scan()
 
 	var levelData: LevelData = _createLevelDataResource(currentJsonData, safeName, dataPath, audioStreamPath)
 	if not levelData:
@@ -207,7 +206,8 @@ func _on_import_pressed() -> void:
 		_log("✅ 关卡数据已保存: " + dataPath)
 		_log("💡 导入完成！请在文件系统中双击打开该场景。")
 		status_label.text = "✅ 已生成: " + safeName
-		EditorInterface.get_resource_filesystem().scan()
+		# 延迟一帧触发 scan_sources，避免在保存资源的回调中发生递归 reimport_files
+		EditorInterface.get_resource_filesystem().call_deferred("scan_sources")
 	else:
 		_log("❌ 场景保存失败: " + str(saveErr))
 
