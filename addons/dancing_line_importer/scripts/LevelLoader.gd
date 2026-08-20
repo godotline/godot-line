@@ -331,7 +331,11 @@ func _createSingleObject(objData: Dictionary, meshes: Array, materials: Array) -
 	var objName: String = str(objData.get("name", "unnamed")).to_lower()
 
 	match type:
-		0, 1, 6, 7, 8:
+		0:
+			# Type 0: 空容器 / Group 节点 (Empty GameObject)
+			return _createGroupObject(objData)
+		1, 6, 7, 8:
+			# Type 1: 真正带有 Mesh 的物体
 			if objName.contains("cube") or objName.contains("box"):
 				return _createObstacleBox(objData, materials)
 			elif objName.contains("gem") or objName.contains("diamond"):
@@ -341,18 +345,31 @@ func _createSingleObject(objData: Dictionary, meshes: Array, materials: Array) -
 			else:
 				return _createMeshObject(objData, meshes, materials)
 		2:
-			return _createPointLightObject(objData)
+			# Type 2: 某些情况下是 Sprite/光源/文本，若无 Mesh 则当 Group
+			return _createGroupObject(objData)
 		3:
 			return _createDirectionalLightObject(objData)
 		4:
 			return _createTriggerObject(objData)
-		5, 9, 10, 11:
+		5, 9, 11:
 			return _createRoadObject(objData, materials)
 		_:
-			return _createMeshObject(objData, meshes, materials)
+			return _createGroupObject(objData)
 
 
 # ==================== 具体物体类型 ====================
+
+func _createGroupObject(objData: Dictionary) -> Node3D:
+	var groupNode: Node3D = Node3D.new()
+	var objId: int = toIntSafe(objData.get("id", 0))
+	groupNode.name = "%s_%d" % [str(objData.get("name", "Group")), objId]
+	var pos: Vector3 = getVector3FromDict(objData, "position")
+	groupNode.position = unityToGodotPosition(pos)
+	var rot: Vector3 = getVector3FromDict(objData, "eulerAngles")
+	groupNode.rotation = unityToGodotRotation(rot)
+	var scale: Vector3 = getVector3FromDict(objData, "scale", Vector3.ONE)
+	groupNode.scale = unityToGodotScale(scale)
+	return groupNode
 
 func _createRoadObject(objData: Dictionary, materials: Array) -> Node:
 	var groundScene: PackedScene = load(GROUND_TEMPLATE) as PackedScene
@@ -372,7 +389,8 @@ func _createRoadObject(objData: Dictionary, materials: Array) -> Node:
 		sb.add_child(meshInst)
 		roadNode = sb
 
-	roadNode.name = str(objData.get("name", "Road"))
+	var objId: int = toIntSafe(objData.get("id", 0))
+	roadNode.name = "%s_%d" % [str(objData.get("name", "Road")), objId]
 	var pos: Vector3 = getVector3FromDict(objData, "position")
 	roadNode.position = unityToGodotPosition(pos)
 	var rot: Vector3 = getVector3FromDict(objData, "eulerAngles")
@@ -406,7 +424,8 @@ func _createObstacleBox(objData: Dictionary, materials: Array) -> Node:
 		sb.add_child(meshInst)
 		obsNode = sb
 
-	obsNode.name = str(objData.get("name", "Box"))
+	var objId: int = toIntSafe(objData.get("id", 0))
+	obsNode.name = "%s_%d" % [str(objData.get("name", "Box")), objId]
 	var pos: Vector3 = getVector3FromDict(objData, "position")
 	obsNode.position = unityToGodotPosition(pos)
 	var rot: Vector3 = getVector3FromDict(objData, "eulerAngles")
@@ -430,7 +449,8 @@ func _createGemInstance(objData: Dictionary) -> Node:
 	else:
 		gemNode = Node3D.new()
 
-	gemNode.name = str(objData.get("name", "Gem"))
+	var objId: int = toIntSafe(objData.get("id", 0))
+	gemNode.name = "%s_%d" % [str(objData.get("name", "Gem")), objId]
 	var pos: Vector3 = getVector3FromDict(objData, "position")
 	gemNode.position = unityToGodotPosition(pos)
 	var rot: Vector3 = getVector3FromDict(objData, "eulerAngles")
@@ -449,7 +469,8 @@ func _createCrownInstance(objData: Dictionary) -> Node:
 	else:
 		crownNode = Node3D.new()
 
-	crownNode.name = str(objData.get("name", "CrownCheckpoint"))
+	var objId: int = toIntSafe(objData.get("id", 0))
+	crownNode.name = "%s_%d" % [str(objData.get("name", "CrownCheckpoint")), objId]
 	var pos: Vector3 = getVector3FromDict(objData, "position")
 	crownNode.position = unityToGodotPosition(pos)
 	var rot: Vector3 = getVector3FromDict(objData, "eulerAngles")
@@ -462,7 +483,8 @@ func _createCrownInstance(objData: Dictionary) -> Node:
 
 func _createMeshObject(objData: Dictionary, meshes: Array, materials: Array) -> Node:
 	var meshNode: MeshInstance3D = MeshInstance3D.new()
-	meshNode.name = str(objData.get("name", "Mesh"))
+	var objId: int = toIntSafe(objData.get("id", 0))
+	meshNode.name = "%s_%d" % [str(objData.get("name", "Mesh")), objId]
 	var pos: Vector3 = getVector3FromDict(objData, "position")
 	meshNode.position = unityToGodotPosition(pos)
 	var rot: Vector3 = getVector3FromDict(objData, "eulerAngles")
@@ -495,6 +517,7 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 		col.shape = box
 		triggerRoot.add_child(col)
 
+	var objId: int = toIntSafe(objData.get("id", 0))
 	var pos: Vector3 = getVector3FromDict(objData, "position")
 	triggerRoot.position = unityToGodotPosition(pos)
 	var rot: Vector3 = getVector3FromDict(objData, "eulerAngles")
@@ -508,7 +531,7 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 
 	match triggerType:
 		0: # CameraTrigger
-			triggerRoot.name = "CameraTrigger"
+			triggerRoot.name = "%s_%d" % ["CameraTrigger", objId]
 			var camComp: Node = CameraTriggerClass.new()
 			camComp.name = "CameraTrigger"
 			if custom.has("duration"):
@@ -517,7 +540,7 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 				camComp.set("fieldOfView", float(custom.get("fov", 80.0)))
 			triggerRoot.add_child(camComp)
 		1: # JumpTrigger
-			triggerRoot.name = "JumpTrigger"
+			triggerRoot.name = "%s_%d" % ["JumpTrigger", objId]
 			var jumpComp: Node = JumpClass.new()
 			jumpComp.name = "Jump"
 			if custom.has("power"):
@@ -528,13 +551,13 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 		2: # CrownTrigger -> 建议替换为 CrownCheckPoint
 			return _createCrownInstance(objData)
 		3: # DeathTrigger
-			triggerRoot.name = "DeathTrigger"
+			triggerRoot.name = "%s_%d" % ["DeathTrigger", objId]
 			var killComp: Node = KillPlayerClass.new()
 			killComp.name = "KillPlayer"
 			killComp.set("reason", 1) # Drowned or Hit
 			triggerRoot.add_child(killComp)
 		_:
-			triggerRoot.name = str(objData.get("name", "Trigger"))
+			triggerRoot.name = "%s_%d" % [str(objData.get("name", "Trigger")), objId]
 
 	return triggerRoot
 
