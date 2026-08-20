@@ -303,6 +303,7 @@ func _createObjects(parent: Node, data: Dictionary) -> void:
 	var nodeMap: Dictionary = {}
 	var rootNodes: Array[Node] = []
 
+	# 1. 实例化所有对象
 	for rawObj: Variant in objects:
 		if not rawObj is Dictionary:
 			continue
@@ -311,22 +312,23 @@ func _createObjects(parent: Node, data: Dictionary) -> void:
 		var node: Node = _createSingleObject(objData, meshes, materials, sprites)
 		if node:
 			nodeMap[objId] = node
-			var parentId: int = toIntSafe(objData.get("parentId", -1))
-			if parentId == -1 or parentId == 0:
-				rootNodes.append(node)
 
+	# 2. 建立父子关系
 	for rawObj: Variant in objects:
 		if not rawObj is Dictionary:
 			continue
 		var objData: Dictionary = rawObj as Dictionary
 		var objId: int = toIntSafe(objData.get("id", -1))
 		var parentId: int = toIntSafe(objData.get("parentId", -1))
-		if parentId != -1 and parentId != 0 and nodeMap.has(objId) and nodeMap.has(parentId):
-			var child: Node = nodeMap[objId]
-			var parentNode: Node = nodeMap[parentId]
-			if child.get_parent():
-				child.get_parent().remove_child(child)
-			parentNode.add_child(child)
+
+		if nodeMap.has(objId):
+			var node: Node = nodeMap[objId]
+			if parentId != -1 and parentId != 0 and nodeMap.has(parentId):
+				var parentNode: Node = nodeMap[parentId]
+				parentNode.add_child(node)
+			else:
+				# parentId 为 -1, 0 或找不到父节点的，作为根节点挂在 Scene_001 下
+				rootNodes.append(node)
 
 	for rootNode: Node in rootNodes:
 		parent.add_child(rootNode)
