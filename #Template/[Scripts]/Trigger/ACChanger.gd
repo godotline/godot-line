@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 @export var newAmbientColor: Color = Color(0.5, 0.5, 0.5, 1.0)
 @export_range(0.0, 60.0, 0.05) var duration: float = 1.0

@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 ## Projects may connect this signal to their platform-specific achievement service.
 signal achievement_requested(achievementKey: String)

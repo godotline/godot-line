@@ -1,6 +1,6 @@
 # animator_base.gd
 @tool
-extends Node3D
+extends Node
 class_name AnimatorBase
 
 enum TransformType { New, Add }
@@ -9,13 +9,14 @@ enum TransformType { New, Add }
 @export var transformType: TransformType = TransformType.New
 @export var startValue: Vector3 = Vector3(0,0,0)
 @export var endOffset: Vector3 = Vector3(0,0,0)
-@export var duration: float = 1.0
+@export var duration: float = 2.0  # Unity 默认 2f
 @export var TransitionType: Tween.TransitionType = Tween.TRANS_SINE
 @export var EaseType: Tween.EaseType = Tween.EASE_IN_OUT
 
 @export_group("触发设置")
-@export var triggeredByTime: bool = false
+@export var triggeredByTime: bool = true  # Unity 默认 true
 @export var triggerTime: float = 0.0
+@export var offsetTime: bool = false  # Unity AnimatorBase.offsetTime: 提前 duration 触发
 @export var dontRevive: bool = false
 
 var isPlaying: bool = false
@@ -27,11 +28,14 @@ var cachedMusicPlayer: AudioStreamPlayer = null
 signal on_animation_start
 signal on_animation_end
 
-# 工具按钮操作的是自身（子节点）
+# 工具按钮操作的是父节点（挂载的目标对象）
 @export_tool_button("Get Original Value")
 var getStartAction: Callable = func() -> void:
+	var target: Node3D = get_parent() as Node3D
+	if not target:
+		return
 	var oldValue: Vector3 = startValue
-	startValue = _get_value(self)
+	startValue = _get_value(target)
 	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
 	undoRedo.create_action("Get Original Value")
 	undoRedo.add_do_property(self, "startValue", startValue)
@@ -41,22 +45,28 @@ var getStartAction: Callable = func() -> void:
 
 @export_tool_button("Set Original Value")
 var setStartAction: Callable = func() -> void:
-	var oldValue: Vector3 = _get_value(self)
+	var target: Node3D = get_parent() as Node3D
+	if not target:
+		return
+	var oldValue: Vector3 = _get_value(target)
 	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
 	undoRedo.create_action("Set Original Value")
-	undoRedo.add_do_method(self, "_set_value", self, startValue)
-	undoRedo.add_undo_method(self, "_set_value", self, oldValue)
+	undoRedo.add_do_method(self, "_set_value", target, startValue)
+	undoRedo.add_undo_method(self, "_set_value", target, oldValue)
 	undoRedo.commit_action(false)
 	notify_property_list_changed()
 
 @export_tool_button("Get New Value")
 var getEndAction: Callable = func() -> void:
+	var target: Node3D = get_parent() as Node3D
+	if not target:
+		return
 	var oldValue: Vector3 = endOffset
 	match transformType:
 		TransformType.New:
-			endOffset = _get_value(self)
+			endOffset = _get_value(target)
 		TransformType.Add:
-			endOffset = _get_value(self) - startValue
+			endOffset = _get_value(target) - startValue
 	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
 	undoRedo.create_action("Get New Value")
 	undoRedo.add_do_property(self, "endOffset", endOffset)
@@ -66,19 +76,22 @@ var getEndAction: Callable = func() -> void:
 
 @export_tool_button("Set New Value")
 var setEndAction: Callable = func() -> void:
-	var oldValue: Vector3 = _get_value(self)
+	var target: Node3D = get_parent() as Node3D
+	if not target:
+		return
+	var oldValue: Vector3 = _get_value(target)
 	var targetValue: Vector3
 	match transformType:
 		TransformType.New:
 			targetValue = endOffset
-			_set_value(self, endOffset)
+			_set_value(target, endOffset)
 		TransformType.Add:
 			targetValue = startValue + endOffset
-			_set_value(self, startValue + endOffset)
+			_set_value(target, startValue + endOffset)
 	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
 	undoRedo.create_action("Set New Value")
-	undoRedo.add_do_method(self, "_set_value", self, targetValue)
-	undoRedo.add_undo_method(self, "_set_value", self, oldValue)
+	undoRedo.add_do_method(self, "_set_value", target, targetValue)
+	undoRedo.add_undo_method(self, "_set_value", target, oldValue)
 	undoRedo.commit_action(false)
 	notify_property_list_changed()
 
@@ -86,11 +99,14 @@ var setEndAction: Callable = func() -> void:
 var playAction: Callable = func() -> void: Trigger()
 
 func _init() -> void:
-	if Engine.is_editor_hint():
-		if transformType == TransformType.Add:
-			startValue = _get_value(self)
+	pass
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		if transformType == TransformType.Add:
+			var target: Node3D = get_parent() as Node3D
+			if target:
+				startValue = _get_value(target)
 	_initialized = true
 
 func _process(_delta: float) -> void:
@@ -104,12 +120,12 @@ func _process(_delta: float) -> void:
 		var player: Player = Player.instance
 		if player:
 			cachedMusicPlayer = player.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-	if cachedMusicPlayer and cachedMusicPlayer.playing and cachedMusicPlayer.get_playback_position() > triggerTime:
+	if cachedMusicPlayer and cachedMusicPlayer.playing and cachedMusicPlayer.get_playback_position() > _effectiveTriggerTime():
 		Trigger()
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_TRANSFORM_CHANGED and Engine.is_editor_hint() and not isPlaying and _initialized:
-		pass
+## Unity InitTime(): offsetTime 时提前 duration 触发
+func _effectiveTriggerTime() -> float:
+	return triggerTime - duration if offsetTime else triggerTime
 
 # 动画 tween 的是父节点
 func Trigger() -> void:
@@ -131,6 +147,7 @@ func Trigger() -> void:
 	var targetValue: Vector3 = endOffset
 	if transformType == TransformType.Add:
 		targetValue = startValue + endOffset
+	targetValue = _adjust_target_value(startValue, targetValue, transformType == TransformType.Add)
 	tween.tween_property(target, _get_property_name(), targetValue, duration).set_trans(TransitionType).set_ease(EaseType)
 	tween.tween_callback(func():
 		on_animation_end.emit()
@@ -164,3 +181,7 @@ func _set_value(_target: Node3D, _value: Vector3) -> void:
 
 func _get_property_name() -> String:
 	return ""
+
+# 虚方法：旋转类子类可覆写以应用 RotateMode 等旋转路径调整
+func _adjust_target_value(_start: Vector3, targetValue: Vector3, _isAdd: bool) -> Vector3:
+	return targetValue

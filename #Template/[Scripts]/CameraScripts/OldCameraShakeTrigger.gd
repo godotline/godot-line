@@ -1,36 +1,21 @@
-extends BaseTrigger
+class_name OldCameraShakeTrigger
+extends Node
 
-@export var cameraParent: Node3D  # 这是Camera3D的父节点
-@export var shakeIntensity: float = 0.5
-@export var shakeDuration: float = 0.3
+## OldCameraShakeTrigger - 旧相机震动触发器（模式 1 纯组件）
+## 作为 BaseTrigger 的子节点使用，由父节点负责碰撞检测。
+## 与 Unity OldCameraShakeTrigger.cs 一致。
 
-var shakeTimer: float = 0.0
-var originalPosition: Vector3
+@export var power: float = 1.0
+@export var duration: float = 2.0
 
-func _ready() -> void:
-	super._ready()
-	set_process(false)  ## 默认关闭，仅在震动时启用
 
-func _process(delta: float) -> void:
-	if shakeTimer > 0 and cameraParent:
-		shakeTimer -= delta
-
-		if shakeTimer <= 0:
-			cameraParent.position = originalPosition
-			set_process(false)  ## 震动结束，关闭 _process
-		else:
-			var shakeOffset: Vector3 = Vector3(
-				randf_range(-shakeIntensity, shakeIntensity),
-				randf_range(-shakeIntensity, shakeIntensity),
-				randf_range(-shakeIntensity, shakeIntensity)
-			)
-			cameraParent.position = originalPosition + shakeOffset
-
-func _on_body_entered(body: Node3D) -> void:
+func trigger(body: Node3D) -> void:
 	if body is CharacterBody3D:
-		if cameraParent:
-			originalPosition = cameraParent.position
-			shakeTimer = shakeDuration
-			set_process(true)  ## 开始震动，启用 _process
+		var follower: OldCameraFollower = OldCameraFollower.instance
+		if follower:
+			follower.DoShake(power, duration)
 		else:
-			push_error("OldCameraShakeTrigger.gd: cameraParent 未指定")
+			var newFollower: CameraFollower = CameraFollower.instance
+			if newFollower:
+				newFollower.DoShake(power, duration)
+

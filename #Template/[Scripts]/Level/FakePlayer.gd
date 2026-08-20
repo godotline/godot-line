@@ -19,7 +19,15 @@ enum State {
 ## 当 isWall = true 时，FakePlayer 尾线的碰撞层设为 BaseWall (3)，
 ## 真实 Player 碰到会死亡。false 时不参与碰撞（纯预览）。
 @export var isWall: bool = false
-@export var drawDirection: bool = false
+@export var drawDirection: bool = false:
+	set(value):
+		drawDirection = value
+		if Engine.is_editor_hint():
+			if self is Node3D:
+				update_gizmos()
+			var parent3d: Node3D = get_parent() as Node3D
+			if parent3d:
+				parent3d.update_gizmos()
 
 @export_group("TurnTrigger")
 @export var createTurnTrigger: bool = true

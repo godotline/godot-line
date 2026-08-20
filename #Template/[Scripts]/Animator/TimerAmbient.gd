@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 @export var ambientSettings: AmbientSettings = AmbientSettings.new()
 @export_range(0.0, 3600.0, 0.01) var trigger_time: float = 0.0

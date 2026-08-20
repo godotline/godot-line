@@ -36,15 +36,16 @@ var triggerArea: Area3D
 var hexahedron: MeshInstance3D
 var scanQuad: MeshInstance3D
 var crystalThunder: MeshInstance3D
-var aura: GPUParticles3D
+var aura: CPUParticles3D
 var crystalLight: OmniLight3D
+var spawnedFragments: Array[RigidBody3D] = []
 
 func _ready() -> void:
 	contentRoot = _resolve_content_root()
 	triggerArea = get_parent() as Area3D
 	hexahedron = contentRoot.get_node_or_null("Hexahedron") as MeshInstance3D
 	scanQuad = contentRoot.get_node_or_null("ScanQuad") as MeshInstance3D
-	aura = contentRoot.get_node_or_null("Aura") as GPUParticles3D
+	aura = contentRoot.get_node_or_null("Aura") as CPUParticles3D
 	if not hexahedron or not scanQuad or not aura:
 		push_error("Crystal.gd: 收集物视觉节点不完整")
 		return
@@ -125,9 +126,10 @@ func _on_body_entered(body: Node3D) -> void:
 	if Player.instance and Player.instance.has_signal("on_get_gem"):
 		# Crystal 使用与 Unity 事件 6 对应的收集通知；当前模板没有独立 Crystal 信号。
 		Player.instance.on_get_gem.emit()
-	_start_scan()
-	_start_lightning()
-	_spawn_fragments()
+	if GraphicsQuality.qualityLevel > 0:
+		_start_scan()
+		_start_lightning()
+		_spawn_fragments()
 
 func _spawn_fragments() -> void:
 	var fragmentParent: Node = contentRoot.get_parent()
@@ -138,6 +140,7 @@ func _spawn_fragments() -> void:
 		var fragment: RigidBody3D = FRAGMENT_SCENE.instantiate() as RigidBody3D
 		fragment.name = "CrystalFragment_%02d" % index
 		fragmentParent.add_child(fragment)
+		spawnedFragments.append(fragment)
 		fragment.global_position = contentRoot.global_position
 		var scaleFactor: float = randf_range(FRAGMENT_SCALE_MIN, FRAGMENT_SCALE_MAX)
 		var fragmentMesh: MeshInstance3D = fragment.get_node("MeshInstance3D") as MeshInstance3D
@@ -183,6 +186,11 @@ func _start_lightning() -> void:
 	crystalLight.visible = true
 
 func _on_revive() -> void:
+	# Unity Crystal.ResetData: 复活时销毁收集特效 (Destroy(effect))
+	for fragment: RigidBody3D in spawnedFragments:
+		if is_instance_valid(fragment):
+			fragment.queue_free()
+	spawnedFragments.clear()
 	LevelManager.CompareCheckpointIndex(index, func():
 		got = false
 		_set_crystal_mesh_visible(true)
@@ -199,7 +207,6 @@ func _reset_scan() -> void:
 	scanQuad.visible = false
 	if crystalThunder:
 		crystalThunder.visible = false
-	aura.restart()
 	aura.emitting = false
 	if crystalLight:
 		crystalLight.light_energy = 0.0

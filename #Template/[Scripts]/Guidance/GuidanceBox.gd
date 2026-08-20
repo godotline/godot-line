@@ -1,5 +1,8 @@
-extends Area3D
 class_name GuidanceBox
+extends Node3D
+
+## GuidanceBox - 点击引导块（GuideTap）
+## 与 Unity GuidanceBox.cs 对齐，基于距离检测与点击判定呈现和触发引导效果。
 
 @export var triggerDistance: float = 1.0
 @export var appearDistance: float = 600.0
@@ -28,8 +31,8 @@ func _try_initialize() -> bool:
 		return false
 
 	_player = player
-	_root = $".."
-	_sprite = $"../Sprite3D"
+	_root = self
+	_sprite = get_node_or_null("Sprite3D") as Sprite3D
 	_trigger_effect = load("res://#Template/[Resources]/Triggered.tscn")
 	_initialized = true
 
@@ -66,38 +69,41 @@ func _trigger() -> void:
 	triggered = true
 	set_process(false)
 	_disappear(true)
-	var effect: Node3D = _trigger_effect.instantiate() as Node3D
-	get_tree().current_scene.add_child(effect)
-	effect.global_position = global_position
-	await get_tree().create_timer(1.0).timeout
-	effect.queue_free()
+	if _trigger_effect:
+		var effect: Node3D = _trigger_effect.instantiate() as Node3D
+		get_tree().current_scene.add_child(effect)
+		effect.global_position = global_position
+		await get_tree().create_timer(1.0).timeout
+		effect.queue_free()
 
 func SetColor(color: Color) -> void:
 	if not _sprite:
-		_sprite = $"../Sprite3D"
-		# If still null, warn and skip
+		_sprite = get_node_or_null("Sprite3D") as Sprite3D
 		if not _sprite:
-			push_warning("GuidanceBox: Sprite3D not found at ../Sprite3D")
+			push_warning("GuidanceBox: Sprite3D not found")
 			return
 	_sprite.modulate = color
 
-# Unity: Appear() — 显示所有 SpriteRenderer（用 _root.visible 等效，且自动覆盖未来添加的子节点）
+# Unity: Appear() — 显示所有 SpriteRenderer
 func _appear() -> void:
 	if not _displayed:
 		_displayed = true
 		_index = LevelManager.checkpointCount
 		_root.visible = true
-		_sprite.visible = true
+		if _sprite:
+			_sprite.visible = true
 		LevelManager.add_revive_listener(_reset_data)
 
 # Unity: Disappear(bool onlyBox)
 # false = 隐藏全部（包括连线），true = 只隐藏盒子 Sprite，连线留着
 func _disappear(only_box: bool) -> void:
 	if only_box:
-		_sprite.visible = false
+		if _sprite:
+			_sprite.visible = false
 	else:
 		_root.visible = false
-		_sprite.visible = false
+		if _sprite:
+			_sprite.visible = false
 
 func _reset_data() -> void:
 	LevelManager.remove_revive_listener(_reset_data)
@@ -105,12 +111,6 @@ func _reset_data() -> void:
 	triggered = false
 	set_process(true)
 	_disappear(false)
-
-func _on_taper_entered(body: Node3D) -> void:
-	pass
-
-func _on_taper_exited(body: Node3D) -> void:
-	pass
 
 func _exit_tree() -> void:
 	LevelManager.remove_revive_listener(_reset_data)

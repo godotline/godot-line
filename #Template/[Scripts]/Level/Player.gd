@@ -22,8 +22,53 @@ signal onturn
 
 @onready var y: float = $".".position.y
 var Speed: float
-@export var firstDirection: Vector3 = Vector3(0, 0, 0)
-@export var secondDirection: Vector3 = Vector3(0, 90, 0)
+
+## ========== Data ==========
+@export_group("Data")
+@export var levelData: LevelData
+
+## ========== Settings ==========
+@export_group("Settings")
+@export var sceneCamera: Camera3D
+@export var sceneLight: DirectionalLight3D
+@export var characterMaterial: Material
+@export var alphaMaterial: Material
+@export var startPosition: Vector3 = Vector3.ZERO
+@export var firstDirection: Vector3 = Vector3(0, 90, 0)
+@export var secondDirection: Vector3 = Vector3.ZERO
+@export_range(1, 1000, 1, "or_greater") var poolSize: int = 100
+@export var playedAnimators: Array[AnimationPlayer] = []
+@export var playedTimelines: Array[AnimationPlayer] = []
+@export var allowTurn: bool = true
+@export var noDeath: bool = false
+@export var drawDirection: bool = false:
+	set(value):
+		drawDirection = value
+		if Engine.is_editor_hint():
+			update_gizmos()
+@export var musicDelay: float = 0.0
+@export_range(0.0, 1.0, 0.01) var musicVolume: float = 1.0
+
+@export_group("Editor Tools")
+@export_tool_button("Get Start Position", "Position")
+var getStartPositionButton: Callable = func() -> void:
+	if Engine.is_editor_hint():
+		var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+		if undoRedo:
+			undoRedo.create_action("Get Start Position")
+			undoRedo.add_do_property(self, "startPosition", position)
+			undoRedo.add_undo_property(self, "startPosition", startPosition)
+			undoRedo.add_do_method(self, "notify_property_list_changed")
+			undoRedo.add_undo_method(self, "notify_property_list_changed")
+			undoRedo.commit_action()
+			return
+	startPosition = position
+	notify_property_list_changed()
+
+@export_group("Other")
+@export var animation: NodePath
+@export var deathParticle: PackedScene
+
 var _currentDirection: int = 0
 
 var currentDirection: Vector3:
@@ -32,15 +77,9 @@ var currentDirection: Vector3:
 
 var fly: bool = false
 var noclip: bool = false
-@export var animation: NodePath
 var isTurn: bool = false
 var isEnd: bool = false
 var tailHolder: Node3D
-@export var sceneCamera: Camera3D
-@export var sceneLight: DirectionalLight3D
-@export var noDeath: bool = false
-@export var drawDirection: bool = false
-@export var playedAnimators: Array[AnimationPlayer] = []
 
 @onready var mesh: Mesh = $MeshInstance3D.mesh
 @onready var tailPosition: Vector3 = position
@@ -61,10 +100,6 @@ var showLineTail: bool = true
 var showLineBody: bool = true
 var rotationTime: float = 0.0
 
-@export var levelData: LevelData
-
-@export var deathParticle: PackedScene
-
 var timeout: float = 0.1
 var isLive: bool = true
 var line: MeshInstance3D
@@ -78,20 +113,14 @@ var startTransform: Transform3D = transform
 var loading: bool = false
 var reloadQueued: bool = false
 var debug: bool = false
-@export var allowTurn: bool = true
 var disallowInput: bool = false
-
-## 音画延迟补偿（秒），用户可配置。与 AudioServer.get_output_latency() 独立并存。
-var musicDelay: float = 0.0
-
-## 音量 (0.0~1.0)
-var musicVolume: float = 1.0
 
 ## 标记首次启动延迟是否已应用（复活时不重置，对齐 Unity gameStarts）
 var delayApplied: bool = false
+var allowCreateTail: bool = true
+var didCreateTail: bool = false
 
 ## ========== Tail 对象池 ==========
-const TAIL_POOL_SIZE: int = 256
 const TAIL_COLLISION_LAYER: int = 1 << 3
 const TAIL_COLLISION_MASK: int = (1 << 1) | (1 << 2)
 const TAIL_JOIN_OVERLAP: float = 0.025
@@ -100,12 +129,20 @@ const TAIL_INITIAL_LENGTH: float = 1.0
 const TAIL_MASS: float = 1000.0
 const TAIL_LINEAR_DAMP: float = 1.0
 const TAIL_ANGULAR_DAMP: float = 2.0
-var tailPool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
-var tailBodyPool: ObjectPool = ObjectPool.new(TAIL_POOL_SIZE)
+var tailPool: ObjectPool = ObjectPool.new(100)
+var tailBodyPool: ObjectPool = ObjectPool.new(100)
 
 func _ready() -> void:
 	add_to_group("Player")
 	instance = self
+	tailPool.size = poolSize
+	tailBodyPool.size = poolSize
+	if characterMaterial:
+		material = characterMaterial
+		if $MeshInstance3D:
+			$MeshInstance3D.set_surface_override_material(0, characterMaterial)
+	elif not material and $MeshInstance3D:
+		material = $MeshInstance3D.get_surface_override_material(0)
 	if not Engine.is_editor_hint():
 		if not LevelManager.cameraCheckpoint.has_checkpoint:
 			LevelManager.reset_to_defaults()
@@ -113,6 +150,8 @@ func _ready() -> void:
 		if LevelManager.isEnd == true:
 			LevelManager.isEnd = false
 			reload()
+		if not LevelManager.cameraCheckpoint.has_checkpoint:
+			LevelManager.InitPlayerPosition(self, startPosition, false)
 		LevelManager.load_checkpoint_to_main_line(self)
 		if not levelData:
 			push_error("Player.gd: levelData 未设置，无法应用速度")
@@ -186,9 +225,10 @@ func _process(delta: float) -> void:
 		_move_head(delta)
 
 	var isOnFloorNow: bool = is_on_floor() or fly
-	if isOnFloorNow and not pastIsOnFloorEffect:
-		_play_land_effect()
-		emit_signal("on_touch_ground")
+	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
+		if isOnFloorNow and not pastIsOnFloorEffect:
+			_play_land_effect()
+			emit_signal("on_touch_ground")
 	pastIsOnFloorEffect = isOnFloorNow
 
 	if isOnFloorNow:
@@ -209,8 +249,23 @@ func _process(delta: float) -> void:
 			emit_signal("on_leave_ground")
 	previousFrameIsGrounded = isOnFloorNow
 
-	if henShin and is_instance_valid(henshinObject):
-		henshinObject.global_position = global_position + objectOffset
+	if henShin:
+		didCreateTail = false
+		if is_instance_valid(henshinObject):
+			henshinObject.global_position = global_position + objectOffset
+		if not showLineTail:
+			line = null
+			allowCreateTail = false
+		if $MeshInstance3D:
+			$MeshInstance3D.visible = showLineBody
+	else:
+		if not didCreateTail:
+			allowCreateTail = true
+			if isOnFloorNow:
+				new_line()
+			if $MeshInstance3D:
+				$MeshInstance3D.visible = true
+			didCreateTail = true
 
 func _move_head(delta: float) -> void:
 	var forward: Vector3 = basis * Vector3.BACK
@@ -250,7 +305,8 @@ func reload() -> void:
 		return
 	reloadQueued = true
 	sceneReloadInProgress = true
-	LevelManager.mainLineTransform = startTransform
+	LevelManager.mainLineTransform = Transform3D(Basis.from_euler(firstDirection * (PI / 180.0)), startPosition)
+	LevelManager.revivePosition = startPosition
 	LevelManager.reset_camera_checkpoint()
 	LevelManager.playerDirectionIndex = _currentDirection
 	LevelManager.playerFirstDirection = firstDirection
@@ -277,22 +333,19 @@ func _reload_current_scene() -> void:
 		loading = false
 		push_error("Player.gd: 重新加载关卡失败，错误码: %s" % reloadError)
 
-func _clear_tail() -> void:
+func ClearPool() -> void:
 	line = null
 	tailPosition = position
 	var holder: Node3D = _get_or_create_player_tail_holder()
-	if not holder:
-		tailHolder = null
-		return
-	tailHolder = holder
-	for child in tailHolder.get_children():
-		var tail: MeshInstance3D = child as MeshInstance3D
-		if child is RigidBody3D:
-			tail = child.get_node_or_null("TailMesh") as MeshInstance3D
-		if tail:
-			_return_to_pool(tail)
-		else:
-			child.queue_free()
+	if holder:
+		for child in holder.get_children():
+			if is_instance_valid(child):
+				child.queue_free()
+	tailPool.DestoryAll()
+	tailBodyPool.DestoryAll()
+
+func _clear_tail() -> void:
+	ClearPool()
 
 func _return_to_pool(tail: MeshInstance3D) -> void:
 	var body: RigidBody3D = tail.get_parent() as RigidBody3D
@@ -319,10 +372,18 @@ func _return_to_pool(tail: MeshInstance3D) -> void:
 		tail.queue_free()
 
 func _get_from_pool() -> MeshInstance3D:
-	var tail: MeshInstance3D = tailPool.pop() as MeshInstance3D
-	if not tail:
-		return MeshInstance3D.new()
-	return tail
+	if not tailPool.full:
+		var tail: MeshInstance3D = MeshInstance3D.new()
+		tailPool.Add(tail)
+		return tail
+	else:
+		var tail: MeshInstance3D = tailPool.First() as MeshInstance3D
+		if not is_instance_valid(tail):
+			tail = MeshInstance3D.new()
+		elif tail.get_parent():
+			tail.get_parent().remove_child(tail)
+		tailPool.Add(tail)
+		return tail
 
 func _get_or_create_player_tail_holder() -> Node3D:
 	var root: Node = tree.current_scene
@@ -333,12 +394,14 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	if not holder:
 		holder = Node3D.new()
 		holder.name = "PlayerTailHolder"
-		root.add_child(holder)
+		root.add_child.call_deferred(holder)
 
 	tailHolder = holder
 	return holder
 
 func new_line() -> void:
+	if not allowCreateTail:
+		return
 	var tailHolder: Node3D = _get_or_create_player_tail_holder()
 	if not tailHolder:
 		return
@@ -399,18 +462,34 @@ func _finish_tail_join(tail: MeshInstance3D) -> void:
 	_update_tail_body(tail, (tailPosition + end) / 2, joinLength)
 
 func _create_tail_body() -> RigidBody3D:
-	var body: RigidBody3D = tailBodyPool.pop() as RigidBody3D
-	if not body:
-		body = RigidBody3D.new()
+	if not tailBodyPool.full:
+		var body: RigidBody3D = RigidBody3D.new()
 		var collision: CollisionShape3D = CollisionShape3D.new()
 		collision.name = "CollisionShape3D"
 		var box: BoxShape3D = BoxShape3D.new()
 		box.margin = TAIL_COLLISION_MARGIN
 		collision.shape = box
 		body.add_child(collision)
-	body.name = "TailRigidBody"
-	_configure_tail_physics(body)
-	return body
+		tailBodyPool.Add(body)
+		body.name = "TailRigidBody"
+		_configure_tail_physics(body)
+		return body
+	else:
+		var body: RigidBody3D = tailBodyPool.First() as RigidBody3D
+		if not is_instance_valid(body):
+			body = RigidBody3D.new()
+			var collision: CollisionShape3D = CollisionShape3D.new()
+			collision.name = "CollisionShape3D"
+			var box: BoxShape3D = BoxShape3D.new()
+			box.margin = TAIL_COLLISION_MARGIN
+			collision.shape = box
+			body.add_child(collision)
+		elif body.get_parent():
+			body.get_parent().remove_child(body)
+		tailBodyPool.Add(body)
+		body.name = "TailRigidBody"
+		_configure_tail_physics(body)
+		return body
 
 func _configure_tail_physics(body: RigidBody3D) -> void:
 	body.collision_layer = TAIL_COLLISION_LAYER
@@ -517,25 +596,6 @@ func _cache_scene_references() -> void:
 	get_scene_camera()
 	get_scene_light()
 
-func enable_henshin(model: Node3D, offset: Vector3, showTail: bool, showBody: bool, rotationTime: float) -> void:
-	if not model:
-		push_warning("Player.gd: Henshin requires a henshinObject")
-		return
-	if henshinObject and henshinObject != model:
-		henshinObject.visible = false
-	henShin = true
-	henshinObject = model
-	objectOffset = offset
-	showLineTail = showTail
-	showLineBody = showBody
-	self.rotationTime = rotationTime
-	henshinObject.visible = true
-	henshinObject.global_position = global_position + objectOffset
-	_sync_henshin_rotation()
-	$MeshInstance3D.visible = showLineBody
-	if not showLineTail:
-		_clear_tail()
-
 func ResetHenshinState() -> void:
 	if henshinObject:
 		henshinObject.visible = false
@@ -565,6 +625,14 @@ func capture_managed_animation_state() -> void:
 				"position": animator.current_animation_position,
 				"playing": animator.is_playing()
 			})
+	for timeline: AnimationPlayer in playedTimelines:
+		if timeline and not timeline.current_animation.is_empty():
+			managedAnimationStates.append({
+				"animator": timeline,
+				"animation": timeline.current_animation,
+				"position": timeline.current_animation_position,
+				"playing": timeline.is_playing()
+			})
 
 func restore_managed_animation_state() -> void:
 	for state: Dictionary in managedAnimationStates:
@@ -583,11 +651,17 @@ func _pause_managed_animators() -> void:
 	for animator: AnimationPlayer in playedAnimators:
 		if animator:
 			animator.pause()
+	for timeline: AnimationPlayer in playedTimelines:
+		if timeline:
+			timeline.pause()
 
 func _resume_managed_animators() -> void:
 	for animator: AnimationPlayer in playedAnimators:
 		if animator and not animator.current_animation.is_empty():
 			animator.play()
+	for timeline: AnimationPlayer in playedTimelines:
+		if timeline and not timeline.current_animation.is_empty():
+			timeline.play()
 
 func _resume_fake_players() -> void:
 	for fakeNode: Node in get_tree().get_nodes_in_group("fake_players"):
@@ -596,7 +670,7 @@ func _resume_fake_players() -> void:
 			fake.state = FakePlayer.State.Moving
 
 func _play_land_effect() -> void:
-	var dust: GPUParticles3D = dustParticle.instantiate() as GPUParticles3D
+	var dust: CPUParticles3D = dustParticle.instantiate() as CPUParticles3D
 	get_tree().current_scene.add_child(dust)
 	dust.global_position = global_position + Vector3(0, -0.5, 0)
 	dust.restart()

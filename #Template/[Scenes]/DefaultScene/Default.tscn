@@ -27,9 +27,11 @@ _data = {
 
 [node name="BasicOBJ_Group" type="Node3D" parent="." unique_id=1533079692]
 
-[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 instance=ExtResource("1_ssf0a")]
-animation = NodePath("../AnimationPlayer")
+[node name="Player" parent="BasicOBJ_Group" unique_id=2020142567 node_paths=PackedStringArray("sceneCamera", "sceneLight") instance=ExtResource("1_ssf0a")]
 levelData = ExtResource("2_cwhkr")
+sceneCamera = NodePath("../CameraRoot/Rotator/Scale/Camera3D")
+sceneLight = NodePath("../DirectionalLight3D")
+animation = NodePath("../AnimationPlayer")
 
 [node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_dnrub")]
 

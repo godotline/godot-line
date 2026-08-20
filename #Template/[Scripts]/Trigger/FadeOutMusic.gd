@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 @export_range(0.0, 60.0, 0.05) var duration: float = 4.0
 

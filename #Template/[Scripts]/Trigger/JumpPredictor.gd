@@ -75,11 +75,11 @@ func _connect_to_jump() -> void:
 	if jumpNode:
 		return
 	_check_parent()
-	if jumpNode and jumpNode.has_signal("height_changed"):
-		if not jumpNode.height_changed.is_connected(_on_height_changed):
-			jumpNode.height_changed.connect(_on_height_changed)
+	if jumpNode and jumpNode.has_signal("power_changed"):
+		if not jumpNode.power_changed.is_connected(_on_power_changed):
+			jumpNode.power_changed.connect(_on_power_changed)
 
-func _on_height_changed(newHeight: float) -> void:
+func _on_power_changed(_newPower: float) -> void:
 	_redraw()
 
 func _redraw() -> void:
@@ -118,11 +118,12 @@ func _draw_line() -> void:
 	var parent: Node3D = get_parent() as Node3D
 	var basePos: Vector3 = parent.global_position if parent else Vector3.ZERO
 
-	var height: float = jumpNode.get("height") if jumpNode else 1.0
+	# Unity Jump.power / Player 刚体质量(100) -> 初速度
+	var jumpPower: float = jumpNode.get("power") if jumpNode else 500.0
+	var jumpSpeed: float = jumpPower / 100.0
 	var gravityStrength: float = 9.8
 	if ProjectSettings.has_setting("physics/3d/default_gravity"):
 		gravityStrength = ProjectSettings.get_setting("physics/3d/default_gravity")
-	var jumpSpeed: float = sqrt(2 * gravityStrength * height)
 
 	var immediateMesh: ImmediateMesh = ImmediateMesh.new()
 	immediateMesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)

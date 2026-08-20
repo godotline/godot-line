@@ -295,8 +295,6 @@ static func InitPlayerPosition(player: CharacterBody3D, position: Vector3, force
 		# 转向后重新计算速度方向
 		player.velocity = player.to_global(Vector3(0, 0, 1) * player.Speed) - player.global_position
 
-	player.new_line()
-
 	if forceCamera:
 		var cf: CameraFollower = CameraFollower.instance
 		if cf:

@@ -1,234 +1,101 @@
 # AGENTS.md — Godot Line
 
-## Project Overview
+## 项目概览
 
-Godot 4.7 Dancing Line game template (GDScript). No CLI build/test/lint — all development is in the Godot editor. Physics: Jolt Physics on separate thread. Renderer: mobile.
+- **引擎版本**：Godot 4.7（Dancing Line / 跳舞的线 游戏模板，GDScript）。`project.godot` 为准。
+- **物理与渲染**：Jolt Physics（独立线程运行）；渲染器为 Mobile。
+- **开发方式**：无 CLI 自动化测试/构建/Lint，所有开发与调试以 Godot 编辑器为准。
 
-**README says 4.6 but `project.godot` config/features is 4.7.** Trust `project.godot`.
+## 调研与开发工具规则
 
-## Research Rule
+- **网络搜索**：使用 Tavily 工具查询 Godot API 与已知问题。**严禁通过 curl/下载引擎源码文件**，优先使用文档与搜索结果。
+- **源码与架构查询**：使用 **DeepWiki MCP**（`godotengine/godot` 等）查询引擎内部实现细节（如 `ScriptServer`、`can_instantiate()` 机制）。
+- **编辑器实时检查**：优先使用 `gdmcp` 工具（端口 9080）与正在运行的 Godot 编辑器交互（检查脚本状态、Expression 求值、查看日志、分析脚本语法）。
 
-- Use the tavily search tool for web research (Godot API questions, known issues, docs). **Never download Godot engine source files** (e.g. via `curl` of GitHub raw files) — prefer tavily search results and official docs pages instead.
-- **DeepWiki MCP** (configured in `opencode.json`, remote server `https://mcp.deepwiki.com/mcp`) provides AI-powered docs for GitHub repos — e.g. `godotengine/godot` for engine internals like `ScriptServer::set_scripting_enabled()` / `GDScript::can_instantiate()` behavior. Use it for engine source questions instead of downloading source.
-- Prefer the `gdmcp` skill's CLI (port 9080) for inspecting the running Godot editor (script states, `can_instantiate()`, editor logs, expression evaluation) over static analysis alone.
-
-## Project Structure
+## 项目目录结构
 
 ```
-#Template/             — Core template: scenes, scripts, resources, materials
-  [Scripts]/           — All GDScript source (10 subdirectories)
-  [Resources]/         — PackedScenes, LevelData, models, UI
-  [Materials]/         — .tres material resources
-  [Music]/             — Audio files
-  [Scenes]/            — Template level scenes (DefaultScene/, Sample/) used by the "新建关卡" plugin
-  *.tscn               — Template scenes (Player, trigger, Gem, etc.) — directly in #Template/ root, NOT in a [Scenes] subfolder
-[Scenes]/              — Created levels only (the "新建关卡" plugin writes new levels here)
+#Template/             — 核心模板：场景、脚本、资源、材质
+  [Scripts]/           — GDScript 源码目录（全部带有显式静态类型）
+  [Resources]/         — PackedScene、LevelData、模型、UI
+  [Materials]/         — .tres 材质资源
+  [Music]/             — 音频文件
+  [Scenes]/            — 模板关卡场景（DefaultScene/、Sample/，供"新建关卡"插件克隆）
+  *.tscn               — 核心通用场景（Player、Trigger、Gem 等直接位于 #Template/ 根目录）
+[Scenes]/              — 用户创建的关卡（由"新建关卡"插件生成至此）
 addons/
-  godot_mcp/           — MCP server plugin (do not modify unless asked)
-  template/            — Editor plugin: toolbar menu, "新建关卡" dialog
+  godot_mcp/           — MCP 服务插件（非必要请勿修改）
+  template/            — 编辑器插件：顶部工具栏菜单与"新建关卡"对话框
 ```
 
-**Bracket-named directories** (`[Scripts]`, `[Resources]`, etc.) are a project convention, not Godot special syntax.
+## 触发器系统 (Trigger System)
 
-## Universal Add Component Panel (Editor Inspector Plugin)
+项目中存在三种触发器模式，**所有新触发器必须采用模式 1（纯组件）**：
 
-`addons/template/component_inspector_plugin.gd` (+ `component_add_panel.gd`) registers an `EditorInspectorPlugin` that shows a "组件" (Add Component) panel at the bottom of the Inspector for **every Node** — no script attachment required. The panel contains only an "Add Component" button that calls `EditorInterface.popup_quick_open(callback, [&"Script"])` — the native quick-open dialog (godot-proposals #3745 was implemented in 4.7). Adds the selected script as a child node with undo/redo, owner assignment, `mark_scene_as_unsaved`, and auto-selects the new node. If the host has a `refresh_behaviors()` method (e.g. `BaseTrigger`), it is called on add/undo. `BaseTrigger` no longer has its own `componentScript` export — use this panel instead. Also: in the editor, `Script.can_instantiate()` returns `false` for **non-@tool** scripts by design (the editor disables scripting "except for tool" scripts — `ScriptServer::set_scripting_enabled(false)` in `EditorNode`) — never use it as a validity guard in editor tooling; `script.new()` works fine for non-tool scripts in the editor.
+| 模式 | 基类 | 碰撞检测负责者 | 示例 |
+|------|------|---------------|------|
+| **模式 1：纯组件（推荐）** | `extends Node` / `Node3D` | 父级 `BaseTrigger` 节点 | `Jump.gd`, `Gem.gd`, `Checkpoint.gd`, `Speed.gd` |
+| **模式 2：自包含** | `extends BaseTrigger` (Area3D) | 自身 | `OldCameraShakeTrigger.gd` |
+| **模式 3：遗留模式** | `extends Area3D` | 自身监听 `body_entered` | `OldCameraTrigger.gd`, `CameraShakeTrigger.gd` |
 
-## Deleted / Renamed Files (Do Not Recreate)
+### 模式 1 规范
+- 实现 `trigger(body)` 方法即可。
+- 作为 `BaseTrigger`（或 `Trigger.tscn` 实例）的子节点放置。
+- `BaseTrigger` 采用鸭子类型（`has_method("trigger")`）自动遍历并调用子节点。
+- `BaseTrigger` 参数：`one_shot`（单次触发）、`require_playing`（需游戏运行中）、`track_exit`、`debug_mode`。
 
-| Old name | Status |
-|----------|--------|
-| `Trigger.gd` | Deleted — replaced by `BaseTrigger` |
-| `customanimplay.gd` | Deleted — merged into `PlayAnimator.gd` |
-| `ChangeSpeedTrigger.gd` | Renamed to `Speed.gd` |
-| `SetActiveTrigger.gd` | Renamed to `SetActive.gd` |
-| `LocalTeleportTrigger.gd` | Renamed to `Teleport.gd` |
-| `ChangeTurn.gd` | Renamed to `ChangeDirection.gd` |
-| `FogColorChanger.gd` | Does not exist — use `SetFog.gd` |
-| `addons/mpm_importer/` | Does not exist |
+## 通用添加组件面板 (Inspector 插件)
 
-## Trigger System — Three Modes Coexist
+- 位于 `addons/template/component_inspector_plugin.gd`，在每个 Node 的 Inspector 底部注册"组件"面板。
+- 点击调用 `EditorInterface.popup_quick_open` 选择脚本并作为子节点挂载，支持 Undo/Redo 并自动维护节点 owner。
+- **注意**：在 Godot 4.7 编辑器中，非 `@tool` 脚本的 `Script.can_instantiate()` 设计上返回 `false`（因编辑器禁用了非工具脚本实例化环境），但 `script.new()` 可正常使用。工具脚本中切勿使用 `can_instantiate()` 作为合法性校验守卫。
 
-This is the most important architectural detail. **New triggers should use Mode 1.**
+## 核心单例与架构
 
-| Mode | Base | Collision handled by | Example |
-|------|------|---------------------|---------|
-| **Pure component** (Mode 1) | `extends Node` / `Node3D` | Parent `BaseTrigger` node | `Jump.gd`, `Gem.gd`, `Checkpoint.gd` |
-| **Self-contained** (Mode 2) | `extends BaseTrigger` (Area3D) | Itself | `OldCameraShakeTrigger.gd` |
-| **Legacy** (Mode 3) | `extends Area3D` | Itself via `body_entered` | `OldCameraTrigger.gd`, `CameraShakeTrigger.gd`, `GuidanceBox.gd` |
+所有核心管理器均为 **`RefCounted` 静态类**（非 Node，不可使用传统生命周期 `_process` 或节点信号）：
 
-**Mode 1 (pure component):** Implement `trigger(body)` method. Place as child of a `BaseTrigger` node (or `trigger.tscn` instance). `BaseTrigger` uses duck typing — it calls `trigger(body)` on any child that has that method. No inheritance required.
+- **`LevelManager`** (`class_name LevelManager`)：游戏状态机（`GameStatus` 枚举）、检查点数据、复活监听器分发（`add_revive_listener` / `emit_revive`）。
+- **`AudioManager`** (`class_name AudioManager`)：音频管理（`PlayClip`, `PlayTrack`, `FadeOut`, `Stop` 等）。从 `Player.instance.get_node("MusicPlayer")` 获取播放器。注意：时间属性名为 `time`（小写，避免遮蔽 Godot 内置 `Time` 类）。
+- **`SetLatency`** (`class_name SetLatency`)：延迟与音量配置，持久化至 `user://settings.cfg`。
+- **`Player.instance`**：Player（`CharacterBody3D`）上的静态单例引用，在 `Player._ready()` 中注册，在编辑器环境中为 `null`（使用前必须判空）。
 
-**BaseTrigger** (`#Template/[Scripts]/Trigger/BaseTrigger.gd`): `class_name BaseTrigger extends Area3D`. Exports: `one_shot`, `require_playing`, `track_exit`, `debug_mode`. Collects behaviors in `_ready()` via `_collect_behaviors()`.
+## 检查点与皇冠 (Checkpoint / Crown)
 
-## Checkpoint / Crown — Unity Alignment Notes
+与 Unity 原版逻辑保持一致，保留两处符合 Godot 特性的有意设计（请勿修改）：
+1. **`trackProgress` 按秒存储**：Godot 中以 `AnimationPlayer` 的秒数记录时间轴进度（Unity 为百分比）。
+2. **`LevelManager.checkpointCount` 计入皇冠**：皇冠与检查点统一推进计数，钻石收集状态与检查点索引对齐恢复。
+3. **复活屏幕淡入淡出**：`Checkpoint.revive()` 在复活重置场景时调用 `LevelUI.HideScreen(...)` 进行雾色全屏遮罩过渡，并在渐隐完成后恢复 `allowTurn = true`。
 
-The Checkpoint/Crown system is ported 1:1 from Unity `Checkpoint.cs` / `Crown.cs`. Two intentional semantic differences from Unity (do not "fix"):
+## GDScript 编码规范
 
-- **`trackProgress` is stored in seconds, not percent.** Unity `Checkpoint.cs` saves `(int)player.SoundTrackProgress * 100` (0–100); Godot stores the AnimationPlayer position in seconds (`Checkpoint.gd` line ~111). They are equivalent for Godot's timeline model — don't convert.
-- **`LevelManager.checkpointCount` counts crowns too.** Unity keeps crowns in a separate `player.Crowns` list and only regular checkpoints in `player.Checkpoints`; Godot increments `checkpointCount` in the base `Checkpoint._enter_trigger`, so crowns also advance it. Gems use the same counter (`index >= LevelManager.checkpointCount`), so the restore math stays internally consistent. This is a deliberate Godot design for crown-as-checkpoint levels.
+- **命名规范**：
+  - 方法名与变量名：**严格使用 `lowerCamelCase` / `PascalCase`**。**除非调用 Godot 引擎内置 API/虚函数（如 `_ready()`、`_process()`、`is_action_pressed()` 等），否则一律严禁使用 `snake_case`**。
+- **强静态类型**：`#Template/[Scripts]` 下的所有变量声明、函数形参及返回值必须附带显式类型注解（`var x: int = 0`，避免无标注或容易出错的推断）。
+- **`@tool` 脚本规范**：
+  - 工具脚本中任何通过按钮/属性修改场景数据的逻辑，必须接入 `EditorUndoRedoManager` 并调用 `notify_property_list_changed()`，否则无法撤销且 Inspector 易出现脏数据。
 
-**Revive screen fade (Unity parity):** `Checkpoint.revive()` (and `Crown.revive()`/`TTFCheckPoint` via `super`) wraps the scene reset in `LevelUI.HideScreen(fogColor, 0.32, ...)` — the same fog-colored screen flash Unity's `Revival()` does. `revive()` kills all tweens *before* `HideScreen` creates its fade tween (mirroring `DOTween.Clear()` ordering), runs the reset (`_reset_scene`) while the screen is opaque, and only sets `allowTurn = true` (and hides the UI) after the screen fades back out. `LevelUI.gd` has `class_name LevelUI` + `static var instance` (set in `_ready()`, cleared in `_exit_tree()`). The overlay is a full-screen `ColorRect` child of `LevelUI.tscn` named `HideScreen` (mouse_filter IGNORE at rest, STOP during fade).
+## 关键场景与输入映射
 
-## Core Singletons (All Static / RefCounted)
+### 核心场景
+- 默认关卡模板：`#Template/[Scenes]/DefaultScene/Default.tscn`
+- 玩家：`#Template/Player.tscn`（置于关卡 `BasicOBJ_Group/Player` 下）
+- 触发器容器：`#Template/Trigger.tscn`（可复用 `BaseTrigger` 预制体）
+- 界面组件：`StartPage.tscn`、`DebugOverlay.tscn`（D 键切换）、`LevelUI.tscn`（结算/复活界面）
 
-- **`LevelManager`** — `class_name LevelManager extends RefCounted`. All static. Game state machine (`GameStatus` enum), checkpoint data, revive listener system (`add_revive_listener`/`emit_revive`). NOT a Node — cannot use `_process` or signals in the traditional sense.
-- **`AudioManager`** — `class_name AudioManager extends RefCounted`. All static. `PlayClip()`, `PlayTrack()`, `FadeOut()`, `Stop()`. Gets music player from `Player.instance.get_node("MusicPlayer")`.
-- **`SetLatency`** — `class_name SetLatency extends RefCounted`. Persists delay/volume to ConfigFile at `user://settings.cfg`.
-- **`Player.instance`** — Static var on Player (CharacterBody3D). Set in `_ready()`.
+### 输入按键（`project.godot`）
+- **转向 (`turn`)**：鼠标左键 / 空格键
+- **R**：重载当前关卡
+- **K**：自杀 / 强制死亡
+- **D**：切换 Debug 性能监控面板（仅 Debug 构建）
 
-## Key Scenes and Entrypoints
+## 常见陷阱与避坑指南
 
-- **Default scene:** `#Template/[Scenes]/DefaultScene/Default.tscn` (not Sample — Sample exists but Default is the primary)
-- **Player scene:** `#Template/Player.tscn` — instantiated inside level scenes under `BasicOBJ_Group/Player`
-- **Trigger container:** `#Template/Trigger.tscn` — reusable BaseTrigger scene, add component children to it
-- **Start page:** `#Template/[Resources]/StartPage.tscn` — dynamically instantiated by `Player._ready()`
-- **Debug overlay:** `#Template/[Resources]/DebugOverlay.tscn` — dynamically instantiated by `Player._ready()`, toggle with D key (debug builds only)
-- **Game UI:** `#Template/[Resources]/LevelUI.tscn` — game over screen with revive/replay
-
-## Input Controls
-
-Defined in `project.godot`:
-- **turn** action: Mouse Left + Space
-- **R**: Reload level (in `Player._input`)
-- **K**: Kill player (in `Player._input`)
-- **D**: Toggle debug overlay (debug builds only, in `Player._input`)
-- **S**: Save Roads.tscn (in `RoadMaker._input`)
-
-## GDScript Conventions
-
-- `lowerCamelCase` for variables and functions
-- `PascalCase` for class names (`class_name`)
-- `UPPER_SNAKE_CASE` for constants
-- `lowerCamelCase` for signals
-- All GDScript under `#Template/[Scripts]` must use static type annotations for variables (`var value: Type`), including local variables and exported properties. Use explicit types instead of leaving variables untyped; inferred declarations (`:=`) should be replaced with an explicit type when the type is known. This avoids type inference errors.
-- Function parameters and return values under `#Template/[Scripts]` must also be explicitly typed.
-- `@tool` annotation used extensively for editor preview (animators, triggers, resources)
-- **`@tool` script buttons:** Any `@tool` script that modifies data via button presses (e.g. `_set`, exported button actions) must call `EditorUndoRedoManager` to register the action AND call `notify_property_list_changed()` so the Inspector refreshes. Without this, changes are invisible to the undo system and the Inspector may show stale data.
-- Follow [Godot GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
-
-## Camera System — Two Generations
-
-Two camera systems coexist, toggled by `Checkpoint.UsingOldCameraFollower`:
-- **New:** `CameraFollower` (class_name, static var instance) + `CameraTrigger.gd` (pure component) + `CameraShakeTrigger.gd`
-- **Old:** `OldCameraFollower` (class_name, static var instance) + `OldCameraTrigger.gd` (legacy Area3D) + `OldCameraShakeTrigger.gd`
-
-New triggers use `CameraFollower.instance.Trigger(...)`. Old triggers modify `OldCameraFollower` properties directly.
-
-## Level Creation
-
-Use the editor plugin: **Template > 新建关卡** in the toolbar. Creates `[Scenes]/<name>/<name>.tscn` + `<name>.tres` (LevelData) from the `#Template/[Scenes]/` templates. The plugin deep-copies LevelData and assigns unique saveID.
-
-## Common Pitfalls
-
-- `LevelManager` is `RefCounted`, not a `Node`. It has no `_process`, no scene tree position. All members are static.
-- `Player.instance` is `null` in editor — always null-check before runtime use.
-- `BaseTrigger` uses duck typing (`has_method("trigger")`), not virtual methods or inheritance for behavior dispatch.
-- `Gem.gd` filename is `Gem.gd`, not `Diamond.gd`. The field is `LevelManager.gem`, not `.diamond`.
-- RoadMaker visual/collision separation: `_road_visuals` (MeshInstance3D, scaled per frame) vs `_road_collisions` (CollisionShape3D, finalized once). Don't mix them up.
-- Player tail (ObjectPool, 256 MeshInstance3D) and RoadMaker road are **two independent systems**.
-- `FogSettings` resource drives fog, not a standalone FogColorChanger script.
-- Physics layers: 1=Player, 2=BaseFloor, 3=BaseWall.
-
-## Performance Best Practices
-
-### Avoid Recursive SceneTreeTimer Creation
-**Problem:** Using `SceneTreeTimer` in recursive patterns (creating a new timer in the timeout callback) causes frequent temporary object allocation, increasing GC pressure and causing FPS drops during gameplay.
-
-**Example (problematic):**
-```gdscript
-func _poll() -> void:
-    # Do something
-    var timer: SceneTreeTimer = get_tree().create_timer(0.5)
-    timer.timeout.connect(_poll)  # Recursive call creates new timer each time
-```
-
-**Solution:** Use persistent `Timer` nodes instead:
-```gdscript
-var _poll_timer: Timer
-
-func _ready() -> void:
-    _poll_timer = Timer.new()
-    _poll_timer.wait_time = 0.5
-    _poll_timer.one_shot = false
-    _poll_timer.autostart = true
-    _poll_timer.timeout.connect(_poll)
-    add_child(_poll_timer)
-
-func _poll() -> void:
-    # Do something (no timer creation)
-```
-
-**Fixed example:** `DebugOverlay.gd` was causing FPS drops due to recursive SceneTreeTimer usage. Fixed by using persistent Timer nodes.
-
-### Cache Expensive Node Lookups
-**Problem:** Calling `get_viewport().get_camera_3d()` or similar lookups every frame is expensive.
-
-**Solution:** Cache the reference once, update only when needed:
-```gdscript
-var _cached_camera: Camera3D
-
-func _ready() -> void:
-    _cached_camera = get_viewport().get_camera_3d()
-```
-
-**Note:** `SetFog.gd` uses `get_viewport().get_camera_3d()` but only on trigger activation (not per-frame), so it's acceptable.
-
-## Unity Alignment Status (v2.3)
-
-### ✅ Completed — Function Name Alignment (PascalCase)
-
-All snake_case methods that have a direct Unity PascalCase counterpart have been renamed. Full list:
-
-| Godot File | Renamed Methods |
-|------------|----------------|
-| `Player.gd` | `PlayerDeath`, `Turn`, `ResetHenshinState`, `ClearPool` (FakePlayer), `StopPlayer` (Pyramid), `Speed` (var) |
-| `LevelManager.gd` | `InitPlayerPosition`, `DestroyRemain`, `CompareCheckpointIndex`, `GameOverNormal`/`GameOverRevive`, `SetFPSLimit`, `GetColorByContent` |
-| `AudioManager.gd` | `PlayClip`, `PlayTrack`, `FadeOut`, `Stop`, `Play`, `Pitch`, `Volume`, `Progress` (only `Time` kept as `time` — shadows Godot native `Time` class) |
-| `ObjectPool.gd` | `Add` |
-| `CameraFollower.gd` / `OldCameraFollower.gd` | `DoShake`, `KillAll`, `KillAllCameraTweens`, `ResetShake`, `Trigger` |
-| `AutoPlayController.gd` | `SetHolder` |
-| `AutoPlay.gd` | `SetActive` |
-| `Crown.gd` | `AnimateCrown` |
-| `HideCanvas.gd` / `ShowCanvas.gd` | `BtnHide`, `BtnShow`, `StopTweens`, `OnClick` |
-| `TTFGem.gd` | `PickUp` |
-| `TTFCheckPoint.gd` | `EnterTrigger` |
-| `GuidanceBox.gd` | `SetColor` |
-
-### ✅ Completed — Remove Orphaned Assets
-
-Deleted: `crown_get_1/2/3.wav`, `BlackCrown_Light/UnLight.png`, `PerfactCrownLight/NoLight.png`, `Models/PerfactCrown.obj`, `ui/` (6 png), `Sample.mp3`, `Shake_It_Up.ogg`, `CameraFollower3/Trigger3/Shake3.gd`, `DefaultScene3/`, `beatmap_reader.gd`, `note_reader.gd` (renamed to `NoteReader.gd`).
-
-### ✅ Completed — Dust Particle Extraction
-
-`#Template/[Resources]/Dust.tscn` (GPUParticles3D) created. Player.gd uses `dustParticle` preload, instantiates on land at -0.5 below player, destroys after 2s. Removed inline LandEffect node from Player.tscn.
-
-### ✅ Completed — DeathParticle → PlayerCubes (Unity Remain.prefab)
-
-`DeathParticle.tscn` rewritten: Node3D root + 20 Fragment (RigidBody3D, mass=100, angular_damp=0.05, default hidden+disabled). `death_particle.gd` → `PlayerCubes.gd` (`class_name PlayerCubes`). `Play()` activates fragments, random scale/rotation, `apply_central_impulse()`. `PlayerDeath()` accepts `hasCollision` param (default `true` for wall death, `false` for KillPlayer/K key).
-
-### ❌ Not Renamed (Godot-Specific, No Unity Counterpart)
-
-The following snake_case methods are intentionally left as-is — they are Godot-specific conventions:
-
-- `trigger(body)` — Duck-typed Mode-1 component interface (BaseTrigger convention)
-- `_on_*` / `_ready` / `_process` / `_physics_process` — Godot engine callbacks
-- `set_camera`/`get_camera` — CameraSettings resource accessors (not Unity `CameraFollower.SetCamera`)
-- `save_settings`/`load_settings` — SetLatency (Unity uses `AddLatency`/`SubtractLatency` — different design)
-- `revive()` — Checkpoint internal method (Unity `RevivePlayer` is on Player, different)
-- `reload`/`new_line`/`enable_henshin` — Player-specific (no Unity equivalent)
-- `hide_animated`/`show_ui`/`reveal` — GUI-specific
-- `apply_*`/`capture_*`/`restore_*`/`get_*` — Internal state management
-- `destroy_all` — ObjectPool (Unity has `DestoryAll` — typo, not replicated)
-- `pop` — ObjectPool (Unity `First()` — different semantics: pop vs peek)
-- `refresh_tracking`/`refresh_behaviors` — AutoPlay/BaseTrigger internal
-- `trigger_manually`/`trigger_animation`/`apply_tweened` — Animator-specific
-- All `@export` variables (scene-binding) — left as camelCase per Godot convention
-
-### ⚠️ Known Issues
-
-- **Tags partially rewritten** (v2.3 release): tags v1.0-stable through v2.2 were force-pushed with rewritten author (meny2333). v1.2.0 rejected (annotated tagger email). Not restored by user choice.
-- **Merge commit author**: v2.3 merge commit shows "meny" (GitHub profile name) instead of "meny2333". The work commit (40b3919) has correct author.
-- **GitHub proxy**: repo uses proxy at `127.0.0.1:7897`. Must be running for git/gh operations.
-- **`AudioManager.Time`**: cannot be renamed to `Time` (shadows Godot native `Time` class). Kept as `time`.
-- **`OnClick`/`StopTweens`/`BtnHide`/`BtnShow`**: HideCanvas/ShowCanvas had pre-existing recursive-placeholder compatibility aliases (`func X():\n\tX()`) that were removed during rename. The real renamed methods are the sole definitions now.
+1. **Godot 4.7 编辑器丢失 `[editable path="..."]` 子节点属性覆盖**：
+   - 编辑器重新加载场景时不会保留子场景实例的节点属性重写（容易导致碰撞体 Scale 变 0 问题）。
+   - **解决方案**：避免在复杂触发器上使用 `instance=Trigger.tscn` 嵌套重写；采用**内联本地节点**（如 `Area3D` + 挂载 `BaseTrigger.gd` + 本地 `CollisionShape3D`）。`CrownCheckPoint.tscn` 和 `HeartCheckPoint.tscn` 已采用此模式。
+2. **禁止循环递归创建 `SceneTreeTimer`**：
+   - 严禁在 `SceneTreeTimer` 回调中反复创建新 Timer（会导致频繁 GC 和掉帧）。周期性轮询必须使用持久化 `Timer` 节点。
+3. **节点引用缓存**：
+   - 避免在 `_process` 等每帧执行的方法中频繁调用 `get_viewport().get_camera_3d()`，应在 `_ready()` 缓存。
+4. **物理碰撞层划分**：
+   - Layer 1: Player / Layer 2: BaseFloor / Layer 3: BaseWall。

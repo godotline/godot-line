@@ -1,4 +1,9 @@
-extends Area3D
+class_name OldCameraTrigger
+extends Node
+
+## OldCameraTrigger - 旧相机视角变换触发器（模式 1 纯组件）
+## 作为 BaseTrigger 的子节点使用，由父节点负责碰撞检测。
+## 与 Unity OldCameraTrigger.cs 一致。
 
 @export_group("Camera Settings")
 @export var addOffset: bool = false
@@ -26,8 +31,6 @@ var timeTriggered: bool = false
 
 
 func _ready() -> void:
-	if not body_entered.is_connected(_on_body_entered):
-		body_entered.connect(_on_body_entered)
 	set_process(useTime)
 
 
@@ -36,10 +39,6 @@ func _process(_delta: float) -> void:
 		timeTriggered = true
 		_apply_camera()
 		set_process(false)
-
-
-func _on_body_entered(body: Node3D) -> void:
-	trigger(body)
 
 
 func trigger(body: Node3D) -> void:
@@ -75,3 +74,4 @@ func _apply_camera() -> void:
 		rotationMode,
 		func() -> void: on_finished.emit()
 	)
+

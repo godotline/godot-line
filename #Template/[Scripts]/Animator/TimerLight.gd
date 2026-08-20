@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 @export var targetLight: DirectionalLight3D
 @export var lightSettings: LightSettings = LightSettings.new()

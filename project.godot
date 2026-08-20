@@ -31,7 +31,7 @@ shapes/collision/shape_color=Color(0, 0.6, 0.69803923, 1)
 
 [display]
 
-window/stretch/mode="canvas_items"
+window/stretch/aspect="ignore"
 
 [editor_plugins]
 
@@ -56,6 +56,7 @@ turn={
 
 3d/run_on_separate_thread=true
 3d/physics_engine="Jolt Physics"
+3d/default_gravity=9.81
 
 [rendering]
 
