@@ -86,9 +86,6 @@ func refresh_components_list() -> void:
 	var headerBox: HBoxContainer = HBoxContainer.new()
 	headerBox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var headerLabel: Label = Label.new()
-	headerLabel.text = "子节点组件 (%d):" % components.size()
-	headerLabel.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
-	headerLabel.add_theme_font_size_override("font_size", 12)
 	headerBox.add_child(headerLabel)
 	_components_container.add_child(headerBox)
 
@@ -125,7 +122,6 @@ func refresh_components_list() -> void:
 		var foldBtn: Button = Button.new()
 		foldBtn.text = "▼" if isExpanded else "▶"
 		foldBtn.flat = true
-		foldBtn.tooltip_text = "折叠 / 展开组件属性"
 		topHbox.add_child(foldBtn)
 
 		var script: Script = component.get_script() as Script
@@ -141,14 +137,12 @@ func refresh_components_list() -> void:
 		titleBtn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		titleBtn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		titleBtn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		titleBtn.tooltip_text = "点击展开/折叠属性编辑"
 		topHbox.add_child(titleBtn)
 
 		# 快捷删除按钮
 		var deleteBtn: Button = Button.new()
 		deleteBtn.text = "×"
 		deleteBtn.flat = true
-		deleteBtn.tooltip_text = "移除此组件"
 		deleteBtn.pressed.connect(func(): _remove_component(component))
 		topHbox.add_child(deleteBtn)
 
