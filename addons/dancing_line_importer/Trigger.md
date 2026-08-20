@@ -25,13 +25,15 @@ GodotLine 采用父子解耦的触发器模式：
   | 索引 | 含义 | ARPhros 示例值 | GodotLine 属性 | 映射逻辑 |
   | :---: | :--- | :--- | :--- | :--- |
   | `[0]` | 是否改变旋转 | `True` | - | 决定是否触发旋转补间 |
-  | `[1]` | 目标欧拉角 (Pitch, Yaw, Roll) | `15, 45, 0` | `targetRotation` | 传入 `CameraFollower.Trigger()` 的 `n_rotation` |
+  | `[1]` | 目标欧拉角 (Pitch, Yaw, Roll) | `15, 45, 0` | `CameraTrigger.rotation` | 解析为弧度 `Vector3(rad(x), rad(-y), rad(z))` |
   | `[2]` | 是否改变 Pivot 偏移 | `True` | - | 决定是否改变跟随偏移 |
-  | `[3]` | 目标 Pivot 偏移 (X, Y, Z) | `0, 3, 0` | `targetOffset` | 传入 `CameraFollower.Trigger()` 的 `n_offset` |
+  | `[3]` | 目标 Pivot 偏移 (X, Y, Z) | `0, 3, 0` | `CameraTrigger.offset` | 注入 `Vector3(x, y, z)` |
   | `[4]` | 是否改变 FOV / 距离 | `True` | - | 决定是否修改 FOV 与相机距离 |
-  | `[5]` | 目标 FOV / 视野大小 | `25` | `fieldOfView` | 赋值给摄像机的 `fov` |
-  | `[7]` | 平滑速度 (Smooth Factor) | `5000` | `duration` | 计算过渡时间：`duration = clamp(5000.0 / smoothFactor, 0.1, 5.0)` |
-  | `[8]` | 缓动曲线类型 (Ease) | `linear` / `easeInOutSine` | `ease` | 映射为 DOTween `Ease` 枚举 (`Tween.EaseType`) |
+  | `[5]` | 目标 FOV / 视野大小 | `25` | `CameraTrigger.fieldOfView` | 赋值给摄像机的 `fov` |
+  | `[6]` | 是否平滑过渡 | `True` | - | 决定是否平滑过渡 |
+  | `[7]` | 平滑速度 (Smooth Factor) | `5000` | `duration` (备用) | 当未提供明确时长时：`duration = clamp(5000.0 / smoothFactor, 0.1, 10.0)` |
+  | `[8]` | 缓动曲线类型 (Ease) | `easeInOutSine` | `CameraTrigger.ease` | 映射为 DOTween `CameraFollower.Ease` 枚举 |
+  | `[9]` | 补间动画时长 (Duration) | `1.0` / `3.95` | `CameraTrigger.duration` | 明确指定的过渡秒数（优先使用） |
 
 ---
 

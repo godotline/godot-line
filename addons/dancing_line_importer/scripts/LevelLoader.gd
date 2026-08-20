@@ -577,13 +577,46 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 			var camComp: Node = CameraTriggerClass.new()
 			camComp.name = "CameraTrigger"
 			# 数据格式示例: "True|15, 45, 0|True|0, 3, 0|True|25|True|5000|linear|0|True|True|0"
+			# [0]: enableRotation, [1]: rotation(x,y,z), [2]: enableOffset, [3]: offset(x,y,z),
+			# [4]: enableFov, [5]: fov, [6]: enableSmooth, [7]: smoothFactor, [8]: ease, [9]: duration
 			var parts: PackedStringArray = dataStr.split("|")
-			if parts.size() >= 7:
+
+			# 1. 旋转 Rotation
+			if parts.size() >= 2:
+				var rotParts: PackedStringArray = parts[1].split(",")
+				if rotParts.size() >= 3:
+					var rx: float = float(rotParts[0].strip_edges())
+					var ry: float = float(rotParts[1].strip_edges())
+					var rz: float = float(rotParts[2].strip_edges())
+					camComp.set("rotation", Vector3(deg_to_rad(rx), deg_to_rad(-ry), deg_to_rad(rz)))
+
+			# 2. 偏移 Offset
+			if parts.size() >= 4:
+				var posParts: PackedStringArray = parts[3].split(",")
+				if posParts.size() >= 3:
+					var px: float = float(posParts[0].strip_edges())
+					var py: float = float(posParts[1].strip_edges())
+					var pz: float = float(posParts[2].strip_edges())
+					camComp.set("offset", Vector3(px, py, pz))
+
+			# 3. 视野 FOV
+			if parts.size() >= 6:
 				var fovVal: float = float(parts[5]) if parts[5].is_valid_float() else 80.0
 				camComp.set("fieldOfView", fovVal)
-				if parts.size() >= 8:
-					var smoothFactor: float = float(parts[7]) if parts[7].is_valid_float() else 5000.0
-					camComp.set("duration", 2.0 if smoothFactor <= 0 else clamp(5000.0 / smoothFactor, 0.1, 5.0))
+
+			# 4. 过渡时间 Duration
+			var durVal: float = 2.0
+			if parts.size() >= 10 and parts[9].is_valid_float() and float(parts[9]) > 0.0:
+				durVal = float(parts[9])
+			elif parts.size() >= 8 and parts[7].is_valid_float() and float(parts[7]) > 0.0:
+				var sf: float = float(parts[7])
+				durVal = clamp(5000.0 / sf, 0.1, 10.0) if sf > 10.0 else 2.0
+			camComp.set("duration", durVal)
+
+			# 5. 缓动 Ease
+			if parts.size() >= 9:
+				camComp.set("ease", _parseEaseType(parts[8]))
+
 			triggerRoot.add_child(camComp)
 
 		1: # JumpTrigger
@@ -657,6 +690,34 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 			triggerRoot.name = "%s_%d" % [str(objData.get("name", "Trigger")), objId]
 
 	return triggerRoot
+
+
+func _parseEaseType(easeName: String) -> CameraFollower.Ease:
+	var lower: String = easeName.to_lower().strip_edges()
+	match lower:
+		"linear": return CameraFollower.Ease.Linear
+		"insine": return CameraFollower.Ease.InSine
+		"outsine": return CameraFollower.Ease.OutSine
+		"inoutsine": return CameraFollower.Ease.InOutSine
+		"inquad": return CameraFollower.Ease.InQuad
+		"outquad": return CameraFollower.Ease.OutQuad
+		"inoutquad": return CameraFollower.Ease.InOutQuad
+		"incubic": return CameraFollower.Ease.InCubic
+		"outcubic": return CameraFollower.Ease.OutCubic
+		"inoutcubic": return CameraFollower.Ease.InOutCubic
+		"inquart": return CameraFollower.Ease.InQuart
+		"outquart": return CameraFollower.Ease.OutQuart
+		"inoutquart": return CameraFollower.Ease.InOutQuart
+		"inexpo": return CameraFollower.Ease.InExpo
+		"outexpo": return CameraFollower.Ease.OutExpo
+		"inoutexpo": return CameraFollower.Ease.InOutExpo
+		"inback": return CameraFollower.Ease.InBack
+		"outback": return CameraFollower.Ease.OutBack
+		"inoutback": return CameraFollower.Ease.InOutBack
+		"inbounce": return CameraFollower.Ease.InBounce
+		"outbounce": return CameraFollower.Ease.OutBounce
+		"inoutbounce": return CameraFollower.Ease.InOutBounce
+		_: return CameraFollower.Ease.InOutSine
 
 
 func _createPointLightObject(objData: Dictionary) -> Node:
