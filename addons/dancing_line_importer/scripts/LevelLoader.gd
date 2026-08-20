@@ -162,11 +162,17 @@ func _createCamera(parent: Node, data: Dictionary) -> Node3D:
 
 	cameraRoot.name = "CameraRoot"
 
-	var envData: Dictionary = data.get("environment", {})
+	# 相机跟随目标设置
+	var follower: CameraFollower = cameraRoot as CameraFollower
+	if follower:
+		follower.target = NodePath("../Player")
+
+	# 获取相机节点 (CameraRoot/Rotator/Scale/Camera3D)
 	var camNode: Camera3D = cameraRoot.get_node_or_null("Rotator/Scale/Camera3D") as Camera3D
 	if not camNode:
 		camNode = cameraRoot.get_node_or_null("Camera3D") as Camera3D
 
+	var envData: Dictionary = data.get("environment", {})
 	if camNode:
 		var env: Environment = Environment.new()
 		var bgColorData: Variant = envData.get("backgroundColor", null)
@@ -197,16 +203,39 @@ func _createCamera(parent: Node, data: Dictionary) -> Node3D:
 
 		camNode.environment = env
 
+	# 读取 Main Camera 配置
 	var camData: Dictionary = data.get("mainCamera", {})
+	var camWorldPos: Vector3 = getVector3FromDict(camData, "position", Vector3.ZERO)
+
 	var customData: Variant = JSON.parse_string(str(camData.get("customData", "{}")))
 	if customData is Dictionary:
 		var custom: Dictionary = customData as Dictionary
+
+		# CameraRoot 位置优先使用 Main Camera 的 position（或 pivotOffset + player position）
 		var pivot: Dictionary = custom.get("pivotOffset", {})
-		cameraRoot.position = Vector3(float(pivot.get("x", 0.0)), float(pivot.get("y", 0.0)), float(pivot.get("z", 0.0)))
+		var pivotVec: Vector3 = Vector3(float(pivot.get("x", 0.0)), float(pivot.get("y", 0.0)), float(pivot.get("z", 0.0)))
+		var playerData: Dictionary = data.get("player", {})
+		var playerPos: Vector3 = getVector3FromDict(playerData, "position", Vector3.ZERO)
+
+		if camWorldPos != Vector3.ZERO:
+			cameraRoot.position = unityToGodotPosition(camWorldPos)
+		else:
+			cameraRoot.position = unityToGodotPosition(playerPos + pivotVec)
+
+		# Rotator 旋转
+		var rotator: Node3D = cameraRoot.get_node_or_null("Rotator") as Node3D
 		var rot: Dictionary = custom.get("targetRotation", {})
-		cameraRoot.rotation = unityToGodotRotation(Vector3(float(rot.get("x", 45.0)), float(rot.get("y", 60.0)), float(rot.get("z", 0.0))))
-		var fovVal: Variant = custom.get("fov", 60.0)
+		var rotEuler: Vector3 = Vector3(float(rot.get("x", 45.0)), float(rot.get("y", 45.0)), float(rot.get("z", 0.0)))
+		if rotator:
+			rotator.rotation = unityToGodotRotation(rotEuler)
+		else:
+			cameraRoot.rotation = unityToGodotRotation(rotEuler)
+
+		# 相机距离 targetDistance -> Camera3D Z 轴偏移
+		var targetDist: float = float(custom.get("targetDistance", 25.0))
 		if camNode:
+			camNode.position = Vector3(0.0, 0.0, -targetDist)
+			var fovVal: Variant = custom.get("fov", 80.0)
 			camNode.fov = float(fovVal)
 
 	parent.add_child(cameraRoot)
