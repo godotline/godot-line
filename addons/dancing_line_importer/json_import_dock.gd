@@ -227,9 +227,9 @@ func _on_import_pressed() -> void:
 	if saveErr == OK:
 		_log("✅ 关卡场景已保存: " + scenePath)
 		_log("✅ 关卡数据已保存: " + dataPath)
+		_log("💡 导入完成！请在文件系统中双击打开该场景。")
 		status_label.text = "✅ 已生成: " + safeName
 		EditorInterface.get_resource_filesystem().scan()
-		EditorInterface.open_scene_from_path(scenePath)
 	else:
 		_log("❌ 场景保存失败: " + str(saveErr))
 
