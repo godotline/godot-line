@@ -242,7 +242,7 @@ transform = Transform3D(9, 0, 0, 0, 9, 0, 0, 0, 9, 19.652412, 4.0459642, 9.80491
 [node name="localpos" type="Node" parent="Scene_Group/Scene_001/Obstacle3" unique_id=412952206]
 script = ExtResource("9_0v7qw")
 transformType = 1
-startValue = Vector3(18.532341, 4.0459642, 9.804915)
+startValue = Vector3(19.68665, 3.2849352, 14.071253)
 endOffset = Vector3(0, 10, 0)
 triggeredByTime = false
 

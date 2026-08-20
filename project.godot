@@ -31,7 +31,6 @@ shapes/collision/shape_color=Color(0, 0.6, 0.69803923, 1)
 
 [display]
 
-window/stretch/mode="disabled"
 window/stretch/aspect="ignore"
 
 [editor_plugins]
