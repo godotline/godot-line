@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://jwey7t3sn0xo"
+path="res://.godot/imported/Plane016.obj-c9b7d12d8bc0f9849c3579da4ff2d29c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Plane016.obj-c9b7d12d8bc0f9849c3579da4ff2d29c.mesh"]
+
+source_file="res://[Scenes]/XZ_Line_中国·春节__The_China_Spring_Festival/Resources/Plane016.obj"
+dest_files=["res://.godot/imported/Plane016.obj-c9b7d12d8bc0f9849c3579da4ff2d29c.mesh", "res://.godot/imported/Plane016.obj-c9b7d12d8bc0f9849c3579da4ff2d29c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

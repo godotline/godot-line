@@ -85,22 +85,6 @@ static func get_all_plugins() -> Array[PluginEntry]:
 	mpm.md5 = "f57cf78f36a7eb001400794c42b45c0c"
 	list.append(mpm)
 
-	# dancing_line_importer — 从 Arphros 导出的关卡 JSON 导入关卡
-	var arphros: PluginEntry = PluginEntry.new(
-		"dancing_line_importer",
-		"Arphros Importer",
-		"导入 Arphros 导出的关卡 JSON 到 GodotLine 项目中，自动生成关卡场景与 LevelData 资源。",
-		"godotline",
-		"dancing_line_importer",
-		"main",
-		"addons/dancing_line_importer",
-		"res://addons/dancing_line_importer",
-		"1.1.0",
-		"",
-		""
-	)
-	list.append(arphros)
-
 	return list
 
 

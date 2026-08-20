@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://6utpg43hy0fs"
+path="res://.godot/imported/SM_Prop_Basket_Rice_01.obj-65d8519f43dae9813249db9ffc62ee1c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/SM_Prop_Basket_Rice_01.obj-65d8519f43dae9813249db9ffc62ee1c.mesh"]
+
+source_file="res://[Scenes]/XZ_Line_中国·春节__The_China_Spring_Festival/Resources/SM_Prop_Basket_Rice_01.obj"
+dest_files=["res://.godot/imported/SM_Prop_Basket_Rice_01.obj-65d8519f43dae9813249db9ffc62ee1c.mesh", "res://.godot/imported/SM_Prop_Basket_Rice_01.obj-65d8519f43dae9813249db9ffc62ee1c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

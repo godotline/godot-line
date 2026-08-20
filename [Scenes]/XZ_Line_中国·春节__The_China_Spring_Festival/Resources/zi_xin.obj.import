@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dpyc73pb6u147"
+path="res://.godot/imported/zi_xin.obj-e079591e10b57cf704c61dca0991ae9f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/zi_xin.obj-e079591e10b57cf704c61dca0991ae9f.mesh"]
+
+source_file="res://[Scenes]/XZ_Line_中国·春节__The_China_Spring_Festival/Resources/zi_xin.obj"
+dest_files=["res://.godot/imported/zi_xin.obj-e079591e10b57cf704c61dca0991ae9f.mesh", "res://.godot/imported/zi_xin.obj-e079591e10b57cf704c61dca0991ae9f.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

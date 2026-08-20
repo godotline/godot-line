@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://b42ufn1b6scv3"
+path="res://.godot/imported/BushPlant01.obj-541d6c6352b19541692844451ad59e67.mesh"
+
+[deps]
+
+files=["res://.godot/imported/BushPlant01.obj-541d6c6352b19541692844451ad59e67.mesh"]
+
+source_file="res://[Scenes]/XZ_Line_中国·春节__The_China_Spring_Festival/Resources/BushPlant01.obj"
+dest_files=["res://.godot/imported/BushPlant01.obj-541d6c6352b19541692844451ad59e67.mesh", "res://.godot/imported/BushPlant01.obj-541d6c6352b19541692844451ad59e67.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://buyjybgclij7h"
+path="res://.godot/imported/SM_Env_Reeds_01.obj-d2567ca26c8226500081e029c7cd202f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/SM_Env_Reeds_01.obj-d2567ca26c8226500081e029c7cd202f.mesh"]
+
+source_file="res://[Scenes]/XZ_Line_中国·春节__The_China_Spring_Festival/Resources/SM_Env_Reeds_01.obj"
+dest_files=["res://.godot/imported/SM_Env_Reeds_01.obj-d2567ca26c8226500081e029c7cd202f.mesh", "res://.godot/imported/SM_Env_Reeds_01.obj-d2567ca26c8226500081e029c7cd202f.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
