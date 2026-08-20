@@ -639,20 +639,35 @@ func _loadMeshFromJson(objData: Dictionary, meshes: Array) -> Mesh:
 	elif custom.has("meshId"):
 		meshId = toIntSafe(custom.get("meshId", -1))
 
-	if meshId != -1 and meshId >= 0 and meshId < meshes.size():
-		var rawInfo: Variant = meshes[meshId]
-		if rawInfo is Dictionary:
-			var meshInfo: Dictionary = rawInfo as Dictionary
-			var fileName: String = str(meshInfo.get("fileName", ""))
-			if fileName != "":
-				var mesh: Mesh = _loadMeshByFilename(fileName)
-				if mesh != null:
-					return mesh
+	# 1. 优先按 meshes 数组中元素自身的 id 字段匹配
+	if meshId != -1:
+		for rawInfo: Variant in meshes:
+			if rawInfo is Dictionary:
+				var meshInfo: Dictionary = rawInfo as Dictionary
+				if toIntSafe(meshInfo.get("id", -1)) == meshId:
+					var fileName: String = str(meshInfo.get("fileName", ""))
+					if fileName != "":
+						var mesh: Mesh = _loadMeshByFilename(fileName)
+						if mesh != null:
+							return mesh
 
+		# 兼容兜底：按下标索引匹配
+		if meshId >= 0 and meshId < meshes.size():
+			var rawInfo: Variant = meshes[meshId]
+			if rawInfo is Dictionary:
+				var meshInfo: Dictionary = rawInfo as Dictionary
+				var fileName: String = str(meshInfo.get("fileName", ""))
+				if fileName != "":
+					var mesh: Mesh = _loadMeshByFilename(fileName)
+					if mesh != null:
+						return mesh
+
+	# 2. 按物体名称匹配
 	var namedMesh: Mesh = _loadMeshByName(objName)
 	if namedMesh != null:
 		return namedMesh
 
+	# 3. 按 meshes 中的文件名模糊匹配物体名称
 	for rawInfo: Variant in meshes:
 		if rawInfo is Dictionary:
 			var meshInfo: Dictionary = rawInfo as Dictionary
@@ -743,14 +758,25 @@ func _createStandardMaterial(objData: Dictionary, materials: Array) -> StandardM
 
 	if not materialIds.is_empty():
 		var matId: int = toIntSafe(materialIds[0])
-		if matId >= 0 and matId < materials.size():
+		# 优先按 materials 数组中元素自身的 id 字段匹配
+		var foundMat: Dictionary = {}
+		for rawMat: Variant in materials:
+			if rawMat is Dictionary:
+				var m: Dictionary = rawMat as Dictionary
+				if toIntSafe(m.get("id", -1)) == matId:
+					foundMat = m
+					break
+		# 兼容兜底：按下标匹配
+		if foundMat.is_empty() and matId >= 0 and matId < materials.size():
 			var rawMat: Variant = materials[matId]
 			if rawMat is Dictionary:
-				var matData: Dictionary = rawMat as Dictionary
-				var colorData: Variant = matData.get("color", null)
-				if colorData is Dictionary:
-					var c: Dictionary = colorData as Dictionary
-					baseColor = Color(float(c.get("r", baseColor.r)), float(c.get("g", baseColor.g)), float(c.get("b", baseColor.b)), float(c.get("a", baseColor.a)))
+				foundMat = rawMat as Dictionary
+
+		if not foundMat.is_empty():
+			var colorData: Variant = foundMat.get("color", null)
+			if colorData is Dictionary:
+				var c: Dictionary = colorData as Dictionary
+				baseColor = Color(float(c.get("r", baseColor.r)), float(c.get("g", baseColor.g)), float(c.get("b", baseColor.b)), float(c.get("a", baseColor.a)))
 
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.albedo_color = baseColor
