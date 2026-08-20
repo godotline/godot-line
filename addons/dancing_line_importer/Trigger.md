@@ -87,9 +87,10 @@ GodotLine 采用父子解耦的触发器模式：
 - **原版数据格式**:
   ```
   "0.01|0.1254902, 0, 0, 1|True|2.5|linear"
+  "True|Color|True|0.1254902, 0, 0, 1|True|True|1, 1, 1, 1|2.5|linear"
   ```
 - **参数映射**:
-  - `fogDensity`: `0.01`
+  - `fogDensity`: `0.01` (动态计算 `fogSetting.end = 100.0 / density`)
   - `fogColor`: `Color(0.125, 0, 0, 1)`
   - `duration`: `2.5` 秒
   - `transType`: `Tween.TRANS_LINEAR`
@@ -107,12 +108,37 @@ GodotLine 采用父子解耦的触发器模式：
 
 ---
 
-### 8. 动效与位移/旋转/缩放/显隐触发器 (Move / Rotate / Scale / Visibility)
-| ARPhros Type | 名称 | 目标说明 |
-| :---: | :--- | :--- |
-| **5** | `MoveTrigger` | 关联目标物体在指定时间内做相对位移 |
-| **6** | `RotateTrigger` | 关联目标物体在指定时间内做相对旋转 |
-| **7** | `ScaleTrigger` | 关联目标物体在指定时间内做缩放动画 |
-| **8** | `ColorTrigger` | 动态渐变材质颜色 |
-| **10** | `SequenceTrigger` | 串联触发序列（延时执行多个触发器） |
-| **18** | `VisibilityTrigger` | 动态显示/隐藏目标关卡区域（如隐藏 场景 1，激活 场景 2） |
+### 8. 转向与方向触发器 (DirectionTrigger)
+- **ARPhros Type**: `11`
+- **GodotLine 脚本**: `res://#Template/[Scripts]/Trigger/ChangeDirection.gd`
+- **原版数据格式**:
+  ```
+  "0, 45, 0|0, 45, 0"
+  ```
+- **映射规则**: 提取一向与二向欧拉角向量 `firstDirection` 与 `secondDirection`，进入时重设玩家左右转向向量。
+
+---
+
+### 9. 通关触发器 (FinishTrigger)
+- **ARPhros Type**: `12`
+- **GodotLine 脚本**: `res://#Template/[Scripts]/Trigger/FadeOutMusic.gd`
+- **原版数据格式**:
+  ```
+  "True|5|0, 45, 0"
+  ```
+- **映射规则**: 提取 `[1]` 位的秒数（`5.0` 秒），调用 `AudioManager.FadeOut(0.0, duration)`。
+
+---
+
+### 10. 区域显隐触发器 (VisibilityTrigger)
+- **ARPhros Type**: `18`
+- **GodotLine 脚本**: `res://#Template/[Scripts]/Trigger/SetActive.gd`
+- **原版数据格式**:
+  ```
+  "Gone|9372|False|" 或 "Active|9515|False|"
+  ```
+- **参数映射**:
+  - `Gone` / `Hidden` → `SingleActive.active = false` (隐藏对应场景)
+  - `Active` / `Appear` → `SingleActive.active = true` (显示对应场景)
+  - `target` → 关联目标场景容器 ID
+  - `dontRevive` → 是否禁止复活时恢复原状

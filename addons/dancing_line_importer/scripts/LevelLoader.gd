@@ -20,6 +20,11 @@ const SpeedClass: Script = preload("res://#Template/[Scripts]/Trigger/Speed.gd")
 const GravityTriggerClass: Script = preload("res://#Template/[Scripts]/Trigger/GravityTrigger.gd")
 const SetFogClass: Script = preload("res://#Template/[Scripts]/Trigger/SetFog.gd")
 const CameraShakeClass: Script = preload("res://#Template/[Scripts]/CameraScripts/CameraShakeTrigger.gd")
+const ChangeDirectionClass: Script = preload("res://#Template/[Scripts]/Trigger/ChangeDirection.gd")
+const FadeOutMusicClass: Script = preload("res://#Template/[Scripts]/Trigger/FadeOutMusic.gd")
+const SetActiveClass: Script = preload("res://#Template/[Scripts]/Trigger/SetActive.gd")
+const SingleActiveClass: Script = preload("res://#Template/[Scripts]/Settings/SingleActive.gd")
+const FogSettingsClass: Script = preload("res://#Template/[Scripts]/Settings/FogSettings.gd")
 
 const MODEL_SEARCH_PATHS: Array[String] = [
 	"res://#Template/[Resources]/Models/",
@@ -656,6 +661,33 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 			shakeComp.name = "CameraShakeTrigger"
 			triggerRoot.add_child(shakeComp)
 
+		11: # DirectionTrigger (设置玩家拐弯方向)
+			triggerRoot.name = "%s_%d" % ["DirectionTrigger", objId]
+			var dirComp: Node = ChangeDirectionClass.new()
+			dirComp.name = "ChangeDirection"
+			# 数据格式示例: "0, 45, 0|0, 45, 0"
+			var parts: PackedStringArray = dataStr.split("|")
+			if parts.size() >= 1:
+				var d1Parts: PackedStringArray = parts[0].split(",")
+				if d1Parts.size() >= 3:
+					var d1: Vector3 = Vector3(float(d1Parts[0]), float(d1Parts[1]), float(d1Parts[2]))
+					dirComp.set("firstDirection", d1)
+			if parts.size() >= 2:
+				var d2Parts: PackedStringArray = parts[1].split(",")
+				if d2Parts.size() >= 3:
+					var d2: Vector3 = Vector3(float(d2Parts[0]), float(d2Parts[1]), float(d2Parts[2]))
+					dirComp.set("secondDirection", d2)
+			triggerRoot.add_child(dirComp)
+
+		12: # FinishTrigger (通关淡出音乐)
+			triggerRoot.name = "%s_%d" % ["FinishTrigger", objId]
+			var fadeComp: Node = FadeOutMusicClass.new()
+			fadeComp.name = "FadeOutMusic"
+			var parts: PackedStringArray = dataStr.split("|")
+			if parts.size() >= 2 and parts[1].is_valid_float():
+				fadeComp.set("duration", float(parts[1]))
+			triggerRoot.add_child(fadeComp)
+
 		13: # FovTrigger
 			triggerRoot.name = "%s_%d" % ["FovTrigger", objId]
 			var camComp: Node = CameraTriggerClass.new()
@@ -667,10 +699,60 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 				camComp.set("duration", float(parts[1]) if parts[1].is_valid_float() else 1.0)
 			triggerRoot.add_child(camComp)
 
+		18: # VisibilityTrigger (动态激活/隐藏区域)
+			triggerRoot.name = "%s_%d" % ["VisibilityTrigger", objId]
+			var activeComp: Node = SetActiveClass.new()
+			activeComp.name = "SetActive"
+			# 数据格式示例: "Gone|9372|False|" -> Mode|TargetObjId|DontRevive|
+			var parts: PackedStringArray = dataStr.split("|")
+			if parts.size() >= 2:
+				var modeStr: String = parts[0].to_lower()
+				var targetId: int = int(parts[1]) if parts[1].is_valid_int() else -1
+				var singleActive: SingleActive = SingleActiveClass.new()
+				# Gone/Hidden -> active=false; Active/Appear -> active=true
+				singleActive.active = (modeStr == "active" or modeStr == "appear" or modeStr == "show")
+				# 相对路径将在后处理或通过节点名定位
+				singleActive.target = NodePath("../../%s" % targetId)
+				if parts.size() >= 3:
+					singleActive.dontRevive = (parts[2].to_lower() == "true")
+				activeComp.set("actives", [singleActive])
+			triggerRoot.add_child(activeComp)
+
+		19: # EnvironmentTrigger (环境雾/颜色切换)
+			triggerRoot.name = "%s_%d" % ["EnvironmentTrigger", objId]
+			var fogComp: Node = SetFogClass.new()
+			fogComp.name = "SetFog"
+			# 数据格式: "True|Color|True|0.125, 0, 0, 1|True|True|1, 1, 1, 1|2.5|linear"
+			var parts: PackedStringArray = dataStr.split("|")
+			var fogSetting: FogSettings = FogSettingsClass.new()
+			fogSetting.useFog = true
+			if parts.size() >= 4:
+				var cParts: PackedStringArray = parts[3].split(",")
+				if cParts.size() >= 4:
+					fogSetting.fogColor = Color(float(cParts[0]), float(cParts[1]), float(cParts[2]), float(cParts[3]))
+			if parts.size() >= 8 and parts[7].is_valid_float():
+				fogComp.set("duration", float(parts[7]))
+			fogComp.set("fog", fogSetting)
+			triggerRoot.add_child(fogComp)
+
 		22: # FogTrigger
 			triggerRoot.name = "%s_%d" % ["FogTrigger", objId]
 			var fogComp: Node = SetFogClass.new()
 			fogComp.name = "SetFog"
+			# 数据格式: "0.01|0.1254902, 0, 0, 1|True|2.5|linear"
+			var parts: PackedStringArray = dataStr.split("|")
+			var fogSetting: FogSettings = FogSettingsClass.new()
+			fogSetting.useFog = true
+			if parts.size() >= 1 and parts[0].is_valid_float():
+				fogSetting.start = 0.0
+				fogSetting.end = 100.0 / float(parts[0]) if float(parts[0]) > 0 else 100.0
+			if parts.size() >= 2:
+				var cParts: PackedStringArray = parts[1].split(",")
+				if cParts.size() >= 4:
+					fogSetting.fogColor = Color(float(cParts[0]), float(cParts[1]), float(cParts[2]), float(cParts[3]))
+			if parts.size() >= 4 and parts[3].is_valid_float():
+				fogComp.set("duration", float(parts[3]))
+			fogComp.set("fog", fogSetting)
 			triggerRoot.add_child(fogComp)
 
 		24: # GravityTrigger
