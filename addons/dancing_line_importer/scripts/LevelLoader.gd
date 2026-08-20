@@ -25,6 +25,7 @@ const MODEL_SEARCH_PATHS: Array[String] = [
 ]
 
 var loadedMeshes: Dictionary = {}
+var extraSearchPaths: Array[String] = []
 
 
 func buildScene(data: Dictionary, levelDataResource: LevelData = null) -> Node3D:
@@ -574,16 +575,46 @@ func _createDirectionalLightObject(objData: Dictionary) -> Node:
 
 # ==================== 网格与材质加载 ====================
 
-func _loadMeshFromJson(objData: Dictionary, meshes: Array) -> Mesh:
+func _parseCustom(objData: Dictionary) -> Dictionary:
 	var customDataStr: Variant = objData.get("customData", "{}")
-	var custom: Dictionary = {}
+	if customDataStr is Dictionary:
+		return customDataStr as Dictionary
 	if customDataStr is String and customDataStr != "":
 		var parsed: Variant = JSON.parse_string(customDataStr as String)
 		if parsed is Dictionary:
-			custom = parsed as Dictionary
+			return parsed as Dictionary
+	return {}
 
-	var meshId: int = toIntSafe(custom.get("meshId", -1))
+
+func _getMeshDataDict(custom: Dictionary) -> Dictionary:
+	var data: Variant = custom.get("data", {})
+	if data is Dictionary:
+		return data as Dictionary
+	var meshData: Variant = custom.get("meshData", {})
+	if meshData is Dictionary:
+		return meshData as Dictionary
+	return custom
+
+
+func _getMaterialIds(custom: Dictionary) -> Array:
+	var meshDataDict: Dictionary = _getMeshDataDict(custom)
+	if meshDataDict.has("materialIds") and meshDataDict.get("materialIds") is Array:
+		return meshDataDict.get("materialIds") as Array
+	if custom.has("materialIds") and custom.get("materialIds") is Array:
+		return custom.get("materialIds") as Array
+	return []
+
+
+func _loadMeshFromJson(objData: Dictionary, meshes: Array) -> Mesh:
+	var custom: Dictionary = _parseCustom(objData)
+	var meshDataDict: Dictionary = _getMeshDataDict(custom)
 	var objName: String = str(objData.get("name", "unnamed"))
+
+	var meshId: int = -1
+	if meshDataDict.has("meshId"):
+		meshId = toIntSafe(meshDataDict.get("meshId", -1))
+	elif custom.has("meshId"):
+		meshId = toIntSafe(custom.get("meshId", -1))
 
 	if meshId != -1 and meshId >= 0 and meshId < meshes.size():
 		var rawInfo: Variant = meshes[meshId]
@@ -616,7 +647,7 @@ func _loadMeshByFilename(fileName: String) -> Mesh:
 	if loadedMeshes.has(fileName):
 		return loadedMeshes[fileName] as Mesh
 
-	for basePath: String in MODEL_SEARCH_PATHS:
+	for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
 		var fullPath: String = basePath + fileName
 		if ResourceLoader.exists(fullPath):
 			var resource: Resource = load(fullPath)
@@ -627,7 +658,7 @@ func _loadMeshByFilename(fileName: String) -> Mesh:
 	var extensions: Array[String] = [".obj", ".glb", ".gltf", ".fbx"]
 	for ext: String in extensions:
 		if not fileName.ends_with(ext):
-			for basePath: String in MODEL_SEARCH_PATHS:
+			for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
 				var fullPath: String = basePath + fileName + ext
 				if ResourceLoader.exists(fullPath):
 					var resource: Resource = load(fullPath)
@@ -639,7 +670,7 @@ func _loadMeshByFilename(fileName: String) -> Mesh:
 
 
 func _loadMeshByName(name: String) -> Mesh:
-	for basePath: String in MODEL_SEARCH_PATHS:
+	for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
 		var fullPath: String = basePath + name
 		if ResourceLoader.exists(fullPath):
 			var resource: Resource = load(fullPath)
@@ -648,7 +679,7 @@ func _loadMeshByName(name: String) -> Mesh:
 
 	var extensions: Array[String] = [".obj", ".glb", ".gltf"]
 	for ext: String in extensions:
-		for basePath: String in MODEL_SEARCH_PATHS:
+		for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
 			var fullPath: String = basePath + name + ext
 			if ResourceLoader.exists(fullPath):
 				var resource: Resource = load(fullPath)
@@ -682,10 +713,9 @@ func _createBuiltinMesh(objData: Dictionary) -> Mesh:
 
 func _createStandardMaterial(objData: Dictionary, materials: Array) -> StandardMaterial3D:
 	var name: String = str(objData.get("name", "")).to_lower()
-	var customData: Variant = JSON.parse_string(str(objData.get("customData", "{}")))
-	var custom: Dictionary = customData as Dictionary if customData is Dictionary else {}
+	var custom: Dictionary = _parseCustom(objData)
 
-	var materialIds: Array = custom.get("materialIds", [])
+	var materialIds: Array = _getMaterialIds(custom)
 	var baseColor: Color = _getDefaultColor(name)
 
 	if not materialIds.is_empty():

@@ -13,6 +13,10 @@ const DEFAULT_LEVEL_DATA_TEMPLATE: String = "res://#Template/[Scenes]/DefaultSce
 
 var currentJsonData: Dictionary = {}
 var tempScene: Node = null
+var currentFolderPath: String = ""
+var currentAudioBytes: PackedByteArray = PackedByteArray()
+var currentAudioExt: String = "mp3"
+var importedModelsDir: String = ""
 
 
 func _ready() -> void:
@@ -21,75 +25,100 @@ func _ready() -> void:
 	preview_button.pressed.connect(_on_preview_pressed)
 
 
-var currentAudioBytes: PackedByteArray = PackedByteArray()
-var currentAudioExt: String = "mp3"
-
-
 func _on_browse_pressed() -> void:
 	var dialog: EditorFileDialog = EditorFileDialog.new()
-	dialog.title = "选择 ARPhros 关卡文件 (.arphos, .arphros, .json)"
-	dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
-	dialog.add_filter("*.arphos, *.arphros, *.json", "Arphros Level Files")
-	dialog.add_filter("*.arphos", "Arphros Package (*.arphos)")
-	dialog.add_filter("*.arphros", "Arphros Package (*.arphros)")
-	dialog.add_filter("*.json", "JSON Level Files (*.json)")
+	dialog.title = "选择 dancing_line 关卡文件夹（包含 level.arproj）"
+	dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_DIR
 	dialog.access = EditorFileDialog.ACCESS_FILESYSTEM
 	add_child(dialog)
 	dialog.popup_centered(Vector2i(800, 500))
-	dialog.file_selected.connect(_on_file_selected)
+	dialog.dir_selected.connect(_on_folder_selected)
 
 
-func _on_file_selected(path: String) -> void:
-	json_path_line.text = path
-	_parseFile(path)
-
-
-func _parseFile(path: String) -> void:
+func _on_folder_selected(dir: String) -> void:
+	json_path_line.text = dir
+	currentFolderPath = dir
 	currentAudioBytes.clear()
-	if not FileAccess.file_exists(path):
-		_log("❌ 文件不存在: " + path)
+	currentAudioExt = "mp3"
+	importedModelsDir = ""
+
+	var arprojPath: String = ""
+	for candidate: String in ["level.arproj", "level.json", "levels.json", "map.json", "data.json"]:
+		var p: String = dir.path_join(candidate)
+		if FileAccess.file_exists(p):
+			arprojPath = p
+			break
+
+	if arprojPath.is_empty():
+		_log("❌ 未在文件夹中找到关卡数据文件 (level.arproj)")
 		return
 
-	var ext: String = path.get_extension().to_lower()
-	if ext == "json":
-		_parseJsonFile(path)
-	else:
-		_parseArphosPackage(path)
+	_log("📂 导入文件夹: " + dir)
+	_log("📄 关卡数据文件: " + arprojPath)
+	_parseJsonFile(arprojPath)
 
-
-func _parseArphosPackage(path: String) -> void:
-	var reader: ZIPReader = ZIPReader.new()
-	var err: Error = reader.open(path)
-	if err != OK:
-		_log("⚠️ ZIPReader 打开失败 (code %d)，尝试直接按文本 JSON 解析..." % err)
-		_parseJsonFile(path)
+	if currentJsonData.is_empty():
 		return
 
-	var files: PackedStringArray = reader.get_files()
-	_log("📦 包内包含文件: " + ", ".join(files))
+	# 读取音频
+	for candidate: String in ["song.mp3", "song.ogg", "song.wav", "music.mp3", "music.ogg", "bgm.mp3"]:
+		var p: String = dir.path_join(candidate)
+		if FileAccess.file_exists(p):
+			var f: FileAccess = FileAccess.open(p, FileAccess.READ)
+			if f:
+				currentAudioBytes = f.get_buffer(f.get_length())
+				currentAudioExt = p.get_extension()
+				f.close()
+				_log("🎵 已读取音频: " + candidate + " (大小: %d 字节)" % currentAudioBytes.size())
+			break
 
-	var jsonBytes: PackedByteArray = PackedByteArray()
-	for f: String in files:
-		var low: String = f.to_lower()
-		if low.ends_with(".arplay") or low.ends_with(".json") or low.contains("level"):
-			jsonBytes = reader.read_file(f)
-			_log("📄 读取关卡数据文件: " + f)
-		elif low.ends_with(".mp3") or low.ends_with(".ogg") or low.ends_with(".wav"):
-			currentAudioBytes = reader.read_file(f)
-			currentAudioExt = low.get_extension()
-			_log("🎵 读取关卡音频文件: " + f + " (大小: %d 字节)" % currentAudioBytes.size())
+	# 复制模型资源
+	_copyModels(dir)
 
-	if jsonBytes.is_empty() and files.size() > 0:
-		jsonBytes = reader.read_file(files[0])
 
-	reader.close()
-
-	if jsonBytes.is_empty():
-		_log("❌ 未在包中找到关卡数据文件")
+func _copyModels(sourceDir: String) -> void:
+	var resourcesDir: String = sourceDir.path_join("Resources")
+	if not DirAccess.dir_exists_absolute(resourcesDir):
+		_log("⚠️ 未找到 Resources 子文件夹，跳过模型导入")
 		return
 
-	var text: String = jsonBytes.get_string_from_utf8()
-	_parseJsonText(text)
+	var info: Dictionary = currentJsonData.get("info", {})
+	var levelName: String = str(info.get("levelName", "Level"))
+	var safeName: String = _sanitizeFilename(levelName)
+	var targetDir: String = "res://[Scenes]/" + safeName + "/Resources/"
+	DirAccess.make_dir_recursive_absolute(targetDir)
+
+	var da: DirAccess = DirAccess.open(resourcesDir)
+	if not da:
+		_log("❌ 无法读取 Resources 文件夹: " + resourcesDir)
+		return
+
+	da.list_dir_begin()
+	var count: int = 0
+	while true:
+		var fileName: String = da.get_next()
+		if fileName.is_empty():
+			break
+		if fileName.begins_with(".") or da.current_is_dir():
+			continue
+		var ext: String = fileName.get_extension().to_lower()
+		if ext in ["meta", "lua", "txt", "json", "cs", "unity", "prefab", "mat"]:
+			continue
+		var validExts: Array[String] = ["obj", "png", "jpg", "jpeg", "mtl", "glb", "gltf", "fbx", "tga", "bmp", "dds", "hdr", "exr", "ktx", "pvr", "pkm", "svg", "webp"]
+		if ext not in validExts:
+			continue
+		var src: String = resourcesDir.path_join(fileName)
+		var dst: String = targetDir + fileName
+		var err: Error = DirAccess.copy_absolute(src, dst)
+		if err == OK:
+			count += 1
+
+	da.list_dir_end()
+
+	_log("📦 已复制 %d 个模型/纹理文件到: " % count + targetDir)
+	if count > 0:
+		importedModelsDir = targetDir
+		EditorInterface.get_resource_filesystem().scan()
 
 
 func _parseJsonFile(path: String) -> void:
@@ -100,10 +129,7 @@ func _parseJsonFile(path: String) -> void:
 
 	var text: String = file.get_as_text()
 	file.close()
-	_parseJsonText(text)
 
-
-func _parseJsonText(text: String) -> void:
 	var json: JSON = JSON.new()
 	var err: Error = json.parse(text)
 	if err != OK:
@@ -127,7 +153,7 @@ func _parseJsonText(text: String) -> void:
 
 func _on_preview_pressed() -> void:
 	if currentJsonData.is_empty():
-		_log("❌ 请先选择 JSON 文件")
+		_log("❌ 请先选择关卡文件夹")
 		return
 
 	_log("🔄 预览场景...")
@@ -146,10 +172,21 @@ func _on_preview_pressed() -> void:
 
 func _on_import_pressed() -> void:
 	if currentJsonData.is_empty():
-		_log("❌ 请先选择 JSON 文件")
+		_log("❌ 请先选择关卡文件夹")
 		return
 
 	_log("🔄 生成关卡资源与场景...")
+
+	# 如果有模型需要等待导入完成
+	if not importedModelsDir.is_empty():
+		_log("⏳ 等待模型资源导入...")
+		if EditorInterface.get_resource_filesystem().is_scanning():
+			await EditorInterface.get_resource_filesystem().filesystem_changed
+		else:
+			# 触发扫描并等待
+			EditorInterface.get_resource_filesystem().scan()
+			await EditorInterface.get_resource_filesystem().filesystem_changed
+		_log("✅ 模型资源导入完成")
 
 	var info: Dictionary = currentJsonData.get("info", {})
 	var levelName: String = str(info.get("levelName", "Level"))
@@ -158,10 +195,8 @@ func _on_import_pressed() -> void:
 	var scenePath: String = levelDir + safeName + ".tscn"
 	var dataPath: String = levelDir + safeName + ".tres"
 
-	# 创建关卡专属目录
 	DirAccess.make_dir_recursive_absolute(levelDir)
 
-	# 提取并保存音频文件（如果有）
 	var audioStreamPath: String = ""
 	if not currentAudioBytes.is_empty():
 		audioStreamPath = levelDir + "song." + currentAudioExt
@@ -169,10 +204,9 @@ func _on_import_pressed() -> void:
 		if audioFile:
 			audioFile.store_buffer(currentAudioBytes)
 			audioFile.close()
-			_log("🎵 音频文件已解压保存至: " + audioStreamPath)
+			_log("🎵 音频文件已保存至: " + audioStreamPath)
 			EditorInterface.get_resource_filesystem().scan()
 
-	# 生成 LevelData 资源
 	var levelData: LevelData = _createLevelDataResource(currentJsonData, safeName, dataPath, audioStreamPath)
 	if not levelData:
 		_log("❌ LevelData 资源创建失败")
@@ -183,10 +217,8 @@ func _on_import_pressed() -> void:
 		_log("❌ 场景生成失败")
 		return
 
-	# 设置 owner 确保所有节点包含在打包场景内
 	_setOwnerRecursive(scene, scene)
 
-	# 打包场景并保存
 	var packedScene: PackedScene = PackedScene.new()
 	var packErr: Error = packedScene.pack(scene)
 	if packErr != OK:
@@ -253,6 +285,8 @@ func _setOwnerRecursive(node: Node, owner: Node) -> void:
 func _buildScene(data: Dictionary, levelDataResource: LevelData) -> Node:
 	var loader: LevelLoader = LevelLoaderScript.new() as LevelLoader
 	add_child(loader)
+	if not importedModelsDir.is_empty():
+		loader.extraSearchPaths = [importedModelsDir]
 	var scene: Node = loader.buildScene(data, levelDataResource)
 	loader.queue_free()
 	return scene
