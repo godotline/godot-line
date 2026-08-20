@@ -357,14 +357,19 @@ func _createSingleObject(objData: Dictionary, meshes: Array, materials: Array, s
 		_:
 			node = _createGroupObject(objData)
 
-	# 处理 visibility 属性
-	# 0: 正常可见 (Visible)
-	# 1: 隐藏 (Hidden / EditorOnly / Invisible)
-	# 2: 仅在运行时特定逻辑激活
+	# 处理 visibility 属性：
+	# ARPhros 导出端的 visibility 定义（反人类设计）：
+	# 0: 正常物体 / 初始激活可见
+	# 1: 真正可见的关卡主场景容器（如 场景（总）、场景 1）
+	# 2: 初始隐藏的后续关卡场景（如 路线、场景 2、场景 7 等，由 VisibilityTrigger 动态激活）
+	# 之前把 1 当成了隐藏，导致 场景（总）/场景 1 顶级容器直接 visible=false，全场景变黑！
+	# 正确逻辑：只有当 visibility == 2 时才是初始隐藏（待触发器激活）
 	if node is Node3D:
 		var vis: int = toIntSafe(objData.get("visibility", 0))
-		if vis == 1:
+		if vis == 2:
 			(node as Node3D).visible = false
+		else:
+			(node as Node3D).visible = true
 
 	return node
 
@@ -384,22 +389,21 @@ func _createGroupObject(objData: Dictionary) -> Node3D:
 	return groupNode
 
 func _createRoadObject(objData: Dictionary, materials: Array, sprites: Array = []) -> Node:
-	var groundScene: PackedScene = load(GROUND_TEMPLATE) as PackedScene
-	var roadNode: Node3D
-	if groundScene:
-		roadNode = groundScene.instantiate() as Node3D
-	else:
-		var sb: StaticBody3D = StaticBody3D.new()
-		sb.collision_layer = 2
-		sb.collision_mask = 0
-		var col: CollisionShape3D = CollisionShape3D.new()
-		var shape: BoxShape3D = BoxShape3D.new()
-		col.shape = shape
-		sb.add_child(col)
-		var meshInst: MeshInstance3D = MeshInstance3D.new()
-		meshInst.mesh = BoxMesh.new()
-		sb.add_child(meshInst)
-		roadNode = sb
+	var sb: StaticBody3D = StaticBody3D.new()
+	sb.collision_layer = 2
+	sb.collision_mask = 0
+
+	var col: CollisionShape3D = CollisionShape3D.new()
+	var shape: BoxShape3D = BoxShape3D.new()
+	shape.margin = 0.001
+	col.shape = shape
+	sb.add_child(col)
+
+	var meshInst: MeshInstance3D = MeshInstance3D.new()
+	meshInst.mesh = BoxMesh.new()
+	sb.add_child(meshInst)
+
+	var roadNode: Node3D = sb
 
 	var objId: int = toIntSafe(objData.get("id", 0))
 	roadNode.name = "%s_%d" % [str(objData.get("name", "Road")), objId]
@@ -411,30 +415,28 @@ func _createRoadObject(objData: Dictionary, materials: Array, sprites: Array = [
 	roadNode.scale = unityToGodotScale(scale)
 
 	var mat: Material = _createStandardMaterial(objData, materials, sprites)
-	var meshNode: MeshInstance3D = roadNode.get_node_or_null("MeshInstance3D") as MeshInstance3D
-	if meshNode and mat:
-		meshNode.material_override = mat
+	if mat:
+		meshInst.material_override = mat
 
 	return roadNode
 
 
 func _createObstacleBox(objData: Dictionary, materials: Array, sprites: Array = []) -> Node:
-	var obsScene: PackedScene = load(OBSTACLE_TEMPLATE) as PackedScene
-	var obsNode: Node3D
-	if obsScene:
-		obsNode = obsScene.instantiate() as Node3D
-	else:
-		var sb: StaticBody3D = StaticBody3D.new()
-		sb.collision_layer = 4
-		sb.collision_mask = 0
-		var col: CollisionShape3D = CollisionShape3D.new()
-		var shape: BoxShape3D = BoxShape3D.new()
-		col.shape = shape
-		sb.add_child(col)
-		var meshInst: MeshInstance3D = MeshInstance3D.new()
-		meshInst.mesh = BoxMesh.new()
-		sb.add_child(meshInst)
-		obsNode = sb
+	var sb: StaticBody3D = StaticBody3D.new()
+	sb.collision_layer = 4
+	sb.collision_mask = 0
+
+	var col: CollisionShape3D = CollisionShape3D.new()
+	var shape: BoxShape3D = BoxShape3D.new()
+	shape.margin = 0.001
+	col.shape = shape
+	sb.add_child(col)
+
+	var meshInst: MeshInstance3D = MeshInstance3D.new()
+	meshInst.mesh = BoxMesh.new()
+	sb.add_child(meshInst)
+
+	var obsNode: Node3D = sb
 
 	var objId: int = toIntSafe(objData.get("id", 0))
 	obsNode.name = "%s_%d" % [str(objData.get("name", "Box")), objId]
@@ -446,9 +448,8 @@ func _createObstacleBox(objData: Dictionary, materials: Array, sprites: Array = 
 	obsNode.scale = unityToGodotScale(scale)
 
 	var mat: Material = _createStandardMaterial(objData, materials, sprites)
-	var meshNode: MeshInstance3D = obsNode.get_node_or_null("MeshInstance3D") as MeshInstance3D
-	if meshNode and mat:
-		meshNode.material_override = mat
+	if mat:
+		meshInst.material_override = mat
 
 	return obsNode
 
