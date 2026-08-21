@@ -4,7 +4,7 @@
 [ext_resource type="Material" uid="uid://cxlb1lr6km05b" path="res://#Template/[Materials]/CrystalGradientMaterial.tres" id="2_m6xhc"]
 [ext_resource type="ArrayMesh" uid="uid://biawqpkmgy5mx" path="res://#Template/[Resources]/Models/Hexahedron.obj" id="2_mesh"]
 [ext_resource type="Material" path="res://#Template/[Materials]/CrystalScanFade.tres" id="4_scan"]
-[ext_resource type="Texture2D" uid="uid://dxjoe7lg7miub" path="res://#Template/[Resources]/Particle.png" id="6_particle"]
+[ext_resource type="Texture2D" uid="uid://dxjoe7lg7miub" path="res://#Template/[Textures]/Particle.png" id="6_particle"]
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="7_trigger"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_scan"]

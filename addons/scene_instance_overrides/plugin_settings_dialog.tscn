@@ -1,0 +1,88 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/scene_instance_overrides/scripts/plugin_settings_dialog.gd" id="1_settings"]
+
+[node name="PluginSettingsDialog" type="Window"]
+visible = false
+title = "Scene Instance Overrides Settings"
+size = Vector2i(520, 270)
+unresizable = true
+transient = true
+transient_to_focused = true
+exclusive = true
+script = ExtResource("1_settings")
+
+[node name="OuterMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 12
+
+[node name="Content" type="VBoxContainer" parent="OuterMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DescriptionLabel" type="Label" parent="OuterMargin/Content"]
+layout_mode = 2
+text = "Configure editor-only behavior for Scene Instance Overrides."
+
+[node name="ShowChildNodeButtonCheckBox" type="CheckBox" parent="OuterMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Overrides button for child nodes"
+tooltip_text = "When disabled, child nodes do not show override buttons in the Inspector or Scene dock."
+
+[node name="ShowSceneDockButtonCheckBox" type="CheckBox" parent="OuterMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show override buttons in Scene dock"
+tooltip_text = "When disabled, Scene dock rows are not decorated with override buttons."
+
+[node name="DirtyParentApplyBehaviorRow" type="HBoxContainer" parent="OuterMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="OuterMargin/Content/DirtyParentApplyBehaviorRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "When the parent scene is unsaved"
+
+[node name="DirtyParentApplyBehaviorOption" type="OptionButton" parent="OuterMargin/Content/DirtyParentApplyBehaviorRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+tooltip_text = "Choose whether to ask, save the parent scene, or apply property overrides only to the base scene."
+
+[node name="DirtyParentApplyBehaviorHelp" type="Label" parent="OuterMargin/Content"]
+layout_mode = 2
+text = "Base-only Apply keeps the parent scene dirty and supports property overrides only."
+modulate = Color(1, 1, 1, 0.65)
+
+[node name="StorageLabel" type="Label" parent="OuterMargin/Content"]
+layout_mode = 2
+text = "These preferences are stored per editor user."
+modulate = Color(1, 1, 1, 0.65)
+
+[node name="Footer" type="HBoxContainer" parent="OuterMargin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 2
+
+[node name="CloseButton" type="Button" parent="OuterMargin/Content/Footer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Close"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="toggled" from="OuterMargin/Content/ShowChildNodeButtonCheckBox" to="." method="_on_show_child_node_button_check_box_toggled"]
+[connection signal="toggled" from="OuterMargin/Content/ShowSceneDockButtonCheckBox" to="." method="_on_show_scene_dock_button_check_box_toggled"]
+[connection signal="item_selected" from="OuterMargin/Content/DirtyParentApplyBehaviorRow/DirtyParentApplyBehaviorOption" to="." method="_on_dirty_parent_apply_behavior_option_item_selected"]
+[connection signal="pressed" from="OuterMargin/Content/Footer/CloseButton" to="." method="_on_close_button_pressed"]

@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" format=3]
 
-[ext_resource type="Shader" path="res://#Template/[Materials]/crystal_gradient.gdshader" id="1_shader"]
+[ext_resource type="Shader" path="res://#Template/[Materials]/Shaders/crystal_gradient.gdshader" id="1_shader"]
 
 [resource]
 shader = ExtResource("1_shader")

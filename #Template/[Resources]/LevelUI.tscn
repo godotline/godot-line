@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://wx3awwdt8xdy"]
 
 [ext_resource type="Script" uid="uid://qco7fgruvgdp" path="res://#Template/[Scripts]/GUI/LevelUI.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://c7fastfb51lh1" path="res://#Template/[Resources]/GUI/Sprites.png" id="2_atlas"]
-[ext_resource type="FontFile" uid="uid://cofd0gpguc54l" path="res://#Template/[Resources]/GUI/MiSans-Normal.ttf" id="3_misans"]
-[ext_resource type="FontFile" uid="uid://cfyw78f6iowmi" path="res://#Template/[Resources]/GUI/CaviarDreams.TTF" id="4_caviar"]
+[ext_resource type="Texture2D" uid="uid://cm6t345rqeaxk" path="res://#Template/[Textures]/Sprites.png" id="2_atlas"]
+[ext_resource type="FontFile" uid="uid://cofd0gpguc54l" path="res://#Template/[Resources]/MiSans-Normal.ttf" id="3_misans"]
+[ext_resource type="FontFile" uid="uid://cfyw78f6iowmi" path="res://#Template/[Resources]/CaviarDreams.TTF" id="4_caviar"]
 
 [sub_resource type="StyleBoxFlat" id="Style_transparent"]
 bg_color = Color(0, 0, 0, 0)

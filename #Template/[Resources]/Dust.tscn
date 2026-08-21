@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dbpinli4l82jf"]
 
-[ext_resource type="Texture2D" path="res://#Template/[Resources]/Particle.png" id="1_particle"]
+[ext_resource type="Texture2D" path="res://#Template/[Textures]/Particle.png" id="1_particle"]
 
 [sub_resource type="Curve" id="Curve_scale"]
 _data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]

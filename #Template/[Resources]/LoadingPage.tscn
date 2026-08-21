@@ -1,8 +1,8 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://#Template/[Scripts]/GUI/LoadingPage.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://#Template/[Resources]/GUI/Sprites.png" id="2_atlas"]
-[ext_resource type="FontFile" path="res://#Template/[Resources]/GUI/MiSans-Normal.ttf" id="3_font"]
+[ext_resource type="Texture2D" path="res://#Template/[Textures]/Sprites.png" id="2_atlas"]
+[ext_resource type="FontFile" path="res://#Template/[Resources]/MiSans-Normal.ttf" id="3_font"]
 
 [sub_resource type="AtlasTexture" id="Atlas_gem"]
 atlas = ExtResource("2_atlas")

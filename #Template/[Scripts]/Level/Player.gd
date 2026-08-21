@@ -171,7 +171,7 @@ func _ready() -> void:
 		add_child(overlay)
 
 	# 实例化 StartPage（启动界面）
-	var startPageScene: PackedScene = load("res://#Template/[Resources]/StartPage.tscn") as PackedScene
+	var startPageScene: PackedScene = load("res://#Template/[Resources]/Prefabs/StartPage.tscn") as PackedScene
 	if startPageScene and not Engine.is_editor_hint():
 		# 加载持久化设置（对齐 Unity PlayerPrefs）
 		var saved: Dictionary = SetLatency.load_settings()

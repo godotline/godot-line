@@ -13,6 +13,7 @@
 [ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/FakePlayerTrigger.gd" id="12_1fvat"]
 [ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="13_hkwba"]
 [ext_resource type="Script" uid="uid://b51jai1eoi3p6" path="res://#Template/[Scripts]/Settings/CameraSettings.gd" id="14_2sj2s"]
+[ext_resource type="Script" uid="uid://c0whny0gf5gyj" path="res://#Template/[Scripts]/Trigger/KillPlayer.gd" id="14_wh4l1"]
 [ext_resource type="PackedScene" uid="uid://cceydenrkikf3" path="res://#Template/[Resources]/GuidanceBox.tscn" id="14_y8kmt"]
 [ext_resource type="PackedScene" uid="uid://car71stqmy3mh" path="res://#Template/Obstacle.tscn" id="15_6gt33"]
 [ext_resource type="PackedScene" uid="uid://dbmrq55p4ik62" path="res://#Template/FakePlayer.tscn" id="15_fmoim"]
@@ -192,6 +193,20 @@ script = ExtResource("12_1fvat")
 targetPlayer = NodePath("../../FakePlayer/FakePlayerComponent")
 type = 2
 
+[node name="Trigger5" parent="Scene_Group/Scene_001" unique_id=857283891 instance=ExtResource("11_mq52h")]
+transform = Transform3D(0, 0, 2.5, 0, 2.5, 0, -34.590446, 0, 0, 39.784286, -0.5, 7.923168)
+
+[node name="KillPlayer" type="Node" parent="Scene_Group/Scene_001/Trigger5" unique_id=1932440388]
+script = ExtResource("14_wh4l1")
+reason = 2
+
+[node name="Trigger6" parent="Scene_Group/Scene_001" unique_id=1064396633 instance=ExtResource("11_mq52h")]
+transform = Transform3D(-34.590443, 0, -1.0927846e-07, 0, 2.4999998, 0, 1.5119963e-06, 0, -2.4999998, 11.27798, -0.4999962, 48.810863)
+
+[node name="KillPlayer" type="Node" parent="Scene_Group/Scene_001/Trigger6" unique_id=1460223864]
+script = ExtResource("14_wh4l1")
+reason = 2
+
 [node name="Trigger2" parent="Scene_Group/Scene_001" unique_id=237830721 instance=ExtResource("11_mq52h")]
 transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, -2.2184198, -0.50000095, 15.765557)
 
@@ -285,8 +300,8 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505,
 script = ExtResource("23_77abe")
 targetNode = NodePath("../../Obstacle3/LocalRotAnimator")
 
-[node name="Gem" parent="." unique_id=149611988 instance=ExtResource("28_s0ncg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18910122, -0.6038189, 12.246883)
+[node name="Gem" parent="Scene_Group/Scene_001" unique_id=149611988 instance=ExtResource("28_s0ncg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22333813, 0.15721011, 7.980546)
 
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D2" method="Trigger"]

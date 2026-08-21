@@ -1,0 +1,566 @@
+[gd_scene format=3 uid="uid://startpage"]
+
+[ext_resource type="Script" uid="uid://urm8r3g8vfda" path="res://#Template/[Scripts]/GUI/StartPage.gd" id="1"]
+[ext_resource type="Script" uid="uid://cpt228wqyq445" path="res://#Template/[Scripts]/Auto/SetAutoPlay.gd" id="2"]
+[ext_resource type="FontFile" uid="uid://cofd0gpguc54l" path="res://#Template/[Resources]/MiSans-Normal.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://cn6suy48bpa3m" path="res://#Template/[Textures]/arrow_left_1000dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.png" id="4_left"]
+[ext_resource type="Texture2D" uid="uid://dadxy5dh8ushu" path="res://#Template/[Textures]/arrow_right_1000dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.png" id="5_right"]
+[ext_resource type="Texture2D" uid="uid://56l3lqh1p6e3" path="res://#Template/[Textures]/info_i_1000dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.png" id="6_info"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/GUI/ShowCanvas.gd" id="7_show_canvas"]
+[ext_resource type="Script" path="res://#Template/[Scripts]/GUI/HideCanvas.gd" id="8_hide_canvas"]
+
+[sub_resource type="StyleBoxFlat" id="7_hover"]
+bg_color = Color(1, 1, 1, 0.12)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="1"]
+bg_color = Color(0, 0, 0, 0)
+
+[sub_resource type="Theme" id="8_theme"]
+default_font = ExtResource("3_font")
+default_font_size = 20
+Button/colors/font_color = Color(1, 1, 1, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/styles/hover = SubResource("7_hover")
+Button/styles/normal = SubResource("1")
+Button/styles/pressed = SubResource("7_hover")
+
+[sub_resource type="StyleBoxFlat" id="4"]
+bg_color = Color(0, 0, 0, 0.392157)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+
+[sub_resource type="StyleBoxFlat" id="5"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="6"]
+bg_color = Color(0, 0, 0, 0.392157)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+
+[sub_resource type="StyleBoxFlat" id="3"]
+bg_color = Color(1, 1, 1, 0)
+
+[node name="StartPage" type="CanvasLayer" unique_id=1577292833]
+layer = 2
+script = ExtResource("1")
+
+[node name="UIContainer" type="Control" parent="." unique_id=1401680929]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = SubResource("8_theme")
+
+[node name="MainPanel" type="Panel" parent="UIContainer" unique_id=636120868]
+layout_mode = 0
+anchor_top = 0.25
+anchor_right = 1.0
+anchor_bottom = 0.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("1")
+
+[node name="RightArea" type="HBoxContainer" parent="UIContainer" unique_id=162991083]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 8.0
+offset_bottom = 68.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="AutoPlayToggle" type="HBoxContainer" parent="UIContainer/RightArea" unique_id=235974998]
+custom_minimum_size = Vector2(216, 60)
+layout_mode = 2
+mouse_filter = 0
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="CheckBox" type="CheckBox" parent="UIContainer/RightArea/AutoPlayToggle" unique_id=1675355245]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+mouse_filter = 2
+flat = true
+
+[node name="ItemLabel" type="Label" parent="UIContainer/RightArea/AutoPlayToggle" unique_id=1399267776]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 16
+text = "AUTOPLAY"
+vertical_alignment = 1
+
+[node name="TopBar" type="HBoxContainer" parent="UIContainer" unique_id=96717573]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 18.0
+offset_right = -16.0
+offset_bottom = 58.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="HintLabel" type="Label" parent="UIContainer/TopBar" unique_id=1657515663]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "R : 重新开始    K : 快速死亡    D : 调试模式"
+horizontal_alignment = 2
+
+[node name="AutoplayHitTarget" type="Button" parent="UIContainer" unique_id=1734727123]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -108.0
+offset_top = 8.0
+offset_right = 108.0
+offset_bottom = 68.0
+grow_horizontal = 2
+mouse_default_cursor_shape = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("1")
+theme_override_styles/hover = SubResource("1")
+theme_override_styles/pressed = SubResource("1")
+theme_override_styles/focus = SubResource("1")
+flat = true
+
+[node name="BottomBar" type="Panel" parent="UIContainer" unique_id=1447155151]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -125.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("4")
+
+[node name="HBox" type="HBoxContainer" parent="UIContainer/BottomBar" unique_id=959627512]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 34.0
+offset_right = -20.0
+offset_bottom = -30.0
+theme_override_constants/separation = 12
+
+[node name="AntiAliasingItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=87616723]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+
+[node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/AntiAliasingItem" unique_id=666338461]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "抗锯齿"
+horizontal_alignment = 1
+
+[node name="Controls" type="HBoxContainer" parent="UIContainer/BottomBar/HBox/AntiAliasingItem" unique_id=1314049537]
+layout_mode = 2
+alignment = 1
+
+[node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1102256506]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=141123282]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1671055612]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1021863229]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+text = "Off"
+horizontal_alignment = 1
+
+[node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1830302213]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=2005454214]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=731316818]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="QualityItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=2077653218]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/QualityItem" unique_id=1216785956]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "画质等级"
+horizontal_alignment = 1
+
+[node name="Controls" type="HBoxContainer" parent="UIContainer/BottomBar/HBox/QualityItem" unique_id=795772962]
+layout_mode = 2
+alignment = 1
+
+[node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=374645834]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=726645966]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1253007165]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1811727225]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+text = "中"
+horizontal_alignment = 1
+
+[node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=240866013]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=484715634]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1341994536]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="LatencyItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1619395701]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/LatencyItem" unique_id=1986991335]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "音画延迟"
+horizontal_alignment = 1
+
+[node name="Controls" type="HBoxContainer" parent="UIContainer/BottomBar/HBox/LatencyItem" unique_id=1357306656]
+layout_mode = 2
+alignment = 1
+
+[node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1834214201]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1113184714]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1747806464]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=719853010]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 19
+text = "0.0ms"
+horizontal_alignment = 1
+
+[node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1256156666]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=732235424]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=204037458]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="VolumeItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=814000201]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/VolumeItem" unique_id=1454086533]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "音量大小"
+horizontal_alignment = 1
+
+[node name="Controls" type="HBoxContainer" parent="UIContainer/BottomBar/HBox/VolumeItem" unique_id=516728100]
+layout_mode = 2
+alignment = 1
+
+[node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1691003379]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1958315036]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1425491818]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("4_left")
+flat = true
+expand_icon = true
+
+[node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1695563518]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+text = "100.0%"
+horizontal_alignment = 1
+
+[node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1931182474]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=603818232]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1011048075]
+visible = false
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+icon = ExtResource("5_right")
+flat = true
+expand_icon = true
+
+[node name="Sep" type="Control" parent="UIContainer/BottomBar/HBox" unique_id=504125627]
+custom_minimum_size = Vector2(16, 0)
+layout_mode = 2
+
+[node name="ShadowToggle" type="HBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1645999694]
+layout_mode = 2
+
+[node name="CheckBox" type="CheckBox" parent="UIContainer/BottomBar/HBox/ShadowToggle" unique_id=1507293345]
+layout_mode = 2
+flat = true
+
+[node name="ItemLabel" type="Label" parent="UIContainer/BottomBar/HBox/ShadowToggle" unique_id=851565371]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "阴影"
+
+[node name="PostToggle" type="HBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1124031244]
+layout_mode = 2
+
+[node name="CheckBox" type="CheckBox" parent="UIContainer/BottomBar/HBox/PostToggle" unique_id=302988651]
+layout_mode = 2
+flat = true
+
+[node name="ItemLabel" type="Label" parent="UIContainer/BottomBar/HBox/PostToggle" unique_id=2081490737]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "后处理"
+
+[node name="AboutPanel" type="Panel" parent="UIContainer" unique_id=651998823]
+visible = false
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("5")
+
+[node name="AboutContent" type="Panel" parent="UIContainer/AboutPanel" unique_id=370199598]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -185.0
+offset_right = 300.0
+offset_bottom = 185.0
+script = ExtResource("7_show_canvas")
+duration = 0.5
+invokeBeforeAnimation = true
+autoHideOnReady = true
+hiddenOffsetY = 400.0
+hiddenRotationDegrees = 15.0
+theme_override_styles/panel = SubResource("6")
+
+[node name="HideCanvas" type="Node" parent="UIContainer/AboutPanel/AboutContent"]
+script = ExtResource("8_hide_canvas")
+duration = 0.5
+autoHideOnEnable = true
+invokeBeforeAnimation = true
+hiddenOffsetY = 400.0
+hiddenRotationDegrees = -15.0
+fadeDelay = 0.3
+fadeDuration = 0.2
+
+[node name="AboutVBox" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutContent" unique_id=61138793]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -137.0
+offset_right = 250.0
+offset_bottom = 137.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="about_title" type="Label" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=2001776335]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 29
+text = "测试场景"
+horizontal_alignment = 1
+
+[node name="AboutSpacer1" type="Control" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=1414067686]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="about_authors" type="VBoxContainer" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=835000038]
+layout_mode = 2
+
+[node name="AboutSpacer2" type="Control" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=1535750752]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="about_credits" type="Label" parent="UIContainer/AboutPanel/AboutContent/AboutVBox" unique_id=2627800]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 20
+text = "共舞的线模板
+基于冰焰模板 4.3.0 修改
+作者：Max冰焰、筱夕Sushi、Quantumilk"
+horizontal_alignment = 1
+
+[node name="InfoButton" type="Button" parent="UIContainer" unique_id=2029351895]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -74.0
+offset_right = 66.0
+offset_bottom = -34.0
+grow_vertical = 0
+theme_override_icons/icon = ExtResource("6_info")
+theme_override_styles/normal = SubResource("3")
+flat = true
+expand_icon = true
+
+[node name="SetAutoPlay" type="Node" parent="." unique_id=1734727122]
+script = ExtResource("2")
+
+[connection signal="gui_input" from="UIContainer/MainPanel" to="." method="_on_main_panel_gui_input"]
+[connection signal="pressed" from="UIContainer/AutoplayHitTarget" to="." method="_on_autoplay_hit_target_pressed"]
+[connection signal="gui_input" from="UIContainer/AboutPanel/AboutContent" to="." method="_on_about_click"]
+[connection signal="pressed" from="UIContainer/InfoButton" to="." method="_on_info_pressed"]
+[connection signal="hide_animation_finished" from="UIContainer/AboutPanel/AboutContent/HideCanvas" to="." method="_on_about_hide_finished"]

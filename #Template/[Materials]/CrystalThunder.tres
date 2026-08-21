@@ -1,15 +1,29 @@
-[gd_resource type="ShaderMaterial" format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://c6ij18cdww48r"]
 
-[ext_resource type="Shader" path="res://#Template/[Materials]/crystal_lightning.gdshader" id="1_lightning"]
+[ext_resource type="Shader" uid="uid://bigfoehndm5kg" path="res://#Template/[Materials]/Shaders/crystal_lightning.gdshader" id="1_lightning"]
 
 [resource]
 render_priority = 10
 shader = ExtResource("1_lightning")
+shader_parameter/core_color = Color(0.92, 0.97, 1, 1)
+shader_parameter/glow_color = Color(0.2, 0.62, 1, 1)
+shader_parameter/core_width = 0.02
+shader_parameter/glow_width = 0.15
+shader_parameter/jitter = 0.2
+shader_parameter/detail_scale = 16.0
 shader_parameter/bolt_speed = 2.2
 shader_parameter/flicker_speed = 11.0
 shader_parameter/flash_rate = 5.0
 shader_parameter/flash_width = 0.18
+shader_parameter/flash_persistence = 0.88
 shader_parameter/idle_brightness = 0.32
 shader_parameter/flash_boost = 2.4
+shader_parameter/branch_strength = 0.75
+shader_parameter/branch_spread = 1.2
+shader_parameter/branch_fade = 0.4
+shader_parameter/branch_root_softness = 0.045
 shader_parameter/core_energy = 24.0
 shader_parameter/glow_energy = 10.0
+shader_parameter/opacity = 1.0
+shader_parameter/alpha_cutoff = 0.015
+shader_parameter/runtime_flash_multiplier = 1.0
