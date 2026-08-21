@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://b82e28m2p5q1f"]
+
+[ext_resource type="Script" path="res://addons/dancing_line_importer/json_import_dock.gd" id="1_d1ock"]
+
+[node name="ArphrosImporter" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+script = ExtResource("1_d1ock")
+
+[node name="HeaderLabel" type="Label" parent="."]
+layout_mode = 2
+text = "Arphros 关卡导入工具"
+theme_override_colors/font_color = Color(0.8, 0.85, 1, 1)
+
+[node name="FileSection" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="FilePathLine" type="LineEdit" parent="FileSection"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "选择 ARPhros 关卡文件 (.arphos / .arphros / .json)..."
+clear_button_enabled = true
+
+[node name="BrowseButton" type="Button" parent="FileSection"]
+layout_mode = 2
+text = "浏览..."
+
+[node name="Actions" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ImportButton" type="Button" parent="Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "导入生成关卡"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 2
+text = "就绪"
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+
+[node name="LogText" type="TextEdit" parent="."]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_vertical = 3
+editable = false
+wrap_mode = 1
+text = "📋 日志:
+"

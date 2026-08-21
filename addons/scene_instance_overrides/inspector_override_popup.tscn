@@ -1,0 +1,132 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/scene_instance_overrides/scripts/inspector_override_popup.gd" id="1_popup"]
+
+[node name="InspectorOverridePopup" type="PopupPanel"]
+unique_name_in_owner = true
+title = "Scene Instance Overrides"
+size = Vector2i(372, 260)
+unresizable = true
+wrap_controls = false
+script = ExtResource("1_popup")
+metadata/layout_version = 4
+
+[node name="OuterMargin" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 2
+theme_override_constants/margin_left = 3
+
+[node name="Content" type="VBoxContainer" parent="OuterMargin"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="Header" type="HBoxContainer" parent="OuterMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="HeaderIcon" type="TextureRect" parent="OuterMargin/Content/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeaderTitleLabel" type="Label" parent="OuterMargin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Overrides (0)"
+text_overrun_behavior = 3
+
+[node name="ContextLabel" type="Label" parent="OuterMargin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Scene Instance / Base scene unavailable"
+text_overrun_behavior = 3
+
+[node name="OverridesTree" type="Tree" parent="OuterMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+size_flags_vertical = 3
+columns = 1
+hide_root = true
+enable_recursive_folding = true
+allow_reselect = true
+scroll_horizontal_enabled = false
+scroll_vertical_enabled = true
+theme_override_constants/v_separation = 0
+theme_override_constants/inner_item_margin_top = 0
+theme_override_constants/inner_item_margin_bottom = 0
+
+[node name="SelectionActions" type="HBoxContainer" parent="OuterMargin/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="SelectionSpacer" type="Control" parent="OuterMargin/Content/SelectionActions"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SelectionSummary" type="Label" parent="OuterMargin/Content/SelectionActions"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text_overrun_behavior = 3
+
+[node name="SelectionRevertButton" type="Button" parent="OuterMargin/Content/SelectionActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(62, 22)
+layout_mode = 2
+text = "Revert"
+tooltip_text = "Revert the selected node or property overrides."
+focus_mode = 0
+flat = true
+
+[node name="SelectionApplyButton" type="Button" parent="OuterMargin/Content/SelectionActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(58, 22)
+layout_mode = 2
+text = "Apply"
+tooltip_text = "Apply the selected node or property overrides to the base scene."
+focus_mode = 0
+flat = true
+
+[node name="AllActions" type="HBoxContainer" parent="OuterMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="RevertAllButton" type="Button" parent="OuterMargin/Content/AllActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Revert All"
+tooltip_text = "Revert every supported change on the current instance."
+focus_mode = 0
+
+[node name="ApplyAllButton" type="Button" parent="OuterMargin/Content/AllActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Apply All"
+tooltip_text = "Apply every supported change to the base scene."
+focus_mode = 0
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="item_collapsed" from="OuterMargin/Content/OverridesTree" to="." method="_on_overrides_tree_item_collapsed"]
+[connection signal="item_selected" from="OuterMargin/Content/OverridesTree" to="." method="_on_overrides_tree_item_selected"]
+[connection signal="pressed" from="OuterMargin/Content/SelectionActions/SelectionRevertButton" to="." method="_on_selection_revert_button_pressed"]
+[connection signal="pressed" from="OuterMargin/Content/SelectionActions/SelectionApplyButton" to="." method="_on_selection_apply_button_pressed"]
+[connection signal="pressed" from="OuterMargin/Content/AllActions/RevertAllButton" to="." method="_on_revert_all_button_pressed"]
+[connection signal="pressed" from="OuterMargin/Content/AllActions/ApplyAllButton" to="." method="_on_apply_all_button_pressed"]

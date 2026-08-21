@@ -1,7 +1,11 @@
 [gd_scene format=3 uid="uid://frofxielu2yl"]
 
-[ext_resource type="Texture2D" uid="uid://sggdepbuqvp6" path="res://#Template/[Resources]/Taper.png" id="1_eani0"]
-[ext_resource type="Texture2D" uid="uid://faobd5hlsgx4" path="res://#Template/[Resources]/Taper_True.png" id="2_yw571"]
+[ext_resource type="Texture2D" uid="uid://cm6t345rqeaxk" path="res://#Template/[Textures]/Sprites.png" id="atlas_tex"]
+[ext_resource type="Texture2D" uid="uid://dcp78ndvx6dxd" path="res://#Template/[Textures]/GuidanceBoxTriggered.png" id="2_yw571"]
+
+[sub_resource type="AtlasTexture" id="Atlas_taper"]
+atlas = ExtResource("atlas_tex")
+region = Rect2(331, 533, 97, 97)
 
 [sub_resource type="Animation" id="Animation_sc732"]
 length = 0.001
@@ -15,7 +19,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [ExtResource("1_eani0")]
+"values": [SubResource("Atlas_taper")]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -93,7 +97,7 @@ transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 0, 0, 0)
 
 [node name="Sprite3D" type="Sprite3D" parent="." unique_id=1249390443]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.05, 0)
-texture = ExtResource("1_eani0")
+texture = SubResource("Atlas_taper")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1379440214]
 autoplay = "taper"

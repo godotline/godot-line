@@ -3,7 +3,7 @@
 [ext_resource type="ArrayMesh" uid="uid://dug07r8y5fnwl" path="res://#Template/[Resources]/Models/Diamond.obj" id="1"]
 [ext_resource type="Script" uid="uid://bd13q1s154gh4" path="res://#Template/[Scripts]/Trigger/Gem.gd" id="2"]
 [ext_resource type="Material" uid="uid://yr2s0ybyebck" path="res://#Template/[Materials]/Diamond.tres" id="3_lsh75"]
-[ext_resource type="Texture2D" uid="uid://dxjoe7lg7miub" path="res://#Template/[Resources]/Particle.png" id="4_particle"]
+[ext_resource type="Texture2D" uid="uid://dxjoe7lg7miub" path="res://#Template/[Textures]/Particle.png" id="4_particle"]
 [ext_resource type="Script" uid="uid://bb5lh2cc1yfy4" path="res://#Template/[Scripts]/Trigger/BaseTrigger.gd" id="5_base"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_gem"]

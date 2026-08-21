@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/scene_instance_overrides/scripts/inspector_override_control.gd" id="1_control"]
+
+[node name="InspectorOverrideControl" type="MarginContainer"]
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 1
+script = ExtResource("1_control")
+
+[node name="OverridesButton" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Overrides (0)    ▾"
+tooltip_text = "Review changes that differ from the base scene."
+alignment = 1
+icon_alignment = 0
+expand_icon = false
+
+[connection signal="pressed" from="OverridesButton" to="." method="_on_overrides_button_pressed"]

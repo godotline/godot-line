@@ -41,7 +41,6 @@ var aboutVisible: bool = false
 
 func _ready() -> void:
 	_init_setting_states()
-	_apply_ported_visuals()
 	_populate_about_from_level_data()
 	if OS.has_feature("template"):
 		autoplayArea.visible = false
@@ -51,23 +50,6 @@ func _ready() -> void:
 		await get_tree().process_frame
 		if setAutoPlay and setAutoPlay.has_method("get_auto"):
 			autoplayCheckbox.button_pressed = setAutoPlay.get_auto()
-
-func _apply_ported_visuals() -> void:
-	var leftIcon: Texture2D = load("res://#Template/[Resources]/GUI/arrow_left.png") as Texture2D
-	var rightIcon: Texture2D = load("res://#Template/[Resources]/GUI/arrow_right.png") as Texture2D
-	for state: Dictionary in settingStates.values():
-		var leftButtons: Array[Button] = [state.arrowLeft, state.arrowFineLeft, state.arrowCoarseLeft]
-		var rightButtons: Array[Button] = [state.arrowRight, state.arrowFineRight, state.arrowCoarseRight]
-		for button: Button in leftButtons:
-			button.text = ""
-			button.icon = leftIcon
-			button.expand_icon = true
-			button.custom_minimum_size = Vector2(36.0, 36.0)
-		for button: Button in rightButtons:
-			button.text = ""
-			button.icon = rightIcon
-			button.expand_icon = true
-			button.custom_minimum_size = Vector2(36.0, 36.0)
 
 func _init_setting_states() -> void:
 	# --- AntiAliasing (CYCLIC) ---

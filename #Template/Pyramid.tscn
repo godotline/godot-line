@@ -26,14 +26,14 @@ surface_material_override/0 = SubResource("StandardMaterial3D_ajvws")
 [node name="OpenTrigger" parent="." unique_id=608483111 instance=ExtResource("2_tulby")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 100)
 
-[node name="PyramidTrigger" type="Node3D" parent="OpenTrigger" unique_id=829783754]
+[node name="PyramidTrigger" type="Node" parent="OpenTrigger" unique_id=976525674]
 script = ExtResource("6_pyrtr")
 changeDirection = true
 
 [node name="FinalTurn" parent="." unique_id=658946201 instance=ExtResource("2_tulby")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 45.342495)
 
-[node name="PyramidTrigger" type="Node3D" parent="FinalTurn" unique_id=2132843373]
+[node name="PyramidTrigger" type="Node" parent="FinalTurn" unique_id=180928268]
 script = ExtResource("6_pyrtr")
 type = 1
 
@@ -41,7 +41,7 @@ type = 1
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 0)
 requirePlaying = false
 
-[node name="PyramidTrigger" type="Node3D" parent="WaitingForWin" unique_id=1301256065]
+[node name="PyramidTrigger" type="Node" parent="WaitingForWin" unique_id=8087906]
 script = ExtResource("6_pyrtr")
 type = 2
 changeDirection = true
@@ -50,7 +50,7 @@ changeDirection = true
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, -53.41746)
 requirePlaying = false
 
-[node name="PyramidTrigger" type="Node3D" parent="StopPlayer" unique_id=1617173312]
+[node name="PyramidTrigger" type="Node" parent="StopPlayer" unique_id=2118122098]
 script = ExtResource("6_pyrtr")
 type = 3
 changeDirection = true

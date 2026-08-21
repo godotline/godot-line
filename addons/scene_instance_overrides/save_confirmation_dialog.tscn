@@ -1,0 +1,98 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/scene_instance_overrides/scripts/save_confirmation_dialog.gd" id="1_dialog"]
+
+[node name="SaveConfirmationDialog" type="Window"]
+visible = false
+title = "Save Current Scene Before Applying"
+size = Vector2i(680, 300)
+unresizable = true
+transient = true
+transient_to_focused = true
+exclusive = true
+script = ExtResource("1_dialog")
+
+[node name="OuterMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 16
+
+[node name="Content" type="VBoxContainer" parent="OuterMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SaveDescription" type="Label" parent="OuterMargin/Content"]
+layout_mode = 2
+text = "Save all unsaved changes in the current parent scene before applying the selected overrides to the base scene."
+autowrap_mode = 2
+
+[node name="DirtyDescription" type="Label" parent="OuterMargin/Content"]
+layout_mode = 2
+text = "Apply Without Saving Parent keeps this scene dirty and writes only property overrides to the base scene."
+autowrap_mode = 2
+
+[node name="ContentSpacer" type="Control" parent="OuterMargin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DefaultBehaviorRow" type="HBoxContainer" parent="OuterMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DefaultBehaviorLabel" type="Label" parent="OuterMargin/Content/DefaultBehaviorRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Default for future dirty-parent Applies"
+
+[node name="DirtyParentApplyBehaviorOption" type="OptionButton" parent="OuterMargin/Content/DefaultBehaviorRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+tooltip_text = "Choose whether future Applies ask, save the parent scene, or apply property overrides only to the base scene."
+
+[node name="DefaultBehaviorHelp" type="Label" parent="OuterMargin/Content"]
+layout_mode = 2
+text = "Base-only Apply supports property overrides. Added nodes still require Save and Apply."
+modulate = Color(1, 1, 1, 0.65)
+
+[node name="Footer" type="HBoxContainer" parent="OuterMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SaveAndApplyButton" type="Button" parent="OuterMargin/Content/Footer"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+text = "Save and Apply"
+
+[node name="LeftSpacer" type="Control" parent="OuterMargin/Content/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CancelButton" type="Button" parent="OuterMargin/Content/Footer"]
+custom_minimum_size = Vector2(105, 0)
+layout_mode = 2
+text = "Cancel"
+
+[node name="RightSpacer" type="Control" parent="OuterMargin/Content/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ApplyWithoutSavingParentButton" type="Button" parent="OuterMargin/Content/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+text = "Apply Without Saving Parent"
+tooltip_text = "Apply property overrides to the base scene while keeping the current parent scene unsaved."
+
+[connection signal="close_requested" from="." to="." method="_on_cancel_requested"]
+[connection signal="item_selected" from="OuterMargin/Content/DefaultBehaviorRow/DirtyParentApplyBehaviorOption" to="." method="_on_dirty_parent_apply_behavior_option_item_selected"]
+[connection signal="pressed" from="OuterMargin/Content/Footer/SaveAndApplyButton" to="." method="_on_save_and_apply_button_pressed"]
+[connection signal="pressed" from="OuterMargin/Content/Footer/CancelButton" to="." method="_on_cancel_requested"]
+[connection signal="pressed" from="OuterMargin/Content/Footer/ApplyWithoutSavingParentButton" to="." method="_on_apply_without_saving_parent_button_pressed"]
