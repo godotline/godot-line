@@ -6,8 +6,10 @@
 [ext_resource type="Script" uid="uid://dtj3e2vqksb8s" path="res://#Template/[Scripts]/Trigger/PyramidTrigger.gd" id="6_pyrtr"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oowoy"]
+albedo_color = Color(0.5647059, 0.5647059, 0.5647059, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ajvws"]
+albedo_color = Color(0.5647059, 0.5647059, 0.5647059, 1)
 
 [node name="Pyramid" type="Node3D" unique_id=1497290031]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)

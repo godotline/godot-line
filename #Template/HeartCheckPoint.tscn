@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cl7pyxuxgg61g" path="res://#Template/[Scripts]/Trigger/HeartCheckpoint.gd" id="1_oq3w0"]
 [ext_resource type="Material" uid="uid://ktbkvswrq32a" path="res://#Template/[Materials]/Checkpoint1.tres" id="2_oq3w0"]
 [ext_resource type="Script" uid="uid://bb5lh2cc1yfy4" path="res://#Template/[Scripts]/Trigger/BaseTrigger.gd" id="3_base"]
+[ext_resource type="Script" uid="uid://dqs5yftnojwpe" path="res://#Template/[Scripts]/Level/DisableInPlayMode.gd" id="10_dipm"]
 
 [sub_resource type="BoxShape3D" id="2"]
 size = Vector3(1, 5, 10)
@@ -128,7 +129,9 @@ gizmo_extents = 0.5
 libraries/ = SubResource("AnimationLibrary_pds1l")
 
 [node name="RevivePosition" type="MeshInstance3D" parent="." unique_id=1500499588]
-mesh = SubResource("BoxMesh_t50w7")
+
+[node name="DisableInPlayMode" type="Node" parent="RevivePosition"]
+script = ExtResource("10_dipm")
 
 [node name="Rotator" type="Node3D" parent="." unique_id=1538698628]
 transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 5, 0)

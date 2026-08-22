@@ -52,6 +52,19 @@ func _show_ui() -> void:
 	revivePage.visible = canRevive
 	background.color.a = 0.0 if canRevive else 0.639216
 	visible = true
+	# 对齐 Unity LevelManager.PlayerDeath：死亡/结算时恢复鼠标显示
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+## 对齐 Unity LevelUI.cs：复活页 E = 复活，Q = 取消复活（R 重开由 Player._input 全局处理）
+func _input(event: InputEvent) -> void:
+	if not shown or not revivePage.visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		match event.keycode:
+			KEY_E:
+				_on_revive_pressed()
+			KEY_Q:
+				_on_cancel_revive_pressed()
 
 func _set_progress(fill: TextureRect, progress: float) -> void:
 	fill.anchor_right = progress

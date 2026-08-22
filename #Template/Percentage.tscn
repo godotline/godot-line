@@ -1,12 +1,17 @@
 [gd_scene format=3 uid="uid://bnhhmjcg10054"]
 
-[ext_resource type="FontFile" uid="uid://diyv3w2nftxaw" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="1_11b5s"]
+[ext_resource type="Script" uid="uid://ixi46180cxby" path="res://#Template/[Scripts]/Level/Percentage.gd" id="1_pct"]
+[ext_resource type="FontFile" uid="uid://diyv3w2nftxaw" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="2_font"]
 
 [sub_resource type="TextMesh" id="TextMesh_ortdl"]
 text = "10%"
-font = ExtResource("1_11b5s")
+font = ExtResource("2_font")
 font_size = 20
 
-[node name="Percentage" type="MeshInstance3D" unique_id=1373098762]
+[node name="Percentage" type="Node3D" unique_id=1373098762]
+script = ExtResource("1_pct")
+percent = 10
+
+[node name="10" type="MeshInstance3D" parent="."]
 transform = Transform3D(-9.999999, 0, -8.742277e-08, 0, 9.999999, 0, 8.742278e-07, 0, -1, 0, 0, 0)
 mesh = SubResource("TextMesh_ortdl")

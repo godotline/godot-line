@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://mj12gw3q1d3w" path="res://#Template/[Textures]/FX_CrownCircle.png" id="7_circle"]
 [ext_resource type="Texture2D" path="res://#Template/[Textures]/Spirit.png" id="8_spirit"]
 [ext_resource type="Script" uid="uid://bb5lh2cc1yfy4" path="res://#Template/[Scripts]/Trigger/BaseTrigger.gd" id="10_base"]
+[ext_resource type="Script" uid="uid://dqs5yftnojwpe" path="res://#Template/[Scripts]/Level/DisableInPlayMode.gd" id="10_dipm"]
 
 [sub_resource type="BoxShape3D" id="2"]
 size = Vector3(1, 5, 10)
@@ -89,6 +90,9 @@ surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 
 [node name="RevivePosition" type="MeshInstance3D" parent="." unique_id=1500499588]
 mesh = SubResource("BoxMesh_t50w7")
+
+[node name="DisableInPlayMode" type="Node" parent="RevivePosition"]
+script = ExtResource("10_dipm")
 
 [node name="CrownSprite" type="Node3D" parent="." unique_id=1095474833]
 transform = Transform3D(-0.7071067, 0.7071067, 3.090862e-08, 0, -4.3711385e-08, 1, 0.7071067, 0.7071067, 3.090862e-08, -3, 0, 3)

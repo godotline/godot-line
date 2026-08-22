@@ -13,6 +13,7 @@ var _download_source_select: OptionButton
 var _name_label: Label
 var _info_label: RichTextLabel
 var _action_button: Button
+var _cancel_button: Button
 var _progress_bar: ProgressBar
 var _status_label: Label
 var _detail_panel: PanelContainer
@@ -173,13 +174,26 @@ func _build_ui() -> void:
 	_status_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	detailVBox.add_child(_status_label)
 
-	# 操作按钮（安装/卸载/重试）
+	# 操作按钮（安装/卸载）与下载取消按钮同行放置
+	var actionRow := HBoxContainer.new()
+	actionRow.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actionRow.add_theme_constant_override("separation", 8)
+	detailVBox.add_child(actionRow)
+
 	_action_button = Button.new()
 	_action_button.text = "一键安装"
 	_action_button.custom_minimum_size = Vector2(0, 36)
+	_action_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_action_button.disabled = true
 	_action_button.pressed.connect(_on_action_pressed)
-	detailVBox.add_child(_action_button)
+	actionRow.add_child(_action_button)
+
+	_cancel_button = Button.new()
+	_cancel_button.text = "取消"
+	_cancel_button.custom_minimum_size = Vector2(96, 36)
+	_cancel_button.visible = false
+	_cancel_button.pressed.connect(_on_cancel_pressed)
+	actionRow.add_child(_cancel_button)
 
 
 func _refresh_plugin_list() -> void:
@@ -214,6 +228,8 @@ func _refresh_plugin_list() -> void:
 	if _plugin_list.item_count > 0:
 		_plugin_list.select(0)
 		_on_plugin_selected(0)
+	else:
+		_status_label.text = "未获取到可用插件。" if _manifest_warning.is_empty() else _manifest_warning
 	_refresh_button.disabled = false
 	_source_edit.editable = true
 	_is_refreshing = false
@@ -394,7 +410,10 @@ func _start_install(entry: PluginEntry, downloadUrl: String) -> void:
 	_downloader = PluginDownloaderClass.new()
 	_downloader.download_progress.connect(_on_download_progress)
 	_downloader.download_complete.connect(_on_download_complete)
+	_downloader.download_cancelled.connect(_on_download_cancelled)
 
+	_cancel_button.visible = true
+	_cancel_button.disabled = false
 	await _downloader.download_plugin(entry, self, downloadUrl)
 
 
@@ -407,6 +426,9 @@ func _on_download_progress(file_index: int, total_files: int, current_file: Stri
 func _on_download_complete(success: bool, message: String) -> void:
 	_is_busy = false
 	_progress_bar.visible = false
+	_cancel_button.visible = false
+	# 安装文件已落盘，先立即恢复操作按钮，避免后续启用/刷新阶段卡在"正在安装..."。
+	_restore_action_button()
 	if success:
 		_status_label.text = "安装成功！正在启用插件并刷新..."
 		var selected: PackedInt32Array = _plugin_list.get_selected_items()
@@ -420,10 +442,36 @@ func _on_download_complete(success: bool, message: String) -> void:
 			await _refresh_plugin_list()
 	else:
 		_status_label.text = "安装失败：" + message
-		var sel: PackedInt32Array = _plugin_list.get_selected_items()
-		if not sel.is_empty():
-			var entry: PluginEntry = _all_plugins[sel[0]]
-			_update_action_button(entry)
+
+
+## 按当前选中项立即恢复操作按钮；无选中时回退为不可用的"一键安装"。
+func _restore_action_button() -> void:
+	var selected: PackedInt32Array = _plugin_list.get_selected_items()
+	if not selected.is_empty():
+		_update_action_button(_all_plugins[selected[0]])
+		return
+	_action_button.text = "一键安装"
+	_action_button.disabled = true
+
+
+## 用户请求中止当前下载；真正结束后由 _on_download_cancelled 恢复界面状态。
+func _on_cancel_pressed() -> void:
+	if _downloader == null:
+		return
+	_cancel_button.disabled = true
+	_status_label.text = "正在取消下载..."
+	_downloader.cancel_download()
+
+
+func _on_download_cancelled() -> void:
+	_is_busy = false
+	_progress_bar.visible = false
+	_progress_bar.value = 0
+	_cancel_button.visible = false
+	_status_label.text = "已取消下载。"
+	var selected: PackedInt32Array = _plugin_list.get_selected_items()
+	if not selected.is_empty():
+		_update_action_button(_all_plugins[selected[0]])
 
 
 ## 在 project.godot 中记录并在当前编辑器中启用插件。
@@ -667,4 +715,7 @@ func _get_install_status(entry: PluginEntry) -> String:
 
 
 func _on_close() -> void:
+	# 关闭对话框时若下载仍在进行，一并中止，避免后台残留下载任务。
+	if _is_busy and _downloader != null:
+		_downloader.cancel_download()
 	hide()

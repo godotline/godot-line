@@ -1,7 +1,7 @@
 @tool
 extends Node3D
 
-@export var percent: int = 10 : set = _set_selected_percent
+@export_range(10, 90, 10, "or_greater", "or_less") var percent: int = 10 : set = _set_selected_percent
 
 var percentNodes: Dictionary = {}
 var percentValues: Array[int] = []
@@ -29,9 +29,7 @@ func _refresh() -> void:
 	if percentValues.is_empty():
 		return
 	if displayNode == null or not is_instance_valid(displayNode):
-		displayNode = percentNodes[percentValues[0]]
-	if percent not in percentNodes:
-		percent = percentValues[0]
+		displayNode = percentNodes.get(percent, percentNodes[percentValues[0]])
 	_apply_selection(percent)
 	pendingRefresh = false
 
@@ -57,17 +55,14 @@ func _set_selected_percent(value: int) -> void:
 		return
 	if percentNodes.is_empty():
 		_collect_percent_nodes()
-		if percentValues.is_empty():
-			return
-		if displayNode == null:
-			displayNode = percentNodes[percentValues[0]]
-	if percent in percentNodes:
-		_apply_selection(percent)
+	_apply_selection(percent)
 
 func _apply_selection(value: int) -> void:
-	if displayNode != null and displayNode.mesh is TextMesh:
-		var textMesh: TextMesh = displayNode.mesh as TextMesh
-		textMesh.text = "%d%%" % value
+	# 有同名子节点则切换显示节点；否则直接改当前显示节点的文字（单节点工作流）
+	if percentNodes.has(value):
+		displayNode = percentNodes[value]
+	if displayNode != null and is_instance_valid(displayNode) and displayNode.mesh is TextMesh:
+		(displayNode.mesh as TextMesh).text = "%d%%" % value
 	for key in percentNodes.keys():
 		var node: MeshInstance3D = percentNodes[key]
 		node.visible = node == displayNode

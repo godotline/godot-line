@@ -101,13 +101,15 @@ var playAction: Callable = func() -> void: Trigger()
 func _init() -> void:
 	pass
 
+# 对齐 Unity：originalTransform 是显式写入的序列化值，无运行时捕获。
+# startValue 由编辑器 "Get Original Value" 按钮或导入器显式填充。
 func _ready() -> void:
-	if Engine.is_editor_hint():
-		if transformType == TransformType.Add:
-			var target: Node3D = get_parent() as Node3D
-			if target:
-				startValue = _get_value(target)
 	_initialized = true
+	# 对齐 Unity Start() 中的 InitTransform()：加载/复活时把目标设为 startValue
+	if not Engine.is_editor_hint():
+		var target: Node3D = get_parent() as Node3D
+		if target:
+			_set_value(target, startValue)
 
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
