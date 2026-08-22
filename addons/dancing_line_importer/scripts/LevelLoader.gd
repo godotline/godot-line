@@ -34,6 +34,10 @@ var extraSearchPaths: Array[String] = []
 ## type 5/6/7 待链接动画触发器：键=触发器根节点，值结构见 _buildAnimatorTrigger
 var pendingAnimatorTriggers: Dictionary = {}
 
+## 发生内部覆写（颜色/自隐）的 Ground 实例，保存前由 dock 调用
+## markEditableInstances 统一标记 editable
+var _overrideInstances: Array[Node] = []
+
 ## 从 Ground.tscn 借用的网格（含地面材质）资源缓存
 var _groundTemplateMeshCache: Mesh = null
 var _groundPartsLoaded: bool = false
@@ -43,6 +47,7 @@ func buildScene(data: Dictionary, levelDataResource: LevelData = null) -> Node3D
 	loadedMeshes.clear()
 	loadedTextures.clear()
 	pendingAnimatorTriggers.clear()
+	_overrideInstances.clear()
 
 	var rootScene: Node3D = Node3D.new()
 	rootScene.name = "LevelHolder"
@@ -220,29 +225,29 @@ func _createCamera(parent: Node, data: Dictionary) -> Node3D:
 
 	# 读取 Main Camera 配置
 	var camData: Dictionary = data.get("mainCamera", {})
-	var camWorldPos: Vector3 = getVector3FromDict(camData, "position", Vector3.ZERO)
 
 	var customData: Variant = JSON.parse_string(str(camData.get("customData", "{}")))
 	if customData is Dictionary:
 		var custom: Dictionary = customData as Dictionary
 
-		# CameraRoot 位置优先使用 Main Camera 的 position（或 pivotOffset + player position）
+		# 跟随相机枢轴 = 玩家出生点 + pivotOffset。
+		# mainCamera.position 是原版编辑器的预览摆放，运行时不使用——
+		# 运行时视角由 targetRotation / targetDistance / pivotOffset 驱动
+		# （此前把 position 赋给枢轴，导致相机叠上后退距离后压在玩家身上）。
 		var pivot: Dictionary = custom.get("pivotOffset", {})
 		var pivotVec: Vector3 = Vector3(float(pivot.get("x", 0.0)), float(pivot.get("y", 0.0)), float(pivot.get("z", 0.0)))
 		var playerData: Dictionary = data.get("player", {})
 		var playerPos: Vector3 = getVector3FromDict(playerData, "position", Vector3.ZERO)
+		cameraRoot.position = unityToGodotPosition(playerPos + pivotVec)
 
-		if camWorldPos != Vector3.ZERO:
-			cameraRoot.position = unityToGodotPosition(camWorldPos)
-		else:
-			cameraRoot.position = unityToGodotPosition(playerPos + pivotVec)
-
-		# Rotator 旋转
+		# Rotator 旋转（targetRotation）与注视点偏移（pivotOffset，
+		# 与运行时 CameraTrigger.offset 同一载体：offset 补间的就是 rotator.position）
 		var rotator: Node3D = cameraRoot.get_node_or_null("Rotator") as Node3D
 		var rot: Dictionary = custom.get("targetRotation", {})
 		var rotEuler: Vector3 = Vector3(float(rot.get("x", 45.0)), float(rot.get("y", 45.0)), float(rot.get("z", 0.0)))
 		if rotator:
 			rotator.rotation = unityToGodotRotation(rotEuler)
+			rotator.position = pivotVec
 		else:
 			cameraRoot.rotation = unityToGodotRotation(rotEuler)
 
@@ -252,6 +257,10 @@ func _createCamera(parent: Node, data: Dictionary) -> Node3D:
 			camNode.position = Vector3(0.0, 0.0, -targetDist)
 			var fovVal: Variant = custom.get("fov", 80.0)
 			camNode.fov = float(fovVal)
+
+	# 对实例内部节点（相机距离/fov/environment、Rotator 位姿）有覆写，
+	# 登记 editable：否则 pack 时这些参数会被静默丢弃，且树中看不到内部节点
+	_overrideInstances.append(cameraRoot)
 
 	parent.add_child(cameraRoot)
 	return cameraRoot
@@ -555,106 +564,93 @@ func _createPrimitiveObject(objData: Dictionary, materials: Array, sprites: Arra
 			return _createGroupObject(objData)
 
 
-## 可碰撞图元：obstacleType=1 为致命障碍物（layer 4，玩家 Area 触碰即死），
-## 其余按可站立地面/阻挡墙处理（layer 2，与 Road 一致）
+## 可碰撞图元（球/平面）：obstacleType=1 → layer 4（玩家 Area 触碰即死），
+## 其余 → layer 2。缩放落在根上，CollisionShape3D 本地缩放保持 1
+## （避免编辑器非均匀缩放警告）
 func _createPrimitiveBody(objData: Dictionary, materials: Array, sprites: Array, shape: Shape3D, mesh: Mesh) -> Node:
 	var body: StaticBody3D = StaticBody3D.new()
 	body.collision_layer = 4 if toIntSafe(objData.get("obstacleType", 0)) == 1 else 2
 	body.collision_mask = 0
 
-	var objScale: Vector3 = _objectScale(objData)
-
 	var col: CollisionShape3D = CollisionShape3D.new()
 	col.name = "CollisionShape3D"
 	col.shape = shape
-	col.scale = objScale
 	body.add_child(col)
 
 	var meshInst: MeshInstance3D = MeshInstance3D.new()
 	meshInst.name = "Mesh"
 	meshInst.mesh = mesh
-	meshInst.scale = objScale
 	body.add_child(meshInst)
 
-	_applyObjectTransform(body, objData, false)
+	_applyObjectTransform(body, objData, true)
 	var mat: Material = _createStandardMaterial(objData, materials, sprites)
 	if mat:
 		meshInst.material_override = mat
 	return body
 
 
-## 可碰撞立方体：直接实例化 Ground.tscn，缩放落在实例根节点。
-## ObstacleType（游戏枚举）: None=0 / Wall=1 / PassThrough=2 / Water=3。
-## 当前映射取舍：Wall=1 → layer 4（玩家 Area 触碰即死，近似原版撞墙判定）；
-## 其余 → layer 2 可站立/阻挡。
-## 是否携带 arproj 材质数据（需逐物体着色者不可直接实例化模板，见 _createInlineColoredBody）
+## 是否携带 arproj 材质数据
 func _hasArprojMaterial(objData: Dictionary) -> bool:
 	var custom: Dictionary = _parseCustom(objData)
 	return not _getMaterialIds(custom).is_empty()
 
 
-## visibility=1 自隐体：内联纯碰撞体（自身本就不渲染，不建网格节点，
-## 从而完全不需要实例内部覆写）
-func _createHiddenBody(objData: Dictionary, layer: int) -> Node:
-	var sb: StaticBody3D = StaticBody3D.new()
+## 盒体统一入口（Road/障碍盒/立方体图元）：直接实例化 Ground.tscn 并整体拉伸
+## （缩放落在实例根节点，内部 CollisionShape3D 本地缩放恒为 1，不触发编辑器
+## 非均匀缩放警告）。需要逐物体颜色（materialIds）或自隐（visibility=1 隐藏
+## 内部网格）时，会覆写实例内部节点并登记 editable instance（见
+## markEditableInstances），保存前由 dock 统一标记。
+func _createGroundBox(objData: Dictionary, materials: Array, sprites: Array, layer: int) -> Node:
+	var sb: StaticBody3D = _instantiateGroundBody()
 	sb.collision_layer = layer
 	sb.collision_mask = 0
-
-	var col: CollisionShape3D = CollisionShape3D.new()
-	col.name = "CollisionShape3D"
-	var shape: BoxShape3D = BoxShape3D.new()
-	shape.margin = 0.001
-	col.shape = shape
-	col.scale = _objectScale(objData)
-	sb.add_child(col)
-
-	_applyObjectTransform(sb, objData, false)
+	_applyObjectTransform(sb, objData, true)
+	if _applyGroundMaterialOverride(sb, objData, materials, sprites):
+		_flagOverriddenInstance(sb)
+	if toIntSafe(objData.get("visibility", 0)) == 1:
+		var meshInst: MeshInstance3D = sb.get_node_or_null("MeshInstance3D") as MeshInstance3D
+		if meshInst != null:
+			meshInst.visible = false
+			_flagOverriddenInstance(sb)
 	return sb
 
 
-## 内联彩色盒体：借用 Ground.tscn 网格资源（含地面材质）+ arproj 颜色覆盖。
-## 内联节点的属性覆写不存在丢失问题；仅无特殊处理的普通地面才直接实例化模板。
-func _createInlineColoredBody(objData: Dictionary, materials: Array, sprites: Array, layer: int) -> Node:
-	var sb: StaticBody3D = StaticBody3D.new()
-	sb.collision_layer = layer
-	sb.collision_mask = 0
-
-	var objScale: Vector3 = _objectScale(objData)
-
-	var col: CollisionShape3D = CollisionShape3D.new()
-	col.name = "CollisionShape3D"
-	var shape: BoxShape3D = BoxShape3D.new()
-	shape.margin = 0.001
-	col.shape = shape
-	col.scale = objScale
-	sb.add_child(col)
-
-	var meshInst: MeshInstance3D = MeshInstance3D.new()
-	meshInst.name = "Mesh"
-	meshInst.mesh = _groundTemplateMesh()
-	meshInst.scale = objScale
-	sb.add_child(meshInst)
-
-	_applyObjectTransform(sb, objData, false)
-	var mat: Material = _createStandardMaterial(objData, materials, sprites)
-	if mat:
-		meshInst.material_override = mat
-	return sb
+func _flagOverriddenInstance(inst: Node) -> void:
+	if not _overrideInstances.has(inst):
+		_overrideInstances.append(inst)
 
 
-## 可碰撞立方体：无特殊处理时直接实例化 Ground.tscn（根节点缩放）；
-## obstacleType=1 为致命障碍物（layer 4），其余可站立/阻挡（layer 2）
+## 为 Ground 实例按 arproj 材质着色（覆写实例内部 MeshInstance3D 的材质）。
+## 返回是否发生了内部覆写（用于登记 editable instance）。
+func _applyGroundMaterialOverride(body: Node, objData: Dictionary, materials: Array, sprites: Array) -> bool:
+	var custom: Dictionary = _parseCustom(objData)
+	if _getMaterialIds(custom).is_empty():
+		return false
+	var meshInst: MeshInstance3D = body.get_node_or_null("MeshInstance3D") as MeshInstance3D
+	if meshInst == null:
+		return false
+	var resolved: StandardMaterial3D = _createStandardMaterial(objData, materials, sprites)
+	if resolved == null:
+		return false
+	meshInst.material_override = resolved
+	return true
+
+
+## 标记所有发生内部覆写的子场景实例（Ground/CameraRoot 等）为 editable instance。
+## 必须在 owner 设置完成【之后】调用（过早调用标志无效，实测验证）：
+## 内部覆写只有 editable instance 才会被 PackedScene.pack() 写入场景文件，
+## 且内部节点会在场景树中可见、可在编辑器中继续调整。
+## 只标记有覆写的实例——全量标记会在大关卡下拖垮编辑器打开速度（实测教训）。
+func markEditableInstances(root: Node) -> void:
+	for inst: Node in _overrideInstances:
+		if is_instance_valid(inst):
+			root.set_editable_instance(inst, true)
+
+
+## 可碰撞立方体：无特殊处理时直接实例化 Ground.tscn（根节点缩放）
 func _createCubeBody(objData: Dictionary, materials: Array, sprites: Array) -> Node:
 	var layer: int = 4 if toIntSafe(objData.get("obstacleType", 0)) == 1 else 2
-	if toIntSafe(objData.get("visibility", 0)) == 1:
-		return _createHiddenBody(objData, layer)
-	if _hasArprojMaterial(objData):
-		return _createInlineColoredBody(objData, materials, sprites, layer)
-	var body: StaticBody3D = _instantiateGroundBody()
-	body.collision_layer = layer
-	body.collision_mask = 0
-	_applyObjectTransform(body, objData, true)
-	return body
+	return _createGroundBox(objData, materials, sprites, layer)
 
 
 ## 非碰撞图元：Node3D 根节点 + "Mesh" 网格子节点（缩放落在网格子节点上，
@@ -699,27 +695,11 @@ func _createTextObject(objData: Dictionary) -> Node:
 	return rootNode
 
 func _createRoadObject(objData: Dictionary, materials: Array, sprites: Array = []) -> Node:
-	if toIntSafe(objData.get("visibility", 0)) == 1:
-		return _createHiddenBody(objData, 2)
-	if _hasArprojMaterial(objData):
-		return _createInlineColoredBody(objData, materials, sprites, 2)
-	var sb: StaticBody3D = _instantiateGroundBody()
-	sb.collision_layer = 2
-	sb.collision_mask = 0
-	_applyObjectTransform(sb, objData, true)
-	return sb
+	return _createGroundBox(objData, materials, sprites, 2)
 
 
 func _createObstacleBox(objData: Dictionary, materials: Array, sprites: Array = []) -> Node:
-	if toIntSafe(objData.get("visibility", 0)) == 1:
-		return _createHiddenBody(objData, 4)
-	if _hasArprojMaterial(objData):
-		return _createInlineColoredBody(objData, materials, sprites, 4)
-	var sb: StaticBody3D = _instantiateGroundBody()
-	sb.collision_layer = 4
-	sb.collision_mask = 0
-	_applyObjectTransform(sb, objData, true)
-	return sb
+	return _createGroundBox(objData, materials, sprites, 4)
 
 
 func _createGemInstance(objData: Dictionary) -> Node:
@@ -781,13 +761,19 @@ func _createMeshObject(objData: Dictionary, meshes: Array, materials: Array, spr
 
 
 func _createTriggerObject(objData: Dictionary) -> Node:
-	var triggerRoot: Area3D = Area3D.new()
-	triggerRoot.set_script(preload("res://#Template/[Scripts]/Trigger/BaseTrigger.gd"))
-
-	var col: CollisionShape3D = CollisionShape3D.new()
-	var box: BoxShape3D = BoxShape3D.new()
-	col.shape = box
-	triggerRoot.add_child(col)
+	# 直接实例化 Trigger.tscn（Area3D + BaseTrigger + CollisionShape3D + Marker3D），整体拉伸
+	var triggerRoot: Area3D = null
+	var triggerScene: PackedScene = load(TRIGGER_TEMPLATE) as PackedScene
+	if triggerScene:
+		triggerRoot = triggerScene.instantiate() as Area3D
+	if triggerRoot == null:
+		# 兜底：模板不可用时手工等价构建
+		triggerRoot = Area3D.new()
+		triggerRoot.set_script(preload("res://#Template/[Scripts]/Trigger/BaseTrigger.gd"))
+		var col: CollisionShape3D = CollisionShape3D.new()
+		col.name = "CollisionShape3D"
+		col.shape = BoxShape3D.new()
+		triggerRoot.add_child(col)
 
 	var objId: int = toIntSafe(objData.get("id", 0))
 	var pos: Vector3 = getVector3FromDict(objData, "position")

@@ -247,9 +247,15 @@ func _createLevelDataResource(data: Dictionary, safeName: String, dataPath: Stri
 func _setOwnerRecursive(node: Node, owner: Node) -> void:
 	if node != owner:
 		node.owner = owner
-	# 如果该节点本身是子场景实例（如 Player.tscn, CameraRoot.tscn, LevelUI.tscn），
-	# 它的根节点 owner 设为主场景，但其内部子节点保留原本预制体的内部所有权，绝不能遍历修改！
+	# 如果该节点本身是子场景实例（如 Player.tscn, CameraRoot.tscn, LevelUI.tscn,
+	# 导入生成的 Ground/Trigger 实例等），它的根节点 owner 设为主场景，
+	# 其模板内部子节点保留原本预制体的内部所有权（owner=实例根），不下钻；
+	# 但导入器追加在实例根下的无主节点（EventTrigger/动画器/颜色组件等）
+	# 属于本场景内容，需要一并设置 owner 才能保存。
 	if node != owner and not node.scene_file_path.is_empty():
+		for child: Node in node.get_children():
+			if child.owner == null:
+				_setOwnerRecursive(child, owner)
 		return
 	for child: Node in node.get_children():
 		_setOwnerRecursive(child, owner)
@@ -261,7 +267,9 @@ func _buildScene(data: Dictionary, levelDataResource: LevelData) -> Node:
 	if not importedModelsDir.is_empty():
 		loader.extraSearchPaths = [importedModelsDir]
 	var scene: Node = loader.buildScene(data, levelDataResource)
+	# owner 先设置；实例的 editable 标记必须在 owner 之后调用才生效
 	_setOwnerRecursive(scene, scene)
+	loader.markEditableInstances(scene)
 	loader.queue_free()
 	return scene
 
