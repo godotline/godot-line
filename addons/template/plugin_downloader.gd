@@ -17,6 +17,10 @@ func cancel_download() -> void:
 	isCancelled = true
 	if is_instance_valid(httpRequest):
 		httpRequest.cancel_request()
+		# Godot 的 HTTPRequest.cancel_request() 只会停止请求并重置状态，不会触发 request_completed 信号。
+		# 因此必须手动唤醒正在 await 该信号的下载协程，否则取消后会永远卡在等待中。
+		# 注意：4.7 的 Result 枚举没有 RESULT_CANCELLED，这里用任意非成功整型值即可（后续由 isCancelled 判定）。
+		httpRequest.emit_signal("request_completed", 1, 0, PackedStringArray(), PackedByteArray())
 
 
 ## 下载插件到指定目标路径。download_url 由商城中的下载源选择器提供。
@@ -44,9 +48,15 @@ func download_plugin(entry: PluginEntry, owner_node: Node, download_url: String 
 	var extractResult: Dictionary = _extract_plugin(entry, archivePath)
 	_remove_archive(archivePath)
 	if not extractResult.get("success", false):
+		if isCancelled:
+			download_cancelled.emit()
+			return
 		emit_signal("download_complete", false, str(extractResult.get("message", "解压插件 ZIP 失败")))
 		return
 
+	if isCancelled:
+		download_cancelled.emit()
+		return
 	download_complete.emit(true, "成功导入 %d 个文件" % extractResult.get("file_count", 0))
 
 
@@ -137,6 +147,9 @@ func _extract_plugin(entry: PluginEntry, archivePath: String) -> Dictionary:
 	DirAccess.make_dir_recursive_absolute(entry.destPath)
 	var fileCount: int = 0
 	for archive_file: String in matchedFiles:
+		if isCancelled:
+			zip.close()
+			return {"success": false, "cancelled": true, "message": "已取消下载"}
 		var relativePath: String = archive_file.substr(archive_file.find(marker) + marker.length())
 		var destination: String = entry.destPath.path_join(relativePath)
 		DirAccess.make_dir_recursive_absolute(destination.get_base_dir())

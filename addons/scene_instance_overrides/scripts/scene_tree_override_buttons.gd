@@ -101,6 +101,9 @@ func _refresh_scene_tree_override_buttons() -> void:
 
 	var row_records: Array[Dictionary] = []
 	_collect_scene_row_records(tree_root, edited_scene_root, row_records)
+	# One shared scan cache lets every instance root in this refresh batch reuse the serialized
+	# snapshot of the edited scene instead of repacking the whole scene per instance root.
+	var scan_cache := {}
 	for row_record: Dictionary in row_records:
 		var instance_root := row_record.get("instance_root") as Node
 		if not is_instance_valid(instance_root):
@@ -108,8 +111,9 @@ func _refresh_scene_tree_override_buttons() -> void:
 		var instance_root_id := instance_root.get_instance_id()
 		if not _context_cache_by_instance_root_id.has(instance_root_id):
 			_context_cache_by_instance_root_id[instance_root_id] = (
-				_host_plugin.scan_overrides_for_node(instance_root)
+				_host_plugin.scan_overrides_for_node(instance_root, scan_cache)
 			)
+	scan_cache.clear()
 
 	for row_record: Dictionary in row_records:
 		var item := row_record.get("item") as TreeItem

@@ -472,7 +472,7 @@ func _on_inspector_property_refresh_timer_timeout() -> void:
 	_schedule_scene_tree_override_button_refresh(context)
 
 
-func scan_overrides_for_node(node: Node) -> Dictionary:
+func scan_overrides_for_node(node: Node, shared_cache: Dictionary = {}) -> Dictionary:
 	if not is_instance_valid(node) or _scanner == null:
 		return {
 			"valid": false,
@@ -481,7 +481,7 @@ func scan_overrides_for_node(node: Node) -> Dictionary:
 			"error": "The selected node cannot be inspected.",
 		}
 
-	var context: Dictionary = _scanner.scan_for_node(node)
+	var context: Dictionary = _scanner.scan_for_node(node, shared_cache)
 	var edited_scene_root := EditorInterface.get_edited_scene_root()
 	context["edited_scene_root"] = edited_scene_root
 	context["host_path"] = edited_scene_root.scene_file_path if is_instance_valid(edited_scene_root) else ""
