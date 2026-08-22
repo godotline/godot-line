@@ -1,3 +1,11 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
 
 [animation]
@@ -27,7 +35,7 @@ window/stretch/aspect="ignore"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/anthonyec.camera_preview/plugin.cfg", "res://addons/dancing_line_importer/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/scene_instance_overrides/plugin.cfg", "res://addons/template/plugin.cfg")
+enabled=PackedStringArray("res://addons/dancing_line_importer/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/template/plugin.cfg")
 
 [input]
 
