@@ -46,13 +46,48 @@ func _on_folder_selected(dir: String) -> void:
 			arprojPath = p
 			break
 
+	# 回退：查找 .arplay 工程包
+	var isArplay: bool = false
 	if arprojPath.is_empty():
-		_log("❌ 未在文件夹中找到关卡数据文件 (level.arproj)")
+		var dirAccess := DirAccess.open(dir)
+		if dirAccess:
+			dirAccess.list_dir_begin()
+			var entry: String = dirAccess.get_next()
+			while not entry.is_empty():
+				if not dirAccess.current_is_dir() and entry.get_extension().to_lower() == "arplay":
+					arprojPath = dir.path_join(entry)
+					isArplay = true
+					break
+				entry = dirAccess.get_next()
+			dirAccess.list_dir_end()
+
+	if arprojPath.is_empty():
+		_log("❌ 未在文件夹中找到关卡数据文件 (level.arproj / *.arplay)")
 		return
 
 	_log("📂 导入文件夹: " + dir)
 	_log("📄 关卡数据文件: " + arprojPath)
-	_parseJsonFile(arprojPath)
+
+	if isArplay:
+		_log("📦 检测到 .arplay 工程包，提取资源…")
+		currentJsonData = ArplayCrypto.readLevel(arprojPath)
+		if currentJsonData.is_empty():
+			_log("❌ .arplay 提取失败")
+			return
+		# 资源直接提取进项目目标目录（产物不落在原始文件夹）
+		var info: Dictionary = currentJsonData.get("info", {}) as Dictionary
+		var arplaySafeName: String = _sanitizeFilename(str(info.get("levelName", "Level")))
+		var arplayResDir: String = "res://[Scenes]/" + arplaySafeName + "/Resources"
+		var counts: Dictionary = ArplayCrypto.extract(arprojPath, arplayResDir)["counts"] as Dictionary
+		importedModelsDir = arplayResDir + "/"
+		EditorInterface.get_resource_filesystem().scan()
+		var objCount: int = (currentJsonData.get("objects", []) as Array).size()
+		_log("✅ 提取成功！对象 %d 个；提取资源 Meshes=%d Sprites=%d Scripts=%d" % [objCount, int(counts.get("Meshes", 0)), int(counts.get("Sprites", 0)), int(counts.get("Scripts", 0))])
+		status_label.text = "✅ 已提取: " + str(info.get("levelName", "未命名"))
+	else:
+		_parseJsonFile(arprojPath)
+		if currentJsonData.is_empty():
+			return
 
 	if currentJsonData.is_empty():
 		return
@@ -69,8 +104,9 @@ func _on_folder_selected(dir: String) -> void:
 				_log("🎵 已读取音频: " + candidate + " (大小: %d 字节)" % currentAudioBytes.size())
 			break
 
-	# 复制模型资源
-	_copyModels(dir)
+	# 复制模型资源（.arplay 路径已在提取时直接写入项目，跳过）
+	if not isArplay:
+		_copyModels(dir)
 
 
 func _copyModels(sourceDir: String) -> void:
@@ -85,18 +121,32 @@ func _copyModels(sourceDir: String) -> void:
 	var targetDir: String = "res://[Scenes]/" + safeName + "/Resources/"
 	DirAccess.make_dir_recursive_absolute(targetDir)
 
-	var da: DirAccess = DirAccess.open(resourcesDir)
-	if not da:
-		_log("❌ 无法读取 Resources 文件夹: " + resourcesDir)
-		return
+	var count: int = _copyModelsRecursive(resourcesDir, targetDir)
 
-	da.list_dir_begin()
+	_log("📦 已复制 %d 个模型/纹理文件到: " % count + targetDir)
+	if count > 0:
+		importedModelsDir = targetDir
+		EditorInterface.get_resource_filesystem().scan()
+
+
+## 递归遍历 Resources 子树（含 Meshes/Sprites 等子目录），文件按原名平铺复制
+func _copyModelsRecursive(dirPath: String, targetDir: String) -> int:
+	var da: DirAccess = DirAccess.open(dirPath)
+	if not da:
+		_log("❌ 无法读取资源文件夹: " + dirPath)
+		return 0
+
 	var count: int = 0
+	da.list_dir_begin()
 	while true:
 		var fileName: String = da.get_next()
 		if fileName.is_empty():
 			break
-		if fileName.begins_with(".") or da.current_is_dir():
+		if fileName.begins_with("."):
+			continue
+		var fullPath: String = dirPath.path_join(fileName)
+		if da.current_is_dir():
+			count += _copyModelsRecursive(fullPath, targetDir)
 			continue
 		var ext: String = fileName.get_extension().to_lower()
 		if ext in ["meta", "lua", "txt", "json", "cs", "unity", "prefab", "mat"]:
@@ -104,18 +154,12 @@ func _copyModels(sourceDir: String) -> void:
 		var validExts: Array[String] = ["obj", "png", "jpg", "jpeg", "mtl", "glb", "gltf", "fbx", "tga", "bmp", "dds", "hdr", "exr", "ktx", "pvr", "pkm", "svg", "webp"]
 		if ext not in validExts:
 			continue
-		var src: String = resourcesDir.path_join(fileName)
-		var dst: String = targetDir + fileName
-		var err: Error = DirAccess.copy_absolute(src, dst)
+		var err: Error = DirAccess.copy_absolute(fullPath, targetDir + fileName)
 		if err == OK:
 			count += 1
 
 	da.list_dir_end()
-
-	_log("📦 已复制 %d 个模型/纹理文件到: " % count + targetDir)
-	if count > 0:
-		importedModelsDir = targetDir
-		EditorInterface.get_resource_filesystem().scan()
+	return count
 
 
 func _parseJsonFile(path: String) -> void:
@@ -165,7 +209,7 @@ func _on_import_pressed() -> void:
 	var levelName: String = str(info.get("levelName", "Level"))
 	var safeName: String = _sanitizeFilename(levelName)
 	var levelDir: String = "res://[Scenes]/" + safeName + "/"
-	var scenePath: String = levelDir + safeName + ".scn"
+	var scenePath: String = levelDir + safeName + ".tscn"
 	var dataPath: String = levelDir + safeName + ".tres"
 
 	DirAccess.make_dir_recursive_absolute(levelDir)

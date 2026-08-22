@@ -543,21 +543,24 @@ func _createPrimitiveObject(objData: Dictionary, materials: Array, sprites: Arra
 			if canCollide:
 				return _createCubeBody(objData, materials, sprites)
 			return _createPrimitiveMesh(objData, materials, sprites, _groundTemplateMesh())
-		0: # Sphere（Unity 单位球，直径 1）
+		0: # Sphere（Unity 单位球，直径 1；半径取缩放最大轴的一半）
+			var maxAxis: float = maxf(_objectScale(objData).x, maxf(_objectScale(objData).y, _objectScale(objData).z))
+			var sphereRadius: float = 0.5 * maxAxis
 			var sphereMesh: SphereMesh = SphereMesh.new()
 			sphereMesh.radius = 0.5
 			sphereMesh.height = 1.0
 			if canCollide:
 				var sphereShape: SphereShape3D = SphereShape3D.new()
-				sphereShape.radius = 0.5
+				sphereShape.radius = sphereRadius
 				return _createPrimitiveBody(objData, materials, sprites, sphereShape, sphereMesh)
 			return _createPrimitiveMesh(objData, materials, sprites, sphereMesh)
 		4: # Plane（Unity 平面为 10x10 朝上水平面）
+			var planeSize: Vector3 = _objectScale(objData)
 			var planeMesh: PlaneMesh = PlaneMesh.new()
-			planeMesh.size = Vector2(10, 10)
+			planeMesh.size = Vector2(10 * planeSize.x, 10 * planeSize.z)
 			if canCollide:
 				var planeShape: BoxShape3D = BoxShape3D.new()
-				planeShape.size = Vector3(10, 0.01, 10)
+				planeShape.size = Vector3(planeMesh.size.x, 0.01, planeMesh.size.y)
 				return _createPrimitiveBody(objData, materials, sprites, planeShape, planeMesh)
 			return _createPrimitiveMesh(objData, materials, sprites, planeMesh)
 		_:
@@ -565,8 +568,8 @@ func _createPrimitiveObject(objData: Dictionary, materials: Array, sprites: Arra
 
 
 ## 可碰撞图元（球/平面）：obstacleType=1 → layer 4（玩家 Area 触碰即死），
-## 其余 → layer 2。缩放落在根上，CollisionShape3D 本地缩放保持 1
-## （避免编辑器非均匀缩放警告）
+## 其余 → layer 2。调用方负责把尺寸烘进新建的 shape 资源；网格视觉缩放
+## 落在子节点上，CollisionShape3D 本地缩放保持 1（避免非均匀缩放警告）
 func _createPrimitiveBody(objData: Dictionary, materials: Array, sprites: Array, shape: Shape3D, mesh: Mesh) -> Node:
 	var body: StaticBody3D = StaticBody3D.new()
 	body.collision_layer = 4 if toIntSafe(objData.get("obstacleType", 0)) == 1 else 2
@@ -580,9 +583,10 @@ func _createPrimitiveBody(objData: Dictionary, materials: Array, sprites: Array,
 	var meshInst: MeshInstance3D = MeshInstance3D.new()
 	meshInst.name = "Mesh"
 	meshInst.mesh = mesh
+	meshInst.scale = _objectScale(objData)
 	body.add_child(meshInst)
 
-	_applyObjectTransform(body, objData, true)
+	_applyObjectTransform(body, objData, false)
 	var mat: Material = _createStandardMaterial(objData, materials, sprites)
 	if mat:
 		meshInst.material_override = mat
@@ -595,45 +599,73 @@ func _hasArprojMaterial(objData: Dictionary) -> bool:
 	return not _getMaterialIds(custom).is_empty()
 
 
-## 盒体统一入口（Road/障碍盒/立方体图元）：直接实例化 Ground.tscn 并整体拉伸
-## （缩放落在实例根节点，内部 CollisionShape3D 本地缩放恒为 1，不触发编辑器
-## 非均匀缩放警告）。需要逐物体颜色（materialIds）或自隐（visibility=1 隐藏
-## 内部网格）时，会覆写实例内部节点并登记 editable instance（见
-## markEditableInstances），保存前由 dock 统一标记。
+## 盒体统一入口（Road/障碍盒/立方体图元），按性质三档构建：
+## - 普通地面（无 materialIds、非自隐）→ 直接实例化 Ground.tscn 并整体拉伸；
+## - 彩色体（有 materialIds）/ 自隐体（visibility=1）→ 内联构建。
+## 彩色与自隐若走实例化，需要对内部节点覆写并标记 editable instance，
+## 数量大时编辑器打开场景会长时间假死（673459 实测：1613 个即卡死），
+## 故这两档一律内联——内联节点的颜色/隐藏天然持久化，零 editable。
 func _createGroundBox(objData: Dictionary, materials: Array, sprites: Array, layer: int) -> Node:
+	if toIntSafe(objData.get("visibility", 0)) == 1:
+		return _createHiddenBody(objData, layer)
+	if _hasArprojMaterial(objData):
+		return _createInlineColoredBody(objData, materials, sprites, layer)
 	var sb: StaticBody3D = _instantiateGroundBody()
 	sb.collision_layer = layer
 	sb.collision_mask = 0
 	_applyObjectTransform(sb, objData, true)
-	if _applyGroundMaterialOverride(sb, objData, materials, sprites):
-		_flagOverriddenInstance(sb)
-	if toIntSafe(objData.get("visibility", 0)) == 1:
-		var meshInst: MeshInstance3D = sb.get_node_or_null("MeshInstance3D") as MeshInstance3D
-		if meshInst != null:
-			meshInst.visible = false
-			_flagOverriddenInstance(sb)
 	return sb
 
 
-func _flagOverriddenInstance(inst: Node) -> void:
-	if not _overrideInstances.has(inst):
-		_overrideInstances.append(inst)
+## visibility=1 自隐体：内联纯碰撞体（自身本就不渲染，不建网格节点）。
+## 尺寸烘进 BoxShape3D.size 而非缩放节点（避免非均匀缩放形状的 Jolt 警告与开销）
+func _createHiddenBody(objData: Dictionary, layer: int) -> Node:
+	var sb: StaticBody3D = StaticBody3D.new()
+	sb.collision_layer = layer
+	sb.collision_mask = 0
+
+	var col: CollisionShape3D = CollisionShape3D.new()
+	col.name = "CollisionShape3D"
+	var shape: BoxShape3D = BoxShape3D.new()
+	shape.margin = 0.001
+	shape.size = _objectScale(objData)
+	col.shape = shape
+	sb.add_child(col)
+
+	_applyObjectTransform(sb, objData, false)
+	return sb
 
 
-## 为 Ground 实例按 arproj 材质着色（覆写实例内部 MeshInstance3D 的材质）。
-## 返回是否发生了内部覆写（用于登记 editable instance）。
-func _applyGroundMaterialOverride(body: Node, objData: Dictionary, materials: Array, sprites: Array) -> bool:
-	var custom: Dictionary = _parseCustom(objData)
-	if _getMaterialIds(custom).is_empty():
-		return false
-	var meshInst: MeshInstance3D = body.get_node_or_null("MeshInstance3D") as MeshInstance3D
-	if meshInst == null:
-		return false
-	var resolved: StandardMaterial3D = _createStandardMaterial(objData, materials, sprites)
-	if resolved == null:
-		return false
-	meshInst.material_override = resolved
-	return true
+## 内联彩色盒体：借用 Ground.tscn 网格资源（含地面材质）+ arproj 颜色覆盖，
+## 缩放落在 CollisionShape3D / Mesh 子节点上
+func _createInlineColoredBody(objData: Dictionary, materials: Array, sprites: Array, layer: int) -> Node:
+	var sb: StaticBody3D = StaticBody3D.new()
+	sb.collision_layer = layer
+	sb.collision_mask = 0
+
+	var objScale: Vector3 = _objectScale(objData)
+
+	# 尺寸烘进 shape/mesh 资源而非缩放节点（避免非均匀缩放形状的 Jolt 警告与开销）
+	var col: CollisionShape3D = CollisionShape3D.new()
+	col.name = "CollisionShape3D"
+	var shape: BoxShape3D = BoxShape3D.new()
+	shape.margin = 0.001
+	shape.size = objScale
+	col.shape = shape
+	sb.add_child(col)
+
+	var meshInst: MeshInstance3D = MeshInstance3D.new()
+	meshInst.name = "Mesh"
+	var boxMesh: BoxMesh = BoxMesh.new()
+	boxMesh.size = objScale
+	meshInst.mesh = boxMesh
+	sb.add_child(meshInst)
+
+	_applyObjectTransform(sb, objData, false)
+	var mat: Material = _createStandardMaterial(objData, materials, sprites)
+	if mat:
+		meshInst.material_override = mat
+	return sb
 
 
 ## 标记所有发生内部覆写的子场景实例（Ground/CameraRoot 等）为 editable instance。
@@ -1019,8 +1051,15 @@ func _buildAnimatorTrigger(dataStr: String, triggerRoot: Area3D, config: Diction
 
 	var idStr: String = parts[2].strip_edges()
 	var targetId: int = idStr.to_int() if idStr.is_valid_int() else -1
-	if targetId <= 0:
-		push_warning("LevelLoader: 动画触发器 %d 目标 id 无效：'%s'" % [objId, parts[2]])
+	# [4]=useGroup / [5]=groups：useGroup=true 时按组定位目标，此时 targetId 允许为 -1
+	var useGroup: bool = parts[4].strip_edges().to_lower() == "true"
+	var groups: Array[int] = []
+	for rawG: String in parts[5].split(","):
+		var gs: String = rawG.strip_edges()
+		if gs.is_valid_int():
+			groups.append(gs.to_int())
+	if targetId <= 0 and (not useGroup or groups.is_empty()):
+		push_warning("LevelLoader: 动画触发器 %d 无有效目标（id=%d，useGroup=%s，组=%s），已跳过。" % [objId, targetId, str(useGroup), str(groups)])
 		return
 
 	var duration: float = 2.0
@@ -1034,6 +1073,8 @@ func _buildAnimatorTrigger(dataStr: String, triggerRoot: Area3D, config: Diction
 		"comp": eventComp,
 		"kind": str(config.get("animatorKind", "pos")),
 		"targetId": targetId,
+		"useGroup": useGroup,
+		"groups": groups,
 		"value": targetValue,
 		"easeTrans": int(easeInfo["trans"]),
 		"easeType": int(easeInfo["ease"]),
@@ -1096,6 +1137,26 @@ func _buildColorTrigger(dataStr: String, triggerRoot: Area3D, config: Dictionary
 
 ## 后处理：为所有 Transform 触发器在目标节点下实例化动画器并建立信号连接。
 ## 必须在对象全部实例化且父子关系就绪之后调用（局部位姿才正确）。
+## 解析触发器目标集合：useGroup=true 时按组匹配（arprojGroups meta），
+## 否则按 targetId 直连。返回去重后的目标节点数组。
+func _resolveTriggerTargets(entry: Dictionary, nodeMap: Dictionary) -> Array[Node]:
+	var result: Array[Node] = []
+	if bool(entry.get("useGroup", false)):
+		var wantedGroups: Array = entry.get("groups", []) as Array
+		for idKey: Variant in nodeMap:
+			var cand: Node = nodeMap[idKey]
+			var candGroups: Array = cand.get_meta("arprojGroups", []) as Array
+			for wantedGid: Variant in wantedGroups:
+				if candGroups.has(int(wantedGid)):
+					result.append(cand)
+					break
+	else:
+		var tid: int = int(entry.get("targetId", -1))
+		if nodeMap.has(tid):
+			result.append(nodeMap[tid])
+	return result
+
+
 func _linkTriggerAnimators(nodeMap: Dictionary) -> void:
 	if pendingAnimatorTriggers.is_empty():
 		return
@@ -1108,54 +1169,58 @@ func _linkTriggerAnimators(nodeMap: Dictionary) -> void:
 		if eventComp == null or not is_instance_valid(eventComp):
 			push_warning("LevelLoader: 动画触发器的 EventTrigger 已失效，跳过链接。")
 			continue
-		var targetId: int = int(entry.get("targetId", -1))
-		if not nodeMap.has(targetId):
-			push_warning("LevelLoader: 动画触发器目标对象 %d 不存在，触发器保持未链接。" % targetId)
-			continue
-		var target: Node3D = nodeMap[targetId] as Node3D
-		if target == null:
-			push_warning("LevelLoader: 动画目标 %d 不是 Node3D，跳过。" % targetId)
+		var targets := _resolveTriggerTargets(entry, nodeMap)
+		if targets.is_empty():
+			push_warning("LevelLoader: 动画触发器未解析到任何目标（id=%d，useGroup=%s），保持未链接。" % [int(entry.get("targetId", -1)), str(entry.get("useGroup", false))])
 			continue
 		var kind: String = str(entry.get("kind", "pos"))
 		var animatorScript: Script = TriggerTypeMapClass.ANIMATOR_SCRIPTS.get(kind, null) as Script
 		if animatorScript == null:
 			continue
-		var animator: AnimatorBase = animatorScript.new() as AnimatorBase
-		animator.name = str(TriggerTypeMapClass.ANIMATOR_NODE_NAMES.get(kind, "Animator"))
 
-		# 以目标当前局部位姿烘焙绝对值（运行时 transformType 恒为 New）
 		var rawVec: Vector3 = entry.get("value", Vector3.ZERO) as Vector3
 		var isAdd: bool = bool(entry.get("isAdd", false))
-		var current: Vector3
-		var endTarget: Vector3
-		if kind == "rot":
-			current = target.rotation
-			var radVec: Vector3 = Vector3(degToRad(rawVec.x), degToRad(rawVec.y), degToRad(rawVec.z))
-			endTarget = (current + radVec) if isAdd else radVec
-		elif kind == "scale":
-			# 缩放不再挂在根节点上（落在碰撞/网格子节点），读导入时记录的原始缩放
-			current = target.get_meta("arprojScale", target.scale) as Vector3
-			endTarget = (current + rawVec) if isAdd else rawVec
-		else:
-			current = target.position
-			endTarget = (current + rawVec) if isAdd else rawVec
+		var linkedCount: int = 0
+		# 组模式下可能多目标：每个目标各挂一个动画器，同一信号统一驱动
+		for target: Node3D in targets:
+			if target == null:
+				continue
+			var animator: AnimatorBase = animatorScript.new() as AnimatorBase
+			animator.name = str(TriggerTypeMapClass.ANIMATOR_NODE_NAMES.get(kind, "Animator"))
 
-		animator.transformType = AnimatorBase.TransformType.New
-		if bool(entry.get("reverse", false)):
-			animator.startValue = endTarget
-			animator.endOffset = current
-		else:
-			animator.startValue = current
-			animator.endOffset = endTarget
-		animator.duration = float(entry.get("duration", 2.0))
-		animator.TransitionType = int(entry.get("easeTrans", Tween.TRANS_LINEAR)) as Tween.TransitionType
-		animator.EaseType = int(entry.get("easeType", Tween.EASE_IN_OUT)) as Tween.EaseType
-		animator.triggeredByTime = false # 仅经由 EventTrigger.triggered 调用
+			# 以目标当前局部位姿烘焙绝对值（运行时 transformType 恒为 New）
+			var current: Vector3
+			var endTarget: Vector3
+			if kind == "rot":
+				current = target.rotation
+				var radVec: Vector3 = Vector3(degToRad(rawVec.x), degToRad(rawVec.y), degToRad(rawVec.z))
+				endTarget = (current + radVec) if isAdd else radVec
+			elif kind == "scale":
+				# 缩放不挂在根节点上（落在碰撞/网格子节点），读导入时记录的原始缩放
+				current = target.get_meta("arprojScale", target.scale) as Vector3
+				endTarget = (current + rawVec) if isAdd else rawVec
+			else:
+				current = target.position
+				endTarget = (current + rawVec) if isAdd else rawVec
 
-		target.add_child(animator, true)
-		eventComp.targetNode = animator
-		# pack() 只序列化带 CONNECT_PERSIST 标志的连接，必须显式携带
-		eventComp.triggered.connect(animator.Trigger, CONNECT_PERSIST)
+			animator.transformType = AnimatorBase.TransformType.New
+			if bool(entry.get("reverse", false)):
+				animator.startValue = endTarget
+				animator.endOffset = current
+			else:
+				animator.startValue = current
+				animator.endOffset = endTarget
+			animator.duration = float(entry.get("duration", 2.0))
+			animator.TransitionType = int(entry.get("easeTrans", Tween.TRANS_LINEAR)) as Tween.TransitionType
+			animator.EaseType = int(entry.get("easeType", Tween.EASE_IN_OUT)) as Tween.EaseType
+			animator.triggeredByTime = false # 仅经由 EventTrigger.triggered 调用
+
+			target.add_child(animator, true)
+			# pack() 只序列化带 CONNECT_PERSIST 标志的连接，必须显式携带
+			eventComp.triggered.connect(animator.Trigger, CONNECT_PERSIST)
+			linkedCount += 1
+		if linkedCount > 0:
+			eventComp.targetNode = targets[0]
 	pendingAnimatorTriggers.clear()
 
 
@@ -1168,26 +1233,14 @@ func _linkColorTrigger(entry: Dictionary, nodeMap: Dictionary) -> void:
 		return
 	var triggerRoot: Node = eventComp.get_parent()
 
+	var resolved := _resolveTriggerTargets(entry, nodeMap)
 	var targets: Array[Node] = []
-	if bool(entry.get("useGroup", false)):
-		var wantedGroups: Array = entry.get("groups", []) as Array
-		if wantedGroups.is_empty():
-			push_warning("LevelLoader: Color 触发器 useGroup=true 但组列表为空，跳过。")
-			return
-		for idKey: Variant in nodeMap:
-			var cand: Node = nodeMap[idKey]
-			var candGroups: Array = cand.get_meta("arprojGroups", []) as Array
-			for wantedGid: Variant in wantedGroups:
-				if candGroups.has(int(wantedGid)):
-					targets.append(cand)
-					break
-	else:
-		var tid: int = int(entry.get("targetId", -1))
-		if nodeMap.has(tid):
-			targets.append(nodeMap[tid])
-		else:
-			push_warning("LevelLoader: Color 触发器目标对象 %d 不存在，跳过。" % tid)
-			return
+	for tgt: Node in resolved:
+		if tgt is Node3D:
+			targets.append(tgt)
+	if targets.is_empty():
+		push_warning("LevelLoader: Color 触发器未解析到任何 Node3D 目标（id=%d）。" % int(entry.get("targetId", -1)))
+		return
 
 	var comp: SetColor3D = TriggerTypeMapClass.SET_COLOR_SCRIPT.new() as SetColor3D
 	comp.name = "SetColor3D"
@@ -1196,12 +1249,7 @@ func _linkColorTrigger(entry: Dictionary, nodeMap: Dictionary) -> void:
 	comp.TransitionType = int(entry.get("easeTrans", Tween.TRANS_LINEAR)) as Tween.TransitionType
 	comp.EaseType = int(entry.get("easeType", Tween.EASE_IN_OUT)) as Tween.EaseType
 	for tgt: Node in targets:
-		if tgt is Node3D:
-			comp.targetNodes.append(tgt)
-	if comp.targetNodes.is_empty():
-		push_warning("LevelLoader: Color 触发器未解析到任何 Node3D 目标。")
-		return
-
+		comp.targetNodes.append(tgt)
 	triggerRoot.add_child(comp, true)
 	eventComp.triggered.connect(comp.trigger, CONNECT_PERSIST)
 

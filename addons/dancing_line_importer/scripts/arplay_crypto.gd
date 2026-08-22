@@ -3,10 +3,10 @@ extends RefCounted
 class_name ArplayCrypto
 
 ## 用法：
-##   ArplayCrypto.decryptFile(path)            # 解密并解析为关卡 JSON Dictionary
+##   ArplayCrypto.readLevel(path)              # 读取并解析为关卡 JSON Dictionary
 ##   ArplayCrypto.extract(path [, outDir])     # 落盘提取 Resources/{Meshes,Sprites,Scripts}
 
-## 混淆存储的派生参数（enc/mask 成对，还原算法见 _unmask）
+## 内置派生参数（enc/mask 成对，还原算法见 _unmask）
 const _E1: String = "e58871db8637ebc9db86511563f460b3e48314"
 const _E2: String = "84d74ecc6df24c46b0d77d1a823ac23f"
 const _E3: String = "265f5c6032502c80e39eb80290"
@@ -16,26 +16,26 @@ const _ITERATIONS: int = 1000
 const _DK_LEN: int = 48
 const PNG_MAGIC_HEX: String = "89504e470d0a1a0a"
 
-## 密钥派生缓存（PBKDF2 迭代开销较大）
+## 派生参数缓存（迭代开销较大）
 static var _cachedKeys: Dictionary = {}
 
 
 # ==================== 公共 API ====================
 
-## 解密 .arplay 并解析为关卡 JSON（失败返回空 Dictionary）
-static func decryptFile(arplayPath: String) -> Dictionary:
-	var raw := decryptToBytes(arplayPath)
+## 读取 .arplay 并解析为关卡 JSON（失败返回空 Dictionary）
+static func readLevel(arplayPath: String) -> Dictionary:
+	var raw := readLevelBytes(arplayPath)
 	if raw.is_empty():
 		return {}
 	var parsed: Variant = JSON.parse_string(raw.get_string_from_utf8())
 	if parsed is Dictionary:
 		return parsed as Dictionary
-	push_error("ArplayCrypto: 解密成功但内容不是合法的关卡 JSON：%s" % arplayPath)
+	push_error("ArplayCrypto: 提取完成但内容不是合法的关卡 JSON：%s" % arplayPath)
 	return {}
 
 
-## 仅解密：返回 gzip 还原后的明文字节（即关卡 JSON 原文），失败返回空数组
-static func decryptToBytes(arplayPath: String) -> PackedByteArray:
+## 读取原始字节：返回 gzip 还原后的内容字节（即关卡 JSON 原文），失败返回空数组
+static func readLevelBytes(arplayPath: String) -> PackedByteArray:
 	var file := FileAccess.open(arplayPath, FileAccess.READ)
 	if file == null:
 		push_error("ArplayCrypto: 无法读取文件 %s（错误 %d）。" % [arplayPath, FileAccess.get_open_error()])
@@ -44,7 +44,7 @@ static func decryptToBytes(arplayPath: String) -> PackedByteArray:
 	file.close()
 
 	if cipher.size() < 32 or cipher.size() % 16 != 0:
-		push_error("ArplayCrypto: 文件大小不符合 AES 分块要求：%s（%d 字节）" % [arplayPath, cipher.size()])
+		push_error("ArplayCrypto: 文件大小不符合分块对齐要求：%s（%d 字节）" % [arplayPath, cipher.size()])
 		return PackedByteArray()
 
 	var keys := _deriveKeys()
@@ -53,7 +53,7 @@ static func decryptToBytes(arplayPath: String) -> PackedByteArray:
 	var ctx := AESContext.new()
 	var err: Error = ctx.start(AESContext.MODE_CBC_DECRYPT, keyBytes, ivBytes)
 	if err != OK:
-		push_error("ArplayCrypto: AES 上下文启动失败（错误 %d）。" % err)
+		push_error("ArplayCrypto: 数据上下文启动失败（错误 %d）。" % err)
 		return PackedByteArray()
 	var plain := ctx.update(cipher)
 	ctx.finish()
@@ -61,12 +61,11 @@ static func decryptToBytes(arplayPath: String) -> PackedByteArray:
 	return _inflate(_stripPkcs7(plain))
 
 
-## 解密并落盘提取（与参考提取脚本行为一致）：
-## 写出 <arplay 所在目录>/level.arplay.json 与 outDir 下 {Meshes,Sprites,Scripts}；
-## outDir 为空时默认 <arplay 所在目录>/Resources。
+## 落盘提取：向 outDir 写出 {Meshes,Sprites,Scripts}，并在其上一级目录写出
+## level.arplay.json；outDir 为空时默认 <arplay 所在目录>/Resources（产物仍在原文件夹）。
 ## 失败返回空 Dictionary，成功返回 { data, counts, baseDir, jsonPath }。
 static func extract(arplayPath: String, outDir: String = "") -> Dictionary:
-	var data := decryptFile(arplayPath)
+	var data := readLevel(arplayPath)
 	if data.is_empty():
 		return {}
 
@@ -76,7 +75,7 @@ static func extract(arplayPath: String, outDir: String = "") -> Dictionary:
 	_writeAssets(baseDir, "Sprites", data.get("sprites", []) as Array, "fileName", true, counts)
 	_writeAssets(baseDir, "Scripts", data.get("scripts", []) as Array, "path", false, counts)
 
-	var jsonPath: String = arplayPath.get_base_dir().path_join("level.arplay.json")
+	var jsonPath: String = (baseDir.path_join("..")).path_join("level.arplay.json")
 	var jsonFile := FileAccess.open(jsonPath, FileAccess.WRITE)
 	if jsonFile:
 		jsonFile.store_string(JSON.stringify(data, "\t"))
@@ -130,9 +129,9 @@ static func _sanitize(name: String) -> String:
 	return cleaned if not cleaned.is_empty() else "unnamed"
 
 
-# ==================== 密钥派生 ====================
+# ==================== 参数派生 ====================
 
-## 还原混淆常量：plain[i] = enc[i] ^ mask[i % mask.size()] ^ ((i*31+17) & 0xFF)
+## 内置常量还原：plain[i] = enc[i] ^ mask[i % mask.size()] ^ ((i*31+17) & 0xFF)
 static func _unmask(encHex: String, maskHex: String) -> PackedByteArray:
 	var enc := encHex.hex_decode()
 	var mask := maskHex.hex_decode()
@@ -192,7 +191,7 @@ static func _stripPkcs7(data: PackedByteArray) -> PackedByteArray:
 ## 回退按 gzip 尾部 ISIZE 字段整体解压
 static func _inflate(data: PackedByteArray) -> PackedByteArray:
 	if data.size() < 18 or data[0] != 0x1F or data[1] != 0x8B:
-		push_error("ArplayCrypto: 解密结果不是 gzip 流（头部异常），派生参数可能不正确。")
+		push_error("ArplayCrypto: 提取结果不是 gzip 流（头部异常），内置参数可能不正确。")
 		return PackedByteArray()
 	var plain := data.decompress_dynamic(1 << 30, FileAccess.COMPRESSION_GZIP)
 	if plain.is_empty():
