@@ -61,7 +61,8 @@ func _create_collection_effect_nodes() -> void:
 	if not crystalThunder:
 		crystalThunder = MeshInstance3D.new()
 		crystalThunder.name = "CrystalThunder"
-		crystalThunder.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * 6.0), Vector3.ZERO)
+		# (4.8, 6, 4.8)：保留重构前 contentRoot 携带 0.8 缩放时的等效世界尺寸（6 × 0.8）
+		crystalThunder.transform = Transform3D(Basis.from_scale(Vector3(4.8, 6.0, 4.8)), Vector3.ZERO)
 		crystalThunder.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var lightningMesh: QuadMesh = QuadMesh.new()
 		lightningMesh.size = Vector2(0.9, 2.7)

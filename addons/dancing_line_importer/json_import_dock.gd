@@ -189,8 +189,6 @@ func _on_import_pressed() -> void:
 		_log("❌ 场景生成失败")
 		return
 
-	_setOwnerRecursive(scene, scene)
-
 	var packedScene: PackedScene = PackedScene.new()
 	var packErr: Error = packedScene.pack(scene)
 	if packErr != OK:
@@ -263,6 +261,7 @@ func _buildScene(data: Dictionary, levelDataResource: LevelData) -> Node:
 	if not importedModelsDir.is_empty():
 		loader.extraSearchPaths = [importedModelsDir]
 	var scene: Node = loader.buildScene(data, levelDataResource)
+	_setOwnerRecursive(scene, scene)
 	loader.queue_free()
 	return scene
 

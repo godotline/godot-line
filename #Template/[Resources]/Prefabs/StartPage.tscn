@@ -8,6 +8,17 @@
 [ext_resource type="Texture2D" uid="uid://56l3lqh1p6e3" path="res://#Template/[Textures]/info_i_1000dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.png" id="6_info"]
 [ext_resource type="Script" path="res://#Template/[Scripts]/GUI/ShowCanvas.gd" id="7_show_canvas"]
 [ext_resource type="Script" path="res://#Template/[Scripts]/GUI/HideCanvas.gd" id="8_hide_canvas"]
+[ext_resource type="Script" uid="uid://ctqws2cbsrpm3" path="res://#Template/[Scripts]/GUI/GuidanceEnabled.gd" id="7_gden"]
+[ext_resource type="Texture2D" path="res://#Template/[Textures]/Sprites.png" id="9_sprites"]
+[ext_resource type="FontFile" uid="uid://diyv3w2nftxaw" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="10_cav"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gdon"]
+atlas = ExtResource("9_sprites")
+region = Rect2(429, 559, 59, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gdoff"]
+atlas = ExtResource("9_sprites")
+region = Rect2(448, 601, 59, 40)
 
 [sub_resource type="StyleBoxFlat" id="7_hover"]
 bg_color = Color(1, 1, 1, 0.12)
@@ -95,7 +106,8 @@ flat = true
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0, 0, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_fonts/font = ExtResource("10_cav")
+theme_override_font_sizes/font_size = 14
 text = "AUTOPLAY"
 vertical_alignment = 1
 
@@ -463,6 +475,30 @@ flat = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "后处理"
+
+[node name="GuidanceToggle" type="HBoxContainer" parent="UIContainer/BottomBar/HBox"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="UIContainer/BottomBar/HBox/GuidanceToggle"]
+custom_minimum_size = Vector2(59, 40)
+layout_mode = 2
+flat = true
+script = ExtResource("7_gden")
+image = NodePath("Image")
+on = SubResource("AtlasTexture_gdon")
+off = SubResource("AtlasTexture_gdoff")
+
+[node name="Image" type="TextureRect" parent="UIContainer/BottomBar/HBox/GuidanceToggle/Button"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("AtlasTexture_gdoff")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="AboutPanel" type="Panel" parent="UIContainer" unique_id=651998823]
 visible = false

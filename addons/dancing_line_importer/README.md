@@ -50,14 +50,14 @@
 ### 4. 场景对象 (`objects`)
 | 对象类型 (`type`) | 覆盖率 | 映射目标与行为 |
 | :--- | :---: | :--- |
-| **Type 0** (空容器 / Group) | 100% | 映射为纯 `Node3D` 容器，完整重构 Unity 父子 Transform 树 |
+| **Type 0** (图元 / Group) | 100% | `customData.type` 为 Unity PrimitiveType（0=Sphere / 3=Cube / 4=Plane）时映射为对应网格；`canCollide=true` 附加 `StaticBody3D`（`obstacleType=1` 为致命障碍 Layer 4，其余 Layer 2 可站立）；无 customData 时为纯 `Node3D` 容器 |
 | **Type 1** (Mesh 网格物体) | 100% | 映射为 `MeshInstance3D`，加载对应 .obj 网格与材质 |
 | **Type 2** (Sprite / 文本) | 80% | 映射为 `Node3D`，若绑定材质贴图则渲染对应纹理 |
 | **Type 4** (Trigger 触发器) | 90% | 映射为 `Area3D` + 模式 1 纯组件挂载（详情参见 `Trigger.md`） |
 | **Type 5** (Road 路线) | 100% | 内联映射为 `StaticBody3D` (Collision Layer 2: BaseFloor) |
 | **Crown / Checkpoint** | 100% | 映射为 `CrownCheckPoint.tscn`，自动忽略 scale/rot 仅保留 position |
 | **Gem / Diamond** | 100% | 映射为 `Gem.tscn` 预制体 |
-| **visibility** | 100% | 仅在 `visibility == 2`（动态激活后续关卡）时设置 `visible = false` |
+| **visibility** | 100% | `1`=自身不渲染（仅隐藏网格表现，保留碰撞与子树，如空气墙/场景容器图元）；`2`=隐藏整个子树待 VisibilityTrigger 激活；`0`=正常可见 |
 | **animatable** (物体位移动画) | 0% | 暂作为静态物体导入（后续版本支持解析烘焙至 `AnimationPlayer`） |
 
 ---

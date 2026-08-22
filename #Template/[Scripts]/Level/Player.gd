@@ -132,9 +132,31 @@ const TAIL_ANGULAR_DAMP: float = 2.0
 var tailPool: ObjectPool = ObjectPool.new(100)
 var tailBodyPool: ObjectPool = ObjectPool.new(100)
 
+## GameEvents 事件枢纽缓存（惰性获取，对应 Unity Player.Events 属性）
+var gameEventsHub: GameEvents = null
+
+## 惰性获取子节点上的 GameEvents 枢纽；不存在时返回 null
+func getEvents() -> GameEvents:
+	if not is_instance_valid(gameEventsHub):
+		gameEventsHub = get_node_or_null("GameEvents") as GameEvents
+	return gameEventsHub
+
 func _ready() -> void:
 	add_to_group("Player")
 	instance = self
+	# 将既有玩家信号转发到 GameEvents 枢纽（bind 索引复用 invoke）
+	# 仅运行时执行：GameEvents.gd 非 @tool，编辑器中其占位实例没有方法可访问
+	if not Engine.is_editor_hint():
+		var events: GameEvents = getEvents()
+		if events:
+			on_game_awake.connect(events.invoke.bind(0))
+			on_player_start.connect(events.invoke.bind(1))
+			on_change_direction.connect(events.invoke.bind(2))
+			on_leave_ground.connect(events.invoke.bind(3))
+			on_touch_ground.connect(events.invoke.bind(4))
+			on_game_over.connect(events.invoke.bind(5))
+			on_get_gem.connect(events.invoke.bind(6))
+			on_player_jump.connect(events.invoke.bind(7))
 	tailPool.size = poolSize
 	tailBodyPool.size = poolSize
 	if characterMaterial:
@@ -213,7 +235,8 @@ func _physics_process(delta: float) -> void:
 		velocity.x = horizontalVelocity.x
 		velocity.z = horizontalVelocity.z
 		if isLive and is_on_wall() and not noDeath:
-			PlayerDeath()
+			# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab
+			PlayerDeath(showLineBody)
 		if fly:
 			$".".position.y = y
 
@@ -615,7 +638,9 @@ func _sync_henshin_rotation() -> void:
 		return
 	henshinObject.create_tween().tween_property(henshinObject, "rotation_degrees", rotation_degrees, rotationTime)
 
-func capture_managed_animation_state() -> void:
+## 捕获受管动画状态。manualGameTime >= 0 时（检查点 AutoRecord 关闭），
+## 时间轴进度按检查点授权的音乐时间记录而非实际位置（对齐 Unity GetTimelineProgresses）
+func capture_managed_animation_state(manualGameTime: float = -1.0) -> void:
 	managedAnimationStates.clear()
 	for animator: AnimationPlayer in playedAnimators:
 		if animator and not animator.current_animation.is_empty():
@@ -625,12 +650,15 @@ func capture_managed_animation_state() -> void:
 				"position": animator.current_animation_position,
 				"playing": animator.is_playing()
 			})
+	var timelinePosition: float = manualGameTime
 	for timeline: AnimationPlayer in playedTimelines:
 		if timeline and not timeline.current_animation.is_empty():
+			if manualGameTime < 0.0:
+				timelinePosition = timeline.current_animation_position
 			managedAnimationStates.append({
 				"animator": timeline,
 				"animation": timeline.current_animation,
-				"position": timeline.current_animation_position,
+				"position": timelinePosition,
 				"playing": timeline.is_playing()
 			})
 
@@ -705,6 +733,8 @@ func Turn() -> void:
 		if page and page is CanvasLayer:
 			page.hide_animated()
 		emit_signal("on_player_start")
+		# 对齐 Unity Player.cs：开局隐藏鼠标（死亡 / 结算时由 LevelUI 恢复显示）
+		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 		rotation_degrees = currentDirection
 		_sync_henshin_rotation()
 		_resume_managed_animators()
@@ -774,7 +804,8 @@ func _on_Area_body_entered(_body: Node) -> void:
 	if not isLive or noDeath:
 		return
 
-	PlayerDeath()
+	# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab，不爆方块不播音效
+	PlayerDeath(showLineBody)
 func PlayerDeath(spawn_particles: bool = true, death_state: LevelManager.GameStatus = LevelManager.GameStatus.Died, hasCollision: bool = true) -> void:
 	if !noclip:
 		isLive = false
