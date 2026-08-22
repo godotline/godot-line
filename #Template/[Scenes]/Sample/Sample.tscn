@@ -186,7 +186,7 @@ endOffset = Vector3(1, 5, 3)
 triggeredByTime = false
 
 [node name="Trigger" parent="Scene_Group/Scene_001" unique_id=608483111 instance=ExtResource("11_mq52h")]
-transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 2.2444015, -0.5, 2.7034848)
+transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 2.9202428, -0.5, 2.7034845)
 
 [node name="FakePlayerTrigger" type="Node" parent="Scene_Group/Scene_001/Trigger" unique_id=589288902 node_paths=PackedStringArray("targetPlayer")]
 script = ExtResource("12_1fvat")

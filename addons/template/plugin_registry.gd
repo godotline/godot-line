@@ -24,6 +24,8 @@ static func fetch_plugins(owner_node: Node, sourceUrl: String = DEFAULT_MANIFEST
 		manifestUrl = DEFAULT_MANIFEST_URL
 	var http: HTTPRequest = HTTPRequest.new()
 	owner_node.add_child(http)
+	# 清单很小，10 秒足够；避免网络黑洞时 await 永久挂起、界面卡死。
+	http.timeout = 10.0
 	var requestError: int = http.request(manifestUrl, ["Accept: application/json", "User-Agent: GodotLine-PluginStore"])
 	if requestError != OK:
 		http.queue_free()

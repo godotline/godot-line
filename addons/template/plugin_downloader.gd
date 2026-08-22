@@ -5,8 +5,18 @@ class_name PluginDownloader extends RefCounted
 
 signal download_progress(file_index: int, total_files: int, current_file: String)
 signal download_complete(success: bool, message: String)
+signal download_cancelled
 
 var nodeOwner: Node
+var httpRequest: HTTPRequest
+var isCancelled: bool = false
+
+
+## 请求中止当前下载，中止完成后通过 download_cancelled 通知。
+func cancel_download() -> void:
+	isCancelled = true
+	if is_instance_valid(httpRequest):
+		httpRequest.cancel_request()
 
 
 ## 下载插件到指定目标路径。download_url 由商城中的下载源选择器提供。
@@ -23,8 +33,11 @@ func download_plugin(entry: PluginEntry, owner_node: Node, download_url: String 
 		if not sources.is_empty():
 			selectedUrl = str(sources[0].get("url", ""))
 	var downloadResult: Dictionary = await _download_archive(entry, archivePath, selectedUrl)
-	if not downloadResult.get("success", false):
+	if isCancelled or not downloadResult.get("success", false):
 		_remove_archive(archivePath)
+		if isCancelled:
+			download_cancelled.emit()
+			return
 		emit_signal("download_complete", false, str(downloadResult.get("message", "下载插件 ZIP 失败")))
 		return
 
@@ -52,19 +65,24 @@ func _download_archive(entry: PluginEntry, archivePath: String, download_url: St
 		return {"success": false, "message": "选定下载源不在插件清单中"}
 
 	_remove_archive(archivePath)
-	var http: HTTPRequest = HTTPRequest.new()
-	nodeOwner.add_child(http)
-	http.download_file = archivePath
+	httpRequest = HTTPRequest.new()
+	nodeOwner.add_child(httpRequest)
+	httpRequest.download_file = archivePath
 	download_progress.emit(0, 1, download_url.get_file() if not download_url.get_file().is_empty() else "plugin.zip")
-	var err: int = http.request(download_url, ["User-Agent: Godot-PluginStore"])
+	var err: int = httpRequest.request(download_url, ["User-Agent: Godot-PluginStore"])
 	if err != OK:
-		http.queue_free()
+		httpRequest.queue_free()
+		httpRequest = null
 		_remove_archive(archivePath)
 		return {"success": false, "message": "无法开始下载（错误码：%d）" % err}
 
-	var result: Array = await http.request_completed
-	http.queue_free()
+	var result: Array = await httpRequest.request_completed
+	httpRequest.queue_free()
+	httpRequest = null
 
+	if isCancelled:
+		_remove_archive(archivePath)
+		return {"success": false, "cancelled": true, "message": "已取消下载"}
 	if result.is_empty() or result[0] != HTTPRequest.RESULT_SUCCESS:
 		_remove_archive(archivePath)
 		return {"success": false, "message": "下载请求失败"}
