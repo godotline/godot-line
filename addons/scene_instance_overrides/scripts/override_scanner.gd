@@ -78,8 +78,12 @@ const CONTROL_ROOT_LAYOUT_PROPERTIES := [
 	&"global_scale",
 ]
 
+# Property lists of script-less built-in classes cannot change while the editor runs, so they
+# are cached per class instead of being rebuilt for every node of every scan.
+static var _class_property_information_cache: Dictionary = {}
 
-func scan_for_node(node: Node) -> Dictionary:
+
+func scan_for_node(node: Node, shared_cache: Dictionary = {}) -> Dictionary:
 	var context := _make_empty_context()
 	if node == null or not is_instance_valid(node):
 		context["error"] = "The selected node is invalid."
@@ -114,19 +118,34 @@ func scan_for_node(node: Node) -> Dictionary:
 		context["error"] = "Instances whose base is an inherited scene are not supported."
 		return context
 
-	var edited_scene_snapshot := PackedScene.new()
-	var pack_error := edited_scene_snapshot.pack(edited_scene_root)
-	if pack_error != OK:
-		context["error"] = "Failed to serialize the edited scene in memory. Error code: %d" % pack_error
-		return context
+	# Serializing the whole edited scene dominates the scan cost, so the snapshot and the node
+	# data derived from it are memoized per edited scene root and shared between all scans of
+	# one refresh batch (see plugin.gd / scene_tree_override_buttons.gd).
+	var caches := {"batch": shared_cache, "local": {}}
+	var edited_root_cache_key := "edited_root:%d" % edited_scene_root.get_instance_id()
+
+	var edited_scene_snapshot: PackedScene = shared_cache.get("snapshot:" + edited_root_cache_key)
+	if edited_scene_snapshot == null:
+		edited_scene_snapshot = PackedScene.new()
+		var pack_error := edited_scene_snapshot.pack(edited_scene_root)
+		if pack_error != OK:
+			context["error"] = "Failed to serialize the edited scene in memory. Error code: %d" % pack_error
+			return context
+		shared_cache["snapshot:" + edited_root_cache_key] = edited_scene_snapshot
 
 	var base_root := _instantiate_base_scene_for_comparison(base_scene)
 	if base_root == null:
 		context["error"] = "Failed to instantiate the base PackedScene for comparison."
 		return context
 
-	var serialized_state := edited_scene_snapshot.get_state()
-	var serialized_nodes := _collect_serialized_scene_nodes(serialized_state)
+	var serialized_nodes: Dictionary
+	var serialized_nodes_cache_key := "serialized_nodes:" + edited_root_cache_key
+	if shared_cache.has(serialized_nodes_cache_key):
+		serialized_nodes = shared_cache[serialized_nodes_cache_key]
+	else:
+		serialized_nodes = _collect_serialized_scene_nodes(edited_scene_snapshot.get_state())
+		shared_cache[serialized_nodes_cache_key] = serialized_nodes
+
 	var current_nodes := _collect_relative_nodes(instance_root)
 	var base_nodes := _collect_relative_nodes(base_root)
 	var entries: Array[Dictionary] = []
@@ -136,14 +155,16 @@ func scan_for_node(node: Node) -> Dictionary:
 		edited_scene_root,
 		current_nodes,
 		base_nodes,
-		serialized_nodes
+		serialized_nodes,
+		caches
 	))
 	entries.append_array(_collect_added_and_changed_structure_entries(
 		instance_root,
 		edited_scene_root,
 		current_nodes,
 		base_nodes,
-		serialized_nodes
+		serialized_nodes,
+		caches
 	))
 	entries.append_array(_collect_missing_original_node_entries(current_nodes, base_nodes))
 	entries.append_array(_collect_reordered_original_node_entries(current_nodes, base_nodes))
@@ -154,7 +175,11 @@ func scan_for_node(node: Node) -> Dictionary:
 		base_nodes,
 		serialized_nodes
 	))
-	entries.append_array(_collect_changed_signal_connection_entries(current_nodes, base_nodes))
+	entries.append_array(_collect_changed_signal_connection_entries(
+		current_nodes,
+		base_nodes,
+		caches
+	))
 
 	base_root.free()
 	entries.sort_custom(_entry_comes_before)
@@ -264,7 +289,8 @@ func _collect_property_override_entries(
 		edited_scene_root: Node,
 		current_nodes: Dictionary,
 		base_nodes: Dictionary,
-		serialized_nodes: Dictionary
+		serialized_nodes: Dictionary,
+		caches: Dictionary
 	) -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
 	var relative_paths: Array = current_nodes.keys()
@@ -281,7 +307,7 @@ func _collect_property_override_entries(
 		if not serialized_nodes.has(serialized_path):
 			continue
 		var serialized_properties: Dictionary = serialized_nodes[serialized_path]["properties"]
-		var property_information := _index_property_information(current_node)
+		var property_information := _index_property_information(current_node, caches)
 		var property_names: Array = serialized_properties.keys()
 		property_names.sort()
 		for property_name_value: Variant in property_names:
@@ -294,7 +320,7 @@ func _collect_property_override_entries(
 				continue
 			if current_node == instance_root and _is_excluded_root_placement_property(current_node, property_name):
 				continue
-			if not _object_has_property(base_node, property_name):
+			if not _object_has_property(base_node, property_name, caches):
 				entries.append(_make_entry(
 					KIND_UNSUPPORTED,
 					relative_path,
@@ -344,7 +370,8 @@ func _collect_added_and_changed_structure_entries(
 		edited_scene_root: Node,
 		current_nodes: Dictionary,
 		base_nodes: Dictionary,
-		serialized_nodes: Dictionary
+		serialized_nodes: Dictionary,
+		caches: Dictionary
 	) -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
 	var missing_paths: Array[String] = []
@@ -379,7 +406,8 @@ func _collect_added_and_changed_structure_entries(
 			current_node,
 			instance_root,
 			edited_scene_root,
-			serialized_nodes
+			serialized_nodes,
+			caches
 		)
 		if not subtree_reason.is_empty():
 			entries.append(_make_entry(
@@ -525,11 +553,12 @@ func _collect_changed_original_group_entries(
 
 func _collect_changed_signal_connection_entries(
 		current_nodes: Dictionary,
-		base_nodes: Dictionary
+		base_nodes: Dictionary,
+		caches: Dictionary
 	) -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
-	var current_connections := _collect_persistent_connection_descriptions(current_nodes)
-	var base_connections := _collect_persistent_connection_descriptions(base_nodes)
+	var current_connections := _collect_persistent_connection_descriptions(current_nodes, caches, true)
+	var base_connections := _collect_persistent_connection_descriptions(base_nodes, caches, false)
 	if current_connections == base_connections:
 		return entries
 	entries.append(_make_entry(
@@ -554,33 +583,58 @@ func _collect_user_group_names(node: Node) -> Array[String]:
 	return groups
 
 
-func _collect_persistent_connection_descriptions(nodes: Dictionary) -> Array[String]:
+func _collect_persistent_connection_descriptions(
+		nodes: Dictionary,
+		caches: Dictionary,
+		use_batch_cache: bool
+	) -> Array[String]:
 	var descriptions: Array[String] = []
 	var relative_paths: Array = nodes.keys()
 	relative_paths.sort()
 	for source_path_value: Variant in relative_paths:
 		var source_path := String(source_path_value)
 		var source_node := nodes[source_path] as Node
-		for signal_info: Dictionary in source_node.get_signal_list():
-			var signal_name := StringName(signal_info["name"])
-			for connection: Dictionary in source_node.get_signal_connection_list(signal_name):
-				var flags := int(connection.get("flags", 0))
-				if (flags & CONNECT_PERSIST) == 0:
-					continue
-				var callable: Callable = connection.get("callable", Callable())
-				var target_object := callable.get_object()
-				var target_path := "@external_object"
-				if target_object is Node:
-					target_path = _find_relative_path_for_node(nodes, target_object as Node)
-				descriptions.append("%s|%s|%s|%s|%d" % [
-					source_path,
-					signal_name,
-					target_path,
-					callable.get_method(),
-					flags,
-				])
+		for connection: Dictionary in _get_node_persistent_connections(source_node, caches, use_batch_cache):
+			var callable: Callable = connection["callable"]
+			var flags := int(connection["flags"])
+			var target_object := callable.get_object()
+			var target_path := "@external_object"
+			if target_object is Node:
+				target_path = _find_relative_path_for_node(nodes, target_object as Node)
+			descriptions.append("%s|%s|%s|%s|%d" % [
+				source_path,
+				connection["signal"],
+				target_path,
+				callable.get_method(),
+				flags,
+			])
 	descriptions.sort()
 	return descriptions
+
+
+func _get_node_persistent_connections(
+		node: Node,
+		caches: Dictionary,
+		use_batch_cache: bool
+	) -> Array:
+	var cache_key := "node_persistent_connections:%d" % node.get_instance_id()
+	var batch_cache: Dictionary = caches["batch"]
+	if use_batch_cache and batch_cache.has(cache_key):
+		return batch_cache[cache_key]
+	var connections: Array = []
+	for signal_info: Dictionary in node.get_signal_list():
+		var signal_name := StringName(signal_info["name"])
+		for connection: Dictionary in node.get_signal_connection_list(signal_name):
+			if (int(connection.get("flags", 0)) & CONNECT_PERSIST) == 0:
+				continue
+			connections.append({
+				"signal": signal_name,
+				"callable": connection.get("callable", Callable()),
+				"flags": int(connection.get("flags", 0)),
+			})
+	if use_batch_cache:
+		batch_cache[cache_key] = connections
+	return connections
 
 
 func _find_relative_path_for_node(nodes: Dictionary, target: Node) -> String:
@@ -604,10 +658,14 @@ func _get_added_subtree_unsafe_reason(
 		added_root: Node,
 		instance_root: Node,
 		edited_scene_root: Node,
-		serialized_nodes: Dictionary
+		serialized_nodes: Dictionary,
+		caches: Dictionary
 	) -> String:
+	# The persistent-connection data of the edited scene is precomputed once per batch instead
+	# of re-walking the whole scene for every added subtree.
+	var connection_data := _get_scene_persistent_connection_data(edited_scene_root, caches)
 	if _has_persistent_signal_connection_targeting_subtree_from_outside(
-		edited_scene_root,
+		connection_data,
 		added_root
 	):
 		return "The added subtree is targeted by a persistent signal connection from outside the subtree."
@@ -621,13 +679,13 @@ func _get_added_subtree_unsafe_reason(
 			if FileAccess.file_exists(nested_scene_path + ".import") or nested_scene_path.get_extension().to_lower() not in ["tscn", "scn"]:
 				return "The added subtree contains an imported scene instance."
 			return "The added subtree contains a nested PackedScene instance."
-		if _node_has_persistent_signal_connection(subtree_node):
+		if _node_has_persistent_signal_connection(connection_data, subtree_node):
 			return "Persistent signal connections in an added subtree are not supported."
 
 		var serialized_path := _path_from_edited_root(edited_scene_root, subtree_node)
 		if not serialized_nodes.has(serialized_path):
 			continue
-		var property_information := _index_property_information(subtree_node)
+		var property_information := _index_property_information(subtree_node, caches)
 		var serialized_properties: Dictionary = serialized_nodes[serialized_path]["properties"]
 		for property_name_value: Variant in serialized_properties.keys():
 			var property_name := StringName(property_name_value)
@@ -649,39 +707,49 @@ func _get_added_subtree_unsafe_reason(
 	return ""
 
 
-func _has_persistent_signal_connection_targeting_subtree_from_outside(
-		edited_scene_root: Node,
-		added_root: Node
-	) -> bool:
+func _get_scene_persistent_connection_data(edited_scene_root: Node, caches: Dictionary) -> Dictionary:
+	var batch_cache: Dictionary = caches["batch"]
+	var cache_key := "scene_persistent_connections:%d" % edited_scene_root.get_instance_id()
+	if batch_cache.has(cache_key):
+		return batch_cache[cache_key]
+	var records: Array[Dictionary] = []
 	var scene_nodes: Array[Node] = []
 	_collect_subtree_nodes(edited_scene_root, scene_nodes)
 	for source_node: Node in scene_nodes:
+		for connection: Dictionary in _get_node_persistent_connections(source_node, caches, false):
+			var callable: Callable = connection["callable"]
+			var target_object := callable.get_object()
+			if not target_object is Node:
+				continue
+			records.append({
+				"source": source_node,
+				"target": target_object as Node,
+			})
+	var source_ids: Dictionary = {}
+	for record: Dictionary in records:
+		source_ids[(record["source"] as Node).get_instance_id()] = true
+	var connection_data := {"records": records, "source_ids": source_ids}
+	batch_cache[cache_key] = connection_data
+	return connection_data
+
+
+func _has_persistent_signal_connection_targeting_subtree_from_outside(
+		connection_data: Dictionary,
+		added_root: Node
+	) -> bool:
+	for record_value: Variant in connection_data["records"]:
+		var record: Dictionary = record_value
+		var source_node := record["source"] as Node
 		if source_node == added_root or added_root.is_ancestor_of(source_node):
 			continue
-		for signal_info: Dictionary in source_node.get_signal_list():
-			var signal_name := StringName(signal_info["name"])
-			for connection: Dictionary in source_node.get_signal_connection_list(
-				signal_name
-			):
-				if (int(connection.get("flags", 0)) & CONNECT_PERSIST) == 0:
-					continue
-				var callable: Callable = connection.get("callable", Callable())
-				var target_object: Object = callable.get_object()
-				if not target_object is Node:
-					continue
-				var target_node := target_object as Node
-				if target_node == added_root or added_root.is_ancestor_of(target_node):
-					return true
+		var target_node := record["target"] as Node
+		if target_node == added_root or added_root.is_ancestor_of(target_node):
+			return true
 	return false
 
 
-func _node_has_persistent_signal_connection(node: Node) -> bool:
-	for signal_info: Dictionary in node.get_signal_list():
-		var signal_name := StringName(signal_info["name"])
-		for connection: Dictionary in node.get_signal_connection_list(signal_name):
-			if (int(connection.get("flags", 0)) & CONNECT_PERSIST) != 0:
-				return true
-	return false
+func _node_has_persistent_signal_connection(connection_data: Dictionary, node: Node) -> bool:
+	return (connection_data["source_ids"] as Dictionary).has(node.get_instance_id())
 
 
 func _collect_subtree_nodes(root: Node, output: Array[Node]) -> void:
@@ -787,18 +855,32 @@ func _is_excluded_root_placement_property(node: Node, property_name: StringName)
 	return false
 
 
-func _index_property_information(object: Object) -> Dictionary:
+func _index_property_information(object: Object, caches: Dictionary) -> Dictionary:
+	var instance_cache_key := "prop_info:%d" % object.get_instance_id()
+	var local_cache: Dictionary = caches["local"]
+	if local_cache.has(instance_cache_key):
+		return local_cache[instance_cache_key]
+	var property_information: Dictionary
+	if object.get_script() == null:
+		var class_cache_key := StringName("prop_info_class:" + object.get_class())
+		if not _class_property_information_cache.has(class_cache_key):
+			_class_property_information_cache[class_cache_key] = _build_property_information(object)
+		property_information = _class_property_information_cache[class_cache_key]
+	else:
+		property_information = _build_property_information(object)
+	local_cache[instance_cache_key] = property_information
+	return property_information
+
+
+func _build_property_information(object: Object) -> Dictionary:
 	var property_information := {}
 	for property_info: Dictionary in object.get_property_list():
 		property_information[StringName(property_info["name"])] = property_info
 	return property_information
 
 
-func _object_has_property(object: Object, property_name: StringName) -> bool:
-	for property_info: Dictionary in object.get_property_list():
-		if StringName(property_info["name"]) == property_name:
-			return true
-	return false
+func _object_has_property(object: Object, property_name: StringName, caches: Dictionary) -> bool:
+	return _index_property_information(object, caches).has(property_name)
 
 
 func _values_are_equivalent(current_value: Variant, base_value: Variant) -> bool:
