@@ -85,7 +85,7 @@ func buildScene(data: Dictionary, levelDataResource: LevelData = null) -> Node3D
 	if MIRROR_X:
 		# 左右镜像唯一载体：全部关卡内容经此负 x 缩放，合成世界变换时自动取反。
 		# 子节点本地 TRS 保持 arproj 原值——动画器烘焙（读实际本地值）与
-		# meta "arprojScale" 语义均不受影响；网格子节点的 -sx 资产翻转补偿
+		# meta "arprojScale" 语义均不受影响；网格子节点的常量翻转因子 (-1,1,1)
 		# 叠乘载体后恰为整体镜像。载体必须是纯容器：物理体不支持负缩放祖先，
 		# 故不可上移到 LevelHolder（其下含 Player/Camera 等实体）。
 		scene001.scale = Vector3(-1, 1, 1)
@@ -418,7 +418,7 @@ func _createObjects(parent: Node, data: Dictionary) -> void:
 			var node: Node = nodeMap[objId]
 			if parentId != -1 and parentId != 0 and nodeMap.has(parentId):
 				var parentNode: Node = nodeMap[parentId]
-				parentNode.add_child(node)
+				_attachChildObject(parentNode, node)
 			else:
 				# parentId 为 -1, 0 或找不到父节点的，作为根节点挂在 Scene_001 下
 				rootNodes.append(node)
@@ -428,6 +428,29 @@ func _createObjects(parent: Node, data: Dictionary) -> void:
 
 	# 3. 后处理：链接 Transform 触发器的动画器（此时 nodeMap 与父子关系均已就绪）
 	_linkTriggerAnimators(nodeMap)
+
+
+## 挂载子物体。Unity 中父级缩放必须传递给子树（子物体的局部偏移与尺寸都要被
+## 父级缩放放大——如锤头挂在被拉伸成锤柄的圆柱下，偏距须乘 28.7 才落在柄端）；
+## 但物理体（StaticBody3D/Area3D）不能携带缩放祖先（碰撞形状会被扭曲，
+## 且不支持负缩放）。故带非单位缩放记录的物理父级，其【视觉】子物体改挂到
+## 携带同款缩放（取绝对值，镜像件暂无此组合数据）的纯 Node3D 容器下恢复层级
+## 语义；物理子物体仍直挂父级，保持现状。
+func _attachChildObject(parentNode: Node, childNode: Node) -> void:
+	var holder: Node = parentNode
+	if parentNode is CollisionObject3D and not (childNode is CollisionObject3D):
+		var parentScale: Vector3 = Vector3.ONE
+		if parentNode is Node3D and (parentNode as Node3D).has_meta("arprojScale"):
+			parentScale = (parentNode as Node3D).get_meta("arprojScale") as Vector3
+		if not parentScale.is_equal_approx(Vector3.ONE):
+			var container: Node3D = parentNode.get_node_or_null(NodePath("ScaledChildren")) as Node3D
+			if container == null:
+				container = Node3D.new()
+				container.name = "ScaledChildren"
+				container.scale = unityToGodotScale(parentScale)
+				parentNode.add_child(container)
+			holder = container
+	holder.add_child(childNode)
 
 
 func _createSingleObject(objData: Dictionary, meshes: Array, materials: Array, sprites: Array = []) -> Node:
@@ -706,11 +729,13 @@ func _createCubeBody(objData: Dictionary, materials: Array, sprites: Array) -> N
 	return _createGroundBox(objData, materials, sprites, layer)
 
 
-## 非碰撞图元：Node3D 根节点 + "Mesh" 网格子节点（缩放落在网格子节点上，
-## visibility=1 时仅隐藏该子节点即可，不影响后续挂进根节点的子树）
+## 非碰撞图元：Node3D 根节点 + "Mesh" 网格子节点。
+## 缩放落在根节点上：与 Unity 一致地向子物体传递（如锤头挂在被拉伸的锤柄父级下，
+## 其局部偏移/尺寸须被父级缩放放大）。根为纯 Node3D 无物理体，负号镜像安全；
+## visibility=1 时仅隐藏网格子节点，不影响后续挂进根节点的子树。
 func _createPrimitiveMesh(objData: Dictionary, materials: Array, sprites: Array, mesh: Mesh) -> Node:
 	var rootNode: Node3D = Node3D.new()
-	_applyObjectTransform(rootNode, objData, false)
+	_applyObjectTransform(rootNode, objData, true)
 	# Hidden 且无碰撞：无可渲染内容，仅保留层级占位（子树照常挂载）
 	if toIntSafe(objData.get("visibility", 0)) == 1:
 		return rootNode
@@ -718,7 +743,6 @@ func _createPrimitiveMesh(objData: Dictionary, materials: Array, sprites: Array,
 	var meshInst: MeshInstance3D = MeshInstance3D.new()
 	meshInst.name = "Mesh"
 	meshInst.mesh = mesh
-	meshInst.scale = _objectScale(objData)
 	rootNode.add_child(meshInst)
 
 	var mat: Material = _createStandardMaterial(objData, materials, sprites)
@@ -795,20 +819,21 @@ func _createCrownInstance(objData: Dictionary) -> Node:
 
 
 func _createMeshObject(objData: Dictionary, meshes: Array, materials: Array, sprites: Array = []) -> Node:
-	# Node3D 根节点 + "Mesh" 网格子节点（缩放落在网格子节点上，visibility=1 时只隐藏网格）
+	# Node3D 根节点 + "Mesh" 网格子节点。缩放落在根节点上向子树传递（Unity 层级语义，
+	# 见 _createPrimitiveMesh 注释），visibility=1 时只隐藏网格子节点；
+	# 根为纯 Node3D 无物理体，负号镜像安全，也不干扰 LocalScaleAnimator 的根 scale 补间
+	# （meta "arprojScale" 语义不变，且动画起始值与根实际缩放一致后不再跳变）。
 	var rootNode: Node3D = Node3D.new()
-	_applyObjectTransform(rootNode, objData, false)
+	_applyObjectTransform(rootNode, objData, true)
 
 	var meshInst: MeshInstance3D = MeshInstance3D.new()
 	meshInst.name = "Mesh"
 	# Unity 模型导入器会把 RH 资产（如 Blender 导出的 .obj/.glb）顶点 X 取反并翻转绕序，
 	# 等效于网格内建 diag(-1,1,1)；Godot 原样加载同一文件会得到左右镜像。
 	# 物体最终线性映射须为 diag(s)·diag(-1,1,1) = diag(-sx, sy, sz)（s 为 arproj 原始带符号缩放）：
-	# 故在网格子节点上施加 (-sx, sy, sz)——保留原符号，仅 x 额外取反。
-	# 若用绝对值会破坏 arproj 中 scale.x<0 的显式镜像件（与导入镜像叠加成双重翻转）；
-	# 只动子节点不碰物体根，避免干扰 LocalScaleAnimator 对根 scale 的补间与 meta "arprojScale" 语义。
-	var nodeScale: Vector3 = _nodeScale(objData)
-	meshInst.scale = Vector3(-nodeScale.x, nodeScale.y, nodeScale.z)
+	# 根节点承载 s 后，网格子节点仅需常量翻转因子 (-1,1,1)——保留原符号语义，
+	# 叠乘后仍恰为整体镜像；若改用绝对值会破坏 scale.x<0 的显式镜像件（双重翻转）。
+	meshInst.scale = Vector3(-1, 1, 1)
 
 	var mesh: Mesh = _loadMeshFromJson(objData, meshes)
 	if mesh == null:
@@ -1309,7 +1334,8 @@ func _linkTriggerAnimators(nodeMap: Dictionary) -> void:
 				var radVec: Vector3 = Vector3(degToRad(rawVec.x), degToRad(rawVec.y), degToRad(rawVec.z))
 				endTarget = (current + radVec) if isAdd else radVec
 			elif kind == "scale":
-				# 缩放不挂在根节点上（落在碰撞/网格子节点），读导入时记录的原始缩放
+				# 视觉物体缩放已在根节点；物理体的缩放烘焙进形状（根为 1），
+				# 故统一读导入时记录的原始缩放兜底
 				current = target.get_meta("arprojScale", target.scale) as Vector3
 				endTarget = (current + rawVec) if isAdd else rawVec
 			else:
