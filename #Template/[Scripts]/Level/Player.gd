@@ -187,8 +187,9 @@ func _ready() -> void:
 		if levelData:
 			levelData.apply_to(self, get_world_3d().space)
 
+	# 实例化 DebugOverlay（调试面板）。对齐 Unity #if UNITY_EDITOR：仅运行时/调试构建生效，编辑器内不挂载
 	var debugOverlayScene: PackedScene = load("res://#Template/[Resources]/DebugOverlay.tscn") as PackedScene
-	if debugOverlayScene:
+	if debugOverlayScene and not Engine.is_editor_hint():
 		var overlay: DebugOverlay = debugOverlayScene.instantiate()
 		add_child(overlay)
 
@@ -853,19 +854,20 @@ func _on_setting_changed(key: String, value: Variant) -> void:
 		"quality":
 			var qualityLevel: int = GraphicsQuality.quality_level_from_value(value)
 			GraphicsQuality.set_level(qualityLevel)
-			get_tree().call_group("active_by_quality", "apply_quality", qualityLevel)
+			# 对齐 Unity SetQuality：任意图形项变更都立即全套重应用（含阴影图集分辨率 / 后处理），而非仅刷新可见性分组
+			GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
 			GraphicsQuality.save_settings()
 		"antialiasing":
 			GraphicsQuality.antiAliasLevel = GraphicsQuality.antialiasing_level_from_value(value)
-			GraphicsQuality.apply_antialiasing(get_viewport())
+			GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
 			GraphicsQuality.save_settings()
 
 func _on_shadow_toggled(isOn: bool) -> void:
 	GraphicsQuality.shadowsEnabled = isOn
-	GraphicsQuality.apply_shadows(get_tree())
+	GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
 	GraphicsQuality.save_settings()
 
 func _on_post_toggled(isOn: bool) -> void:
 	GraphicsQuality.postProcessEnabled = isOn
-	GraphicsQuality.apply_post_process(get_scene_environment())
+	GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
 	GraphicsQuality.save_settings()

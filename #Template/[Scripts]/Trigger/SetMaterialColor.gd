@@ -13,7 +13,7 @@ class_name SetMaterialColor
 var _tween: Tween = null
 
 
-func trigger(_body: Node3D) -> void:
+func trigger(_body: Node3D = null) -> void:
 	if not colors.is_empty():
 		for s: SingleColor in colors:
 			s.apply_tweened(self, duration, int(TransitionType), int(EaseType))

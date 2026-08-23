@@ -771,8 +771,13 @@ func _createTextObject(objData: Dictionary) -> Node:
 		var c: Dictionary = colorData as Dictionary
 		# arproj 颜色 alpha 可能为 0（不参与显示），强制不透明
 		label.modulate = Color(float(c.get("r", 1.0)), float(c.get("g", 1.0)), float(c.get("b", 1.0)), 1.0)
-	label.horizontal_alignment = _mapTextAlignment(toIntSafe(custom.get("horizontalAlignment", 1)), true)
-	label.vertical_alignment = _mapTextAlignment(toIntSafe(custom.get("verticalAlignment", 1)), false)
+	var hFlags: int = toIntSafe(custom.get("horizontalAlignment", 2))
+	var vFlags: int = toIntSafe(custom.get("verticalAlignment", 512))
+	# TextMeshPro 对齐位标志（见 GameAssembly dump.cs）：
+	#   HorizontalAlignmentOptions: Left=1 / Center=2 / Right=4
+	#   VerticalAlignmentOptions:   Top=256 / Middle=512 / Bottom=1024
+	label.horizontal_alignment = _mapTextAlignH(hFlags)
+	label.vertical_alignment = _mapTextAlignV(vFlags)
 	if MIRROR_X:
 		# 文本位于 Scene_001 载体之下，非正常变换会把字形左右翻转，反向缩放抵消
 		label.scale = Vector3(-1, 1, 1)
@@ -780,19 +785,27 @@ func _createTextObject(objData: Dictionary) -> Node:
 	return rootNode
 
 
-## Unity 对齐值 → Godot Label3D 对齐枚举（水平 0=左/1=中/2=右，垂直 0=上/1=中/2=下）。
-## 源数据两种编码并存：小整数 0/1/2 即左中右（上中下）；
-## 大数按 TextAnchor<<7 编码（如 512=MiddleCenter），拆 anchor 后按行/列取分量。
-## 越界值一律回退居中——直接透传会触发 Label3D 的 p_alignment 越界断言。
-func _mapTextAlignment(value: int, isHorizontal: bool) -> int:
-	var v: int = value
-	if v > 2:
-		if v > 3 and v % 128 == 0:
-			var anchor: int = v / 128 # Unity TextAnchor 0..8：行=anchor/3，列=anchor%3
-			v = (anchor % 3) if isHorizontal else (anchor / 3)
-		else:
-			v = 1
-	return clampi(v, 0, 2)
+## TextMeshPro 水平对齐位标志 → Godot Label3D（0=左/1=中/2=右）。
+## HorizontalAlignmentOptions: Left=1 / Center=2 / Right=4（可 OR 组合）。
+func _mapTextAlignH(flags: int) -> int:
+	if (flags & 4) != 0:
+		return 2
+	if (flags & 2) != 0:
+		return 1
+	if (flags & 1) != 0:
+		return 0
+	return 1 # 缺省居中
+
+## TextMeshPro 垂直对齐位标志 → Godot Label3D（0=上/1=中/2=下）。
+## VerticalAlignmentOptions: Top=256 / Middle=512 / Bottom=1024（可 OR 组合）。
+func _mapTextAlignV(flags: int) -> int:
+	if (flags & 1024) != 0:
+		return 2
+	if (flags & 512) != 0:
+		return 1
+	if (flags & 256) != 0:
+		return 0
+	return 1 # 缺省居中
 
 func _createRoadObject(objData: Dictionary, materials: Array, sprites: Array = []) -> Node:
 	return _createGroundBox(objData, materials, sprites, 2)
@@ -1613,6 +1626,7 @@ func _loadMeshFromJson(objData: Dictionary, meshes: Array) -> Mesh:
 	var custom: Dictionary = _parseCustom(objData)
 	var meshDataDict: Dictionary = _getMeshDataDict(custom)
 	var objName: String = str(objData.get("name", "unnamed"))
+	var baseObjName: String = _stripInstanceSuffix(objName)
 
 	var meshId: int = -1
 	if meshDataDict.has("meshId"):
@@ -1648,13 +1662,19 @@ func _loadMeshFromJson(objData: Dictionary, meshes: Array) -> Mesh:
 	if namedMesh != null:
 		return namedMesh
 
-	# 3. 按 meshes 中的文件名模糊匹配物体名称
+	# 2b. 按物体名称匹配（剥除实例后缀 " 1" / " (2)"，对齐模板模型文件名 HalfPyramid.obj）
+	if baseObjName != objName:
+		var namedMesh2: Mesh = _loadMeshByName(baseObjName)
+		if namedMesh2 != null:
+			return namedMesh2
+
+	# 3. 按 meshes 中的文件名模糊匹配物体名称（含去后缀名）
 	for rawInfo: Variant in meshes:
 		if rawInfo is Dictionary:
 			var meshInfo: Dictionary = rawInfo as Dictionary
 			var fileName: String = str(meshInfo.get("fileName", ""))
 			var baseName: String = fileName.get_basename()
-			if baseName != "" and objName.to_lower().contains(baseName.to_lower()):
+			if baseName != "" and (objName.to_lower().contains(baseName.to_lower()) or baseObjName.to_lower().contains(baseName.to_lower())):
 				var m: Mesh = _loadMeshByFilename(fileName)
 				if m != null:
 					return m
@@ -1719,6 +1739,18 @@ func _loadMeshByName(name: String) -> Mesh:
 					return resource as Mesh
 
 	return null
+
+
+## 剥除物体名的实例后缀，使 "HalfPyramid 1" / "Box (2)" 落到模板模型 "HalfPyramid.obj" / "Box.obj"。
+func _stripInstanceSuffix(name: String) -> String:
+	var s: String = name.strip_edges()
+	var rparen: int = s.rfind(")")
+	if rparen > 0 and s[rparen - 1] == "(":
+		return s.substr(0, rparen - 1).strip_edges()
+	var space: int = s.rfind(" ")
+	if space > 0 and s.substr(space + 1).is_valid_int():
+		return s.substr(0, space).strip_edges()
+	return s
 
 
 func _createStandardMaterial(objData: Dictionary, materials: Array, sprites: Array = []) -> StandardMaterial3D:
