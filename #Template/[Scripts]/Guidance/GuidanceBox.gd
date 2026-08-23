@@ -33,7 +33,6 @@ func _try_initialize() -> bool:
 	_player = player
 	_root = self
 	_sprite = get_node_or_null("Sprite3D") as Sprite3D
-	_trigger_effect = load("res://#Template/[Resources]/Triggered.tscn")
 	_initialized = true
 
 	# Unity: if (Distance > appearDistance) Disappear(false);
