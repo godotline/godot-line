@@ -57,30 +57,30 @@ _data = {
 &"level": SubResource("3")
 }
 
-[sub_resource type="Resource" id="Resource_rptew"]
+[sub_resource type="Resource" id="Resource_14asg"]
 resource_local_to_scene = true
 script = ExtResource("14_2sj2s")
 rotation = Vector3(0.942478, 0.785398, 0)
 fov = 75.0
 
-[sub_resource type="Resource" id="Resource_skrbu"]
+[sub_resource type="Resource" id="Resource_rptew"]
 resource_local_to_scene = true
 script = ExtResource("15_qvrir")
 
-[sub_resource type="Resource" id="Resource_d7stf"]
+[sub_resource type="Resource" id="Resource_skrbu"]
 resource_local_to_scene = true
 script = ExtResource("16_n0hkk")
 fogColor = Color(0.518, 0.553, 0.608, 1)
 start = 10.0
 end = 100.0
 
-[sub_resource type="Resource" id="Resource_k6bba"]
+[sub_resource type="Resource" id="Resource_d7stf"]
 resource_local_to_scene = true
 script = ExtResource("17_w5hru")
 rotation = Vector3(-1.0472, 2.61799, 0)
 shadowStrength = 1.0
 
-[sub_resource type="Resource" id="Resource_e7kbm"]
+[sub_resource type="Resource" id="Resource_k6bba"]
 resource_local_to_scene = true
 script = ExtResource("18_44jhc")
 lightingType = 0
@@ -242,11 +242,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.168884, -9.536743e-07, 16.
 [node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" parent_id_path=PackedInt32Array(1805653336, 220972321) index="0" unique_id=1220123700]
 GameTime = 2.4613333
 direction = 1
-cameraNew = SubResource("Resource_rptew")
-cameraOld = SubResource("Resource_skrbu")
-fog = SubResource("Resource_d7stf")
-light = SubResource("Resource_k6bba")
-ambient = SubResource("Resource_e7kbm")
+cameraNew = SubResource("Resource_14asg")
+cameraOld = SubResource("Resource_rptew")
+fog = SubResource("Resource_skrbu")
+light = SubResource("Resource_d7stf")
+ambient = SubResource("Resource_k6bba")
 
 [node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0" unique_id=1273809823]
 render_priority = 0
@@ -276,7 +276,7 @@ triggeredByTime = false
 [node name="LocalRotAnimator" type="Node" parent="Scene_Group/Scene_001/Obstacle3" unique_id=418376129]
 script = ExtResource("23_s0ncg")
 rotateMode = 1
-endOffset = Vector3(0, 6.2831855, 0)
+endOffset = Vector3(0, 7.0685835, 0)
 duration = 4.0
 
 [node name="DisableInPlayMode" type="Node" parent="Scene_Group/Scene_001/Obstacle3" unique_id=1168296430]

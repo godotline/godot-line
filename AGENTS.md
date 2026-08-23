@@ -4,13 +4,12 @@
 
 - **引擎版本**：Godot 4.7（Dancing Line / 跳舞的线 游戏模板，GDScript）。`project.godot` 为准。
 - **物理与渲染**：Jolt Physics（独立线程运行）；渲染器为 Mobile。
-- **开发方式**：无 CLI 自动化测试/构建/Lint，所有开发与调试以 Godot 编辑器为准。
 
 ## 调研与开发工具规则
 
 - **网络搜索**：使用 Tavily 工具查询 Godot API 与已知问题。**严禁通过 curl/下载引擎源码文件**，优先使用文档与搜索结果。
 - **源码与架构查询**：使用 **DeepWiki MCP**（`godotengine/godot` 等）查询引擎内部实现细节（如 `ScriptServer`、`can_instantiate()` 机制）。
-- **编辑器实时检查**：优先使用 `gdmcp` 工具（端口 9080）与正在运行的 Godot 编辑器交互（检查脚本状态、Expression 求值、查看日志、分析脚本语法）。
+- **编辑器实时检查**：优先使用 `gdmcp` 工具（端口 9080）与正在运行的 Godot 编辑器交互。
 
 ## 项目目录结构
 
@@ -28,7 +27,7 @@ addons/
   template/            — 编辑器插件：顶部工具栏菜单与"新建关卡"对话框
 ```
 
-## 导入器插件开发规则
+## 插件/Unity 移植开发规则
 
 - **区分"Unity 移植"与"写插件"**：Godot 端口的 Unity 模板组件（如 `SetMaterialColor.cs` → `SetMaterialColor.gd`、`Jump`/`Speed`/`SetActive`/`SetFog` 等）属于 `#Template` 内容，应落在 `#Template/[Scripts]`，与既有通用触发器并列——这是移植 Unity 模板，不是"写插件"。
 - **写插件（`addons/dancing_line_importer`）时严禁往 `#Template` 塞导入器专用 / Arphros 适配逻辑**：仅数据解析、关卡构建，以及 Arphros 特有格式组件（如 `animatable.gd`，对应 `objects[].animatable` JSON）才放插件目录。
@@ -92,22 +91,16 @@ addons/
 - 默认关卡模板：`#Template/[Scenes]/DefaultScene/Default.tscn`
 - 玩家：`#Template/Player.tscn`（置于关卡 `BasicOBJ_Group/Player` 下）
 - 触发器容器：`#Template/Trigger.tscn`（可复用 `BaseTrigger` 预制体）
-- 界面组件：`StartPage.tscn`、`DebugOverlay.tscn`（D 键切换）、`LevelUI.tscn`（结算/复活界面）
+- 界面组件：`StartPage.tscn`、`LevelUI.tscn`（结算/复活界面）
 
 ### 输入按键（`project.godot`）
-- **转向 (`turn`)**：鼠标左键 / 空格键
+- **转向 (`turn`)**：鼠标左键 / 空格键 / Enter（主键盘与小键盘）
 - **R**：重载当前关卡
 - **K**：自杀 / 强制死亡
 - **D**：切换 Debug 性能监控面板（仅 Debug 构建）
 
 ## 常见陷阱与避坑指南
-
-1. **Godot 4.7 编辑器丢失 `[editable path="..."]` 子节点属性覆盖**：
-   - 编辑器重新加载场景时不会保留子场景实例的节点属性重写（容易导致碰撞体 Scale 变 0 问题）。
-   - **解决方案**：避免在复杂触发器上使用 `instance=Trigger.tscn` 嵌套重写；采用**内联本地节点**（如 `Area3D` + 挂载 `BaseTrigger.gd` + 本地 `CollisionShape3D`）。`CrownCheckPoint.tscn` 和 `HeartCheckPoint.tscn` 已采用此模式。
-2. **禁止循环递归创建 `SceneTreeTimer`**：
-   - 严禁在 `SceneTreeTimer` 回调中反复创建新 Timer（会导致频繁 GC 和掉帧）。周期性轮询必须使用持久化 `Timer` 节点。
 3. **节点引用缓存**：
    - 避免在 `_process` 等每帧执行的方法中频繁调用 `get_viewport().get_camera_3d()`，应在 `_ready()` 缓存。
 4. **物理碰撞层划分**：
-   - Layer 1: Player / Layer 2: BaseFloor / Layer 3: BaseWall。
+   - Layer 1: Player / Layer 2: Ground / Layer 3: Obstacle。

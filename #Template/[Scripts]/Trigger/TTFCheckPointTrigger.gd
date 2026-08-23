@@ -15,15 +15,15 @@ func trigger(body: Node3D) -> void:
 	if not target:
 		push_error("TTFCheckPointTrigger.gd: TTFCheckPoint target not found")
 		return
-	if not target.has_method("enter_trigger"):
-		push_error("TTFCheckPointTrigger.gd: target does not implement enter_trigger")
+	if not target.has_method("EnterTrigger"):
+		push_error("TTFCheckPointTrigger.gd: target does not implement EnterTrigger")
 		return
-	target.call("enter_trigger", body)
+	target.call("EnterTrigger", body)
 
 func _find_checkpoint_parent() -> Checkpoint:
 	var current: Node = get_parent()
 	while current:
-		if current is Checkpoint and current.has_method("enter_trigger"):
+		if current is Checkpoint and current.has_method("EnterTrigger"):
 			return current as Checkpoint
 		current = current.get_parent()
 	return null

@@ -210,7 +210,7 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		velocity.x = horizontalVelocity.x
 		velocity.z = horizontalVelocity.z
-		if isLive and is_on_wall() and not noDeath:
+		if isLive and is_on_wall() and not noDeath and LevelManager.GameState == LevelManager.GameStatus.Playing:
 			# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab
 			PlayerDeath(showLineBody)
 		if fly:
@@ -289,7 +289,7 @@ func _input(event: InputEvent) -> void:
 					loading = true
 					reload()
 			KEY_K:
-				if not Engine.is_editor_hint() and (isLive or LevelManager.GameState == LevelManager.GameStatus.Moving):
+				if not Engine.is_editor_hint() and LevelManager.GameState == LevelManager.GameStatus.Playing:
 					PlayerDeath(true, LevelManager.GameStatus.Died, false)
 			KEY_D:
 				if OS.is_debug_build():

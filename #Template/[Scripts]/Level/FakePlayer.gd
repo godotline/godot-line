@@ -16,7 +16,7 @@ enum State {
 @export var firstDirection: Vector3 = Vector3(0, 90, 0)
 @export var secondDirection: Vector3 = Vector3.ZERO
 @export var poolSize: int = 100
-## 当 isWall = true 时，FakePlayer 尾线的碰撞层设为 BaseWall (3)，
+## 当 isWall = true 时，FakePlayer 尾线的碰撞层设为 Obstacle (3)，
 ## 真实 Player 碰到会死亡。false 时不参与碰撞（纯预览）。
 @export var isWall: bool = false
 @export var drawDirection: bool = false:
