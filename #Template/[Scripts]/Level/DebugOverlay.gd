@@ -7,6 +7,8 @@ class_name DebugOverlay
 
 var previousDebug: bool = false
 var shown: bool = false
+var panelHovered: bool = false
+var lastAppliedShown: bool = true
 var pollTimer: Timer
 
 func _ready() -> void:
@@ -26,14 +28,23 @@ func _exit_tree() -> void:
 		ImGui.imgui_layout.disconnect(_onImguiLayout)
 
 func _onImguiLayout() -> void:
-	if not shown:
-		return
 	var p: Player = Player.instance
 	if not p:
 		return
 
+	# D 键仅展开/收起：窗口常驻，收起时保留标题栏。仅在状态变化时应用，避免每帧强制覆盖
+	if shown != lastAppliedShown:
+		lastAppliedShown = shown
+		ImGui.set_next_window_collapsed(not shown, 1)
+	ImGui.set_next_window_bg_alpha(0.0)
 	ImGui.set_next_window_pos(10.0, 10.0, 4) # 4 = CondFirstUseEver，允许用户拖动后记忆位置
-	if ImGui.begin("DebugOverlay"):
+	# 鼠标可见性基于真实窗口状态（begin 返回值=是否折叠/裁剪）与悬停检测。
+	# 仅 Playing 状态下干预；死亡/结算时鼠标交给 LevelUI 保持显示。
+	var expanded: bool = ImGui.begin("DebugOverlay")
+	# 收起时 begin 返回 false，仅剩标题栏；此时悬停标题栏也应能显示鼠标（否则无法点开）
+	panelHovered = ImGui.is_window_hovered(0)
+	if expanded:
+		ImGui.set_window_font_scale(1.5)
 		ImGui.text("FPS: %d" % Engine.get_frames_per_second())
 
 		if p.levelData:
@@ -63,7 +74,17 @@ func _onImguiLayout() -> void:
 				ImGui.text("Camera Position: (%.2f, %.2f, %.2f)" % [cam3d.global_position.x, cam3d.global_position.y, cam3d.global_position.z])
 				ImGui.text("Camera Angle: (%.1f, %.1f, %.1f)" % [cam3d.rotation_degrees.x, cam3d.rotation_degrees.y, cam3d.rotation_degrees.z])
 				ImGui.text("FOV: %.1f" % cam3d.fov)
+
+		ImGui.text("")
+		if ImGui.small_button("Reload (R)"):
+			p.reload()
+		if ImGui.small_button("Kill (K)"):
+			p.PlayerDeath(true, LevelManager.GameStatus.Died, false)
 	ImGui.end()
+
+	# Playing 状态下：展开 + 悬停面板才显示鼠标；折叠或移出即隐藏。其余状态（死亡/结算）交给 LevelUI
+	if LevelManager.GameState == LevelManager.GameStatus.Playing:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if (expanded and panelHovered) else Input.MOUSE_MODE_HIDDEN
 
 func _pollDebug() -> void:
 	if not is_instance_valid(self):
