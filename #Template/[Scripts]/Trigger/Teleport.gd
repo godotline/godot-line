@@ -7,12 +7,10 @@ enum TeleportType {
 	Position  # 绝对世界坐标
 }
 
-@export_group("传送设置")
 @export var type: TeleportType = TeleportType.Target
 @export var target: Node3D  # Target 模式
 @export var position: Vector3 = Vector3.ZERO  # Position 模式
 
-@export_group("转向设置")
 @export var turn: bool = false
 @export var targetDirection: LevelManager.Direction = LevelManager.Direction.First
 

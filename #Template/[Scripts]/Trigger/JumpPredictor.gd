@@ -9,7 +9,6 @@ enum LineDirection {
 	Right
 }
 
-@export_group("预测设置")
 @export var speedX: float = 12.0:
 	set(value):
 		speedX = value
@@ -36,7 +35,6 @@ enum LineDirection {
 		color = value
 		_redraw()
 
-@export_group("预览控制")
 @export var drawPreview: bool = false:
 	set(value):
 		drawPreview = value

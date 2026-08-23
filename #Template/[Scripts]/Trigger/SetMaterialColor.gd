@@ -1,46 +1,64 @@
-@tool
 extends Node
+class_name SetMaterialColor
+
+## Godot 移植自 Unity 模板 SetMaterialColor.cs（对应导入器 trigger type 8）。
 
 @export var colors: Array[SingleColor] = []
+@export var color: Color = Color.WHITE
 @export var duration: float = 2.0
-@export var transType: int = 0
-@export var ease: int = 0
-## 目标网格，如果不指定则尝试从 body 上找
-@export var targetMesh: MeshInstance3D
+@export var TransitionType: Tween.TransitionType = Tween.TRANS_LINEAR
+@export var EaseType: Tween.EaseType = Tween.EASE_IN_OUT
+@export var targetNodes: Array[Node] = []
+
+var _tween: Tween = null
 
 
-func trigger(body: Node3D) -> void:
-	for sc in colors:
-		_apply_color(sc, body)
-
-
-## 对单个 SingleColor 应用颜色变化，通过 material_override + duplicate 避免污染原始 .tres 资源
-func _apply_color(sc: SingleColor, body: Node3D) -> void:
-	if not sc.material:
+func trigger(_body: Node3D) -> void:
+	if not colors.is_empty():
+		for s: SingleColor in colors:
+			s.apply_tweened(self, duration, int(TransitionType), int(EaseType))
 		return
 
-	# 确定目标网格
-	var mesh: MeshInstance3D = targetMesh
-	if not mesh:
-		mesh = body.find_child("MeshInstance3D", true, false) as MeshInstance3D
-	if not mesh:
+	var roots: Array[Node] = targetNodes
+	if roots.is_empty() and get_parent() != null:
+		roots.append(get_parent())
+
+	var materials: Array[StandardMaterial3D] = []
+	for root: Node in roots:
+		var mesh := _resolveMesh(root)
+		if mesh == null:
+			continue
+		var mat := mesh.material_override as Material
+		if mat == null:
+			var active: Material = mesh.get_active_material(0)
+			if active == null:
+				continue
+			mat = active.duplicate()
+			mesh.material_override = mat
+		if mat is StandardMaterial3D:
+			materials.append(mat as StandardMaterial3D)
+
+	if materials.is_empty():
+		push_warning("SetMaterialColor: 未解析到任何 StandardMaterial3D 目标")
 		return
 
-	# 复制材质，确保不修改原始磁盘资源
-	var mat: Material = sc.material
-	if not mat.resource_local_to_scene:
-		mat = mat.duplicate()
-		mat.resource_local_to_scene = true
+	if _tween != null and _tween.is_valid():
+		_tween.kill()
 
-	# 通过 material_override 临时覆盖（不会写入 .tres 文件）
-	mesh.material_override = mat
+	if duration <= 0.0:
+		for stdMat: StandardMaterial3D in materials:
+			stdMat.albedo_color = color
+		return
 
-	# 补间动画
-	var tween: Tween = create_tween()
-	tween.set_ease(ease)
-	tween.set_trans(transType)
-	tween.tween_property(mat, "albedo_color", sc.color, duration)
-	if sc.has_emission and mat is StandardMaterial3D:
-		mat.emission_enabled = true
-		tween.tween_property(mat, "emission", sc.color, duration)
-		tween.parallel().tween_property(mat, "emission_energy_multiplier", sc.intensity, duration)
+	_tween = create_tween().set_parallel(true)
+	for stdMat: StandardMaterial3D in materials:
+		_tween.tween_property(stdMat, "albedo_color", color, duration).set_trans(TransitionType).set_ease(EaseType)
+
+
+func _resolveMesh(root: Node) -> MeshInstance3D:
+	if root is MeshInstance3D:
+		return root as MeshInstance3D
+	for child: Node in root.get_children():
+		if child is MeshInstance3D:
+			return child as MeshInstance3D
+	return null

@@ -205,7 +205,7 @@ GodotLine 采用父子解耦的触发器模式：
 
 ### 13. 颜色触发器 (ColorTrigger)
 - **ARPhros Type**: `8`（`Trigger.Color_Data.targetColor`）
-- **GodotLine 脚本**: `res://#Template/[Scripts]/Trigger/SetColor3D.gd`（模式 1 纯组件，多目标）
+- **GodotLine 脚本**: `res://#Template/[Scripts]/Trigger/SetMaterialColor.gd`（SetMaterialColor.cs 的 Godot 移植，模式 1 纯组件，多目标）
 - **原版数据格式**（6 段）:
   ```
   "1, 0.8156863, 0, 0.6901961|easeInOutSine|-1|True|179|0"
@@ -214,14 +214,36 @@ GodotLine 采用父子解耦的触发器模式：
 - **参数切分与映射**:
   | 索引 | 含义 | 映射逻辑 |
   | :---: | :--- | :--- |
-  | `[0]` | 目标颜色 RGBA | `SetColor3D.color` |
+  | `[0]` | 目标颜色 RGBA | `SetMaterialColor.color` |
   | `[1]` | 缓动曲线 (LeanTweenType 成员名) | `getAnimatorEase` → Tween 枚举 |
   | `[2]` | 直连目标对象 ID | `useGroup=false` 时经 nodeMap 解析 |
   | `[3]` | useGroup | `true` 时按 `[4]` 组定位 |
   | `[4]` | groups 列表（逗号分隔） | 匹配对象的 `groupId` 字段 |
   | `[5]` | duration (秒) | 0 = 直接赋值不渐变 |
 
-- **导入实现**: 触发器本体 = Area3D(BaseTrigger) + EventTrigger + SetColor3D 子组件；`_linkColorTrigger` 后处理解析目标集合填入 `targetNodes`。运行时首次触发将目标活动材质复制为 material_override，再 tween 其 albedo_color（避免污染共享模板材质）。已知限制：不做复活时颜色恢复。
+- **导入实现**: 触发器本体 = Area3D(BaseTrigger) + EventTrigger + SetMaterialColor 子组件；`_linkColorTrigger` 后处理解析目标集合填入 `targetNodes`。运行时首次触发将目标活动材质复制为 material_override，再 tween 其 albedo_color（避免污染共享模板材质）。已知限制：不做复活时颜色恢复。
+
+---
+
+### 14. 物体自带动画 (Animatable)
+
+- **ARPhros 来源**：`objects[].animatable`（JSON 字符串字段，非 trigger type），对应 `Arphros.Animatable`（il2cpp dump 实证）。
+- **GodotLine 组件**：`addons/dancing_line_importer/scripts/animatable.gd`（插件本地，沿用 `sequence_trigger.gd` 先例，**不放入 #Template**）。
+- **机制（源码实证，非循环）**：`Animatable` 是**一次性触发**补间——`StartMode` 决定触发条件，`isInvoked` 锁存仅触发一次，`OnAnimationTriggered()` 触发时播放补间；复活回退到更早检查点时复位并重触发。**不存在持续循环**；后续若有持续往复需求需新加 loop 模式。
+  - `ByDistance=0`：玩家进入 `distanceMinimum` 半径触发。
+  - `ByTime=1`：音乐播放进度 ≥ `timeMinimum` 触发（timeMinimum=0 时游戏开始即触发一次）。
+- **通道支持范围**：仅实现**位置通道**（`animatePosition`）。`animateRotation` / `animateScale` / `animateColor` 出现时 `push_warning` 并跳过；`positionValueType=Random` 告警后按 `Fixed` 处理。
+- **偏移语义**：
+  - `asOffset=true` → 偏移量 = `positionValue`（相对起点）。
+  - `asOffset=false` → 偏移量 = `positionValue - startPositionValue`（绝对目标）。
+- **ease（LeanTweenType 整数，经 `LevelLoader._mapLeanTweenEase`）**：
+  | 值 | 名称 | GodotLine 处理 |
+  | :---: | :--- | :--- |
+  | 1–31 | linear/quad…elastic | 标准 `Tween.TRANS_*` 映射（`EASE_IN/OUT/IN_OUT` 按奇偶区间） |
+  | 32 | `spring` | `TRANS_SPRING` / `EASE_OUT` |
+  | **34** | **`punch`** | **`punchReturn=true`**：复合近似——`QUART/OUT` 冲到目标 + `ELASTIC/OUT` 弹回原位（与 LeanTween punch 一致） |
+  | 0/33/35/36/37/38 | `notUsed`/`shake`/`once`/`clamp`/`pingPong`/`animationCurve` | 无直接对应曲线，`SINE` 往复语义回退并 `push_warning` |
+- **复活对齐**：`_on_revive` 经 `LevelManager.CompareCheckpointIndex` 判定后复位到起点位姿并清除 `isInvoked`；`dontRevive=true` 时跳过复位（与 `AnimatorBase`/`PlayAnimator` 同语义）。
 
 ---
 
@@ -236,7 +258,7 @@ GodotLine 采用父子解耦的触发器模式：
 | 3 | **FreezePlayer**（duration/freezeGravity） | ❌ 未实现（曾误映射为死亡） |
 | 4 | ShakeCamera | ✅ 已实现 |
 | 5 / 6 / 7 | Move / Rotate / Scale | ✅ 已实现（第 11 节） |
-| 8 | Color（targetColor） | ✅ 已实现（SetColor3D，第 13 节） |
+| 8 | Color（targetColor） | ✅ 已实现（SetMaterialColor，第 13 节） |
 | 9 | Teleport（followImmediate） | ❌ 未实现 |
 | 10 | Sequence（preInstance + delay） | ❌ 未实现（春节关 152 个） |
 | 11 | Direction | ✅ 已实现 |
@@ -262,7 +284,7 @@ GodotLine 采用父子解耦的触发器模式：
 - **Unity PrimitiveType**（type 0 的 `customData.type`）: `Sphere=0 / Cube=3 / Plane=4`。
 
 ### 变换触发器 ease 词表来源
-ease 字符串为 **LeanTweenType 枚举成员名**（如 `linear`、`easeOutBounce`、`easeSpring`）。`easeSpring`(32)/`easeShake`(33) 无 in/out 修饰；Godot 侧映射见 `TriggerTypeMap.ANIMATOR_EASE_MAP`（Spring→TRANS_SPRING；shake/punch/pingPong 等无对应曲线，回退 linear 并告警）。
+ease 字符串为 **LeanTweenType 枚举成员名**（如 `linear`、`easeOutBounce`、`easeSpring`）。`easeSpring`(32) 无 in/out 修饰；Godot 侧映射见 `TriggerTypeMap.ANIMATOR_EASE_MAP`（Spring→TRANS_SPRING；shake/punch/pingPong 等未知基名回退 linear 并告警）。注意此路径（变换触发器 type 5/6/7）以**字符串**查表；而 §14 Animatable 以**整数 id** 经 `LevelLoader._mapLeanTweenEase` 解析，二者独立：`punch`(34) 在 Animatable 路径下被特殊处理为复合回弹近似，而非 linear 回退。
 
 ### Move/Rotate/Scale 参数段与游戏字段对应
 管道串字段顺序对应 `Trigger` 基类 + `Trigger.MoveRotateScale_Data`：

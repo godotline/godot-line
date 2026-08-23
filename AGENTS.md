@@ -28,6 +28,18 @@ addons/
   template/            — 编辑器插件：顶部工具栏菜单与"新建关卡"对话框
 ```
 
+## 导入器插件开发规则
+
+- **区分"Unity 移植"与"写插件"**：Godot 端口的 Unity 模板组件（如 `SetMaterialColor.cs` → `SetMaterialColor.gd`、`Jump`/`Speed`/`SetActive`/`SetFog` 等）属于 `#Template` 内容，应落在 `#Template/[Scripts]`，与既有通用触发器并列——这是移植 Unity 模板，不是"写插件"。
+- **写插件（`addons/dancing_line_importer`）时严禁往 `#Template` 塞导入器专用 / Arphros 适配逻辑**：仅数据解析、关卡构建，以及 Arphros 特有格式组件（如 `animatable.gd`，对应 `objects[].animatable` JSON）才放插件目录。
+- **判定先例**：`animatable.gd`、`sequence_trigger.gd` 为导入器专用 → 插件；`SetMaterialColor.gd` 为 `SetMaterialColor.cs` 的 Godot 移植 → `#Template`。
+- **命名保真（Unity 移植）**：移植组件时**类名 / 文件名沿用 Unity 源码原名**（如 Unity `SetMaterialColor` → Godot `SetMaterialColor.gd` + `class_name SetMaterialColor`），不得自行改名（如不得叫 `SetColor3D`）。字段 / 方法**优先对齐 Unity 源码命名**（如 Unity `duration` / `material` / `hasEmission` / `SetColor` 直接沿用，不另起 GDScript 风格名）；snake_case 仅用于 Godot 引擎 API 与 `_ready`/`_process`/`trigger` 等虚函数或约定方法，如模式 1 的 `trigger(body)`）。
+- **注释 / 标注克制（Unity 移植）**：DLMTP 的 `SetMaterialColor.cs` 等源文本就几乎无注释、无分组标注。移植时**不要添加原版没有的文字说明、`@export_group` 解释性标签、冗余注释**，只保留与源码对应的必要结构与 Godot 端口必需的少量约束（如 `material_override` 保护共享模板材质可一行点出）。严禁画蛇添足。
+- **Unity 源码基准（DLMTP）**：移植保真度（命名、字段默认值、行为、Inspector 分组）一律以 Unity 模板源码为准，位于 `../../DLMTP-Template/Assets/#Template`（相对本仓库根目录；绝对即 `/home/meny/Code/DLMTP-Template/Assets/#Template` 下的 `Assets/#Template`）。任何"是否与 Unity 一致"的判断都回到该目录的对应 `.cs`。
+- **`@export_group` 必须与 Unity `[Title]` 对齐**：Godot 端口的 Inspector 分组标签**只能保留与 Unity 源码 `[Title("...")]` 完全一致者**（如 `TrackSwitchTrigger` 的 `Timeline Track Switch Control`、`Checkpoint`/`TTFCheckPoint` 的 `Player`/`Colors`/`Event`）；Unity 无对应 `[Title]` 的标签一律删除（如 `设置`、`预测设置`、`激活设置`、`传送设置`、`转向设置`、`TTF Visuals`、`Final设置`，以及 `Checkpoint` 的 `Config`/`Camera`/`Fog`/`Light`/`Ambient`）。禁止为 Godot 端口便利自行添加分组名。
+- **字段默认值 / 行为对齐 Unity**：移植组件的字段默认值、取值、触发行为须与 Unity 源码一致（如 `SetMaterialColor.duration` 默认 `2f`；`SingleColor` 按 `hasEmission` 开关 emission 且 `intensity` 生效）。运行期由导入器覆盖的字段，其编辑器默认值仍应对齐源码。
+- 组件归属 / 命名变动时同步 `trigger_type_map.gd` 的 `preload` 路径、`Trigger.md` 引用与 `LevelLoader` 内的 `class_name` / 实例化代码。
+
 ## 触发器系统 (Trigger System)
 
 项目中存在三种触发器模式，**所有新触发器必须采用模式 1（纯组件）**：

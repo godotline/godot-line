@@ -45,10 +45,11 @@ func restore_state(state: Dictionary) -> void:
 func apply() -> void:
 	if material:
 		material.albedo_color = color
-		if hasEmission and material is StandardMaterial3D:
-			material.emission_enabled = true
-			material.emission = color
-			material.emission_energy_multiplier = intensity
+		if material is StandardMaterial3D:
+			material.emission_enabled = hasEmission
+			if hasEmission:
+				material.emission = color
+				material.emission_energy_multiplier = intensity
 
 
 func apply_tweened(node: Node, duration: float, trans_type: int = 0, ease_type: int = 0) -> void:
@@ -58,7 +59,8 @@ func apply_tweened(node: Node, duration: float, trans_type: int = 0, ease_type: 
 	tween.set_ease(ease_type)
 	tween.set_trans(trans_type)
 	tween.tween_property(material, "albedo_color", color, duration)
-	if hasEmission and material is StandardMaterial3D:
-		material.emission_enabled = true
-		tween.tween_property(material, "emission", color, duration)
-		tween.parallel().tween_property(material, "emission_energy_multiplier", intensity, duration)
+	if material is StandardMaterial3D:
+		material.emission_enabled = hasEmission
+		if hasEmission:
+			material.emission = color
+			material.emission_energy_multiplier = intensity

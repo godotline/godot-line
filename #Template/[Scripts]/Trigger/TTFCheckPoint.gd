@@ -4,7 +4,6 @@ class_name TTFCheckPoint
 ## TTF checkpoint variant. The inherited Checkpoint owns all gameplay snapshots
 ## and revival behavior; this script adds the TTF presentation and gem pickup.
 
-@export_group("TTF Visuals")
 @export var rotator: Node3D
 @export var checkpointGem: Node3D
 @export var checkPointText: Node3D

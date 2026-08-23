@@ -10,7 +10,6 @@ class_name EventTrigger
 signal triggered
 signal target_node_changed
 
-@export_group("事件回调")
 @export var targetNode: Node = null:
 	set(value):
 		if targetNode == value:
@@ -18,11 +17,9 @@ signal target_node_changed
 		targetNode = value
 		target_node_changed.emit()
 
-@export_group("触发模式")
 @export var invokeOnAwake: bool = false
 @export var invokeOnClick: bool = false
 
-@export_group("调试")
 @export var debugMode: bool = false
 
 var invoked: bool = false

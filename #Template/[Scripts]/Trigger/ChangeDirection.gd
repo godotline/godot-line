@@ -7,10 +7,8 @@ enum ChangeType {
 	Turn        # 立即转向
 }
 
-@export_group("设置")
 @export var type: ChangeType = ChangeType.Direction
 
-@export_group("Direction 模式")
 @export var firstDirection: Vector3 = Vector3(0, 90, 0)
 @export var secondDirection: Vector3 = Vector3.ZERO
 

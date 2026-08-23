@@ -1483,7 +1483,7 @@ func _linkStopTrigger(entry: Dictionary, nodeMap: Dictionary) -> void:
 
 
 ## 链接 Color 触发器（type 8）：解析目标集合（useGroup 组匹配 / 直连 id），
-## 为每个触发器挂载一个 SetColor3D 组件并连接 triggered 信号
+## 为每个触发器挂载一个 SetMaterialColor 组件并连接 triggered 信号
 func _linkColorTrigger(entry: Dictionary, nodeMap: Dictionary) -> void:
 	var eventComp: EventTrigger = entry.get("comp") as EventTrigger
 	if eventComp == null or not is_instance_valid(eventComp):
@@ -1500,8 +1500,8 @@ func _linkColorTrigger(entry: Dictionary, nodeMap: Dictionary) -> void:
 		push_warning("LevelLoader: Color 触发器未解析到任何 Node3D 目标（id=%d）。" % int(entry.get("targetId", -1)))
 		return
 
-	var comp: SetColor3D = TriggerTypeMapClass.SET_COLOR_SCRIPT.new() as SetColor3D
-	comp.name = "SetColor3D"
+	var comp: SetMaterialColor = TriggerTypeMapClass.SET_MATERIAL_COLOR_SCRIPT.new() as SetMaterialColor
+	comp.name = "SetMaterialColor"
 	comp.color = entry.get("color", Color.WHITE) as Color
 	comp.duration = float(entry.get("duration", 0.5))
 	comp.TransitionType = int(entry.get("easeTrans", Tween.TRANS_LINEAR)) as Tween.TransitionType

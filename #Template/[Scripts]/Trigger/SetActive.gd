@@ -6,7 +6,6 @@ extends Node
 
 static var instance: SetActive = null
 
-@export_group("激活设置")
 @export var activeOnAwake: bool = false
 @export var actives: Array[SingleActive] = []
 
