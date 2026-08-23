@@ -36,7 +36,7 @@ window/stretch/aspect="ignore"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/dear-imgui-godot/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/template/plugin.cfg")
+enabled=PackedStringArray("res://addons/anthonyec.camera_preview/plugin.cfg", "res://addons/dear-imgui-godot/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/scene_instance_overrides/plugin.cfg", "res://addons/template/plugin.cfg")
 
 [input]
 
@@ -62,6 +62,4 @@ turn={
 [rendering]
 
 renderer/rendering_method="mobile"
-lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
-lights_and_shadows/positional_shadow/soft_shadow_filter_quality=0
 occlusion_culling/use_occlusion_culling=true
