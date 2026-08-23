@@ -78,7 +78,8 @@ func _onImguiLayout() -> void:
 		ImGui.text("")
 		if ImGui.small_button("Reload (R)"):
 			p.reload()
-		if ImGui.small_button("Kill (K)"):
+		# 与键盘 K 同一状态门控：仅 Playing 可判死，防止死亡后反复鞭尸
+		if ImGui.small_button("Kill (K)") and LevelManager.GameState == LevelManager.GameStatus.Playing:
 			p.PlayerDeath(true, LevelManager.GameStatus.Died, false)
 	ImGui.end()
 

@@ -168,6 +168,12 @@ func _ready() -> void:
 		if levelData:
 			levelData.apply_to(self, get_world_3d().space)
 
+	# 实例化 DebugOverlay（调试面板）。对齐 Unity #if UNITY_EDITOR：仅运行时/调试构建生效，编辑器内不挂载
+	var debugOverlayScene: PackedScene = load("res://#Template/[Resources]/DebugOverlay.tscn") as PackedScene
+	if debugOverlayScene and not Engine.is_editor_hint():
+		var overlay: DebugOverlay = debugOverlayScene.instantiate()
+		add_child(overlay)
+
 	# 实例化 StartPage（启动界面）
 	var startPageScene: PackedScene = load("res://#Template/[Resources]/Prefabs/StartPage.tscn") as PackedScene
 	if startPageScene and not Engine.is_editor_hint():
