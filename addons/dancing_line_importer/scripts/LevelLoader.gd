@@ -20,6 +20,7 @@ const OBSTACLE_TEMPLATE: String = "res://#Template/Obstacle.tscn"
 
 const SingleActiveClass: Script = preload("res://#Template/[Scripts]/Settings/SingleActive.gd")
 const FogSettingsClass: Script = preload("res://#Template/[Scripts]/Settings/FogSettings.gd")
+const AnimatableClass: Script = preload("res://addons/dancing_line_importer/scripts/animatable.gd")
 
 ## 触发器映射表：组件脚本、构造描述、解析规格与动画 ease 映射集中于此
 ## （其余触发器组件的 preload 已迁入该表，见 trigger_type_map.gd）
@@ -500,6 +501,7 @@ func _createSingleObject(objData: Dictionary, meshes: Array, materials: Array, s
 			(node as Node3D).visible = false
 		elif vis == 1:
 			_hideOwnVisual(node)
+		_applyAnimatable(node as Node3D, objData)
 
 	return node
 
@@ -760,19 +762,37 @@ func _createTextObject(objData: Dictionary) -> Node:
 	var label: Label3D = Label3D.new()
 	label.name = "Label3D"
 	label.text = str(custom.get("text", ""))
-	label.font_size = int(float(str(custom.get("fontSize", 20))))
+	# Unity 字号→世界尺寸换算：1pt≈0.1 单位（源数据 boundsSize 印证——fontSize=36 时
+	# boundsSize 宽 15 恰容 4 个汉字）。Label3D 世界高度=font_size×pixel_size，
+	# 保持默认 pixel_size=0.005 不动，渲染字号放大 20 倍即得目标尺寸且光栅更清晰。
+	label.font_size = int(round(float(str(custom.get("fontSize", 20))) * 20.0))
 	var colorData: Variant = custom.get("color", null)
 	if colorData is Dictionary:
 		var c: Dictionary = colorData as Dictionary
 		# arproj 颜色 alpha 可能为 0（不参与显示），强制不透明
 		label.modulate = Color(float(c.get("r", 1.0)), float(c.get("g", 1.0)), float(c.get("b", 1.0)), 1.0)
-	label.horizontal_alignment = toIntSafe(custom.get("horizontalAlignment", 1))
-	label.vertical_alignment = toIntSafe(custom.get("verticalAlignment", 1))
+	label.horizontal_alignment = _mapTextAlignment(toIntSafe(custom.get("horizontalAlignment", 1)), true)
+	label.vertical_alignment = _mapTextAlignment(toIntSafe(custom.get("verticalAlignment", 1)), false)
 	if MIRROR_X:
 		# 文本位于 Scene_001 载体之下，非正常变换会把字形左右翻转，反向缩放抵消
 		label.scale = Vector3(-1, 1, 1)
 	rootNode.add_child(label)
 	return rootNode
+
+
+## Unity 对齐值 → Godot Label3D 对齐枚举（水平 0=左/1=中/2=右，垂直 0=上/1=中/2=下）。
+## 源数据两种编码并存：小整数 0/1/2 即左中右（上中下）；
+## 大数按 TextAnchor<<7 编码（如 512=MiddleCenter），拆 anchor 后按行/列取分量。
+## 越界值一律回退居中——直接透传会触发 Label3D 的 p_alignment 越界断言。
+func _mapTextAlignment(value: int, isHorizontal: bool) -> int:
+	var v: int = value
+	if v > 2:
+		if v > 3 and v % 128 == 0:
+			var anchor: int = v / 128 # Unity TextAnchor 0..8：行=anchor/3，列=anchor%3
+			v = (anchor % 3) if isHorizontal else (anchor / 3)
+		else:
+			v = 1
+	return clampi(v, 0, 2)
 
 func _createRoadObject(objData: Dictionary, materials: Array, sprites: Array = []) -> Node:
 	return _createGroundBox(objData, materials, sprites, 2)
@@ -826,6 +846,13 @@ func _createMeshObject(objData: Dictionary, meshes: Array, materials: Array, spr
 	var rootNode: Node3D = Node3D.new()
 	_applyObjectTransform(rootNode, objData, true)
 
+	var mesh: Mesh = _loadMeshFromJson(objData, meshes)
+	if mesh == null:
+		# 找不到网格资源：保留根节点占位（子树照常挂载），不再回退内置 BoxMesh——
+		# 错误的替身几何体会掩盖资源缺失（An_Asian_Adventure 曾因此 1625 个物体全变方块）。
+		push_warning("LevelLoader: 模型 '%s'(id=%d) 未能加载网格，保留空占位。" % [str(objData.get("name", "")), toIntSafe(objData.get("id", 0))])
+		return rootNode
+
 	var meshInst: MeshInstance3D = MeshInstance3D.new()
 	meshInst.name = "Mesh"
 	# Unity 模型导入器会把 RH 资产（如 Blender 导出的 .obj/.glb）顶点 X 取反并翻转绕序，
@@ -834,10 +861,6 @@ func _createMeshObject(objData: Dictionary, meshes: Array, materials: Array, spr
 	# 根节点承载 s 后，网格子节点仅需常量翻转因子 (-1,1,1)——保留原符号语义，
 	# 叠乘后仍恰为整体镜像；若改用绝对值会破坏 scale.x<0 的显式镜像件（双重翻转）。
 	meshInst.scale = Vector3(-1, 1, 1)
-
-	var mesh: Mesh = _loadMeshFromJson(objData, meshes)
-	if mesh == null:
-		mesh = _createBuiltinMesh(objData)
 	meshInst.mesh = mesh
 	rootNode.add_child(meshInst)
 
@@ -870,6 +893,12 @@ func _createTriggerObject(objData: Dictionary) -> Node:
 	triggerRoot.rotation = unityToGodotRotationNoFlip(rot)
 	var scale: Vector3 = getVector3FromDict(objData, "scale", Vector3.ONE)
 	triggerRoot.scale = unityToGodotScale(scale)
+	# 组定位元数据（与 _applyObjectTransform 对齐）：组员可以是触发器本身
+	# （如 Stop 按组停用一批 MoveTrigger）；缺失会使 _resolveTriggerTargets 的组匹配打不中
+	var groupIds: Array[int] = []
+	for rawG: Variant in objData.get("groupId", []) as Array:
+		groupIds.append(toIntSafe(rawG))
+	triggerRoot.set_meta("arprojGroups", groupIds)
 
 	var customData: Variant = JSON.parse_string(str(objData.get("customData", "{}")))
 	var custom: Dictionary = customData as Dictionary if customData is Dictionary else {}
@@ -1214,6 +1243,35 @@ func _buildSequenceTrigger(dataStr: String, triggerRoot: Area3D, config: Diction
 	}
 
 
+## ARPhros type 14 Stop，3 段：targetId|useGroup|groups（如 "-1|True|14"，组员常为其他触发器）。
+## 复用 SetActive 组件（active=false 停用目标触发器：visible=false + PROCESS_MODE_DISABLED
+## 令 BaseTrigger 的 body_entered 彻底停发；复活回退时由其监听恢复——正确的世界回退语义）。
+## 目标路径须待父子关系就绪后由 _linkStopTrigger 解析成真实相对路径。
+func _buildStopTrigger(dataStr: String, triggerRoot: Area3D, config: Dictionary, objId: int) -> void:
+	var activeComp: SetActive = TriggerTypeMapClass.SET_ACTIVE_SCRIPT.new() as SetActive
+	activeComp.name = str(config.get("childName", "SetActive"))
+	triggerRoot.add_child(activeComp)
+
+	var parts: PackedStringArray = dataStr.split("|")
+	if parts.size() < 3:
+		push_warning("LevelLoader: Stop 触发器 %d 参数段不足（%d/3），已跳过。" % [objId, parts.size()])
+		return
+
+	var idStr: String = parts[0].strip_edges()
+	var groups: Array[int] = []
+	for rawG: String in parts[2].split(","):
+		var gs: String = rawG.strip_edges()
+		if gs.is_valid_int():
+			groups.append(gs.to_int())
+	pendingAnimatorTriggers[triggerRoot] = {
+		"comp": activeComp,
+		"kind": "stop",
+		"targetId": idStr.to_int() if idStr.is_valid_int() else -1,
+		"useGroup": parts[1].strip_edges().to_lower() == "true",
+		"groups": groups,
+	}
+
+
 ## ARPhros type 8 Color：targetColor(RGBA)|ease|targetId|useGroup|groups(逗号分隔)|duration
 func _buildColorTrigger(dataStr: String, triggerRoot: Area3D, config: Dictionary, objId: int) -> void:
 	var eventComp: EventTrigger = TriggerTypeMapClass.EVENT_TRIGGER_SCRIPT.new() as EventTrigger
@@ -1302,6 +1360,9 @@ func _linkTriggerAnimators(nodeMap: Dictionary) -> void:
 			continue
 		if entryKind == "sequence":
 			_linkSequenceTrigger(entry, nodeMap)
+			continue
+		if entryKind == "stop":
+			_linkStopTrigger(entry, nodeMap)
 			continue
 		var eventComp: EventTrigger = entry.get("comp") as EventTrigger
 		if eventComp == null or not is_instance_valid(eventComp):
@@ -1397,6 +1458,28 @@ func _linkSequenceTrigger(entry: Dictionary, nodeMap: Dictionary) -> void:
 				list.append(targetNode)
 		if not list.is_empty():
 			seqComp.set(str(phase[0]), list)
+
+
+## 链接 Stop 触发器（type 14）：解析目标触发器集合，为 SetActive 组件逐个填入
+## SingleActive{active=false}——路径用组件到目标根的真实相对路径（运行时树形一致，
+## get_node_or_null 必命中；不重蹈 type 18 旧版"裸 id 路径打不中"的覆辙）。
+func _linkStopTrigger(entry: Dictionary, nodeMap: Dictionary) -> void:
+	var activeComp: Node = entry.get("comp") as Node
+	if activeComp == null or not is_instance_valid(activeComp):
+		push_warning("LevelLoader: Stop 触发器的 SetActive 已失效，跳过链接。")
+		return
+
+	var resolved := _resolveTriggerTargets(entry, nodeMap)
+	var linkedCount: int = 0
+	for targetRoot: Node in resolved:
+		if targetRoot is Node3D and targetRoot != activeComp.get_parent():
+			var singleActive: SingleActive = SingleActiveClass.new()
+			singleActive.active = false # Stop：停用目标触发器
+			singleActive.target = activeComp.get_path_to(targetRoot)
+			(activeComp as SetActive).actives.append(singleActive)
+			linkedCount += 1
+	if linkedCount == 0:
+		push_warning("LevelLoader: Stop 触发器未解析到任何目标（id=%d，useGroup=%s），保持未链接。" % [int(entry.get("targetId", -1)), str(entry.get("useGroup", false))])
 
 
 ## 链接 Color 触发器（type 8）：解析目标集合（useGroup 组匹配 / 直连 id），
@@ -1579,11 +1662,24 @@ func _loadMeshFromJson(objData: Dictionary, meshes: Array) -> Mesh:
 	return null
 
 
+## 资源搜索基路径：显式路径逐个展开出 Meshes/Sprites 子目录——arplay 提取结构为
+## Resources/{Meshes,Sprites}/，而 dock 传入的 extraSearchPaths 只到 Resources/ 一层，
+## 不展开子目录会导致全部模型/贴图查找落空（模型回退内置 BoxMesh、材质无贴图）。
+func _assetSearchPaths() -> Array[String]:
+	var paths: Array[String] = []
+	for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
+		paths.append(basePath)
+		var normalized: String = basePath if basePath.ends_with("/") else basePath + "/"
+		paths.append(normalized + "Meshes/")
+		paths.append(normalized + "Sprites/")
+	return paths
+
+
 func _loadMeshByFilename(fileName: String) -> Mesh:
 	if loadedMeshes.has(fileName):
 		return loadedMeshes[fileName] as Mesh
 
-	for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
+	for basePath: String in _assetSearchPaths():
 		var fullPath: String = basePath + fileName
 		if ResourceLoader.exists(fullPath):
 			var resource: Resource = load(fullPath)
@@ -1594,7 +1690,7 @@ func _loadMeshByFilename(fileName: String) -> Mesh:
 	var extensions: Array[String] = [".obj", ".glb", ".gltf", ".fbx"]
 	for ext: String in extensions:
 		if not fileName.ends_with(ext):
-			for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
+			for basePath: String in _assetSearchPaths():
 				var fullPath: String = basePath + fileName + ext
 				if ResourceLoader.exists(fullPath):
 					var resource: Resource = load(fullPath)
@@ -1606,7 +1702,7 @@ func _loadMeshByFilename(fileName: String) -> Mesh:
 
 
 func _loadMeshByName(name: String) -> Mesh:
-	for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
+	for basePath: String in _assetSearchPaths():
 		var fullPath: String = basePath + name
 		if ResourceLoader.exists(fullPath):
 			var resource: Resource = load(fullPath)
@@ -1615,7 +1711,7 @@ func _loadMeshByName(name: String) -> Mesh:
 
 	var extensions: Array[String] = [".obj", ".glb", ".gltf"]
 	for ext: String in extensions:
-		for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
+		for basePath: String in _assetSearchPaths():
 			var fullPath: String = basePath + name + ext
 			if ResourceLoader.exists(fullPath):
 				var resource: Resource = load(fullPath)
@@ -1623,28 +1719,6 @@ func _loadMeshByName(name: String) -> Mesh:
 					return resource as Mesh
 
 	return null
-
-
-func _createBuiltinMesh(objData: Dictionary) -> Mesh:
-	var name: String = str(objData.get("name", "")).to_lower()
-	if name.contains("plane") or name.contains("ground") or name.contains("floor"):
-		var plane: PlaneMesh = PlaneMesh.new()
-		plane.size = Vector2(1, 1)
-		return plane
-	elif name.contains("sphere") or name.contains("ball"):
-		var sphere: SphereMesh = SphereMesh.new()
-		sphere.radius = 0.5
-		return sphere
-	elif name.contains("cylinder") or name.contains("pillar"):
-		var cylinder: CylinderMesh = CylinderMesh.new()
-		cylinder.top_radius = 0.5
-		cylinder.bottom_radius = 0.5
-		cylinder.height = 1.0
-		return cylinder
-	else:
-		var box: BoxMesh = BoxMesh.new()
-		box.size = Vector3(1, 1, 1)
-		return box
 
 
 func _createStandardMaterial(objData: Dictionary, materials: Array, sprites: Array = []) -> StandardMaterial3D:
@@ -1692,6 +1766,107 @@ func _createStandardMaterial(objData: Dictionary, materials: Array, sprites: Arr
 	return material
 
 
+## LeanTweenType 数值 → Tween 枚举（枚举序经游戏 il2cpp dump 实证，见 dump.cs LeanTweenType）。
+## punch(34) 无对应曲线：返回 punch=true 由组件用"快出+弹性回落"复合近似；
+## shake/pingPong 等运行时特型回退 SINE 往复语义并告警。
+func _mapLeanTweenEase(easeId: int) -> Dictionary:
+	var trans: Tween.TransitionType = Tween.TRANS_SINE
+	var easeMode: Tween.EaseType = Tween.EASE_IN_OUT
+	var isPunch: bool = false
+	match easeId:
+		1:
+			trans = Tween.TRANS_LINEAR
+		2, 3, 4:
+			trans = Tween.TRANS_QUAD
+			easeMode = Tween.EASE_OUT if easeId == 2 else (Tween.EASE_IN if easeId == 3 else Tween.EASE_IN_OUT)
+		5, 6, 7:
+			trans = Tween.TRANS_CUBIC
+			easeMode = Tween.EASE_IN if easeId == 5 else (Tween.EASE_OUT if easeId == 6 else Tween.EASE_IN_OUT)
+		8, 9, 10:
+			trans = Tween.TRANS_QUART
+			easeMode = Tween.EASE_IN if easeId == 8 else (Tween.EASE_OUT if easeId == 9 else Tween.EASE_IN_OUT)
+		11, 12, 13:
+			trans = Tween.TRANS_QUINT
+			easeMode = Tween.EASE_IN if easeId == 11 else (Tween.EASE_OUT if easeId == 12 else Tween.EASE_IN_OUT)
+		14, 15, 16:
+			trans = Tween.TRANS_SINE
+			easeMode = Tween.EASE_IN if easeId == 14 else (Tween.EASE_OUT if easeId == 15 else Tween.EASE_IN_OUT)
+		17, 18, 19:
+			trans = Tween.TRANS_EXPO
+			easeMode = Tween.EASE_IN if easeId == 17 else (Tween.EASE_OUT if easeId == 18 else Tween.EASE_IN_OUT)
+		20, 21, 22:
+			trans = Tween.TRANS_CIRC
+			easeMode = Tween.EASE_IN if easeId == 20 else (Tween.EASE_OUT if easeId == 21 else Tween.EASE_IN_OUT)
+		23, 24, 25:
+			trans = Tween.TRANS_BOUNCE
+			easeMode = Tween.EASE_IN if easeId == 23 else (Tween.EASE_OUT if easeId == 24 else Tween.EASE_IN_OUT)
+		26, 27, 28:
+			trans = Tween.TRANS_BACK
+			easeMode = Tween.EASE_IN if easeId == 26 else (Tween.EASE_OUT if easeId == 27 else Tween.EASE_IN_OUT)
+		29, 30, 31:
+			trans = Tween.TRANS_ELASTIC
+			easeMode = Tween.EASE_IN if easeId == 29 else (Tween.EASE_OUT if easeId == 30 else Tween.EASE_IN_OUT)
+		32:
+			trans = Tween.TRANS_SPRING
+			easeMode = Tween.EASE_OUT
+		34:
+			isPunch = true
+		0, 33, 35, 36, 37, 38:
+			push_warning("LevelLoader: LeanTweenType %d（%s）无直接对应曲线，回退 SINE 往复。" % [easeId, ["notUsed", "easeShake", "once", "clamp", "pingPong", "animationCurve"][easeId] if easeId in [0, 33, 35, 36, 37, 38] else "?"])
+		_:
+			push_warning("LevelLoader: 未知 LeanTweenType %d，回退 SINE 往复。" % easeId)
+	return {"trans": trans, "ease": easeMode, "punch": isPunch}
+
+
+## ARPhros objects[].animatable 自动画（Arphros.Animatable，il2cpp dump 实证）：
+## StartMode ByDistance=玩家进入 distanceMinimum 半径触发 / ByTime=音乐时间过 timeMinimum 触发，
+## 触发后按 ease 播放一次性位移补间。仅实现位置通道；其余通道出现时告警跳过。
+func _applyAnimatable(node: Node3D, objData: Dictionary) -> void:
+	var raw: String = str(objData.get("animatable", ""))
+	if raw.is_empty():
+		return
+	var objId: int = toIntSafe(objData.get("id", 0))
+	var parsed: Variant = JSON.parse_string(raw)
+	if not parsed is Dictionary:
+		push_warning("LevelLoader: 物体 %d 的 animatable 无法解析。" % objId)
+		return
+	var cfg: Dictionary = parsed as Dictionary
+
+	for channel: String in ["animateRotation", "animateScale", "animateColor"]:
+		if bool(cfg.get(channel, false)):
+			push_warning("LevelLoader: 物体 %d 的 animatable.%s 暂不支持，已忽略。" % [objId, channel])
+	if not bool(cfg.get("animatePosition", false)):
+		return
+	if toIntSafe(cfg.get("positionValueType", 0)) != 0:
+		push_warning("LevelLoader: 物体 %d 的 animatable.positionValueType=Random 暂不支持，按 Fixed 处理。" % objId)
+
+	var valueVec: Variant = cfg.get("positionValue", {})
+	var offset := Vector3.ZERO
+	if valueVec is Dictionary:
+		var v: Dictionary = valueVec as Dictionary
+		offset = Vector3(float(v.get("x", 0.0)), float(v.get("y", 0.0)), float(v.get("z", 0.0)))
+	if not bool(cfg.get("asOffset", true)):
+		# 绝对目标语义：偏移 = 目标 - 起点
+		var sv: Variant = cfg.get("startPositionValue", {})
+		var startVec := Vector3.ZERO
+		if sv is Dictionary:
+			startVec = Vector3(float(sv.get("x", 0.0)), float(sv.get("y", 0.0)), float(sv.get("z", 0.0)))
+		offset = offset - startVec
+
+	var easeInfo: Dictionary = _mapLeanTweenEase(toIntSafe(cfg.get("ease", 1)))
+	var comp: Animatable = AnimatableClass.new() as Animatable
+	comp.name = "Animatable"
+	comp.mode = toIntSafe(cfg.get("mode", 0)) as Animatable.StartMode
+	comp.timeMinimum = float(cfg.get("timeMinimum", 0.0))
+	comp.distanceMinimum = float(cfg.get("distanceMinimum", 12.0))
+	comp.offsetPosition = offset
+	comp.duration = maxf(float(cfg.get("duration", 2.0)), 0.1)
+	comp.transType = easeInfo["trans"] as Tween.TransitionType
+	comp.easeType = easeInfo["ease"] as Tween.EaseType
+	comp.punchReturn = bool(easeInfo["punch"])
+	node.add_child(comp)
+
+
 func _loadTextureBySpriteId(spriteId: int, sprites: Array) -> Texture2D:
 	var fileName: String = ""
 	for rawSprite: Variant in sprites:
@@ -1711,7 +1886,7 @@ func _loadTextureBySpriteId(spriteId: int, sprites: Array) -> Texture2D:
 	if loadedTextures.has(fileName):
 		return loadedTextures[fileName] as Texture2D
 
-	for basePath: String in MODEL_SEARCH_PATHS + extraSearchPaths:
+	for basePath: String in _assetSearchPaths():
 		var fullPath: String = basePath + fileName
 		if ResourceLoader.exists(fullPath):
 			var res: Resource = load(fullPath)

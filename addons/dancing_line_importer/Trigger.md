@@ -146,6 +146,25 @@ GodotLine 采用父子解耦的触发器模式：
 
 ---
 
+### 10.5. 停止触发器 (StopTrigger)
+- **ARPhros Type**: `14`（`Stop`）
+- **GodotLine 脚本**: 复用 `res://#Template/[Scripts]/Trigger/SetActive.gd`（与 type 18 同组件）
+- **原版数据格式**:
+  ```
+  "-1|True|14"
+  ```
+- **参数切分与映射**:
+  | 索引 | 含义 | 示例 | 映射逻辑 |
+  | :---: | :--- | :--- | :--- |
+  | `[0]` | 直连目标对象 ID | `-1` | useGroup=true 时忽略 |
+  | `[1]` | useGroup | `True` | 按组定位目标 |
+  | `[2]` | groups 列表 | `14` | 匹配对象的 groupId 字段 |
+
+- **导入实现**: 触发器本体 = Area3D(BaseTrigger) + `SetActive` 子组件；`_linkStopTrigger` 后处理解析目标集合，逐个填入 `SingleActive{active=false}`，路径取组件到目标根的真实相对路径。玩家路过即停用这些目标触发器（`visible=false + PROCESS_MODE_DISABLED` 使 BaseTrigger 的 `body_entered` 停发）；复活回退到更早检查点时由 SetActive 的复活监听恢复。
+- **已知语义限制**：目标触发器已启动、进行中的补间不会被冻结（自然播完）；Stop 目标应为触发器，指向视觉物体会连带隐藏。
+
+---
+
 ### 11. 变换触发器 (MoveTrigger / RotateTrigger / ScaleTrigger)
 - **ARPhros Type**: `5` (`Move` 位移) / `6` (`Rotate` 旋转) / `7` (`Scale` 缩放)
 - **GodotLine 脚本**: `res://#Template/[Scripts]/Animator/LocalPosAnimator.gd` / `LocalRotAnimator.gd` / `LocalScaleAnimator.gd`
@@ -180,7 +199,7 @@ GodotLine 采用父子解耦的触发器模式：
 
 - **动画 ease 词表**（`TriggerTypeMap.ANIMATOR_EASE_MAP`，独立于相机通道的 `CameraFollower.Ease`）：可选 `ease` 前缀 + 可选修饰符（`inout`/`outin`/`out`/`in` 按最长前缀优先 → 对应 `Tween.EaseType`；裸名 → `EASE_IN_OUT`）+ 基曲线名：`linear/sine/quad/cubic/quart/quint/expo/circ/back/elastic/bounce/spring` → 同名 `Tween.TRANS_*`。未知基名回退 linear 并 push_warning。
 - **映射表架构**：触发器类型 → 组件与解析规格集中维护于 `addons/dancing_line_importer/scripts/trigger_type_map.gd`（`TRIGGER_CONFIG` / `TRIGGER_FIELD_MAP` / `ANIMATOR_EASE_MAP`）；`LevelLoader._createTriggerObject` 仅做查表分发（special 构建器 + 通用 field-kind 规格）。
-- **未实现类型**：`3(FreezePlayer), 9(Teleport), 10(Sequence), 14(Stop), 15(Tail), 16(AnalogGlitch), 17(Material), 20(Code), 21(LegacyCamera), 23(Light), 25(Tap)` 记录于 `TriggerTypeMap.UNMAPPED_TRIGGER_TYPES`，命中时仅告警并保留裸碰撞触发器。
+- **未实现类型**：`3(FreezePlayer), 9(Teleport), 10(Sequence), 15(Tail), 16(AnalogGlitch), 17(Material), 20(Code), 21(LegacyCamera), 23(Light), 25(Tap)` 记录于 `TriggerTypeMap.UNMAPPED_TRIGGER_TYPES`，命中时仅告警并保留裸碰撞触发器。
 
 ---
 
@@ -223,7 +242,7 @@ GodotLine 采用父子解耦的触发器模式：
 | 11 | Direction | ✅ 已实现 |
 | 12 | Finish | ✅ 已实现 |
 | 13 | Fov | ✅ 已实现 |
-| 14 | Stop | ❌ 未实现 |
+| 14 | Stop | ✅ 已实现（复用 SetActive，见 §10.5） |
 | 15 | Tail（clearTailData） | ❌ 未实现 |
 | 16 | AnalogGlitch | ❌ 未实现 |
 | 17 | Material（material/mainColor/emissionColor） | ❌ 未实现 |

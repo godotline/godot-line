@@ -71,7 +71,7 @@ static func extract(arplayPath: String, outDir: String = "") -> Dictionary:
 
 	var baseDir := outDir if not outDir.is_empty() else arplayPath.get_base_dir().path_join("Resources")
 	var counts: Dictionary = {}
-	_writeAssets(baseDir, "Meshes", data.get("meshes", []) as Array, "fileName", false, counts)
+	_writeAssets(baseDir, "Meshes", data.get("meshes", []) as Array, "fileName", false, counts, true)
 	_writeAssets(baseDir, "Sprites", data.get("sprites", []) as Array, "fileName", true, counts)
 	_writeAssets(baseDir, "Scripts", data.get("scripts", []) as Array, "path", false, counts)
 
@@ -80,8 +80,11 @@ static func extract(arplayPath: String, outDir: String = "") -> Dictionary:
 
 # ==================== 提取落盘 ====================
 
-## 将资产数组写出到 baseDir/subDir；sprite 内容为 base64，其余为 UTF-8 文本
-static func _writeAssets(baseDir: String, subDir: String, items: Array, nameKey: String, isBase64: bool, counts: Dictionary) -> void:
+## 将资产数组写出到 baseDir/subDir；sprite 内容为 base64，其余为 UTF-8 文本。
+## stripMtllib：写 .obj 前剥除 mtllib 行——arplay 包内不含 .mtl 资产，
+## 保留该行会让 OBJ 导入器逐文件报 "Couldn't open MTL"；材质由加载器
+## 按 arproj materialIds 经 material_override 提供，剥离无副作用。
+static func _writeAssets(baseDir: String, subDir: String, items: Array, nameKey: String, isBase64: bool, counts: Dictionary, stripMtllib: bool = false) -> void:
 	var dir: String = baseDir.path_join(subDir)
 	DirAccess.make_dir_recursive_absolute(dir)
 	var written: int = 0
@@ -102,6 +105,13 @@ static func _writeAssets(baseDir: String, subDir: String, items: Array, nameKey:
 				continue
 			if blob.slice(0, 8).hex_encode() != PNG_MAGIC_HEX:
 				push_warning("ArplayCrypto: 贴图 '%s' 不是 PNG 格式（magic=%s）。" % [fileName, blob.slice(0, 8).hex_encode()])
+		elif stripMtllib and fileName.get_extension().to_lower() == "obj":
+			var lines: PackedStringArray = str(item.get("content", "")).split("\n")
+			var cleaned: PackedStringArray = []
+			for line: String in lines:
+				if not line.strip_edges().begins_with("mtllib"):
+					cleaned.append(line)
+			blob = "\n".join(cleaned).to_utf8_buffer()
 		else:
 			blob = str(item.get("content", "")).to_utf8_buffer()
 

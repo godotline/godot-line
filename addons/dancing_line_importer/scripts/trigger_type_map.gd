@@ -42,6 +42,7 @@ const TRIGGER_CONFIG: Dictionary = {
 	8: {"label": "ColorTrigger", "childName": "EventTrigger"},
 	9: {"label": "TeleportTrigger", "childName": "Teleport", "component": TELEPORT_SCRIPT},
 	10: {"label": "SequenceTrigger", "childName": "EventTrigger"},
+	14: {"label": "StopTrigger", "childName": "SetActive"}, # 复用 SetActive 停用目标触发器，链接见 _linkStopTrigger
 	11: {"label": "DirectionTrigger", "childName": "ChangeDirection", "component": CHANGE_DIRECTION_SCRIPT},
 	12: {"label": "FinishTrigger", "childName": "FadeOutMusic", "component": FADE_OUT_MUSIC_SCRIPT},
 	13: {"label": "FovTrigger", "childName": "CameraTrigger", "component": CAMERA_TRIGGER_SCRIPT},
@@ -71,6 +72,7 @@ const TRIGGER_FIELD_MAP: Dictionary = {
 	8: {"builder": "_buildColorTrigger"},
 	9: {"builder": "_buildTeleportTrigger"},
 	10: {"builder": "_buildSequenceTrigger"},
+	14: {"builder": "_buildStopTrigger"}, # targetId|useGroup|groups（如 "-1|True|14"）
 	11: {"fields": [
 		{"kind": "vecAt", "part": 0, "prop": "firstDirection"},
 		{"kind": "vecAt", "part": 1, "prop": "secondDirection"},
@@ -158,7 +160,6 @@ static func getAnimatorEase(easeName: String) -> Dictionary:
 ## 并保留裸碰撞触发器。新实现某类型时请将其移入上方 TRIGGER_CONFIG / TRIGGER_FIELD_MAP。
 const UNMAPPED_TRIGGER_TYPES: Dictionary = {
 	3: "FreezePlayer（冻结玩家 duration 秒，可选冻结重力）",
-	14: "Stop",
 	15: "Tail（clearTailData: TailMode）",
 	16: "AnalogGlitch",
 	17: "Material（material/mainColor/emissionColor）",
