@@ -64,8 +64,8 @@ func _process(_delta: float) -> void:
 			_original_created = true
 
 	if createBoxes and LevelManager.GameState == LevelManager.GameStatus.Playing and not _started:
-		if not _player.onturn.is_connected(_on_player_turn):
-			_player.onturn.connect(_on_player_turn)
+		if not _player.OnTurn.is_connected(_on_player_turn):
+			_player.OnTurn.connect(_on_player_turn)
 		_started = true
 
 func _find_guidance_box(node: Node) -> GuidanceBox:

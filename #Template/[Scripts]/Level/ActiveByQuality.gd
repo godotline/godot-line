@@ -1,9 +1,9 @@
 class_name ActiveByQuality
 extends Node
 
-@export var showInLow: bool = true
-@export var showInMedium: bool = true
-@export var showInHigh: bool = true
+@export var showInLow: bool = false
+@export var showInMedium: bool = false
+@export var showInHigh: bool = false
 
 func _ready() -> void:
 	add_to_group("active_by_quality")

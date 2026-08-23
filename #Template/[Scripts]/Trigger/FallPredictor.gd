@@ -2,7 +2,6 @@
 extends Node3D
 class_name FallPredictor
 
-@export_group("预测设置")
 @export var showInGame: bool = false
 @export var speed: int = 12:
 	set(value):

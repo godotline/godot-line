@@ -260,12 +260,11 @@ static func GameOverNormal(complete: bool) -> void:
 			percent = int((currentSec / totalSec) * 100) if totalSec > 0 else 0
 
 	if GameState == GameStatus.Died or GameState == GameStatus.Completed or GameState == GameStatus.Moving:
-		if Player.instance and Player.instance.has_method("get_block_count"):
-			pass
-		# 触发UI显示，由LevelUI.gd监听on_game_end信号
+		# 对齐 Unity LevelManager.GameOverNormal：直接调用 LevelUI.Instance.NormalPage
 		isEnd = true
-		if Player.instance:
-			Player.instance.on_game_end.emit()
+		var ui: LevelUI = LevelUI.instance
+		if ui:
+			ui.show_end_ui()
 
 static func GameOverRevive() -> void:
 	if GameState == GameStatus.Died or GameState == GameStatus.Moving:
@@ -277,8 +276,10 @@ static func GameOverRevive() -> void:
 				var currentSec: float = musicPlayer.get_playback_position()
 				percent = int((currentSec / totalSec) * 100) if totalSec > 0 else 0
 		isEnd = true
-		if Player.instance:
-			Player.instance.on_game_end.emit()
+		# 对齐 Unity LevelManager.GameOverRevive：直接调用 LevelUI.Instance.RevivePage
+		var ui: LevelUI = LevelUI.instance
+		if ui:
+			ui.show_end_ui()
 
 ## ============================================================
 ## 辅助方法

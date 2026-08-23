@@ -124,9 +124,8 @@ func _on_body_entered(body: Node3D) -> void:
 	index = LevelManager.checkpointCount
 	_set_monitoring(false)
 	_set_crystal_mesh_visible(false)
-	if Player.instance and Player.instance.has_signal("on_get_gem"):
-		# Crystal 使用与 Unity 事件 6 对应的收集通知；当前模板没有独立 Crystal 信号。
-		Player.instance.on_get_gem.emit()
+	if Player.instance:
+		Player.instance.emitGameEvent(6)
 	if GraphicsQuality.qualityLevel > 0:
 		_start_scan()
 		_start_lightning()

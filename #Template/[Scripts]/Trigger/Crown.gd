@@ -44,8 +44,10 @@ func _connect_player_start() -> void:
 	if Engine.is_editor_hint():
 		return
 	var player: Player = Player.instance
-	if is_instance_valid(player) and not player.on_player_start.is_connected(_on_player_start):
-		player.on_player_start.connect(_on_player_start)
+	if is_instance_valid(player):
+		var events: GameEvents = player.getEvents()
+		if events and not events.onPlayerStart.is_connected(_on_player_start):
+			events.onPlayerStart.connect(_on_player_start)
 
 func _on_player_start() -> void:
 	if used and lastCollectedCrown == self:
@@ -199,7 +201,9 @@ func _stop_particle_disappear() -> void:
 func _exit_tree() -> void:
 	_stop_crown_animations()
 	var player: Player = Player.instance
-	if is_instance_valid(player) and player.on_player_start.is_connected(_on_player_start):
-		player.on_player_start.disconnect(_on_player_start)
+	if is_instance_valid(player):
+		var events: GameEvents = player.getEvents()
+		if events and events.onPlayerStart.is_connected(_on_player_start):
+			events.onPlayerStart.disconnect(_on_player_start)
 	if lastCollectedCrown == self:
 		lastCollectedCrown = null

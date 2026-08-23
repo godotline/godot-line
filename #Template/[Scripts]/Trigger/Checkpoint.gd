@@ -3,7 +3,6 @@ class_name Checkpoint
 
 enum Direction { First, Second }
 
-@export_group("Config")
 @export var AutoRecord: bool = false
 @export var GameTime: float = 0.0
 @export var playerSpeed: float = 12.0
@@ -12,20 +11,16 @@ enum Direction { First, Second }
 @export_group("Player")
 @export var direction: Direction = Direction.First
 
-@export_group("Camera")
 @export var cameraNew: CameraSettings = CameraSettings.new()
 @export var cameraOld: OldCameraSettings = OldCameraSettings.new()
 @export var manualCamera: bool = false
 
-@export_group("Fog")
 @export var fog: FogSettings = FogSettings.new()
 @export var manualFog: bool = false
 
-@export_group("Light")
 @export var light: LightSettings = LightSettings.new()
 @export var manualLight: bool = false
 
-@export_group("Ambient")
 @export var ambient: AmbientSettings = AmbientSettings.new()
 @export var manualAmbient: bool = false
 

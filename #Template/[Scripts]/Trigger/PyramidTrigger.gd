@@ -4,7 +4,6 @@ extends Node
 
 @export var type: Pyramid.TriggerType = Pyramid.TriggerType.Open
 
-@export_group("Final设置")
 @export var changeDirection: bool = false
 @export var finalDirection: Vector3 = Vector3.ZERO
 

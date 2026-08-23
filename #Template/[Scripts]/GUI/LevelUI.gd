@@ -25,14 +25,13 @@ func _ready() -> void:
 	else:
 		push_error("LevelUI.gd: Player.instance 或 levelData 为空，无法读取关卡标题")
 	visible = false
-	if Player.instance:
-		Player.instance.on_game_end.connect(_show_ui)
 
 func _exit_tree() -> void:
 	if instance == self:
 		instance = null
 
-func _show_ui() -> void:
+## 对齐 Unity LevelUI.cs NormalPage/RevivePage：由 LevelManager.GameOver 直接调用
+func show_end_ui() -> void:
 	if shown:
 		return
 	shown = true

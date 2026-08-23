@@ -5,20 +5,8 @@ class_name Player
 static var instance: Player
 static var sceneReloadInProgress: bool = false
 
-## ========== 事件信号（GameEvents 系统） ==========
-signal on_game_awake			## 游戏初始化完成
-signal on_player_start			## 玩家开始移动（第一次转向）
-signal on_change_direction		## 玩家转向
-signal on_leave_ground			## 玩家离开地面
-signal on_touch_ground			## 玩家落地
-signal on_game_over				## 玩家死亡
-signal on_game_end				## 游戏结束（死亡或完成）
-signal on_get_gem				## 收集宝石
-signal on_player_jump			## 玩家跳跃
-
-signal new_line1
-signal on_sky
-signal onturn
+## ========== 事件信号 ==========
+signal OnTurn		## 玩家转向（对齐 Unity Player.OnTurn）
 
 @onready var y: float = $".".position.y
 var Speed: float
@@ -141,22 +129,15 @@ func getEvents() -> GameEvents:
 		gameEventsHub = get_node_or_null("GameEvents") as GameEvents
 	return gameEventsHub
 
+## 触发 GameEvents 枢纽事件（对齐 Unity Player.Events?.Invoke(index)）
+func emitGameEvent(index: int) -> void:
+	var events: GameEvents = getEvents()
+	if events:
+		events.invoke(index)
+
 func _ready() -> void:
 	add_to_group("Player")
 	instance = self
-	# 将既有玩家信号转发到 GameEvents 枢纽（bind 索引复用 invoke）
-	# 仅运行时执行：GameEvents.gd 非 @tool，编辑器中其占位实例没有方法可访问
-	if not Engine.is_editor_hint():
-		var events: GameEvents = getEvents()
-		if events:
-			on_game_awake.connect(events.invoke.bind(0))
-			on_player_start.connect(events.invoke.bind(1))
-			on_change_direction.connect(events.invoke.bind(2))
-			on_leave_ground.connect(events.invoke.bind(3))
-			on_touch_ground.connect(events.invoke.bind(4))
-			on_game_over.connect(events.invoke.bind(5))
-			on_get_gem.connect(events.invoke.bind(6))
-			on_player_jump.connect(events.invoke.bind(7))
 	tailPool.size = poolSize
 	tailBodyPool.size = poolSize
 	if characterMaterial:
@@ -182,13 +163,14 @@ func _ready() -> void:
 		rotation_degrees = currentDirection
 		_cache_scene_references()
 		_pause_managed_animators()
-		emit_signal("on_game_awake")
+		emitGameEvent(0)
 	if is_inside_tree():
 		if levelData:
 			levelData.apply_to(self, get_world_3d().space)
 
+	# 实例化 DebugOverlay（调试面板）。对齐 Unity #if UNITY_EDITOR：仅运行时/调试构建生效，编辑器内不挂载
 	var debugOverlayScene: PackedScene = load("res://#Template/[Resources]/DebugOverlay.tscn") as PackedScene
-	if debugOverlayScene:
+	if debugOverlayScene and not Engine.is_editor_hint():
 		var overlay: DebugOverlay = debugOverlayScene.instantiate()
 		add_child(overlay)
 
@@ -234,14 +216,14 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		velocity.x = horizontalVelocity.x
 		velocity.z = horizontalVelocity.z
-		if isLive and is_on_wall() and not noDeath:
+		if isLive and is_on_wall() and not noDeath and LevelManager.GameState == LevelManager.GameStatus.Playing:
 			# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab
 			PlayerDeath(showLineBody)
 		if fly:
 			$".".position.y = y
 
 func _process(delta: float) -> void:
-	if Engine.is_editor_hint() or (not isLive and LevelManager.GameState != LevelManager.GameStatus.Moving):
+	if Engine.is_editor_hint() or (not isLive and LevelManager.GameState != LevelManager.GameStatus.Moving) or LevelManager.GameState == LevelManager.GameStatus.Waiting:
 		return
 
 	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
@@ -251,7 +233,7 @@ func _process(delta: float) -> void:
 	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
 		if isOnFloorNow and not pastIsOnFloorEffect:
 			_play_land_effect()
-			emit_signal("on_touch_ground")
+			emitGameEvent(4)
 	pastIsOnFloorEffect = isOnFloorNow
 
 	if isOnFloorNow:
@@ -268,8 +250,7 @@ func _process(delta: float) -> void:
 	else:
 		if previousFrameIsGrounded != isOnFloorNow:
 			line = null
-			emit_signal("on_sky")
-			emit_signal("on_leave_ground")
+			emitGameEvent(3)
 	previousFrameIsGrounded = isOnFloorNow
 
 	if henShin:
@@ -314,7 +295,7 @@ func _input(event: InputEvent) -> void:
 					loading = true
 					reload()
 			KEY_K:
-				if not Engine.is_editor_hint() and (isLive or LevelManager.GameState == LevelManager.GameStatus.Moving):
+				if not Engine.is_editor_hint() and LevelManager.GameState == LevelManager.GameStatus.Playing:
 					PlayerDeath(true, LevelManager.GameStatus.Died, false)
 			KEY_D:
 				if OS.is_debug_build():
@@ -447,8 +428,6 @@ func new_line() -> void:
 	tailHolder.add_child(body)
 	body.add_child(line)
 	_update_tail_collision(line, initialScale)
-
-	emit_signal("new_line1")
 
 func _finish_tail_join(tail: MeshInstance3D) -> void:
 	var halfWidth: float = float(tailScale) * 0.5
@@ -718,8 +697,8 @@ func Turn() -> void:
 
 	if gameStarts:
 		# 常规转向
-		emit_signal("onturn")
-		emit_signal("on_change_direction")
+		emit_signal("OnTurn")
+		emitGameEvent(2)
 		_currentDirection = 1 - _currentDirection
 		rotation_degrees = currentDirection
 		_sync_henshin_rotation()
@@ -732,7 +711,7 @@ func Turn() -> void:
 		var page: CanvasLayer = get_node_or_null("StartPage") as CanvasLayer
 		if page and page is CanvasLayer:
 			page.hide_animated()
-		emit_signal("on_player_start")
+		emitGameEvent(1)
 		# 对齐 Unity Player.cs：开局隐藏鼠标（死亡 / 结算时由 LevelUI 恢复显示）
 		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 		rotation_degrees = currentDirection
@@ -810,7 +789,7 @@ func PlayerDeath(spawn_particles: bool = true, death_state: LevelManager.GameSta
 	if !noclip:
 		isLive = false
 		LevelManager.GameState = death_state
-		emit_signal("on_game_over")
+		emitGameEvent(5)
 		if death_state == LevelManager.GameStatus.Died:
 			velocity = Vector3.ZERO
 		if animationNode: animationNode.pause()
@@ -853,19 +832,20 @@ func _on_setting_changed(key: String, value: Variant) -> void:
 		"quality":
 			var qualityLevel: int = GraphicsQuality.quality_level_from_value(value)
 			GraphicsQuality.set_level(qualityLevel)
-			get_tree().call_group("active_by_quality", "apply_quality", qualityLevel)
+			# 对齐 Unity SetQuality：任意图形项变更都立即全套重应用（含阴影图集分辨率 / 后处理），而非仅刷新可见性分组
+			GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
 			GraphicsQuality.save_settings()
 		"antialiasing":
 			GraphicsQuality.antiAliasLevel = GraphicsQuality.antialiasing_level_from_value(value)
-			GraphicsQuality.apply_antialiasing(get_viewport())
+			GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
 			GraphicsQuality.save_settings()
 
 func _on_shadow_toggled(isOn: bool) -> void:
 	GraphicsQuality.shadowsEnabled = isOn
-	GraphicsQuality.apply_shadows(get_tree())
+	GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
 	GraphicsQuality.save_settings()
 
 func _on_post_toggled(isOn: bool) -> void:
 	GraphicsQuality.postProcessEnabled = isOn
-	GraphicsQuality.apply_post_process(get_scene_environment())
+	GraphicsQuality.apply_to_scene(get_viewport(), get_tree(), get_scene_environment())
 	GraphicsQuality.save_settings()

@@ -10,7 +10,7 @@
 [ext_resource type="Script" path="res://#Template/[Scripts]/GUI/HideCanvas.gd" id="8_hide_canvas"]
 [ext_resource type="Script" uid="uid://ctqws2cbsrpm3" path="res://#Template/[Scripts]/GUI/GuidanceEnabled.gd" id="7_gden"]
 [ext_resource type="Texture2D" path="res://#Template/[Textures]/Sprites.png" id="9_sprites"]
-[ext_resource type="FontFile" uid="uid://diyv3w2nftxaw" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="10_cav"]
+[ext_resource type="FontFile" uid="uid://cfyw78f6iowmi" path="res://#Template/[Resources]/CaviarDreams.TTF" id="10_cav"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gdon"]
 atlas = ExtResource("9_sprites")

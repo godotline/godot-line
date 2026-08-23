@@ -181,9 +181,7 @@ func _build_component_inspector(component: Node, container: VBoxContainer) -> vo
 func _collect_child_components(node: Node) -> Array[Node]:
 	var result: Array[Node] = []
 	for child: Node in node.get_children():
-		if child is BaseTrigger:
-			continue
-		if child.get_script() != null or child.has_method("trigger"):
+		if child.get_script() != null and child.get_class() == "Node":
 			result.append(child)
 	return result
 
