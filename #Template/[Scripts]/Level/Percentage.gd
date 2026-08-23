@@ -6,13 +6,10 @@ extends Node3D
 var percentNodes: Dictionary = {}
 var percentValues: Array[int] = []
 var isReady: bool = false
-var ownerRestore: Dictionary = {}
 var displayNode: MeshInstance3D
 var pendingRefresh: bool = false
 
 func _ready() -> void:
-	if not Engine.is_editor_hint():
-		return
 	isReady = true
 	_refresh()
 
@@ -21,8 +18,6 @@ func _notification(what: int) -> void:
 		return
 	if what == NOTIFICATION_EDITOR_PRE_SAVE:
 		_prepare_scene_for_save()
-	elif what == NOTIFICATION_EDITOR_POST_SAVE:
-		_restore_scene_after_save()
 
 func _refresh() -> void:
 	_collect_percent_nodes()
@@ -47,8 +42,6 @@ func _collect_percent_nodes() -> void:
 
 func _set_selected_percent(value: int) -> void:
 	percent = value
-	if not Engine.is_editor_hint():
-		return
 	if not isReady:
 		pendingRefresh = true
 		call_deferred("_refresh")
@@ -74,20 +67,3 @@ func _prepare_scene_for_save() -> void:
 	if displayNode == null:
 		displayNode = percentNodes[percentValues[0]]
 	_apply_selection(percent)
-	ownerRestore.clear()
-	var root: Node = get_tree().edited_scene_root
-	if root == null:
-		return
-	for key in percentNodes.keys():
-		var node: MeshInstance3D = percentNodes[key]
-		ownerRestore[node] = node.owner
-		if node == displayNode:
-			node.owner = root
-		else:
-			node.owner = null
-
-func _restore_scene_after_save() -> void:
-	for node in ownerRestore.keys():
-		if is_instance_valid(node):
-			node.owner = ownerRestore[node]
-	ownerRestore.clear()

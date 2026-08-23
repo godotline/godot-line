@@ -27,8 +27,8 @@ func trigger(body: Node3D) -> void:
 		# Unity: Rigidbody.AddForce(0, power, 0, Impulse)，mass=100 -> 初速度 = power / mass
 		var jumpSpeed: float = power / PLAYER_MASS
 		character.velocity += Vector3(0, jumpSpeed, 0)
-		if Player.instance and Player.instance.has_signal("on_player_jump"):
-			Player.instance.on_player_jump.emit()
+		if Player.instance:
+			Player.instance.emitGameEvent(7)
 
 ## 通知子 JumpPredictor/FallPredictor 刷新预览
 func _update_predictor() -> void:

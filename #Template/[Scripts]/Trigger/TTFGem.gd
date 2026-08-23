@@ -28,8 +28,8 @@ func PickUp(add_gem: bool = true) -> void:
 
 	if add_gem:
 		LevelManager.gem += 1
-	if Player.instance and Player.instance.has_signal("on_get_gem"):
-		Player.instance.on_get_gem.emit()
+	if Player.instance:
+		Player.instance.emitGameEvent(6)
 
 	var mesh: MeshInstance3D = contentRoot.get_node_or_null("MeshInstance3D") as MeshInstance3D
 	if mesh:

@@ -82,7 +82,7 @@ func _ready() -> void:
 		currentScene.add_child.call_deferred(tailHolder)
 	add_to_group("fake_players")
 	if synchronismWithPlayer:
-		# Follow Player.onturn so synchronized FakePlayers also work with autoplay.
+		# Follow Player.OnTurn so synchronized FakePlayers also work with autoplay.
 		call_deferred("_connect_player_turn")
 
 	if createTurnTrigger:
@@ -184,8 +184,8 @@ func _connect_player_turn() -> void:
 		if is_inside_tree():
 			call_deferred("_connect_player_turn")
 		return
-	if player and not player.onturn.is_connected(_on_player_turn):
-		player.onturn.connect(_on_player_turn)
+	if player and not player.OnTurn.is_connected(_on_player_turn):
+		player.OnTurn.connect(_on_player_turn)
 
 func _on_player_turn() -> void:
 	if state == State.Moving:
@@ -326,8 +326,8 @@ func _exit_tree() -> void:
 	if Engine.is_editor_hint():
 		return
 	var player: Player = Player.instance
-	if player and player.onturn.is_connected(_on_player_turn):
-		player.onturn.disconnect(_on_player_turn)
+	if player and player.OnTurn.is_connected(_on_player_turn):
+		player.OnTurn.disconnect(_on_player_turn)
 	if tailHolder and is_instance_valid(tailHolder):
 		tailHolder.queue_free()
 	if triggerHolder and is_instance_valid(triggerHolder):

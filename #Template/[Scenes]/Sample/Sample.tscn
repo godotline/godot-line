@@ -30,7 +30,6 @@
 [ext_resource type="Script" uid="uid://dypjr6kswkpyo" path="res://#Template/[Scripts]/Animator/LocalRotAnimator.gd" id="23_s0ncg"]
 [ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Gem.tscn" id="28_s0ncg"]
 [ext_resource type="PackedScene" uid="uid://bnhhmjcg10054" path="res://#Template/Percentage.tscn" id="30_rptew"]
-[ext_resource type="FontFile" uid="uid://diyv3w2nftxaw" path="res://#Template/[Resources]/CaviarDreams-1.ttf" id="31_skrbu"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 background_mode = 1
@@ -58,38 +57,33 @@ _data = {
 &"level": SubResource("3")
 }
 
-[sub_resource type="Resource" id="Resource_d7stf"]
+[sub_resource type="Resource" id="Resource_rptew"]
 resource_local_to_scene = true
 script = ExtResource("14_2sj2s")
 rotation = Vector3(0.942478, 0.785398, 0)
 fov = 75.0
 
-[sub_resource type="Resource" id="Resource_k6bba"]
+[sub_resource type="Resource" id="Resource_skrbu"]
 resource_local_to_scene = true
 script = ExtResource("15_qvrir")
 
-[sub_resource type="Resource" id="Resource_e7kbm"]
+[sub_resource type="Resource" id="Resource_d7stf"]
 resource_local_to_scene = true
 script = ExtResource("16_n0hkk")
 fogColor = Color(0.518, 0.553, 0.608, 1)
 start = 10.0
 end = 100.0
 
-[sub_resource type="Resource" id="Resource_guxfo"]
+[sub_resource type="Resource" id="Resource_k6bba"]
 resource_local_to_scene = true
 script = ExtResource("17_w5hru")
 rotation = Vector3(-1.0472, 2.61799, 0)
 shadowStrength = 1.0
 
-[sub_resource type="Resource" id="Resource_pufe6"]
+[sub_resource type="Resource" id="Resource_e7kbm"]
 resource_local_to_scene = true
 script = ExtResource("18_44jhc")
 lightingType = 0
-
-[sub_resource type="TextMesh" id="TextMesh_ortdl"]
-text = "50%"
-font = ExtResource("31_skrbu")
-font_size = 20
 
 [node name="LevelHolder" type="Node3D" unique_id=542804875]
 
@@ -104,6 +98,7 @@ secondDirection = Vector3(0, 90, 0)
 animation = NodePath("../AnimationPlayer")
 
 [node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_sm0oj")]
+target = NodePath("../Player")
 
 [node name="Camera3D" parent="BasicOBJ_Group/CameraRoot/Rotator/Scale" parent_id_path=PackedInt32Array(1925825702, 1568144045) index="0" unique_id=1985620912]
 environment = SubResource("Environment_ys6ci")
@@ -247,11 +242,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.168884, -9.536743e-07, 16.
 [node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" parent_id_path=PackedInt32Array(1805653336, 220972321) index="0" unique_id=1220123700]
 GameTime = 2.4613333
 direction = 1
-cameraNew = SubResource("Resource_d7stf")
-cameraOld = SubResource("Resource_k6bba")
-fog = SubResource("Resource_e7kbm")
-light = SubResource("Resource_guxfo")
-ambient = SubResource("Resource_pufe6")
+cameraNew = SubResource("Resource_rptew")
+cameraOld = SubResource("Resource_skrbu")
+fog = SubResource("Resource_d7stf")
+light = SubResource("Resource_k6bba")
+ambient = SubResource("Resource_e7kbm")
 
 [node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0" unique_id=1273809823]
 render_priority = 0
@@ -322,10 +317,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22333813, 0.15721011, 7.98
 [node name="Percentage" parent="." unique_id=1373098762 instance=ExtResource("30_rptew")]
 transform = Transform3D(1.4210855e-14, 2.2337995, -4.3711385e-08, 1.0460625e-07, -9.76425e-08, -1, -2.3931117, 0, -4.3711385e-08, 19.6922, 7.809935, 14.178271)
 percent = 50
-
-[node name="10" type="MeshInstance3D" parent="Percentage" unique_id=446876227]
-transform = Transform3D(-9.999999, 0, -8.742277e-08, 0, 9.999999, 0, 8.742278e-07, 0, -1, 0, 0, 0)
-mesh = SubResource("TextMesh_ortdl")
 
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D2" method="Trigger"]

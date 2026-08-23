@@ -32,7 +32,7 @@ func _ready() -> void:
 	roadHolder = Node3D.new()
 	roadHolder.name = "RoadHolder"
 
-	var onTurn: Signal = player.onturn
+	var onTurn: Signal = player.OnTurn
 	if not onTurn.is_connected(_on_player_turn):
 		onTurn.connect(_on_player_turn)
 
@@ -89,7 +89,7 @@ func _get_road_position() -> Vector3:
 	return player.global_position - Vector3(0.0, verticalOffset, 0.0)
 
 func _on_player_turn() -> void:
-	# Player emits onturn before applying its new rotation; defer until the turn is complete.
+	# Player emits OnTurn before applying its new rotation; defer until the turn is complete.
 	call_deferred("_create_road")
 
 func _process(delta: float) -> void:
