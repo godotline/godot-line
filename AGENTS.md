@@ -30,7 +30,7 @@ addons/
 ## 插件/Unity 移植开发规则
 
 - **区分"Unity 移植"与"写插件"**：Godot 端口的 Unity 模板组件（如 `SetMaterialColor.cs` → `SetMaterialColor.gd`、`Jump`/`Speed`/`SetActive`/`SetFog` 等）属于 `#Template` 内容，应落在 `#Template/[Scripts]`，与既有通用触发器并列——这是移植 Unity 模板，不是"写插件"。
-- **写插件（`addons/dancing_line_importer`）时严禁往 `#Template` 塞导入器专用 / Arphros 适配逻辑**：仅数据解析、关卡构建，以及 Arphros 特有格式组件（如 `animatable.gd`，对应 `objects[].animatable` JSON）才放插件目录。
+- **写插件（`addons/plugin_arphros_importer`）时严禁往 `#Template` 塞导入器专用 / Arphros 适配逻辑**：仅数据解析、关卡构建，以及 Arphros 特有格式组件（如 `animatable.gd`，对应 `objects[].animatable` JSON）才放插件目录。
 - **判定先例**：`animatable.gd`、`sequence_trigger.gd` 为导入器专用 → 插件；`SetMaterialColor.gd` 为 `SetMaterialColor.cs` 的 Godot 移植 → `#Template`。
 - **命名保真（Unity 移植）**：移植组件时**类名 / 文件名沿用 Unity 源码原名**（如 Unity `SetMaterialColor` → Godot `SetMaterialColor.gd` + `class_name SetMaterialColor`），不得自行改名（如不得叫 `SetColor3D`）。字段 / 方法**优先对齐 Unity 源码命名**（如 Unity `duration` / `material` / `hasEmission` / `SetColor` 直接沿用，不另起 GDScript 风格名）；snake_case 仅用于 Godot 引擎 API 与 `_ready`/`_process`/`trigger` 等虚函数或约定方法，如模式 1 的 `trigger(body)`）。
 - **注释 / 标注克制（Unity 移植）**：DLMTP 的 `SetMaterialColor.cs` 等源文本就几乎无注释、无分组标注。移植时**不要添加原版没有的文字说明、`@export_group` 解释性标签、冗余注释**，只保留与源码对应的必要结构与 Godot 端口必需的少量约束（如 `material_override` 保护共享模板材质可一行点出）。严禁画蛇添足。
