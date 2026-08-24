@@ -41,6 +41,23 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "导入生成关卡"
 
+[node name="ProgressSection" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ProgressLabel" type="Label" parent="ProgressSection"]
+layout_mode = 2
+text = "准备导入..."
+theme_override_colors/font_color = Color(0.65, 0.8, 1, 1)
+
+[node name="ProgressBar" type="ProgressBar" parent="ProgressSection"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+max_value = 1.0
+step = 0.001
+show_percentage = false
+
 [node name="StatusLabel" type="Label" parent="."]
 layout_mode = 2
 text = "就绪"

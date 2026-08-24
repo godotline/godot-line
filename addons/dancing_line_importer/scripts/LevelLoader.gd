@@ -4,6 +4,9 @@ class_name LevelLoader
 
 const MIN_SCALE: float = 0.001
 
+## 对象分片构建的单帧时间预算（毫秒）：超时即让出主线程一帧，避免大关卡导入阻塞编辑器
+const FRAME_BUDGET_MS: int = 20
+
 ## 左右镜像总开关：导入关卡整体沿 X 轴镜像（与原版游戏画面方向对齐）。
 ## 方案：Scene_001 作为唯一反射载体（负 x 缩放），内部物体本地变换保持原值；
 ## 载体外的实体（玩家/相机/平行光）单独做位置取反与旋转共轭。
@@ -40,16 +43,18 @@ var extraSearchPaths: Array[String] = []
 ## type 5/6/7 待链接动画触发器：键=触发器根节点，值结构见 _buildAnimatorTrigger
 var pendingAnimatorTriggers: Dictionary = {}
 
-## 发生内部覆写（颜色/自隐）的 Ground 实例，保存前由 dock 调用
+## 发生内部覆写的子场景实例（CameraRoot），保存前由 dock 调用
 ## markEditableInstances 统一标记 editable
 var _overrideInstances: Array[Node] = []
 
-## 从 Ground.tscn 借用的网格（含地面材质）资源缓存
+## 从 Ground.tscn 复制的单位盒网格缓存（已剥离模板材质引用）
 var _groundTemplateMeshCache: Mesh = null
 var _groundPartsLoaded: bool = false
 
 
-func buildScene(data: Dictionary, levelDataResource: LevelData = null) -> Node3D:
+## progressCallback：可选进度回调，签名 (builtCount: int, totalCount: int)，在对象分片构建时回调。
+## 本函数为协程：内部按帧时间预算分片并 await 让出主线程（保持编辑器可交互），调用方必须 await。
+func buildScene(data: Dictionary, levelDataResource: LevelData = null, progressCallback: Callable = Callable()) -> Node3D:
 	loadedMeshes.clear()
 	loadedTextures.clear()
 	pendingAnimatorTriggers.clear()
@@ -91,7 +96,7 @@ func buildScene(data: Dictionary, levelDataResource: LevelData = null) -> Node3D
 		# 故不可上移到 LevelHolder（其下含 Player/Camera 等实体）。
 		scene001.scale = Vector3(-1, 1, 1)
 
-	_createObjects(scene001, data)
+	await _createObjects(scene001, data, progressCallback)
 
 	# 如果没有任何网格，添加默认地面
 	if not _hasMesh(scene001):
@@ -388,7 +393,7 @@ func _createLevelUI(parent: Node) -> void:
 
 # ==================== 关卡物体与树构建 ====================
 
-func _createObjects(parent: Node, data: Dictionary) -> void:
+func _createObjects(parent: Node, data: Dictionary, progressCallback: Callable = Callable()) -> void:
 	var meshes: Array = data.get("meshes", [])
 	var materials: Array = data.get("materials", [])
 	var sprites: Array = data.get("sprites", [])
@@ -397,7 +402,11 @@ func _createObjects(parent: Node, data: Dictionary) -> void:
 	var nodeMap: Dictionary = {}
 	var rootNodes: Array[Node] = []
 
-	# 1. 实例化所有对象
+	# 1. 实例化所有对象。节点创建必须留在主线程（Godot 场景 API 非线程安全），
+	#    改用时间预算分片：单帧工作量超过 FRAME_BUDGET_MS 即让出编辑器一帧并回报进度
+	var totalObjects: int = objects.size()
+	var builtCount: int = 0
+	var chunkStartMs: int = Time.get_ticks_msec()
 	for rawObj: Variant in objects:
 		if not rawObj is Dictionary:
 			continue
@@ -406,6 +415,12 @@ func _createObjects(parent: Node, data: Dictionary) -> void:
 		var node: Node = _createSingleObject(objData, meshes, materials, sprites)
 		if node:
 			nodeMap[objId] = node
+		builtCount += 1
+		if Time.get_ticks_msec() - chunkStartMs >= FRAME_BUDGET_MS:
+			if progressCallback.is_valid():
+				progressCallback.call(builtCount, totalObjects)
+			await _nextEditorFrame()
+			chunkStartMs = Time.get_ticks_msec()
 
 	# 2. 建立父子关系
 	for rawObj: Variant in objects:
@@ -429,6 +444,13 @@ func _createObjects(parent: Node, data: Dictionary) -> void:
 
 	# 3. 后处理：链接 Transform 触发器的动画器（此时 nodeMap 与父子关系均已就绪）
 	_linkTriggerAnimators(nodeMap)
+
+
+## 分片间让出主线程一帧；loader 已不在场景树中时取不到信号，退化为连续构建
+func _nextEditorFrame() -> void:
+	var tree := get_tree()
+	if tree:
+		await tree.process_frame
 
 
 ## 挂载子物体。Unity 中父级缩放必须传递给子树（子物体的局部偏移与尺寸都要被
@@ -557,7 +579,9 @@ func _hideOwnVisual(node: Node) -> void:
 			(child as MeshInstance3D).visible = false
 
 
-## 借用 Ground.tscn 内部的 BoxMesh（含地面材质）资源（只读引用，用于纯视觉立方体）
+## 从 Ground.tscn 内部复制单位 BoxMesh（剥离模板材质引用），供盒体/纯视觉立方体使用。
+## 所有使用方都会立刻 material_override 覆盖，表面材质是死数据；
+## 原样借用会让生成场景残留对 #Template 材质的 ext_resource 引用。
 func _ensureGroundTemplateParts() -> void:
 	if _groundPartsLoaded:
 		return
@@ -567,8 +591,10 @@ func _ensureGroundTemplateParts() -> void:
 		return
 	var inst: Node = groundScene.instantiate()
 	var mi: MeshInstance3D = inst.get_node_or_null("MeshInstance3D") as MeshInstance3D
-	if mi:
-		_groundTemplateMeshCache = mi.mesh
+	if mi and mi.mesh:
+		_groundTemplateMeshCache = mi.mesh.duplicate()
+		if _groundTemplateMeshCache is PrimitiveMesh:
+			(_groundTemplateMeshCache as PrimitiveMesh).material = null
 	inst.free()
 
 
@@ -579,26 +605,9 @@ func _groundTemplateMesh() -> Mesh:
 	return _groundTemplateMeshCache
 
 
-## 直接实例化 Ground.tscn 作为盒体（Layer 2 模板默认；缩放由调用方落在实例根节点）。
-## 仅用于无颜色/自隐等特殊处理的普通地面——实例内部覆写需要 editable instance，
-## 数量多时编辑器打开场景会长时间卡死（实测教训），特殊体一律内联构建。
-func _instantiateGroundBody() -> StaticBody3D:
-	var groundScene: PackedScene = load(GROUND_TEMPLATE) as PackedScene
-	if groundScene:
-		var inst: Node = groundScene.instantiate()
-		if inst is StaticBody3D:
-			return inst as StaticBody3D
-	# 兜底：模板不可用时手工等价构建（子节点名与模板保持一致）
-	var fallback: StaticBody3D = StaticBody3D.new()
-	var col: CollisionShape3D = CollisionShape3D.new()
-	col.name = "CollisionShape3D"
-	col.shape = BoxShape3D.new()
-	fallback.add_child(col)
-	var meshInst: MeshInstance3D = MeshInstance3D.new()
-	meshInst.name = "MeshInstance3D"
-	meshInst.mesh = BoxMesh.new()
-	fallback.add_child(meshInst)
-	return fallback
+## 直接实例化 Ground.tscn 作为盒体的旧路径已删除：实例内部材质覆写依赖
+## editable instance，实测部分关卡的 Road 覆写不生效（导入后丢色），
+## 盒体一律内联构建（见 _createGroundBox）。
 
 
 ## ARPhros type 0：customData.type 为 Unity PrimitiveType（0=Sphere / 3=Cube / 4=Plane）时
@@ -678,43 +687,34 @@ func _createPrimitiveBody(objData: Dictionary, materials: Array, sprites: Array,
 	return body
 
 
-## 盒体统一入口（Road/障碍盒/立方体图元）：直接实例化 Ground.tscn 并整体拉伸
-## （缩放落在实例根节点，scale 动画与节点实际状态保持一致）。
-## 有 arproj 材质颜色或自隐需求时覆写实例内部节点并登记 editable instance，
-## 由 dock 在 owner 设置后统一标记（markEditableInstances）。
+## 盒体统一入口（Road/障碍盒/立方体图元）：内联构建 StaticBody3D + 借用 Ground
+## 模板的单位盒网格，arproj 材质经 material_override 直挂本场景节点——pack 必然
+## 写入，不依赖 editable instance，也无大量 editable 拖慢编辑器之虞。
 func _createGroundBox(objData: Dictionary, materials: Array, sprites: Array, layer: int) -> Node:
-	var sb: StaticBody3D = _instantiateGroundBody()
+	var sb: StaticBody3D = StaticBody3D.new()
 	sb.collision_layer = layer
 	sb.collision_mask = 0
+
+	var col: CollisionShape3D = CollisionShape3D.new()
+	col.name = "CollisionShape3D"
+	col.shape = BoxShape3D.new()
+	sb.add_child(col)
+
+	var meshInst: MeshInstance3D = MeshInstance3D.new()
+	meshInst.name = "MeshInstance3D"
+	meshInst.mesh = _groundTemplateMesh()
+	sb.add_child(meshInst)
+
 	_applyObjectTransform(sb, objData, true)
-	if _applyGroundMaterialOverride(sb, objData, materials, sprites) and not _overrideInstances.has(sb):
-		_overrideInstances.append(sb)
+	var mat: Material = _createStandardMaterial(objData, materials, sprites)
+	if mat:
+		meshInst.material_override = mat
 	if toIntSafe(objData.get("visibility", 0)) == 1:
-		var meshInst: MeshInstance3D = sb.get_node_or_null("MeshInstance3D") as MeshInstance3D
-		if meshInst != null:
-			meshInst.visible = false
-			if not _overrideInstances.has(sb):
-				_overrideInstances.append(sb)
+		meshInst.visible = false
 	return sb
 
 
-## 为 Ground 实例按 arproj 材质着色（覆写实例内部 MeshInstance3D 的材质）。
-## 返回是否发生了内部覆写（用于登记 editable instance）。
-func _applyGroundMaterialOverride(body: Node, objData: Dictionary, materials: Array, sprites: Array) -> bool:
-	var custom: Dictionary = _parseCustom(objData)
-	if _getMaterialIds(custom).is_empty():
-		return false
-	var meshInst: MeshInstance3D = body.get_node_or_null("MeshInstance3D") as MeshInstance3D
-	if meshInst == null:
-		return false
-	var resolved: StandardMaterial3D = _createStandardMaterial(objData, materials, sprites)
-	if resolved == null:
-		return false
-	meshInst.material_override = resolved
-	return true
-
-
-## 标记所有发生内部覆写的子场景实例（Ground/CameraRoot 等）为 editable instance。
+## 标记发生内部覆写的子场景实例（CameraRoot 等少量实例）为 editable instance。
 ## 必须在 owner 设置完成【之后】调用（过早调用标志无效，实测验证）：
 ## 内部覆写只有 editable instance 才会被 PackedScene.pack() 写入场景文件，
 ## 且内部节点会在场景树中可见、可在编辑器中继续调整。
@@ -725,7 +725,7 @@ func markEditableInstances(root: Node) -> void:
 			root.set_editable_instance(inst, true)
 
 
-## 可碰撞立方体：无特殊处理时直接实例化 Ground.tscn（根节点缩放）
+## 可碰撞立方体：与 Road 共用同一内联盒体构建（根节点缩放）
 func _createCubeBody(objData: Dictionary, materials: Array, sprites: Array) -> Node:
 	var layer: int = 4 if toIntSafe(objData.get("obstacleType", 0)) == 1 else 2
 	return _createGroundBox(objData, materials, sprites, layer)
@@ -1604,12 +1604,12 @@ func _parseCustom(objData: Dictionary) -> Dictionary:
 
 
 func _getMeshDataDict(custom: Dictionary) -> Dictionary:
-	var data: Variant = custom.get("data", {})
-	if data is Dictionary:
-		return data as Dictionary
-	var meshData: Variant = custom.get("meshData", {})
-	if meshData is Dictionary:
-		return meshData as Dictionary
+	# 注意必须先 has() 再取：get(key, {}) 的默认空字典也是 Dictionary，
+	# 直接判 is Dictionary 会在键缺失时提前返回，永远轮不到 meshData 分支
+	if custom.has("data") and custom.get("data") is Dictionary:
+		return custom.get("data") as Dictionary
+	if custom.has("meshData") and custom.get("meshData") is Dictionary:
+		return custom.get("meshData") as Dictionary
 	return custom
 
 

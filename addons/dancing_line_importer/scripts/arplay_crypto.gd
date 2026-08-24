@@ -103,8 +103,7 @@ static func _writeAssets(baseDir: String, subDir: String, items: Array, nameKey:
 			if blob.is_empty():
 				push_warning("ArplayCrypto: 资源 '%s' 的 base64 内容无效，已跳过。" % fileName)
 				continue
-			if blob.slice(0, 8).hex_encode() != PNG_MAGIC_HEX:
-				push_warning("ArplayCrypto: 贴图 '%s' 不是 PNG 格式（magic=%s）。" % [fileName, blob.slice(0, 8).hex_encode()])
+			_checkSpriteMagic(fileName, blob)
 		elif stripMtllib and fileName.get_extension().to_lower() == "obj":
 			var lines: PackedStringArray = str(item.get("content", "")).split("\n")
 			var cleaned: PackedStringArray = []
@@ -129,6 +128,19 @@ static func _writeAssets(baseDir: String, subDir: String, items: Array, nameKey:
 static func _sanitize(name: String) -> String:
 	var cleaned := name.replace("/", "_").replace("\\", "_").strip_edges()
 	return cleaned if not cleaned.is_empty() else "unnamed"
+
+
+## 按扩展名校验贴图魔数：包内除 PNG 外还存在 JPEG 等格式（如 peak 关卡的 .jpg），
+## 仅当内容与扩展名不符时告警；无已知魔数的扩展名跳过校验。
+static func _checkSpriteMagic(fileName: String, blob: PackedByteArray) -> void:
+	var ext: String = fileName.get_extension().to_lower()
+	var magicByExt := {"png": PNG_MAGIC_HEX, "jpg": "ffd8ff", "jpeg": "ffd8ff", "bmp": "424d", "dds": "44445320"}
+	var expected: Variant = magicByExt.get(ext)
+	if expected == null:
+		return
+	var headHex: String = blob.slice(0, 8).hex_encode() if blob.size() >= 8 else blob.hex_encode()
+	if not headHex.begins_with(str(expected)):
+		push_warning("ArplayCrypto: 贴图 '%s' 内容与扩展名不符（期望 %s…，实际 magic=%s）。" % [fileName, str(expected), headHex])
 
 
 # ==================== 参数派生 ====================

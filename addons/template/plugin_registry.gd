@@ -123,8 +123,33 @@ static func _entry_from_dictionary(data: Dictionary) -> PluginEntry:
 	entry.author = str(data.get("author", owner))
 	entry.downloadUrls = _parse_download_urls(data.get("download_urls", []))
 	entry.md5 = str(data.get("md5", "")).strip_edges().to_lower()
-	entry.minTemplateVersion = str(data.get("min_template_version", "")).strip_edges()
+	entry.recommendedTemplateVersion = str(data.get("recommended_template_version", "")).strip_edges()
+	entry.updatedAt = str(data.get("updated_at", "")).strip_edges()
+	entry.changelog = _parse_changelog(data.get("changelog", []))
 	return entry
+
+
+static func _parse_changelog(raw_entries: Variant) -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+	if not raw_entries is Array:
+		return entries
+	for raw_entry: Variant in raw_entries as Array:
+		if not raw_entry is Dictionary:
+			continue
+		var releaseData: Dictionary = raw_entry as Dictionary
+		var versionName: String = str(releaseData.get("version", "")).strip_edges()
+		var date: String = str(releaseData.get("date", "")).strip_edges()
+		if versionName.is_empty() and date.is_empty():
+			continue
+		var notes: PackedStringArray = PackedStringArray()
+		var rawNotes: Variant = releaseData.get("notes", [])
+		if rawNotes is Array:
+			for raw_note: Variant in rawNotes as Array:
+				var noteText: String = str(raw_note).strip_edges()
+				if not noteText.is_empty():
+					notes.append(noteText)
+		entries.append({"version": versionName, "date": date, "notes": notes})
+	return entries
 
 
 static func _parse_download_urls(raw_sources: Variant) -> Array[Dictionary]:

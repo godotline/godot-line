@@ -49,6 +49,8 @@ func _enter_tree() -> void:
 	popup.add_item("排序 GuidanceBox", 3)
 	popup.add_item("NoteReader", 4)
 	popup.add_separator()
+	popup.add_item("修复 Jolt 负缩放", 5)
+	popup.add_separator()
 	popup.add_item("插件商城", 2)
 	popup.id_pressed.connect(_on_menu_item_pressed)
 
@@ -102,6 +104,8 @@ func _on_menu_item_pressed(id: int) -> void:
 			_sort_guidance_boxes_in_current_scene()
 		4:
 			_spawn_note_reader()
+		5:
+			_fix_jolt_negative_scales()
 		2:
 			_show_store_dialog()
 
@@ -127,6 +131,43 @@ func _spawn_note_reader() -> void:
 	get_editor_interface().edit_node(reader)
 	get_editor_interface().mark_scene_as_unsaved()
 	print("[NoteReader] 已在场景中添加 NoteReader 节点，请在 Inspector 中配置参数（场景字段可直接拖拽 .tscn）并勾选「执行生成」")
+
+
+# ===================== Jolt 负缩放修复 =====================
+
+## Jolt Physics 不支持 body/shape 的负缩放（如 (-0.5, -0.55, -0.55)），
+## 运行期会报 _try_build_shape 警告并改用非预期 scale。
+## 扫描当前场景中任何 local scale 含负分量的 Node3D 并一键取绝对值修复。
+func _fix_jolt_negative_scales() -> void:
+	var sceneRoot: Node = get_editor_interface().get_edited_scene_root()
+	if not sceneRoot:
+		_push_error("当前没有打开的场景")
+		return
+
+	var bad: Array[Node3D] = []
+	_collect_negative_scale_nodes(sceneRoot, bad)
+	if bad.is_empty():
+		print("[JoltScale] 未发现含负分量的缩放节点")
+		return
+
+	var undoRedo: EditorUndoRedoManager = get_undo_redo()
+	undoRedo.create_action("修复 Jolt 负缩放")
+	for node: Node3D in bad:
+		var fixed: Vector3 = Vector3(absf(node.scale.x), absf(node.scale.y), absf(node.scale.z))
+		undoRedo.add_do_property(node, "scale", fixed)
+		undoRedo.add_undo_property(node, "scale", node.scale)
+	undoRedo.commit_action()
+	get_editor_interface().mark_scene_as_unsaved()
+	print("[JoltScale] 已修复 %d 个负缩放节点：%s" % [bad.size(), ", ".join(bad.map(func(n: Node): return n.get_path()))])
+
+
+func _collect_negative_scale_nodes(node: Node, out: Array[Node3D]) -> void:
+	var node3d: Node3D = node as Node3D
+	if node3d:
+		if node3d.scale.x < 0.0 or node3d.scale.y < 0.0 or node3d.scale.z < 0.0:
+			out.append(node3d)
+	for child: Node in node.get_children():
+		_collect_negative_scale_nodes(child, out)
 
 
 # ===================== GuidanceBox 排序 =====================

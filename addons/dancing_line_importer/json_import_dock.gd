@@ -7,6 +7,9 @@ const DEFAULT_LEVEL_DATA_TEMPLATE: String = "res://#Template/[Scenes]/DefaultSce
 @onready var json_path_line: LineEdit = $FileSection/FilePathLine
 @onready var browse_button: Button = $FileSection/BrowseButton
 @onready var import_button: Button = $Actions/ImportButton
+@onready var progress_section: VBoxContainer = $ProgressSection
+@onready var progress_label: Label = $ProgressSection/ProgressLabel
+@onready var progress_bar: ProgressBar = $ProgressSection/ProgressBar
 @onready var status_label: Label = $StatusLabel
 @onready var log_text: TextEdit = $LogText
 
@@ -15,6 +18,7 @@ var currentFolderPath: String = ""
 var currentAudioBytes: PackedByteArray = PackedByteArray()
 var currentAudioExt: String = "mp3"
 var importedModelsDir: String = ""
+var _importing: bool = false
 
 
 func _ready() -> void:
@@ -70,6 +74,9 @@ func _on_folder_selected(dir: String) -> void:
 
 	if isArplay:
 		_log("📦 检测到 .arplay 工程包，提取资源…")
+		status_label.text = "⏳ 正在解密提取 .arplay（约数秒）…"
+		# 先让状态文本上屏再进入同步解密（大包 AES+gzip+JSON 解析会阻塞主线程数秒）
+		await get_tree().process_frame
 		currentJsonData = ArplayCrypto.readLevel(arprojPath)
 		if currentJsonData.is_empty():
 			_log("❌ .arplay 提取失败")
@@ -84,6 +91,8 @@ func _on_folder_selected(dir: String) -> void:
 		var objCount: int = (currentJsonData.get("objects", []) as Array).size()
 		_log("✅ 提取成功！对象 %d 个；提取资源 Meshes=%d Sprites=%d Scripts=%d" % [objCount, int(counts.get("Meshes", 0)), int(counts.get("Sprites", 0)), int(counts.get("Scripts", 0))])
 		status_label.text = "✅ 已提取: " + str(info.get("levelName", "未命名"))
+		# 紧随扫描的贴图/网格引擎导入耗时不定，轮询展示进度直至就绪
+		await _trackResourceImport("导入关卡资源")
 	else:
 		_parseJsonFile(arprojPath)
 		if currentJsonData.is_empty():
@@ -107,6 +116,8 @@ func _on_folder_selected(dir: String) -> void:
 	# 复制模型资源（.arplay 路径已在提取时直接写入项目，跳过）
 	if not isArplay:
 		_copyModels(dir)
+		if not importedModelsDir.is_empty():
+			await _trackResourceImport("导入关卡资源")
 
 
 func _copyModels(sourceDir: String) -> void:
@@ -196,13 +207,30 @@ func _on_import_pressed() -> void:
 	if currentJsonData.is_empty():
 		_log("❌ 请先选择关卡文件夹")
 		return
+	if _importing:
+		return
 
+	_importing = true
+	import_button.disabled = true
+	browse_button.disabled = true
+	progress_section.visible = true
+	await _runImport()
+	import_button.disabled = false
+	browse_button.disabled = false
+	progress_section.visible = false
+
+
+## 完整导入流水线（协程）。所有失败路径直接 return，由 _on_import_pressed 统一恢复 UI。
+func _runImport() -> void:
 	_log("🔄 生成关卡资源与场景...")
+	_setProgress("准备资源", 0.02)
 
-	# 仅在后台仍在扫描时等待，若已扫描完成则直接跳过，避免重复触发 scan
+	# 仅在后台仍在扫描时等待，若已扫描完成则直接跳过，避免重复触发 scan。
+	# 不能用 await filesystem_changed：该信号在编辑器中不可靠，曾致协程永久挂起、
+	# _importing 无法复位而令按钮彻底失效——改为轮询 is_scanning()
 	if not importedModelsDir.is_empty() and EditorInterface.get_resource_filesystem().is_scanning():
 		_log("⏳ 等待模型资源导入...")
-		await EditorInterface.get_resource_filesystem().filesystem_changed
+		await _trackResourceImport("导入关卡资源")
 		_log("✅ 模型资源导入完成")
 
 	var info: Dictionary = currentJsonData.get("info", {})
@@ -214,6 +242,7 @@ func _on_import_pressed() -> void:
 
 	DirAccess.make_dir_recursive_absolute(levelDir)
 
+	_setProgress("写入音频", 0.03)
 	var audioStreamPath: String = ""
 	if not currentAudioBytes.is_empty():
 		audioStreamPath = levelDir + "song." + currentAudioExt
@@ -229,16 +258,18 @@ func _on_import_pressed() -> void:
 			fs.reimport_files(PackedStringArray([audioStreamPath]))
 			_log("✅ 音频已导入资源系统")
 
+	_setProgress("生成 LevelData", 0.05)
 	var levelData: LevelData = _createLevelDataResource(currentJsonData, safeName, dataPath, audioStreamPath)
 	if not levelData:
 		_log("❌ LevelData 资源创建失败")
 		return
 
-	var scene: Node = _buildScene(currentJsonData, levelData)
+	var scene: Node = await _buildScene(currentJsonData, levelData)
 	if scene == null:
 		_log("❌ 场景生成失败")
 		return
 
+	_setProgress("打包场景", 0.95)
 	var packedScene: PackedScene = PackedScene.new()
 	var packErr: Error = packedScene.pack(scene)
 	if packErr != OK:
@@ -246,18 +277,71 @@ func _on_import_pressed() -> void:
 		scene.queue_free()
 		return
 
+	_setProgress("保存场景", 0.98)
 	var saveErr: Error = ResourceSaver.save(packedScene, scenePath)
 	scene.queue_free()
 
 	if saveErr == OK:
+		_setProgress("完成", 1.0)
 		_log("✅ 关卡场景已保存: " + scenePath)
 		_log("✅ 关卡数据已保存: " + dataPath)
 		_log("💡 导入完成！请在文件系统中双击打开该场景。")
 		status_label.text = "✅ 已生成: " + safeName
-		# 延迟一帧触发 scan_sources，避免在保存资源的回调中发生递归 reimport_files
-		EditorInterface.get_resource_filesystem().call_deferred("scan_sources")
+		# 推迟半秒再触发 scan_sources：错开 ResourceSaver.save 引发的文件系统更新任务，
+		# 避免编辑器内置进度对话框的任务簿记冲突（progress_dialog.cpp 报错）
+		await get_tree().create_timer(0.5).timeout
+		EditorInterface.get_resource_filesystem().scan_sources()
 	else:
 		_log("❌ 场景保存失败: " + str(saveErr))
+
+
+func _buildScene(data: Dictionary, levelDataResource: LevelData) -> Node:
+	var loader: LevelLoader = LevelLoaderScript.new() as LevelLoader
+	add_child(loader)
+	if not importedModelsDir.is_empty():
+		loader.extraSearchPaths = [importedModelsDir]
+	# 分片构建：buildScene 为协程，逐对象让出主线程并回报进度
+	var scene: Node = await loader.buildScene(data, levelDataResource, _onBuildProgress)
+	# owner 先设置；实例的 editable 标记必须在 owner 之后调用才生效
+	_setOwnerRecursive(scene, scene)
+	loader.markEditableInstances(scene)
+	loader.queue_free()
+	return scene
+
+
+## LevelLoader 对象分片构建进度回调（主线程同步调用），映射到整体进度的 5%~93% 区间
+func _onBuildProgress(builtCount: int, totalCount: int) -> void:
+	if totalCount <= 0:
+		return
+	var frac: float = clampf(float(builtCount) / float(totalCount), 0.0, 1.0)
+	_setProgress("构建关卡对象 (%d/%d)" % [builtCount, totalCount], 0.05 + frac * 0.88)
+
+
+func _setProgress(stageText: String, fraction: float) -> void:
+	progress_section.visible = true
+	progress_label.text = "%s %d%%" % [stageText, roundi(fraction * 100.0)]
+	progress_bar.value = clampf(fraction, 0.0, 1.0)
+
+
+## 轮询编辑器文件系统扫描进度并刷入进度条（扫描/重导入在后台进行，此处仅读取状态）。
+## 带 120s 硬超时兜底：扫描状态异常时不至于让协程永久挂起卡死按钮。
+## 就绪判定要求扫描状态连续 1.5s 保持空闲——is_scanning() 翻转后引擎的重导入队列
+## 仍在排空，过早进行音频 reimport_files 会与其内置进度任务冲突（progress_dialog 报错）。
+func _trackResourceImport(stageText: String) -> void:
+	var fs: EditorFileSystem = EditorInterface.get_resource_filesystem()
+	progress_section.visible = true
+	var deadlineMs: int = Time.get_ticks_msec() + 120000
+	var idleMs: int = 0
+	while Time.get_ticks_msec() < deadlineMs:
+		if fs.is_scanning():
+			idleMs = 0
+			var frac: float = clampf(fs.get_scanning_progress(), 0.0, 1.0)
+			_setProgress(stageText, frac)
+		else:
+			idleMs += 150
+			if idleMs >= 1500:
+				break
+		await get_tree().create_timer(0.15).timeout
 
 
 func _createLevelDataResource(data: Dictionary, safeName: String, dataPath: String, audioStreamPath: String = "") -> LevelData:
@@ -309,19 +393,6 @@ func _setOwnerRecursive(node: Node, owner: Node) -> void:
 		return
 	for child: Node in node.get_children():
 		_setOwnerRecursive(child, owner)
-
-
-func _buildScene(data: Dictionary, levelDataResource: LevelData) -> Node:
-	var loader: LevelLoader = LevelLoaderScript.new() as LevelLoader
-	add_child(loader)
-	if not importedModelsDir.is_empty():
-		loader.extraSearchPaths = [importedModelsDir]
-	var scene: Node = loader.buildScene(data, levelDataResource)
-	# owner 先设置；实例的 editable 标记必须在 owner 之后调用才生效
-	_setOwnerRecursive(scene, scene)
-	loader.markEditableInstances(scene)
-	loader.queue_free()
-	return scene
 
 
 func _sanitizeFilename(name: String) -> String:

@@ -19,7 +19,12 @@ var homepage: String
 var iconUrl: String
 var downloadUrls: Array[Dictionary] = []
 var md5: String = ""
-var minTemplateVersion: String = ""
+## 推荐的 Template 版本（建议性质，不拦截安装）
+var recommendedTemplateVersion: String = ""
+## 清单标注的最近更新日期（ISO 格式 YYYY-MM-DD），用于列表时间排序与详情展示
+var updatedAt: String = ""
+## 更新日志，元素为 {"version": String, "date": String, "notes": PackedStringArray}，按新到旧排列
+var changelog: Array[Dictionary] = []
 
 const MD5_HEX_DIGITS: String = "0123456789abcdef"
 
@@ -77,15 +82,16 @@ func can_download() -> bool:
 	return get_download_warning().is_empty()
 
 
-func get_template_version_warning(current_template_version: String) -> String:
-	var requiredVersion: String = minTemplateVersion.strip_edges()
-	if requiredVersion.is_empty():
+## 返回推荐版本提示；为空表示当前 Template 版本已满足推荐
+func get_template_recommendation(current_template_version: String) -> String:
+	var recommendedVersion: String = recommendedTemplateVersion.strip_edges()
+	if recommendedVersion.is_empty():
 		return ""
 	var currentVersion: String = current_template_version.strip_edges()
 	if currentVersion.is_empty():
-		return "无法读取当前 Template 版本，插件要求最低版本 %s" % requiredVersion
-	if _compare_versions(currentVersion, requiredVersion) < 0:
-		return "当前 Template 版本 %s，插件要求最低版本 %s" % [currentVersion, requiredVersion]
+		return "无法读取当前 Template 版本，推荐 Template 版本 %s" % recommendedVersion
+	if _compare_versions(currentVersion, recommendedVersion) < 0:
+		return "当前 Template 版本 %s，推荐 Template 版本 %s" % [currentVersion, recommendedVersion]
 	return ""
 
 
