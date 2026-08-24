@@ -14,6 +14,8 @@ const ComponentInspectorPluginClass := preload("res://addons/template/component_
 const CheckpointCaptureRuntimeClass := preload("res://addons/template/checkpoint_capture_runtime.gd")
 const CheckpointCaptureDebuggerPluginClass := preload("res://addons/template/checkpoint_capture_debugger.gd")
 const NoteReaderClass := preload("res://addons/template/NoteReader.gd")
+const JoltNegativeScaleFixerClass := preload("res://addons/template/jolt_negative_scale_fixer.gd")
+const MaterialMergerClass := preload("res://addons/template/material_merger.gd")
 
 var _menu_button: MenuButton
 var _new_level_dialog: ConfirmationDialog
@@ -48,6 +50,9 @@ func _enter_tree() -> void:
 	popup.add_item("新建关卡", 1)
 	popup.add_item("排序 GuidanceBox", 3)
 	popup.add_item("NoteReader", 4)
+	popup.add_separator()
+	popup.add_item("修复 Jolt 负缩放", 5)
+	popup.add_item("合并相同材质", 6)
 	popup.add_separator()
 	popup.add_item("插件商城", 2)
 	popup.id_pressed.connect(_on_menu_item_pressed)
@@ -102,6 +107,10 @@ func _on_menu_item_pressed(id: int) -> void:
 			_sort_guidance_boxes_in_current_scene()
 		4:
 			_spawn_note_reader()
+		5:
+			_fix_jolt_negative_scales()
+		6:
+			_merge_same_materials()
 		2:
 			_show_store_dialog()
 
@@ -127,6 +136,47 @@ func _spawn_note_reader() -> void:
 	get_editor_interface().edit_node(reader)
 	get_editor_interface().mark_scene_as_unsaved()
 	print("[NoteReader] 已在场景中添加 NoteReader 节点，请在 Inspector 中配置参数（场景字段可直接拖拽 .tscn）并勾选「执行生成」")
+
+
+# ===================== Jolt 负缩放修复 =====================
+
+## Jolt 只看每个碰撞体自身的全局变换：本地 scale 干净但祖先带镜像（如
+## 导入器的 X 轴镜像载体）时同样会报 "Failed to correctly scale body"。
+## 具体算法见 jolt_negative_scale_fixer.gd：翻转物理节点全局基的一个列向量，
+## 图元形状足迹不变、缩放转正；视觉节点不动。
+func _fix_jolt_negative_scales() -> void:
+	var sceneRoot: Node = get_editor_interface().get_edited_scene_root()
+	if not sceneRoot:
+		_push_error("当前没有打开的场景")
+		return
+
+	var report: Dictionary = JoltNegativeScaleFixerClass.repair(sceneRoot, get_undo_redo())
+	if report["fixed"] == 0:
+		print("[JoltScale] 未发现全局负缩放的物理节点")
+		return
+	get_editor_interface().mark_scene_as_unsaved()
+	print("[JoltScale] 已修复 %d 个物理节点的负缩放" % report["fixed"])
+	for warning: String in report["warnings"]:
+		push_warning("[JoltScale] " + warning)
+
+
+# ===================== 合并相同材质 =====================
+
+func _merge_same_materials() -> void:
+	var sceneRoot: Node = get_editor_interface().get_edited_scene_root()
+	if not sceneRoot:
+		_push_error("当前没有打开的场景")
+		return
+
+	var stats: Dictionary = MaterialMergerClass.merge(sceneRoot, get_undo_redo())
+	var refs: int = stats.get("refs", 0)
+	if stats.get("replaced", 0) == 0:
+		print("[MergeMaterial] 未发现可合并的重复材质（材质引用 %d 个，唯一 %d 个）" % [refs, stats.get("unique", 0)])
+		return
+	get_editor_interface().mark_scene_as_unsaved()
+	print("[MergeMaterial] 已将 %d 处重复材质引用统一到 %d 份唯一材质（总引用 %d）；保存场景后重复的内联子资源会自动移除" % [
+		stats.get("replaced", 0), stats.get("unique", 0), refs,
+	])
 
 
 # ===================== GuidanceBox 排序 =====================

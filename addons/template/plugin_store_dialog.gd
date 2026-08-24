@@ -6,7 +6,11 @@ extends ConfirmationDialog
 
 const PluginDownloaderClass := preload("res://addons/template/plugin_downloader.gd")
 
+enum SortMode { SORT_BY_NAME, SORT_BY_TIME }
+
 var _plugin_list: ItemList
+var _sort_select: OptionButton
+var _sort_mode: int = SortMode.SORT_BY_TIME
 var _source_edit: LineEdit
 var _refresh_button: Button
 var _download_source_select: OptionButton
@@ -95,13 +99,25 @@ func _build_ui() -> void:
 	mainHBox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_child(mainHBox)
 
-	# 左侧：插件列表
+	# 左侧：排序切换 + 插件列表
+	var listVBox := VBoxContainer.new()
+	listVBox.custom_minimum_size = Vector2(300, 0)
+	listVBox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	listVBox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	mainHBox.add_child(listVBox)
+
+	_sort_select = OptionButton.new()
+	_sort_select.add_item("按首字排序")
+	_sort_select.add_item("按时间排序")
+	_sort_select.select(SortMode.SORT_BY_TIME)
+	_sort_select.item_selected.connect(_on_sort_selected)
+	listVBox.add_child(_sort_select)
+
 	_plugin_list = ItemList.new()
-	_plugin_list.custom_minimum_size = Vector2(300, 0)
 	_plugin_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_plugin_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_plugin_list.item_selected.connect(_on_plugin_selected)
-	mainHBox.add_child(_plugin_list)
+	listVBox.add_child(_plugin_list)
 
 	# 右侧：详情面板
 	_detail_panel = PanelContainer.new()
@@ -207,24 +223,9 @@ func _refresh_plugin_list() -> void:
 	_template_version = PluginRegistry.get_template_version()
 	_all_plugins = await PluginRegistry.fetch_plugins(self, _source_edit.text)
 	_manifest_warning = PluginRegistry.last_load_warning
+	_apply_current_sort()
 	for i in range(_all_plugins.size()):
-		var entry: PluginEntry = _all_plugins[i]
-		var status: String = _get_install_status(entry)
-		var versionWarning: String = entry.get_version_warning()
-		var templateWarning: String = entry.get_template_version_warning(_template_version)
-		var downloadWarning: String = entry.get_download_warning()
-		if not versionWarning.is_empty():
-			status += "，版本更新"
-		if not templateWarning.is_empty():
-			status += "，模板版本不足"
-		if not downloadWarning.is_empty() and not _is_installed(entry):
-			status += "，不可安装"
-		var displayText: String = "%s  [%s]" % [entry.displayName, status]
-		_plugin_list.add_item(displayText)
-		if _is_installed(entry):
-			_plugin_list.set_item_custom_fg_color(i, Color(0.4, 0.8, 0.4))
-		if not versionWarning.is_empty() or not templateWarning.is_empty() or (not downloadWarning.is_empty() and not _is_installed(entry)):
-			_plugin_list.set_item_custom_fg_color(i, Color(0.95, 0.7, 0.25))
+		_append_plugin_item(i)
 	if _plugin_list.item_count > 0:
 		_plugin_list.select(0)
 		_on_plugin_selected(0)
@@ -233,6 +234,66 @@ func _refresh_plugin_list() -> void:
 	_refresh_button.disabled = false
 	_source_edit.editable = true
 	_is_refreshing = false
+
+
+func _on_sort_selected(index: int) -> void:
+	_sort_mode = index
+	_apply_current_sort()
+	_rebuild_plugin_items()
+
+
+## 就地按当前排序模式排列 _all_plugins：首字按名称自然序，时间按更新日期新到旧。
+func _apply_current_sort() -> void:
+	if _sort_mode == SortMode.SORT_BY_NAME:
+		_all_plugins.sort_custom(func(a: PluginEntry, b: PluginEntry) -> bool:
+			return a.displayName.naturalnocasecmp_to(b.displayName) < 0
+		)
+	else:
+		# ISO 日期字符串可直接按字典序比较
+		_all_plugins.sort_custom(func(a: PluginEntry, b: PluginEntry) -> bool:
+			var byDate: int = b.updatedAt.naturalnocasecmp_to(a.updatedAt)
+			if byDate != 0:
+				return byDate < 0
+			return a.displayName.naturalnocasecmp_to(b.displayName) < 0
+		)
+
+
+## 向列表追加第 index 个插件条目（状态后缀与颜色标记）。
+func _append_plugin_item(index: int) -> void:
+	var entry: PluginEntry = _all_plugins[index]
+	var status: String = _get_install_status(entry)
+	var versionWarning: String = entry.get_version_warning()
+	var recommendation: String = entry.get_template_recommendation(_template_version)
+	var downloadWarning: String = entry.get_download_warning()
+	if not versionWarning.is_empty():
+		status += "，版本更新"
+	if not recommendation.is_empty():
+		status += "，建议升级模板"
+	if not downloadWarning.is_empty() and not _is_installed(entry):
+		status += "，不可安装"
+	_plugin_list.add_item("%s  [%s]" % [entry.displayName, status])
+	if _is_installed(entry):
+		_plugin_list.set_item_custom_fg_color(index, Color(0.4, 0.8, 0.4))
+	if not versionWarning.is_empty() or not recommendation.is_empty() or (not downloadWarning.is_empty() and not _is_installed(entry)):
+		_plugin_list.set_item_custom_fg_color(index, Color(0.95, 0.7, 0.25))
+
+
+## 清空并按当前排序重建全部列表条目，尽量保持原选中项。
+func _rebuild_plugin_items() -> void:
+	var selectedId: String = ""
+	var selected: PackedInt32Array = _plugin_list.get_selected_items()
+	if not selected.is_empty() and selected[0] < _all_plugins.size():
+		selectedId = _all_plugins[selected[0]].id
+	_plugin_list.clear()
+	for i in range(_all_plugins.size()):
+		_append_plugin_item(i)
+	if selectedId.is_empty():
+		return
+	for i in range(_all_plugins.size()):
+		if _all_plugins[i].id == selectedId:
+			_plugin_list.select(i)
+			_on_plugin_selected(i)
+			return
 
 
 func _on_refresh_pressed() -> void:
@@ -259,22 +320,27 @@ func _on_plugin_selected(index: int) -> void:
 
 	var status: String = _get_install_status(entry)
 	var desc: String = "[b]版本：[/b] %s\n" % entry.version
+	if not entry.updatedAt.is_empty():
+		desc += "[b]更新时间：[/b] %s\n" % entry.updatedAt
 	desc += "[b]当前 Template 版本：[/b] %s\n" % (_template_version if not _template_version.is_empty() else "未知")
-	if not entry.minTemplateVersion.is_empty():
-		desc += "[b]最低 Template 版本：[/b] %s\n" % entry.minTemplateVersion
+	if not entry.recommendedTemplateVersion.is_empty():
+		desc += "[b]推荐 Template 版本：[/b] %s\n" % entry.recommendedTemplateVersion
 	var installedVersion: String = entry.get_installed_version()
 	if not installedVersion.is_empty():
 		desc += "[b]已安装版本：[/b] %s\n" % installedVersion
 	desc += "[b]作者：[/b] %s\n\n" % entry.author
 	desc += "[b]状态：[/b] %s\n\n" % status
 	desc += "[b]描述：[/b]\n%s\n\n" % entry.description
+	var changelogText: String = _render_changelog(entry)
+	if not changelogText.is_empty():
+		desc += "%s\n" % changelogText
 	desc += "[b]主页：[/b] [url]%s[/url]" % entry.homepage
 	var versionWarning: String = entry.get_version_warning()
 	if not versionWarning.is_empty():
 		desc += "\n\n[color=#e0a040][b]版本状态：[/b] %s[/color]" % versionWarning
-	var templateWarning: String = entry.get_template_version_warning(_template_version)
-	if not templateWarning.is_empty():
-		desc += "\n\n[color=#e0a040][b]模板版本警告：[/b] %s[/color]" % templateWarning
+	var recommendation: String = entry.get_template_recommendation(_template_version)
+	if not recommendation.is_empty():
+		desc += "\n\n[color=#e0a040][b]模板建议：[/b] %s[/color]" % recommendation
 	var downloadWarning: String = entry.get_download_warning()
 	if not downloadWarning.is_empty() and not _is_installed(entry):
 		desc += "\n\n[color=#e05050][b]安装不可用：[/b] %s[/color]" % downloadWarning
@@ -284,6 +350,31 @@ func _on_plugin_selected(index: int) -> void:
 	_status_label.text = _manifest_warning
 
 	_update_action_button(entry)
+
+
+## 渲染更新日志为 BBCode；清单未提供时返回空串。
+func _render_changelog(entry: PluginEntry) -> String:
+	if entry.changelog.is_empty():
+		return ""
+	var text: String = "[b]更新日志：[/b]\n"
+	for i in range(entry.changelog.size()):
+		var release: Dictionary = entry.changelog[i]
+		var heading: String = str(release.get("version", ""))
+		var date: String = str(release.get("date", ""))
+		if not heading.is_empty():
+			heading = "v" + heading.lstrip("vV")
+		if not date.is_empty():
+			if heading.is_empty():
+				heading = date
+			else:
+				heading += "（%s）" % date
+		text += "[b]%s[/b]\n" % heading
+		var notes: PackedStringArray = release.get("notes", PackedStringArray())
+		for note: String in notes:
+			text += "- %s\n" % note
+		if i < entry.changelog.size() - 1:
+			text += "\n"
+	return text
 
 
 func _update_action_button(entry: PluginEntry) -> void:
@@ -329,11 +420,11 @@ func _on_action_pressed() -> void:
 		if downloadUrl.is_empty():
 			_status_label.text = "安装不可用：请选择有效的下载源"
 			return
-		var templateWarning: String = entry.get_template_version_warning(_template_version)
-		if not templateWarning.is_empty():
-			_confirm_install(entry, downloadUrl, templateWarning)
-		else:
-			_start_install(entry, downloadUrl)
+		# 推荐版本仅提示，不拦截安装
+		var recommendation: String = entry.get_template_recommendation(_template_version)
+		if not recommendation.is_empty():
+			_status_label.text = "注意：" + recommendation
+		_start_install(entry, downloadUrl)
 
 
 func _populate_download_sources(entry: PluginEntry) -> void:
@@ -357,25 +448,6 @@ func _get_selected_download_url(entry: PluginEntry) -> String:
 	if sourceId < 0 or sourceId >= sources.size():
 		return ""
 	return str(sources[sourceId].get("url", "")).strip_edges()
-
-
-func _confirm_install(entry: PluginEntry, downloadUrl: String, templateWarning: String) -> void:
-	var dialog: ConfirmationDialog = ConfirmationDialog.new()
-	dialog.unresizable = false
-	dialog.title = "模板版本警告"
-	dialog.dialog_text = "插件 %s 需要更高版本的 Template。\n\n%s\n\n仍要继续下载并安装吗？" % [entry.displayName, templateWarning]
-	dialog.ok_button_text = "继续安装"
-	dialog.cancel_button_text = "取消"
-	add_child(dialog)
-	dialog.confirmed.connect(func():
-		dialog.queue_free()
-		_start_install(entry, downloadUrl)
-	)
-	dialog.canceled.connect(func():
-		dialog.queue_free()
-		_status_label.text = "已取消安装。"
-	)
-	dialog.popup_centered(Vector2i(460, 220))
 
 
 func _confirm_uninstall(entry: PluginEntry) -> void:
@@ -669,35 +741,10 @@ func _quarantine_plugin_dir(entry: PluginEntry) -> bool:
 	return true
 
 
-## 只更新当前条目，避免卸载完成后再次扫描项目或请求远程清单。
-func _refresh_plugin_item(entry: PluginEntry) -> void:
-	var itemIndex: int = -1
-	for i: int in range(_all_plugins.size()):
-		if _all_plugins[i].id == entry.id:
-			itemIndex = i
-			break
-	if itemIndex < 0:
-		return
-
-	var status: String = _get_install_status(entry)
-	var versionWarning: String = entry.get_version_warning()
-	var templateWarning: String = entry.get_template_version_warning(_template_version)
-	var downloadWarning: String = entry.get_download_warning()
-	if not versionWarning.is_empty():
-		status += "，版本更新"
-	if not templateWarning.is_empty():
-		status += "，模板版本不足"
-	if not downloadWarning.is_empty() and not _is_installed(entry):
-		status += "，不可安装"
-	var displayText: String = "%s  [%s]" % [entry.displayName, status]
-	_plugin_list.set_item_text(itemIndex, displayText)
-	_plugin_list.set_item_custom_fg_color(itemIndex, Color(1, 1, 1))
-	if _is_installed(entry):
-		_plugin_list.set_item_custom_fg_color(itemIndex, Color(0.4, 0.8, 0.4))
-	if not versionWarning.is_empty() or not templateWarning.is_empty() or (not downloadWarning.is_empty() and not _is_installed(entry)):
-		_plugin_list.set_item_custom_fg_color(itemIndex, Color(0.95, 0.7, 0.25))
-	_plugin_list.select(itemIndex)
-	_on_plugin_selected(itemIndex)
+## 只重绘列表条目，避免卸载完成后再次扫描项目或请求远程清单。
+func _refresh_plugin_item(_entry: PluginEntry) -> void:
+	_apply_current_sort()
+	_rebuild_plugin_items()
 
 
 func _is_installed(entry: PluginEntry) -> bool:
