@@ -14,6 +14,8 @@ const ComponentInspectorPluginClass := preload("res://addons/template/component_
 const CheckpointCaptureRuntimeClass := preload("res://addons/template/checkpoint_capture_runtime.gd")
 const CheckpointCaptureDebuggerPluginClass := preload("res://addons/template/checkpoint_capture_debugger.gd")
 const NoteReaderClass := preload("res://addons/template/NoteReader.gd")
+const JoltNegativeScaleFixerClass := preload("res://addons/template/jolt_negative_scale_fixer.gd")
+const MaterialMergerClass := preload("res://addons/template/material_merger.gd")
 
 var _menu_button: MenuButton
 var _new_level_dialog: ConfirmationDialog
@@ -50,6 +52,7 @@ func _enter_tree() -> void:
 	popup.add_item("NoteReader", 4)
 	popup.add_separator()
 	popup.add_item("修复 Jolt 负缩放", 5)
+	popup.add_item("合并相同材质", 6)
 	popup.add_separator()
 	popup.add_item("插件商城", 2)
 	popup.id_pressed.connect(_on_menu_item_pressed)
@@ -106,6 +109,8 @@ func _on_menu_item_pressed(id: int) -> void:
 			_spawn_note_reader()
 		5:
 			_fix_jolt_negative_scales()
+		6:
+			_merge_same_materials()
 		2:
 			_show_store_dialog()
 
@@ -135,39 +140,43 @@ func _spawn_note_reader() -> void:
 
 # ===================== Jolt 负缩放修复 =====================
 
-## Jolt Physics 不支持 body/shape 的负缩放（如 (-0.5, -0.55, -0.55)），
-## 运行期会报 _try_build_shape 警告并改用非预期 scale。
-## 扫描当前场景中任何 local scale 含负分量的 Node3D 并一键取绝对值修复。
+## Jolt 只看每个碰撞体自身的全局变换：本地 scale 干净但祖先带镜像（如
+## 导入器的 X 轴镜像载体）时同样会报 "Failed to correctly scale body"。
+## 具体算法见 jolt_negative_scale_fixer.gd：翻转物理节点全局基的一个列向量，
+## 图元形状足迹不变、缩放转正；视觉节点不动。
 func _fix_jolt_negative_scales() -> void:
 	var sceneRoot: Node = get_editor_interface().get_edited_scene_root()
 	if not sceneRoot:
 		_push_error("当前没有打开的场景")
 		return
 
-	var bad: Array[Node3D] = []
-	_collect_negative_scale_nodes(sceneRoot, bad)
-	if bad.is_empty():
-		print("[JoltScale] 未发现含负分量的缩放节点")
+	var report: Dictionary = JoltNegativeScaleFixerClass.repair(sceneRoot, get_undo_redo())
+	if report["fixed"] == 0:
+		print("[JoltScale] 未发现全局负缩放的物理节点")
+		return
+	get_editor_interface().mark_scene_as_unsaved()
+	print("[JoltScale] 已修复 %d 个物理节点的负缩放" % report["fixed"])
+	for warning: String in report["warnings"]:
+		push_warning("[JoltScale] " + warning)
+
+
+# ===================== 合并相同材质 =====================
+
+func _merge_same_materials() -> void:
+	var sceneRoot: Node = get_editor_interface().get_edited_scene_root()
+	if not sceneRoot:
+		_push_error("当前没有打开的场景")
 		return
 
-	var undoRedo: EditorUndoRedoManager = get_undo_redo()
-	undoRedo.create_action("修复 Jolt 负缩放")
-	for node: Node3D in bad:
-		var fixed: Vector3 = Vector3(absf(node.scale.x), absf(node.scale.y), absf(node.scale.z))
-		undoRedo.add_do_property(node, "scale", fixed)
-		undoRedo.add_undo_property(node, "scale", node.scale)
-	undoRedo.commit_action()
+	var stats: Dictionary = MaterialMergerClass.merge(sceneRoot, get_undo_redo())
+	var refs: int = stats.get("refs", 0)
+	if stats.get("replaced", 0) == 0:
+		print("[MergeMaterial] 未发现可合并的重复材质（材质引用 %d 个，唯一 %d 个）" % [refs, stats.get("unique", 0)])
+		return
 	get_editor_interface().mark_scene_as_unsaved()
-	print("[JoltScale] 已修复 %d 个负缩放节点：%s" % [bad.size(), ", ".join(bad.map(func(n: Node): return n.get_path()))])
-
-
-func _collect_negative_scale_nodes(node: Node, out: Array[Node3D]) -> void:
-	var node3d: Node3D = node as Node3D
-	if node3d:
-		if node3d.scale.x < 0.0 or node3d.scale.y < 0.0 or node3d.scale.z < 0.0:
-			out.append(node3d)
-	for child: Node in node.get_children():
-		_collect_negative_scale_nodes(child, out)
+	print("[MergeMaterial] 已将 %d 处重复材质引用统一到 %d 份唯一材质（总引用 %d）；保存场景后重复的内联子资源会自动移除" % [
+		stats.get("replaced", 0), stats.get("unique", 0), refs,
+	])
 
 
 # ===================== GuidanceBox 排序 =====================
