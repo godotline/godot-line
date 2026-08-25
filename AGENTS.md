@@ -11,6 +11,22 @@
 - **源码与架构查询**：使用 **DeepWiki MCP**（`godotengine/godot` 等）查询引擎内部实现细节（如 `ScriptServer`、`can_instantiate()` 机制）。
 - **编辑器实时检查**：优先使用 `gdmcp` 工具（端口 9080）与正在运行的 Godot 编辑器交互。
 
+### 编辑器内脚本测试配方（gdmcp execute_editor_script）
+
+- 简单探查：内联语句 + `_custom_print` 返回输出，须带 `--apply --allow-open-world` 旗标。
+- **MCP 侧的报错永远是笼统的（如 "Script compilation failed"），或 success 但输出缺失——真实报错看编辑器输出面板**：`get_editor_logs` 传 `source: "editor_panel"` 拉取（默认 `mcp` 源只是插件自身日志）。引擎真实报错（带行号、参数详情）都在面板里，排查脚本异常第一步先拉它；仍无线索再用 FileAccess 分步落盘探针 + bash 轮询定位死点。
+- **API 签名勿凭文档记忆**（4.x 小版本间有增删）：优先 **Tavily 搜索对应版本文档**核实；编辑器正在运行时可用 **gdmcp 查运行版本的 ClassDB** 兜底（`get_class_api_metadata` 工具，或 execute_editor_script 内 `ClassDB.class_get_method_list(...)`）。签名不符时：直呼被静态检查拒绝，报笼统 "Script compilation failed"（无行号）；改用 `.call()` 动态调用能过编译，但运行时会**静默中止整个执行帧**——后续语句与 `_custom_print` 全部丢失、工具仍报 success。
+- **跨帧 / 异步工作用「延迟帮手节点」两段式**：内联脚本只把一个临时 Node 挂到编辑器主根节点保活，真正逻辑接在其 `create_timer(...).timeout` 回调里（回调内可 `await` 多帧编排），随即返回；回调自行把结果写文件并清理自身，调用方轮询文件拿结论。`await` 直接写在内联顶层会被 GC（协程状态无人持有，表现为只跑到第一个 await）；挂在树上的节点回调中 await 则安全。
+
+编程式保存等完整管线测试的已验证流程：
+
+1. 构造临时场景，子节点**必须设 `owner = root`**（否则 `PackedScene.pack()` 得到空场景）；
+2. `pack()` + `ResourceSaver.save(ps, "res://.tmp_xxx.tscn")` 落盘；
+3. `open_scene_from_path(path)` 打开为编辑场景，`await process_frame` ×2；
+4. 经 `get_edited_scene_root()` 拿实例做接线；
+5. **零参 `EditorInterface.save_scene()`** 走完整 `EditorNode::_save_scene` 管线（`NOTIFICATION_EDITOR_PRE_SAVE/POST_SAVE` 对无 owner 内部子节点同样传播）；
+6. 结果写文件 → `close_scene()` → 删临时文件 → 帮手节点自清理。
+
 ## 项目目录结构
 
 ```

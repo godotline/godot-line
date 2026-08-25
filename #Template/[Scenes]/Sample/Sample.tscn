@@ -30,6 +30,8 @@
 [ext_resource type="Script" uid="uid://dypjr6kswkpyo" path="res://#Template/[Scripts]/Animator/LocalRotAnimator.gd" id="23_s0ncg"]
 [ext_resource type="PackedScene" uid="uid://cl2ga7ac0dg54" path="res://#Template/Gem.tscn" id="28_s0ncg"]
 [ext_resource type="PackedScene" uid="uid://bnhhmjcg10054" path="res://#Template/Percentage.tscn" id="30_rptew"]
+[ext_resource type="Script" uid="uid://ddae7d88bey41" path="res://#Template/[Scripts]/Trigger/SetActive.gd" id="30_skrbu"]
+[ext_resource type="Script" uid="uid://c03h45ospp1yp" path="res://#Template/[Scripts]/Settings/SingleActive.gd" id="31_d7stf"]
 
 [sub_resource type="Environment" id="Environment_ys6ci"]
 background_mode = 1
@@ -57,33 +59,39 @@ _data = {
 &"level": SubResource("3")
 }
 
-[sub_resource type="Resource" id="Resource_14asg"]
+[sub_resource type="Resource" id="Resource_skrbu"]
 resource_local_to_scene = true
 script = ExtResource("14_2sj2s")
 rotation = Vector3(0.942478, 0.785398, 0)
 fov = 75.0
 
-[sub_resource type="Resource" id="Resource_rptew"]
+[sub_resource type="Resource" id="Resource_d7stf"]
 resource_local_to_scene = true
 script = ExtResource("15_qvrir")
 
-[sub_resource type="Resource" id="Resource_skrbu"]
+[sub_resource type="Resource" id="Resource_k6bba"]
 resource_local_to_scene = true
 script = ExtResource("16_n0hkk")
 fogColor = Color(0.518, 0.553, 0.608, 1)
 start = 10.0
 end = 100.0
 
-[sub_resource type="Resource" id="Resource_d7stf"]
+[sub_resource type="Resource" id="Resource_guxfo"]
 resource_local_to_scene = true
 script = ExtResource("17_w5hru")
 rotation = Vector3(-1.0472, 2.61799, 0)
 shadowStrength = 1.0
 
-[sub_resource type="Resource" id="Resource_k6bba"]
+[sub_resource type="Resource" id="Resource_pufe6"]
 resource_local_to_scene = true
 script = ExtResource("18_44jhc")
 lightingType = 0
+
+[sub_resource type="Resource" id="Resource_e7kbm"]
+script = ExtResource("31_d7stf")
+target = NodePath("../../Obstacle3")
+active = false
+metadata/_custom_type_script = "uid://c03h45ospp1yp"
 
 [node name="LevelHolder" type="Node3D" unique_id=542804875]
 
@@ -176,7 +184,7 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 33.8
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.034236908, -0.761029, 4.2663374)
 
 [node name="Crystal2" parent="Scene_Group/Scene_001" unique_id=2099437324 instance=ExtResource("19_6gt33")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.07899666, 0.50000024, 2.6116118)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8049364, 0.50000024, 2.6116118)
 
 [node name="Ground" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("8_lthrg")]
 transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 300, 0, -1, 0)
@@ -242,11 +250,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.168884, -9.536743e-07, 16.
 [node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" parent_id_path=PackedInt32Array(1805653336, 220972321) index="0" unique_id=1220123700]
 GameTime = 2.4613333
 direction = 1
-cameraNew = SubResource("Resource_14asg")
-cameraOld = SubResource("Resource_rptew")
-fog = SubResource("Resource_skrbu")
-light = SubResource("Resource_d7stf")
-ambient = SubResource("Resource_k6bba")
+cameraNew = SubResource("Resource_skrbu")
+cameraOld = SubResource("Resource_d7stf")
+fog = SubResource("Resource_k6bba")
+light = SubResource("Resource_guxfo")
+ambient = SubResource("Resource_pufe6")
 
 [node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0" unique_id=1273809823]
 render_priority = 0
@@ -283,8 +291,12 @@ duration = 4.0
 script = ExtResource("17_j2eg4")
 disableInPlayMode = false
 
+[node name="Percentage" parent="Scene_Group/Scene_001/Obstacle3" unique_id=1373098762 instance=ExtResource("30_rptew")]
+transform = Transform3D(1.5789839e-15, 0.24819994, -4.8568207e-09, 1.1622917e-08, -1.0849167e-08, -0.11111111, -0.2659013, 0, -4.8568207e-09, 0.00061655045, 0.5027777, 0.011891007)
+percent = 50
+
 [node name="Obstacle4" parent="Scene_Group/Scene_001" unique_id=1353085919 instance=ExtResource("15_6gt33")]
-transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 28.07723, 23.695015)
+transform = Transform3D(8.999999, 0, 0, 0, 9, 0, 0, 0, 8.999999, 1.9902518, 4.0504656, 23.695015)
 
 [node name="DisableInPlayMode" type="Node" parent="Scene_Group/Scene_001/Obstacle4" unique_id=618902218]
 script = ExtResource("17_j2eg4")
@@ -311,18 +323,37 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505,
 script = ExtResource("23_77abe")
 targetNode = NodePath("../../Obstacle3/LocalRotAnimator")
 
-[node name="Gem" parent="Scene_Group/Scene_001" unique_id=149611988 instance=ExtResource("28_s0ncg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22333813, 0.15721011, 7.980546)
+[node name="Trigger8" parent="Scene_Group/Scene_001" unique_id=593467814 instance=ExtResource("11_mq52h")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 10.16557, 0.084308505, 10.899901)
 
-[node name="Percentage" parent="." unique_id=1373098762 instance=ExtResource("30_rptew")]
-transform = Transform3D(1.4210855e-14, 2.2337995, -4.3711385e-08, 1.0460625e-07, -9.76425e-08, -1, -2.3931117, 0, -4.3711385e-08, 19.6922, 7.809935, 14.178271)
-percent = 50
+[node name="event" type="Node" parent="Scene_Group/Scene_001/Trigger8" unique_id=188439560 node_paths=PackedStringArray("targetNode")]
+script = ExtResource("23_77abe")
+targetNode = NodePath("../../Obstacle3/localpos")
+
+[node name="Trigger7" parent="Scene_Group/Scene_001" unique_id=1773023015 instance=ExtResource("11_mq52h")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 13.0527935, 0.084308505, 19.919746)
+
+[node name="SetActive" type="Node" parent="Scene_Group/Scene_001/Trigger7" unique_id=70739088]
+script = ExtResource("30_skrbu")
+actives = Array[ExtResource("31_d7stf")]([SubResource("Resource_e7kbm")])
+
+[node name="Gem" parent="Scene_Group/Scene_001" unique_id=149611988 instance=ExtResource("28_s0ncg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9676895, 0.15721011, 7.980546)
+
+[node name="Gem" parent="Scene_Group/Scene_001/Gem/Area3D" parent_id_path=PackedInt32Array(149611988, 1594876525) index="0" unique_id=1613085479]
+fake = true
+
+[node name="Obstacle" parent="Scene_Group/Scene_001/Gem" unique_id=369395415 instance=ExtResource("15_6gt33")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+visible = false
 
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D2" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Obstacle3/LocalRotAnimator" method="Trigger"]
+[connection signal="triggered" from="Scene_Group/Scene_001/Trigger8/event" to="Scene_Group/Scene_001/Obstacle3/localpos" method="Trigger"]
 
 [editable path="BasicOBJ_Group/CameraRoot"]
 [editable path="Scene_Group/Scene_001/FakePlayer"]
 [editable path="Scene_Group/Scene_001/Crown"]
 [editable path="Scene_Group/Scene_001/Pyramid"]
+[editable path="Scene_Group/Scene_001/Gem"]
