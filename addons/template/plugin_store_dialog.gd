@@ -174,6 +174,8 @@ func _build_ui() -> void:
 	_info_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_info_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_info_label.custom_minimum_size = Vector2(0, 200)
+	# RichTextLabel 不会自动打开链接，需监听 meta_clicked 自行处理
+	_info_label.meta_clicked.connect(_on_meta_clicked)
 	detailVBox.add_child(_info_label)
 
 	# 进度条
@@ -307,6 +309,14 @@ func _on_source_submitted(_source_url: String) -> void:
 func _on_contribute_pressed() -> void:
 	OS.shell_open(PluginRegistry.CONTRIBUTION_URL)
 	_status_label.text = "已打开插件注册表 Pull Requests 页面。"
+
+
+## 打开详情中点击的主页链接（RichTextLabel 需手动处理 meta_clicked）。
+func _on_meta_clicked(meta: Variant) -> void:
+	var url: String = str(meta).strip_edges()
+	if not url.is_empty():
+		OS.shell_open(url)
+		_status_label.text = "已在系统浏览器打开：%s" % url
 
 
 func _on_plugin_selected(index: int) -> void:

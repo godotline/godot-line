@@ -36,7 +36,7 @@ window/stretch/aspect="ignore"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/anthonyec.camera_preview/plugin.cfg", "res://addons/dancing_line_importer/plugin.cfg", "res://addons/dear-imgui-godot/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/template/plugin.cfg")
+enabled=PackedStringArray("res://addons/anthonyec.camera_preview/plugin.cfg", "res://addons/dear-imgui-godot/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/template/plugin.cfg")
 
 [input]
 
