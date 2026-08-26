@@ -1,0 +1,35 @@
+name: Bug
+description: 行为与冰焰模板不一致，或运行/编辑器出错
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+      description: 冰焰模板里对应的行为。可把截图或视频拖进此框。
+      placeholder: |
+        冰焰模板中：……
+        （可附 Unity 编辑器 / 游戏录屏）
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 当前行为
+      description: GodotLine 实际发生了什么。可附截图、视频或编辑器日志。
+    validations:
+      required: true
+  - type: textarea
+    id: links
+    attributes:
+      label: 相关链接
+      description: |
+        冰焰模板文档、对应 Unity 脚本、或本仓库文件。
+        手册：https://www.cnblogs.com/mmme/p/-/tutorial
+        源码：https://github.com/XGames-Studio/DLMTP-Template
+      placeholder: |
+        https://www.cnblogs.com/mmme/p/-/tutorial
+        DLMTP-Template/Assets/#Template/.../*.cs
+    validations:
+      required: true
