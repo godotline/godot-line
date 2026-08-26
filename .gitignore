@@ -1,11 +1,3 @@
 # Ignore hidden directories (all levels)
-.*/
-!.github/
-!.githooks/
-!.devin/
-!.opencode/
-.opencode/node_modules/
-.opencode/package.json
-.opencode/package-lock.json
-.opencode/bun.lock
+.godot/
 docs/
