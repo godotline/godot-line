@@ -40,7 +40,10 @@ func _onImguiLayout() -> void:
 	ImGui.set_next_window_bg_alpha(0.0)
 	# Mouse visibility follows the actual window state and hover detection.
 	# Only intervene while Playing; LevelUI owns the cursor during death and results screens.
-	var expanded: bool = ImGui.begin("DebugOverlay")
+	# Android touch-to-mouse events can carry the previous mouse position, which makes
+	# an outside tap look like a window drag. Keep the debug window fixed on Android.
+	var windowFlags: int = ImGui.WINDOW_NO_MOVE if OS.get_name() == "Android" else 0
+	var expanded: bool = ImGui.begin_ex("DebugOverlay", windowFlags)
 	# begin returns false when collapsed, leaving the title bar available for reopening.
 	panelHovered = ImGui.is_window_hovered(0)
 	if expanded:
