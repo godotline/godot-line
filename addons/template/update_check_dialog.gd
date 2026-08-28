@@ -8,6 +8,7 @@ const REPO_OWNER: String = "godotline"
 const REPO_NAME: String = "godot-line"
 const RELEASE_API_URL: String = "https://api.github.com/repos/%s/%s/releases/latest" % [REPO_OWNER, REPO_NAME]
 const COMMIT_API_URL: String = "https://api.github.com/repos/%s/%s/commits/main" % [REPO_OWNER, REPO_NAME]
+const PLUGIN_CFG_CONTENTS_URL: String = "https://api.github.com/repos/%s/%s/contents/addons/template/plugin.cfg" % [REPO_OWNER, REPO_NAME]
 const RELEASES_PAGE_URL: String = "https://github.com/%s/%s/releases" % [REPO_OWNER, REPO_NAME]
 const COMMITS_PAGE_URL: String = "https://github.com/%s/%s/commits/main" % [REPO_OWNER, REPO_NAME]
 const USER_AGENT: String = "GodotLine-UpdateCheck"
@@ -80,8 +81,11 @@ func _check_updates() -> void:
 	var commitResult: Dictionary = await _fetch_json(COMMIT_API_URL)
 	if not is_instance_valid(self):
 		return
+	var pluginCfgResult: Dictionary = await _fetch_commit_plugin_cfg(commitResult)
+	if not is_instance_valid(self):
+		return
 
-	_info_label.text = _render_result(currentVersion, releaseResult, commitResult)
+	_info_label.text = _render_result(currentVersion, releaseResult, commitResult, pluginCfgResult)
 	if bool(releaseResult.get("ok", false)) and bool(commitResult.get("ok", false)):
 		_status_label.text = "检查完成。"
 	else:
@@ -95,11 +99,11 @@ func _render_loading(currentVersion: String) -> String:
 	return text
 
 
-func _render_result(currentVersion: String, releaseResult: Dictionary, commitResult: Dictionary) -> String:
+func _render_result(currentVersion: String, releaseResult: Dictionary, commitResult: Dictionary, pluginCfgResult: Dictionary) -> String:
 	var text: String = "[b]当前模板版本：[/b] %s\n\n" % _display_version(currentVersion)
 	text += _render_release(currentVersion, releaseResult)
 	text += "\n"
-	text += _render_commit(commitResult)
+	text += _render_commit(currentVersion, commitResult, pluginCfgResult)
 	return text
 
 
@@ -129,7 +133,7 @@ func _render_release(currentVersion: String, releaseResult: Dictionary) -> Strin
 	return text
 
 
-func _render_commit(commitResult: Dictionary) -> String:
+func _render_commit(currentVersion: String, commitResult: Dictionary, pluginCfgResult: Dictionary) -> String:
 	var text: String = "[b]Git commit 最新版[/b]（远程 main）\n"
 	if not bool(commitResult.get("ok", false)):
 		text += "[color=#e05050]%s[/color]\n" % str(commitResult.get("message", "读取失败"))
@@ -151,7 +155,9 @@ func _render_commit(commitResult: Dictionary) -> String:
 	var authorName: String = str(author.get("name", "")).strip_edges()
 	if htmlUrl.is_empty() and not sha.is_empty():
 		htmlUrl = "https://github.com/%s/%s/commit/%s" % [REPO_OWNER, REPO_NAME, sha]
+	var commitVersion: String = _plugin_version_from_contents(pluginCfgResult)
 
+	text += "版本：%s\n" % _display_version(commitVersion)
 	text += "提交：%s\n" % (sha.substr(0, 12) if not sha.is_empty() else "未知")
 	if not subject.is_empty():
 		text += "说明：%s\n" % _escape_bbcode(subject)
@@ -161,7 +167,50 @@ func _render_commit(commitResult: Dictionary) -> String:
 		text += "时间：%s\n" % dateText
 	if not htmlUrl.is_empty():
 		text += "链接：[url]%s[/url]\n" % htmlUrl
+	text += "状态：%s\n" % _commit_status(currentVersion, commitVersion, pluginCfgResult)
 	return text
+
+
+func _commit_status(currentVersion: String, commitVersion: String, pluginCfgResult: Dictionary) -> String:
+	if not bool(pluginCfgResult.get("ok", false)):
+		return "[color=#e05050]%s[/color]" % str(pluginCfgResult.get("message", "无法读取该提交的模板版本"))
+	if commitVersion.strip_edges().is_empty():
+		return "[color=#e05050]该提交未包含有效的 template 插件版本[/color]"
+	var comparison: int = PluginEntry._compare_versions(
+		currentVersion.lstrip("vV").strip_edges(),
+		commitVersion.lstrip("vV").strip_edges()
+	)
+	if comparison < 0:
+		return "[color=#e0a040]可更新到 %s[/color]" % commitVersion
+	if comparison > 0:
+		return "当前版本高于远程 main（本地未推送）"
+	return "已与远程 main 模板版本一致"
+
+
+func _plugin_version_from_contents(pluginCfgResult: Dictionary) -> String:
+	if not bool(pluginCfgResult.get("ok", false)):
+		return ""
+	var data: Dictionary = pluginCfgResult.get("data", {}) as Dictionary
+	var encoding: String = str(data.get("encoding", "")).strip_edges()
+	var contentB64: String = str(data.get("content", "")).replace("\n", "").strip_edges()
+	var cfgText: String = ""
+	if encoding == "base64" and not contentB64.is_empty():
+		cfgText = Marshalls.base64_to_utf8(contentB64)
+	if cfgText.strip_edges().is_empty():
+		return ""
+	var cfg: ConfigFile = ConfigFile.new()
+	if cfg.parse(cfgText) != OK:
+		return ""
+	return str(cfg.get_value("plugin", "version", "")).strip_edges()
+
+
+func _fetch_commit_plugin_cfg(commitResult: Dictionary) -> Dictionary:
+	if not bool(commitResult.get("ok", false)):
+		return {"ok": false, "message": "无法读取该提交的模板版本"}
+	var sha: String = str((commitResult.get("data", {}) as Dictionary).get("sha", "")).strip_edges()
+	if sha.is_empty():
+		return {"ok": false, "message": "远程 commit 缺少 SHA"}
+	return await _fetch_json("%s?ref=%s" % [PLUGIN_CFG_CONTENTS_URL, sha])
 
 
 func _release_status(currentVersion: String, tagName: String) -> String:
