@@ -52,7 +52,7 @@ func _physics_process(_delta: float) -> void:
 		set_physics_process(false)
 		player.Turn()
 
-func SetActive(active: bool) -> void:
+func set_active(active: bool) -> void:
 	_active = active
 	if not active:
 		playerRef = null

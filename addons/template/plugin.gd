@@ -16,10 +16,12 @@ const CheckpointCaptureDebuggerPluginClass := preload("res://addons/template/che
 const NoteReaderClass := preload("res://addons/template/NoteReader.gd")
 const JoltNegativeScaleFixerClass := preload("res://addons/template/jolt_negative_scale_fixer.gd")
 const MaterialMergerClass := preload("res://addons/template/material_merger.gd")
+const UpdateCheckDialogClass := preload("res://addons/template/update_check_dialog.gd")
 
 var _menu_button: MenuButton
 var _new_level_dialog: ConfirmationDialog
 var _store_dialog: ConfirmationDialog
+var _update_dialog: ConfirmationDialog
 var _direction_gizmo_plugin: EditorNode3DGizmoPlugin
 var _event_trigger_inspector_plugin: Object
 var _component_inspector_plugin: Object
@@ -51,10 +53,11 @@ func _enter_tree() -> void:
 	popup.add_item("排序 GuidanceBox", 3)
 	popup.add_item("NoteReader", 4)
 	popup.add_separator()
-	popup.add_item("修复 Jolt 负缩放", 5)
+	popup.add_item("修复 Jolt 缩放", 5)
 	popup.add_item("合并相同材质", 6)
 	popup.add_separator()
 	popup.add_item("插件商城", 2)
+	popup.add_item("检查更新", 7)
 	popup.id_pressed.connect(_on_menu_item_pressed)
 
 	add_control_to_container(CONTAINER_TOOLBAR, _menu_button)
@@ -83,6 +86,9 @@ func _exit_tree() -> void:
 	if _store_dialog and is_instance_valid(_store_dialog):
 		_store_dialog.queue_free()
 		_store_dialog = null
+	if _update_dialog and is_instance_valid(_update_dialog):
+		_update_dialog.queue_free()
+		_update_dialog = null
 
 
 func _check_first_run() -> void:
@@ -113,6 +119,8 @@ func _on_menu_item_pressed(id: int) -> void:
 			_merge_same_materials()
 		2:
 			_show_store_dialog()
+		7:
+			_show_update_dialog()
 
 
 # ===================== NoteReader 谱面生成 =====================
@@ -138,12 +146,12 @@ func _spawn_note_reader() -> void:
 	print("[NoteReader] 已在场景中添加 NoteReader 节点，请在 Inspector 中配置参数（场景字段可直接拖拽 .tscn）并勾选「执行生成」")
 
 
-# ===================== Jolt 负缩放修复 =====================
+# ===================== Jolt 缩放修复 =====================
 
-## Jolt 只看每个碰撞体自身的全局变换：本地 scale 干净但祖先带镜像（如
-## 导入器的 X 轴镜像载体）时同样会报 "Failed to correctly scale body"。
-## 具体算法见 jolt_negative_scale_fixer.gd：翻转物理节点全局基的一个列向量，
-## 图元形状足迹不变、缩放转正；视觉节点不动。
+## Jolt 只看每个碰撞体自身的全局变换。负缩放、剪切、以及挂在
+## 「非均匀缩放且带旋转」的父节点下，都会报 "Failed to correctly scale body"。
+## 正交的非均匀（Trigger / Ground 拉长盒子）是合法的，不会被平均。
+## 算法见 jolt_negative_scale_fixer.gd。
 func _fix_jolt_negative_scales() -> void:
 	var sceneRoot: Node = get_editor_interface().get_edited_scene_root()
 	if not sceneRoot:
@@ -152,10 +160,10 @@ func _fix_jolt_negative_scales() -> void:
 
 	var report: Dictionary = JoltNegativeScaleFixerClass.repair(sceneRoot, get_undo_redo())
 	if report["fixed"] == 0:
-		print("[JoltScale] 未发现全局负缩放的物理节点")
+		print("[JoltScale] 未发现需要修复的物理节点")
 		return
 	get_editor_interface().mark_scene_as_unsaved()
-	print("[JoltScale] 已修复 %d 个物理节点的负缩放" % report["fixed"])
+	print("[JoltScale] 已修复 %d 个物理节点（重挂 %d）" % [report["fixed"], report["reparented"]])
 	for warning: String in report["warnings"]:
 		push_warning("[JoltScale] " + warning)
 
@@ -192,20 +200,12 @@ func _sort_guidance_boxes_in_current_scene() -> void:
 	if holders.is_empty():
 		_push_error("当前场景没有找到 GuidanceBoxHolder")
 		return
-	var player: Player = _find_player_in_scene(sceneRoot)
-	var playerDirection: Vector3 = Vector3.FORWARD
-	var alternateDirection: Vector3 = Vector3.RIGHT
-	if player:
-		playerDirection = _direction_from_degrees(player.currentDirection)
-		alternateDirection = _direction_from_degrees(
-			player.secondDirection if player.currentDirection == player.firstDirection else player.firstDirection
-		)
-
 	var changedCount: int = 0
+	var boxCount: int = 0
 	var undoRedo: EditorUndoRedoManager = get_undo_redo()
 	undoRedo.create_action("排序 GuidanceBox")
 	for holder: Node in holders:
-		var ordered: Array[Node] = _sort_holder_boxes(holder, playerDirection, alternateDirection)
+		var ordered: Array[Node] = _sort_holder_boxes(holder)
 		if ordered.is_empty():
 			continue
 		var original: Array[Node] = []
@@ -217,13 +217,14 @@ func _sort_guidance_boxes_in_current_scene() -> void:
 		undoRedo.add_do_method(self, "_apply_guidance_box_order", holder, ordered)
 		undoRedo.add_undo_method(self, "_apply_guidance_box_order", holder, original)
 		changedCount += 1
+		boxCount += ordered.size()
 	if changedCount == 0:
 		undoRedo.commit_action(false)
 		print("[GuidanceSort] 当前 GuidanceBox 已经是路径顺序")
 		return
 	undoRedo.commit_action()
 	get_editor_interface().mark_scene_as_unsaved()
-	print("[GuidanceSort] 已排序 %d 个 GuidanceBoxHolder" % changedCount)
+	print("[GuidanceSort] 已排序 %d 个 GuidanceBoxHolder 共 %d 个 Box" % [changedCount, boxCount])
 
 
 func _collect_guidance_holders(node: Node, holders: Array[Node]) -> void:
@@ -233,7 +234,7 @@ func _collect_guidance_holders(node: Node, holders: Array[Node]) -> void:
 		_collect_guidance_holders(child, holders)
 
 
-func _sort_holder_boxes(holder: Node, playerDirection: Vector3, alternateDirection: Vector3) -> Array[Node]:
+func _sort_holder_boxes(holder: Node) -> Array[Node]:
 	var remaining: Array[Node] = []
 	for child: Node in holder.get_children():
 		if _is_guidance_box_root(child):
@@ -253,21 +254,22 @@ func _sort_holder_boxes(holder: Node, playerDirection: Vector3, alternateDirecti
 	remaining.erase(current)
 
 	while not remaining.is_empty():
-		var direction: Vector3 = playerDirection if ordered.size() % 2 == 1 else alternateDirection
-		var next: Node = _find_next_guidance_box(current, remaining, direction)
+		var next: Node = _find_next_guidance_box(current, remaining, _box_forward(current))
 		ordered.append(next)
 		remaining.erase(next)
 		current = next
 	return ordered
 
 
-func _direction_from_degrees(rotation_degrees: Vector3) -> Vector3:
-	var rotationRadians: Vector3 = rotation_degrees * (PI / 180.0)
-	var direction: Vector3 = Basis.from_euler(rotationRadians) * Vector3.FORWARD
+func _box_forward(box: Node) -> Vector3:
+	var box3d: Node3D = box as Node3D
+	if not box3d:
+		return Vector3(0, 0, 1)
+	var direction: Vector3 = box3d.global_transform.basis.z
 	direction.y = 0.0
 	if direction.length_squared() > 0.0001:
 		return direction.normalized()
-	return Vector3.FORWARD
+	return Vector3(0, 0, 1)
 
 
 func _find_next_guidance_box(current: Node, candidates: Array[Node], playerDirection: Vector3) -> Node:
@@ -302,16 +304,6 @@ func _find_next_guidance_box(current: Node, candidates: Array[Node], playerDirec
 	return best
 
 
-func _find_player_in_scene(node: Node) -> Player:
-	if node is Player:
-		return node as Player
-	for child: Node in node.get_children():
-		var found: Player = _find_player_in_scene(child)
-		if found:
-			return found
-	return null
-
-
 func _is_guidance_box_root(node: Node) -> bool:
 	if node is GuidanceBox:
 		return true
@@ -331,15 +323,8 @@ func _same_node_order(first: Array[Node], second: Array[Node]) -> bool:
 
 
 func _apply_guidance_box_order(holder: Node, ordered: Array[Node]) -> void:
-	var boxIndex: int = 0
-	for child: Node in holder.get_children():
-		if not _is_guidance_box_root(child):
-			continue
-		var target: Node = ordered[boxIndex]
-		var targetIndex: int = holder.get_children().find(target)
-		if targetIndex != -1:
-			holder.move_child(target, targetIndex)
-		boxIndex += 1
+	for i: int in range(ordered.size()):
+		holder.move_child(ordered[i], i)
 
 
 # ===================== 插件商城 =====================
@@ -353,6 +338,16 @@ func _show_store_dialog() -> void:
 	_store_dialog.unresizable = false
 	add_child(_store_dialog)
 	_store_dialog.popup_centered(Vector2i(720, 520))
+
+
+func _show_update_dialog() -> void:
+	if _update_dialog and is_instance_valid(_update_dialog):
+		_update_dialog.queue_free()
+		_update_dialog = null
+
+	_update_dialog = UpdateCheckDialogClass.new()
+	add_child(_update_dialog)
+	_update_dialog.popup_centered(Vector2i(520, 360))
 
 
 # ===================== 新建关卡 =====================

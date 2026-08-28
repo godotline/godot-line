@@ -95,7 +95,7 @@ func _on_revive_pressed() -> void:
 	elif is_instance_valid(LevelManager.currentCheckpoint):
 		# The UI stays visible while Checkpoint.revive() runs the HideScreen
 		# fog-colored fade, matching Unity's Revival() -> LevelUI.HideScreen.
-		LevelManager.currentCheckpoint.revive()
+		Player.instance.RevivePlayer(LevelManager.currentCheckpoint)
 	else:
 		_on_gamereplay_pressed()
 

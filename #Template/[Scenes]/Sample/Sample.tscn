@@ -347,11 +347,13 @@ fake = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 visible = false
 
+[connection signal="onPlayerJump" from="BasicOBJ_Group/Player/GameEvents" to="BasicOBJ_Group/Player" method="ClearPool"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D2" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Obstacle3/LocalRotAnimator" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger8/event" to="Scene_Group/Scene_001/Obstacle3/localpos" method="Trigger"]
 
+[editable path="BasicOBJ_Group/Player"]
 [editable path="BasicOBJ_Group/CameraRoot"]
 [editable path="Scene_Group/Scene_001/FakePlayer"]
 [editable path="Scene_Group/Scene_001/Crown"]
