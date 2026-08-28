@@ -1,6 +1,6 @@
 @tool
 class_name FakePlayer
-extends Node3D
+extends Node
 
 ## 假线系统组件 — 挂载在 CharacterBody3D 下，沿预设方向自动移动。
 
@@ -23,8 +23,6 @@ enum State {
 	set(value):
 		drawDirection = value
 		if Engine.is_editor_hint():
-			if self is Node3D:
-				update_gizmos()
 			var parent3d: Node3D = get_parent() as Node3D
 			if parent3d:
 				parent3d.update_gizmos()
@@ -275,13 +273,11 @@ func set_reset_data(data: Dictionary) -> void:
 func _get_world_position() -> Vector3:
 	if body:
 		return body.global_position
-	return global_position
+	return Vector3.ZERO
 
 func _set_world_position(value: Vector3) -> void:
 	if body:
 		body.global_position = value
-	else:
-		global_position = value
 
 func set_world_position(value: Vector3) -> void:
 	_set_world_position(value)
@@ -289,13 +285,11 @@ func set_world_position(value: Vector3) -> void:
 func _get_world_rotation() -> Vector3:
 	if body:
 		return body.rotation_degrees
-	return rotation_degrees
+	return Vector3.ZERO
 
 func _set_world_rotation(value: Vector3) -> void:
 	if body:
 		body.rotation_degrees = value
-	else:
-		rotation_degrees = value
 
 func _create_turn_trigger() -> void:
 	if not triggerHolder:

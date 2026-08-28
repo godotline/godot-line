@@ -33,44 +33,45 @@ func _collect_behaviors() -> void:
 		if child.has_method("trigger"):
 			behaviors.append(child)
 
-func _on_body_entered(body: Node3D) -> void:
+func _on_body_entered(other: Node3D) -> void:
 	if oneShot and used:
 		if debugMode:
 			print("[BaseTrigger] ", name, " 已触发过")
 		return
 	if requirePlaying and LevelManager.GameState != LevelManager.GameStatus.Playing:
 		return
-	# Unity triggers compare the incoming collider's Tag. Ordinary trigger
-	# components are Player-only; FakePlayerTrigger handles its extra tags
-	# through the raw body_entered signal.
-	if not _has_player_tag(body):
-		return
 
-	used = true
-	if debugMode:
-		print("[BaseTrigger] ", name, " 被触发")
-
-	triggered.emit(body)
-
+	var any_triggered = false
 	for behavior: Node in behaviors:
 		if is_instance_valid(behavior):
-			behavior.trigger(body)
+			var result = behavior.trigger(other)
+			# 如果组件返回 true 或者没有返回值（null），我们认为它触发了。
+			# 严格来说，Unity 风格里组件自决是否触发，如果有任意一个触发了，并且配置了 oneShot，那么就消耗掉。
+			if typeof(result) == TYPE_BOOL:
+				if result:
+					any_triggered = true
+			else:
+				# 兼容没有返回 bool 的老组件
+				any_triggered = true
 
-func _has_player_tag(body: Node3D) -> bool:
-	return body is Player or body.is_in_group("Player")
+	if any_triggered:
+		used = true
+		if debugMode:
+			print("[BaseTrigger] ", name, " 被触发")
+		triggered.emit(other)
 
 ## 新增：离开区域处理
-func _on_body_exited(body: Node3D) -> void:
-	if not body is CharacterBody3D:
+func _on_body_exited(other: Node3D) -> void:
+	if not other is CharacterBody3D:
 		return
 	if debugMode:
 		print("[BaseTrigger] ", name, " 玩家离开")
 
-	exited.emit(body)
+	exited.emit(other)
 
 	for behavior: Node in behaviors:
 		if is_instance_valid(behavior) and behavior.has_method("on_exit"):
-			behavior.on_exit(body)
+			behavior.on_exit(other)
 
 ## 重新收集行为组件
 func refresh_behaviors() -> void:

@@ -11,7 +11,7 @@ signal on_animation_start
 signal on_animation_end
 
 ## 由父节点 BaseTrigger 调用的入口方法
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if body is CharacterBody3D:
 		apply_fog()
 

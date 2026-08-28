@@ -17,7 +17,7 @@ enum TransportType {
 
 @export var transport_position: Vector3 = Vector3.ZERO
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if not fakePlayer or not body is CharacterBody3D:
 		return
 

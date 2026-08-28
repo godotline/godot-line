@@ -64,13 +64,11 @@ func _is_direction_enabled(target: Node3D) -> bool:
 	return false
 
 func _find_fake_player(node: Node3D) -> FakePlayer:
-	var direct: FakePlayer = node as FakePlayer
-	if direct:
-		return direct
-	for child: Node in node.get_children():
-		var component: FakePlayer = child as FakePlayer
-		if component:
-			return component
+	if node.is_in_group("FakePlayer"):
+		for child: Node in node.get_children():
+			var component: FakePlayer = child as FakePlayer
+			if component:
+				return component
 	return null
 
 func _add_world_direction(gizmo: EditorNode3DGizmo, target: Node3D, world_direction: Vector3, line_material_name: String, icon_material_name: String) -> void:

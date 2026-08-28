@@ -53,20 +53,21 @@ func _on_player_start() -> void:
 	if used and lastCollectedCrown == self:
 		AnimateCrown(false)
 
-func _on_checkpoint_body_entered(body: Node3D) -> void:
+func _on_checkpoint_body_entered(body: Node3D) -> bool:
 	if used:
-		return
+		return false
 	var player: Player = body as Player
 	if not player:
-		return
+		return false
 	used = true
 	lastCollectedCrown = self
 	LevelManager.crown += 1
 	_enter_trigger(player)
 	_take_crown()
+	return true
 
-func trigger(body: Node3D) -> void:
-	_on_checkpoint_body_entered(body)
+func trigger(body: Node3D) -> bool:
+	return _on_checkpoint_body_entered(body)
 
 func revive() -> void:
 	_stop_crown_animations()

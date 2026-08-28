@@ -35,17 +35,18 @@ func _process(delta: float) -> void:
 	var offsetY: float = sin(visualTime * bobFrequency) * bobAmplitude
 	rotator.position = rotatorStartPosition + Vector3.UP * offsetY
 
-func _on_checkpoint_body_entered(body: Node3D) -> void:
-	EnterTrigger(body)
+func _on_checkpoint_body_entered(body: Node3D) -> bool:
+	return EnterTrigger(body)
 
-func EnterTrigger(body: Node3D) -> void:
+func EnterTrigger(body: Node3D) -> bool:
 	if used or not body is Player:
-		return
+		return false
 
 	_enter_trigger(body)
 	if checkpointGem and checkpointGem.has_method("pick_up"):
 		checkpointGem.call("pick_up", false)
 	_move_checkpoint_text()
+	return true
 
 func _move_checkpoint_text() -> void:
 	if not checkPointText:

@@ -9,7 +9,7 @@ func _ready() -> void:
 	if particlesystem:
 		particlesystem.set("emitting", false)
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if not body is Player or not particlesystem:
 		return
 	checkpointIndex = LevelManager.checkpointCount

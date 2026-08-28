@@ -6,7 +6,7 @@ class_name TTFCheckPointTrigger
 
 @export var checkpoint: Checkpoint
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if not body is Player:
 		return
 	var target: Checkpoint = checkpoint

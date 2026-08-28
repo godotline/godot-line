@@ -5,7 +5,7 @@ extends Node
 @export_range(0.0, 1.0) var volume: float = 1.0
 @export var triggeredByTrigger: bool = true
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if body is Player and triggeredByTrigger:
 		play_clip()
 

@@ -21,9 +21,9 @@ const DROWNED_CLIP: AudioStream = preload("res://#Template/[Resources]/WaterDie.
 ## 自定义死亡音效（留空则使用 reason 默认音效）
 @export var customDeathClip: AudioStream
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if LevelManager.GameState != LevelManager.GameStatus.Playing:
-		return
+		return false
 	var player: Player = body as Player
 	if player and player.isLive and not player.noDeath:
 		if noRevive:
@@ -36,6 +36,8 @@ func trigger(body: Node3D) -> void:
 				player.PlayerDeath(true, LevelManager.GameStatus.Died, false)
 			DieReason.Drowned, DieReason.Border:
 				player.PlayerDeath(false, LevelManager.GameStatus.Moving)
+		return true
+	return false
 
 func _play_death_sound() -> void:
 	if customDeathClip:

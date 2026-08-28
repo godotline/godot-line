@@ -12,7 +12,7 @@ enum ChangeType {
 @export var firstDirection: Vector3 = Vector3(0, 90, 0)
 @export var secondDirection: Vector3 = Vector3.ZERO
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if not body is CharacterBody3D:
 		return
 	

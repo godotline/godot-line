@@ -19,8 +19,10 @@ func _ready() -> void:
 		_update_predictor()
 
 ## 由父节点 BaseTrigger 调用的入口方法
-func trigger(body: Node3D) -> void:
-	var character: CharacterBody3D = body as CharacterBody3D
+func trigger(other: Node3D) -> bool:
+	if not (other is Player or other.is_in_group("Player")):
+		return false
+	var character: CharacterBody3D = other as CharacterBody3D
 	if character:
 		if changeDirection and Player.instance:
 			Player.instance.Turn()
@@ -29,6 +31,8 @@ func trigger(body: Node3D) -> void:
 		character.velocity += Vector3(0, jumpSpeed, 0)
 		if Player.instance:
 			Player.instance.emitGameEvent(7)
+		return true
+	return false
 
 ## 通知子 JumpPredictor/FallPredictor 刷新预览
 func _update_predictor() -> void:

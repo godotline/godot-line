@@ -21,14 +21,14 @@ func _ready() -> void:
 	add_to_group("checkpoint_actives")
 	if activeOnAwake:
 		SetActiveFunc()
-
 	LevelManager.add_revive_listener(_on_revive)
 
-func trigger(body: Node3D) -> void:
+func trigger(other: Node3D) -> bool:
 	if activeOnAwake:
-		return
+		return false
 	captureCheckpointState()
 	SetActiveFunc()
+	return true
 
 func captureCheckpointState() -> void:
 	if activeOnAwake:

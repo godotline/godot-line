@@ -5,7 +5,7 @@ extends Node
 @export var transType: Tween.TransitionType = Tween.TRANS_LINEAR
 @export var ease: Tween.EaseType = Tween.EASE_IN_OUT
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	var player: Player = body as Player
 	if not player or not light:
 		return
