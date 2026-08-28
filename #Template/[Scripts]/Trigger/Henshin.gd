@@ -14,7 +14,7 @@ enum Facing { DontChange, FirstDirection, SecondDirection }
 func trigger(body: Node3D) -> bool:
 	var player: Player = body as Player
 	if not player:
-		return
+		return false
 	if not enableHenshin:
 		Player.instance.ResetHenshinState()
 	else:
@@ -24,8 +24,8 @@ func trigger(body: Node3D) -> bool:
 		Player.instance.showLineTail = showLineTail
 		Player.instance.showLineBody = showLineBody
 		Player.instance.rotationTime = animationTime
-
 		if facing == Facing.FirstDirection:
 			Player.instance.henshinObject.rotation_degrees = Player.instance.firstDirection
 		elif facing == Facing.SecondDirection:
 			Player.instance.henshinObject.rotation_degrees = Player.instance.secondDirection
+	return true

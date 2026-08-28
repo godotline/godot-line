@@ -19,8 +19,7 @@ enum TransportType {
 
 func trigger(body: Node3D) -> bool:
 	if not fakePlayer or not body is CharacterBody3D:
-		return
-
+		return false
 	if tpToPlayer:
 		_set_fake_player_position(body.global_position + offset)
 	else:
@@ -30,9 +29,7 @@ func trigger(body: Node3D) -> bool:
 					_set_fake_player_position(target.global_position)
 			TransportType.Vector3:
 				_set_fake_player_position(transport_position)
+	return true
 
 func _set_fake_player_position(value: Vector3) -> void:
-	if fakePlayer.has_method("set_world_position"):
-		fakePlayer.set_world_position(value)
-	else:
-		fakePlayer.global_position = value
+	fakePlayer.set_world_position(value)

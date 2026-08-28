@@ -8,10 +8,11 @@ var checkpointIndex: int = -1
 func trigger(body: Node3D) -> bool:
 	var player: Player = body as Player
 	if not player:
-		return
+		return false
 	checkpointIndex = LevelManager.checkpointCount
 	player.set_gravity_override(gravity)
 	LevelManager.add_revive_listener(_on_revive)
+	return true
 
 func _on_revive() -> void:
 	LevelManager.CompareCheckpointIndex(checkpointIndex, func() -> void:

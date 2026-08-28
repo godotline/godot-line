@@ -11,10 +11,11 @@ extends Node
 
 func trigger(body: Node3D) -> bool:
 	if not body is Player:
-		return
+		return false
 	var switcher: TrackSwitcher = _resolveSwitcher()
 	if switcher:
 		switcher.SwitchToTargetTrack()
+	return true
 
 func _resolveSwitcher() -> TrackSwitcher:
 	if not trackSwitcherPath.is_empty():

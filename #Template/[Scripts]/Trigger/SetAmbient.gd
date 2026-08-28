@@ -6,5 +6,7 @@ extends Node
 @export var ease: Tween.EaseType = Tween.EASE_IN_OUT
 
 func trigger(body: Node3D) -> bool:
-	if body is Player and ambient:
-		ambient.apply_tweened(self, duration, transType, ease)
+	if not (body is Player and ambient):
+		return false
+	ambient.apply_tweened(self, duration, transType, ease)
+	return true
