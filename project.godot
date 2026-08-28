@@ -8,6 +8,10 @@
 
 config_version=5
 
+[addons]
+
+imgui/config="res://#Template/[Resources]/ImGuiConfig.tres"
+
 [animation]
 
 warnings/check_invalid_track_paths=false

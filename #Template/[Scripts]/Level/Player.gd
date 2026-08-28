@@ -80,7 +80,6 @@ var tailHolder: Node3D
 var dustParticle: PackedScene = preload("res://#Template/[Resources]/Dust.tscn")
 
 var managedAnimationStates: Array[Dictionary] = []
-var managedTimelineStates: Array[Dictionary] = []
 var gravityOverride: Vector3 = Vector3.ZERO
 var hasGravityOverride: bool = false
 
@@ -166,6 +165,7 @@ func _ready() -> void:
 		rotation_degrees = currentDirection
 		_cache_scene_references()
 		_pause_managed_animators()
+		Timeline.Reset()
 		emitGameEvent(0)
 	if is_inside_tree():
 		if levelData:
@@ -645,49 +645,15 @@ func SetAnimatorProgresses() -> void:
 		if not (state.get("playing", false) as bool):
 			animator.pause()
 
-## 时间轴进度按检查点授权的音乐时间记录而非实际位置（对齐 Unity GetTimelineProgresses）
-func GetTimelineProgresses(autoRecord: bool, gameTime: float) -> void:
-	managedTimelineStates.clear()
-	var timelinePosition: float = gameTime
-	for timeline: AnimationPlayer in playedTimelines:
-		if timeline and not timeline.current_animation.is_empty():
-			if autoRecord:
-				timelinePosition = timeline.current_animation_position
-			managedTimelineStates.append({
-				"animator": timeline,
-				"animation": timeline.current_animation,
-				"position": timelinePosition,
-				"playing": timeline.is_playing()
-			})
-
-func SetTimelineProgresses() -> void:
-	for state: Dictionary in managedTimelineStates:
-		var timeline: AnimationPlayer = state.get("animator") as AnimationPlayer
-		if not timeline:
-			continue
-		var animationName: StringName = state.get("animation", StringName()) as StringName
-		if animationName.is_empty() or not timeline.has_animation(animationName):
-			continue
-		timeline.play(animationName)
-		timeline.seek(state.get("position", 0.0) as float, true)
-		if not (state.get("playing", false) as bool):
-			timeline.pause()
-
 func _pause_managed_animators() -> void:
 	for animator: AnimationPlayer in playedAnimators:
 		if animator:
 			animator.pause()
-	for timeline: AnimationPlayer in playedTimelines:
-		if timeline:
-			timeline.pause()
 
 func _resume_managed_animators() -> void:
 	for animator: AnimationPlayer in playedAnimators:
 		if animator and not animator.current_animation.is_empty():
 			animator.play()
-	for timeline: AnimationPlayer in playedTimelines:
-		if timeline and not timeline.current_animation.is_empty():
-			timeline.play()
 
 func _resume_fake_players() -> void:
 	for fakeNode: Node in get_tree().get_nodes_in_group("fake_players"):
@@ -735,6 +701,7 @@ func Turn() -> void:
 		rotation_degrees = currentDirection
 		_sync_henshin_rotation()
 		_resume_managed_animators()
+		Timeline.Play()
 
 		if delayApplied:
 			_play_music_from_level_data()
@@ -815,6 +782,7 @@ func PlayerDeath(spawn_particles: bool = true, death_state: LevelManager.GameSta
 		if death_state == LevelManager.GameStatus.Died:
 			velocity = Vector3.ZERO
 		if animationNode: animationNode.pause()
+		Timeline.Pause()
 		if is_instance_valid(LevelManager.currentCheckpoint):
 			LevelManager.GameOverRevive()
 		else:

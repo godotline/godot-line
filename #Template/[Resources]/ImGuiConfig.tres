@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ImGuiConfig" format=3 uid="uid://c6pcb5uvwku2i"]
+
+[ext_resource type="Script" uid="uid://pe5trdb6ntcc" path="res://addons/imgui-godot/scripts/ImGuiFont.gd" id="1_font"]
+[ext_resource type="Script" uid="uid://bifgtt7s2ntc0" path="res://addons/imgui-godot/scripts/ImGuiConfig.gd" id="2_cfg"]
+[ext_resource type="FontFile" uid="uid://cofd0gpguc54l" path="res://#Template/[Resources]/MiSans-Normal.ttf" id="3_misans"]
+
+[sub_resource type="Resource" id="Resource_misans"]
+script = ExtResource("1_font")
+FontData = ExtResource("3_misans")
+FontSize = 25
+Merge = false
+
+[resource]
+script = ExtResource("2_cfg")
+AddDefaultFont = false
+Fonts = [SubResource("Resource_misans")]

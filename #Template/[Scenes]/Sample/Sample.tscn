@@ -49,9 +49,99 @@ fog_depth_end = 50.0
 
 [sub_resource type="Animation" id="Animation_wkp8b"]
 length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Scene_Group/Scene_001/Pyramid:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Scene_Group/Scene_001/Crystal:position:x")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(4.198456, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Scene_Group/Scene_001/Crystal:position:y")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0.50000095, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/3/type = "bezier"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Scene_Group/Scene_001/Crystal:position:z")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(12.258225, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
 
 [sub_resource type="Animation" id="3"]
 length = 130.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Scene_Group/Scene_001/Pyramid:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(2.5666666, 3.1, 3.5666666, 4.0666666, 4.5333333, 4.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [false, true, false, true, false, true]
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Scene_Group/Scene_001/Crystal:position:x")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0, 2, 2),
+"points": PackedFloat32Array(4.198456, -0.25, 0, 0.25, 0, 10.023533, -0.0866667, 33.488186, 0, 0, 24.142626, -0.91666675, -4.455126, 0, 0),
+"times": PackedFloat32Array(0, 1.72, 3.95)
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Scene_Group/Scene_001/Crystal:position:y")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0, 2, 2),
+"points": PackedFloat32Array(0.50000095, -0.25, 0, 0.25, 0, 0.50000095, -0.6533333, 9.642577, 0, 0, 0.50000095, -0.7166667, 2.3242178, 0, 0),
+"times": PackedFloat32Array(0, 1.72, 3.95)
+}
+tracks/3/type = "bezier"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Scene_Group/Scene_001/Crystal:position:z")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"handle_modes": PackedInt32Array(0, 2, 2),
+"points": PackedFloat32Array(12.258225, -0.25, 0, 0.25, 0, 28.607418, -0.35333335, -46.39648, 0, 0, 28.607418, -0.8166666, -28.419918, 0, 0),
+"times": PackedFloat32Array(0, 1.72, 3.95)
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_cm0pq"]
 _data = {
@@ -260,13 +350,13 @@ ambient = SubResource("Resource_pufe6")
 render_priority = 0
 
 [node name="Obstacle" parent="Scene_Group/Scene_001" unique_id=359263919 instance=ExtResource("15_6gt33")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 14.330317, 38.845993, 0.5, 32.94414)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 11.784085, 41.28955, 0.5, 31.919292)
 
 [node name="Obstacle2" parent="Scene_Group/Scene_001" unique_id=298826961 instance=ExtResource("15_6gt33")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 14.330317, 29.313358, 0.5, 43.874218)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 7.1939473, 28.054424, 0.5, 33.676594)
 
 [node name="Pyramid" parent="Scene_Group/Scene_001" unique_id=1497290031 instance=ExtResource("18_emri0")]
-transform = Transform3D(-1, 0, 1.509958e-07, 0, 1, 0, -1.509958e-07, 0, -1, 33.540188, -0.28812522, 95.13104)
+transform = Transform3D(-1, 0, 1.509958e-07, 0, 1, 0, -1.509958e-07, 0, -1, 34.03661, -0.28812528, 95.13104)
 
 [node name="OpenTrigger" parent="Scene_Group/Scene_001/Pyramid" index="2" unique_id=608483111]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 7.882288, 0, 61.789726)
