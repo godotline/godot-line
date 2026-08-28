@@ -9,7 +9,7 @@ extends Node
 ## 指向挂有 TrackSwitcher 组件的节点；留空则自动使用场景中第一个切换器
 @export var trackSwitcherPath: NodePath
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if not body is Player:
 		return
 	var switcher: TrackSwitcher = _resolveSwitcher()

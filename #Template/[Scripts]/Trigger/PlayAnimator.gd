@@ -40,7 +40,7 @@ func _process(delta: float) -> void:
 	set_process(false)
 
 ## 由父节点 BaseTrigger 调用的入口方法
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if LevelManager.GameState == LevelManager.GameStatus.Waiting or LevelManager.GameState == LevelManager.GameStatus.Died:
 		return
 	for index: int in range(animators.size()):

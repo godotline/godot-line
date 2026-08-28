@@ -5,6 +5,6 @@ extends Node
 @export var transType: Tween.TransitionType = Tween.TRANS_LINEAR
 @export var ease: Tween.EaseType = Tween.EASE_IN_OUT
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if body is Player and ambient:
 		ambient.apply_tweened(self, duration, transType, ease)

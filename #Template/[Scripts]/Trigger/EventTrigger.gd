@@ -33,15 +33,18 @@ func _ready() -> void:
 		_invoke()
 
 ## 由父节点 BaseTrigger 调用的入口方法
-func trigger(body: Node3D) -> void:
+func trigger(other: Node3D) -> bool:
+	if not (other is Player or other.is_in_group("Player")):
+		return false
 	if invokeOnAwake or invoked:
-		return
+		return false
 	if not invokeOnClick:
 		_invoke()
 	elif not waitingClick:
 		waitingClick = true
 		if Player.instance and Player.instance.has_signal("OnTurn") and not Player.instance.OnTurn.is_connected(_on_player_turn):
 			Player.instance.OnTurn.connect(_on_player_turn)
+	return true
 
 ## 由父节点 BaseTrigger 调用的离开方法
 func on_exit(body: Node3D) -> void:

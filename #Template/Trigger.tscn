@@ -6,6 +6,7 @@
 
 [node name="Trigger" type="Area3D" unique_id=608483111]
 monitorable = false
+collision_mask = 5
 script = ExtResource("1_hpm7v")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1276946581]

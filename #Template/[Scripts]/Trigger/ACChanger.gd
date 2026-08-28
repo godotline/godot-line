@@ -3,7 +3,7 @@ extends Node
 @export var newAmbientColor: Color = Color(0.5, 0.5, 0.5, 1.0)
 @export_range(0.0, 60.0, 0.05) var duration: float = 1.0
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if not body is Player:
 		return
 	var environment: Environment = (body as Player).get_scene_environment()

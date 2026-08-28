@@ -11,7 +11,7 @@ enum Facing { DontChange, FirstDirection, SecondDirection }
 @export_range(0.0, 10.0, 0.05) var animationTime: float = 0.0
 @export var facing: Facing = Facing.DontChange
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	var player: Player = body as Player
 	if not player:
 		return

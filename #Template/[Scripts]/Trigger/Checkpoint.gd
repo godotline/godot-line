@@ -63,16 +63,17 @@ func _resolve_checkpoint_container() -> Node3D:
 			return container
 	return self
 
-func trigger(body: Node3D) -> void:
-	_on_checkpoint_body_entered(body)
+func trigger(body: Node3D) -> bool:
+	return _on_checkpoint_body_entered(body)
 
-func _on_checkpoint_body_entered(body: Node3D) -> void:
+func _on_checkpoint_body_entered(body: Node3D) -> bool:
 	if used:
-		return
+		return false
 	if not body is Player:
 		push_error("Checkpoint.gd: 进入触发器的不是 Player 类型，无法保存检查点")
-		return
+		return false
 	_enter_trigger(body)
+	return true
 
 func _enter_trigger(body: Node3D) -> void:
 	used = true

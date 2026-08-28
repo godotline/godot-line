@@ -12,10 +12,11 @@ func _ready() -> void:
 	speed = TTF_ROTATION_SPEED_RADIANS
 	super._ready()
 
-func _on_body_entered(body: Node3D) -> void:
+func _on_body_entered(body: Node3D) -> bool:
 	if got or body != Player.instance:
-		return
+		return false
 	PickUp(true)
+	return true
 
 func PickUp(add_gem: bool = true) -> void:
 	if got or Engine.is_editor_hint():

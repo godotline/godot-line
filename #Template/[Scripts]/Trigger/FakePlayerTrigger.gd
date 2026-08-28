@@ -22,28 +22,18 @@ var index: int = 0
 var container: BaseTrigger
 
 func _ready() -> void:
-	if Engine.is_editor_hint():
-		return
+	pass
 
-	container = get_parent() as BaseTrigger
-	if container and not container.body_entered.is_connected(_on_container_body_entered):
-		container.body_entered.connect(_on_container_body_entered)
-
-## BaseTrigger 默认只分发 CharacterBody3D；FakePlayer 尾线使用 StaticBody3D，
-## 因此在本组件内补充静态障碍物这一种专用输入。
-func _on_container_body_entered(body: Node3D) -> void:
-	if body is StaticBody3D or _find_fake_player(body) != null:
-		trigger(body)
 
 ## 由父节点 BaseTrigger 调用的入口方法。
-func trigger(body: Node3D) -> void:
+func trigger(other: Node3D) -> bool:
 	if not targetPlayer:
-		return
+		return false
 
-	var isPlayer: bool = body is Player
-	var fakeBody: FakePlayer = _find_fake_player(body)
+	var isPlayer: bool = other is Player
+	var fakeBody: FakePlayer = _find_fake_player(other)
 	var isFakePlayer: bool = fakeBody != null
-	var isObstacle: bool = body.is_in_group("obstacle")
+	var isObstacle: bool = other.is_in_group("obstacle")
 
 	# ChangeDirection 和 SetState 由真实玩家触发。
 	if isPlayer:
@@ -63,15 +53,19 @@ func trigger(body: Node3D) -> void:
 			LevelManager.add_revive_listener(_reset_data)
 			targetPlayer.Turn()
 			used = true
+		return true
 
-func _find_fake_player(body: Node3D) -> FakePlayer:
-	var directComponent: FakePlayer = body as FakePlayer
-	if directComponent:
-		return directComponent
-	for child: Node in body.get_children():
-		var component: FakePlayer = child as FakePlayer
-		if component:
-			return component
+	if isPlayer:
+		return true
+	
+	return false
+
+func _find_fake_player(other: Node3D) -> FakePlayer:
+	if other.is_in_group("FakePlayer"):
+		for child: Node in other.get_children():
+			var component: FakePlayer = child as FakePlayer
+			if component:
+				return component
 	return null
 
 func _reset_data() -> void:
@@ -81,8 +75,5 @@ func _reset_data() -> void:
 	)
 
 func _exit_tree() -> void:
-	if container and is_instance_valid(container):
-		if container.body_entered.is_connected(_on_container_body_entered):
-			container.body_entered.disconnect(_on_container_body_entered)
 	if not Engine.is_editor_hint():
 		LevelManager.remove_revive_listener(_reset_data)

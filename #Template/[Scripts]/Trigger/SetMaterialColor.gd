@@ -13,11 +13,13 @@ class_name SetMaterialColor
 var _tween: Tween = null
 
 
-func trigger(_body: Node3D = null) -> void:
+func trigger(body: Node3D) -> bool:
+	if not (body is Player or body.is_in_group("Player")):
+		return false
 	if not colors.is_empty():
 		for s: SingleColor in colors:
 			s.apply_tweened(self, duration, int(TransitionType), int(EaseType))
-		return
+		return true
 
 	var roots: Array[Node] = targetNodes
 	if roots.is_empty() and get_parent() != null:
@@ -40,7 +42,7 @@ func trigger(_body: Node3D = null) -> void:
 
 	if materials.is_empty():
 		push_warning("SetMaterialColor: 未解析到任何 StandardMaterial3D 目标")
-		return
+		return true
 
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
@@ -48,7 +50,7 @@ func trigger(_body: Node3D = null) -> void:
 	if duration <= 0.0:
 		for stdMat: StandardMaterial3D in materials:
 			stdMat.albedo_color = color
-		return
+		return true
 
 	_tween = create_tween().set_parallel(true)
 	for stdMat: StandardMaterial3D in materials:

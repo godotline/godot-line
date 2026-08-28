@@ -114,12 +114,12 @@ func _resolve_content_root() -> Node3D:
 		return area.get_parent() as Node3D
 	return self
 
-func trigger(body: Node3D) -> void:
-	_on_body_entered(body)
+func trigger(body: Node3D) -> bool:
+	return _on_body_entered(body)
 
-func _on_body_entered(body: Node3D) -> void:
+func _on_body_entered(body: Node3D) -> bool:
 	if got or body != Player.instance:
-		return
+		return false
 	got = true
 	index = LevelManager.checkpointCount
 	_set_monitoring(false)
@@ -130,6 +130,7 @@ func _on_body_entered(body: Node3D) -> void:
 		_start_scan()
 		_start_lightning()
 		_spawn_fragments()
+	return true
 
 func _spawn_fragments() -> void:
 	var fragmentParent: Node = contentRoot.get_parent()

@@ -5,7 +5,7 @@ extends Node
 @export var transType: Tween.TransitionType = Tween.TRANS_SINE
 @export var ease: Tween.EaseType = Tween.EASE_IN_OUT
 
-func trigger(body: Node3D) -> void:
+func trigger(body: Node3D) -> bool:
 	if not body is Player:
 		return
 	for imageSetting: SingleImageColor in images:
