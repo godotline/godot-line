@@ -8,7 +8,8 @@ extends Node
 func trigger(body: Node3D) -> bool:
 	var player: Player = body as Player
 	if not player or not light:
-		return
+		return false
 	var sceneLight: DirectionalLight3D = player.get_scene_light()
 	if sceneLight:
 		light.apply_tweened(sceneLight, duration, transType, ease)
+	return true

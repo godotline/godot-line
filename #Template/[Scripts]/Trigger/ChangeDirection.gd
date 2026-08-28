@@ -14,8 +14,7 @@ enum ChangeType {
 
 func trigger(body: Node3D) -> bool:
 	if not body is CharacterBody3D:
-		return
-	
+		return false
 	match type:
 		ChangeType.Direction:
 			if "firstDirection" in body:
@@ -25,3 +24,4 @@ func trigger(body: Node3D) -> bool:
 		ChangeType.Turn:
 			if body.has_method("Turn"):
 				body.Turn()
+	return true

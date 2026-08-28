@@ -55,6 +55,7 @@ func trigger(body: Node3D) -> bool:
 	_tween = create_tween().set_parallel(true)
 	for stdMat: StandardMaterial3D in materials:
 		_tween.tween_property(stdMat, "albedo_color", color, duration).set_trans(TransitionType).set_ease(EaseType)
+	return true
 
 
 func _resolveMesh(root: Node) -> MeshInstance3D:

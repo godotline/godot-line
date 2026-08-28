@@ -16,16 +16,14 @@ enum TeleportType {
 
 func trigger(body: Node3D) -> bool:
 	if not body is CharacterBody3D:
-		return
-	
+		return false
 	var finalPosition: Vector3
 	match type:
 		TeleportType.Target:
 			if not target:
-				return
+				return false
 			finalPosition = target.global_position
 		TeleportType.Position:
 			finalPosition = position
-	
-	# Unity 签名: InitPlayerPosition(player, position, changeDirection, direction) 且总是强制相机跟随
 	LevelManager.InitPlayerPosition(body, finalPosition, true, turn, targetDirection)
+	return true

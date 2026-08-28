@@ -5,9 +5,10 @@ extends Node
 
 func trigger(body: Node3D) -> bool:
 	if not body is Player:
-		return
+		return false
 	var environment: Environment = (body as Player).get_scene_environment()
 	if not environment:
-		return
+		return false
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	create_tween().tween_property(environment, "ambient_light_color", newAmbientColor, duration)
+	return true

@@ -11,11 +11,12 @@ func _ready() -> void:
 
 func trigger(body: Node3D) -> bool:
 	if not body is Player or not particlesystem:
-		return
+		return false
 	checkpointIndex = LevelManager.checkpointCount
 	particlesystem.call("restart")
 	particlesystem.set("emitting", true)
 	LevelManager.add_revive_listener(_on_revive)
+	return true
 
 func _on_revive() -> void:
 	LevelManager.CompareCheckpointIndex(checkpointIndex, func() -> void:

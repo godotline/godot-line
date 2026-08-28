@@ -7,7 +7,7 @@ extends Node
 
 func trigger(body: Node3D) -> bool:
 	if not body is Player:
-		return
+		return false
 	for imageSetting: SingleImageColor in images:
 		if not imageSetting:
 			continue
@@ -16,3 +16,4 @@ func trigger(body: Node3D) -> bool:
 			continue
 		var tween: Tween = image.create_tween().set_trans(transType).set_ease(ease)
 		tween.tween_property(image, "modulate", imageSetting.color, duration)
+	return true

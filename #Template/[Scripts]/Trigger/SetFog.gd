@@ -12,8 +12,10 @@ signal on_animation_end
 
 ## 由父节点 BaseTrigger 调用的入口方法
 func trigger(body: Node3D) -> bool:
-	if body is CharacterBody3D:
-		apply_fog()
+	if not body is CharacterBody3D:
+		return false
+	apply_fog()
+	return true
 
 func apply_fog() -> void:
 	if not fog:
@@ -53,4 +55,3 @@ func apply_fog() -> void:
 	tween.parallel().tween_property(env, "fog_depth_end", fog.end, duration)
 	tween.parallel().tween_property(env, "background_color", fog.fogColor, duration)
 	tween.tween_callback(func() -> void: on_animation_end.emit())
-

@@ -21,13 +21,14 @@ func _process(delta: float) -> void:
 	if core:
 		core.rotate_y(delta * deg_to_rad(60.0))
 
-func _on_checkpoint_body_entered(body: Node3D) -> void:
+func _on_checkpoint_body_entered(body: Node3D) -> bool:
 	if used or not body is Player:
-		return
+		return false
 	if rotator:
 		var tw: Tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 		tw.tween_property(rotator, "scale", Vector3.ONE, 0.5)
 	_enter_trigger(body)
+	return true
 
 func _on_Crown_body_entered(line: Node3D) -> void:
 	if used:

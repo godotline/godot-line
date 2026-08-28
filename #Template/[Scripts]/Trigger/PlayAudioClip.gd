@@ -6,8 +6,10 @@ extends Node
 @export var triggeredByTrigger: bool = true
 
 func trigger(body: Node3D) -> bool:
-	if body is Player and triggeredByTrigger:
-		play_clip()
+	if not (body is Player and triggeredByTrigger):
+		return false
+	play_clip()
+	return true
 
 func play_clip() -> void:
 	AudioManager.PlayClip(clip, volume)

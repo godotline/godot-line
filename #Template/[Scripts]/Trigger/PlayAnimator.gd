@@ -42,10 +42,11 @@ func _process(delta: float) -> void:
 ## 由父节点 BaseTrigger 调用的入口方法
 func trigger(body: Node3D) -> bool:
 	if LevelManager.GameState == LevelManager.GameStatus.Waiting or LevelManager.GameState == LevelManager.GameStatus.Died:
-		return
+		return false
 	for index: int in range(animators.size()):
 		if not finished[index]:
 			_play(index)
+	return true
 
 ## Called by Checkpoint when its state is captured.
 func capture_checkpoint_state() -> void:
