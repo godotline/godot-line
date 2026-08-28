@@ -55,4 +55,3 @@ func apply_fog() -> void:
 	tween.parallel().tween_property(env, "fog_depth_end", fog.end, duration)
 	tween.parallel().tween_property(env, "background_color", fog.fogColor, duration)
 	tween.tween_callback(func() -> void: on_animation_end.emit())
-
