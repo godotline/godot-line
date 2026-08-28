@@ -105,7 +105,8 @@ func _enter_trigger(body: Node3D) -> void:
 	playerFirstDirection = body.firstDirection
 	playerSecondDirection = body.secondDirection
 	# AutoRecord 关闭时按检查点授权的音乐时间记录时间轴进度（对齐 Unity GetTimelineProgresses(AutoRecord, GameTime)）
-	body.capture_managed_animation_state(-1.0 if AutoRecord else GameTime)
+	body.GetAnimatorProgresses()
+	Timeline.GetTimelineProgresses(AutoRecord, GameTime)
 	trackProgress = body.animationNode.get_current_animation_position() if body.animationNode and body.animationNode.is_playing() else 0.0
 	sceneGravity = body.get_current_gravity()
 	gravityCaptured = true
@@ -367,7 +368,8 @@ func _reset_scene(mainLine: Player) -> void:
 	_restore_light()
 	_restore_ambient()
 	_restore_player_collider(mainLine)
-	mainLine.restore_managed_animation_state()
+	mainLine.SetAnimatorProgresses()
+	Timeline.SetTimelineProgresses()
 
 	# 对齐 Unity：恢复时间轴切换器轨道状态（在位置恢复之后，保持播放头不重置）
 	for tsNode: Node in get_tree().get_nodes_in_group("timeline_track_switchers"):

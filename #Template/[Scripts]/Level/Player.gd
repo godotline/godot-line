@@ -39,7 +39,9 @@ var Speed: float
 
 @export_group("Editor Tools")
 @export_tool_button("Get Start Position", "Position")
-var getStartPositionButton: Callable = func() -> void:
+var getStartPositionButton: Callable = GetStartPosition
+
+func GetStartPosition() -> void:
 	if Engine.is_editor_hint():
 		var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
 		if undoRedo:
@@ -163,6 +165,7 @@ func _ready() -> void:
 		rotation_degrees = currentDirection
 		_cache_scene_references()
 		_pause_managed_animators()
+		Timeline.Reset()
 		emitGameEvent(0)
 	if is_inside_tree():
 		if levelData:
@@ -238,7 +241,7 @@ func _process(delta: float) -> void:
 
 	if isOnFloorNow:
 		if previousFrameIsGrounded != isOnFloorNow:
-			new_line()
+			CreateTail()
 		if line:
 			var tailPosition: Vector3 = position
 			tailPosition.y = self.tailPosition.y
@@ -266,7 +269,7 @@ func _process(delta: float) -> void:
 		if not didCreateTail:
 			allowCreateTail = true
 			if isOnFloorNow:
-				new_line()
+				CreateTail()
 			if $MeshInstance3D:
 				$MeshInstance3D.visible = true
 			didCreateTail = true
@@ -403,7 +406,7 @@ func _get_or_create_player_tail_holder() -> Node3D:
 	tailHolder = holder
 	return holder
 
-func new_line() -> void:
+func CreateTail() -> void:
 	if not allowCreateTail:
 		return
 	var tailHolder: Node3D = _get_or_create_player_tail_holder()
@@ -618,8 +621,7 @@ func _sync_henshin_rotation() -> void:
 	henshinObject.create_tween().tween_property(henshinObject, "rotation_degrees", rotation_degrees, rotationTime)
 
 ## 捕获受管动画状态。manualGameTime >= 0 时（检查点 AutoRecord 关闭），
-## 时间轴进度按检查点授权的音乐时间记录而非实际位置（对齐 Unity GetTimelineProgresses）
-func capture_managed_animation_state(manualGameTime: float = -1.0) -> void:
+func GetAnimatorProgresses() -> void:
 	managedAnimationStates.clear()
 	for animator: AnimationPlayer in playedAnimators:
 		if animator and not animator.current_animation.is_empty():
@@ -629,19 +631,8 @@ func capture_managed_animation_state(manualGameTime: float = -1.0) -> void:
 				"position": animator.current_animation_position,
 				"playing": animator.is_playing()
 			})
-	var timelinePosition: float = manualGameTime
-	for timeline: AnimationPlayer in playedTimelines:
-		if timeline and not timeline.current_animation.is_empty():
-			if manualGameTime < 0.0:
-				timelinePosition = timeline.current_animation_position
-			managedAnimationStates.append({
-				"animator": timeline,
-				"animation": timeline.current_animation,
-				"position": timelinePosition,
-				"playing": timeline.is_playing()
-			})
 
-func restore_managed_animation_state() -> void:
+func SetAnimatorProgresses() -> void:
 	for state: Dictionary in managedAnimationStates:
 		var animator: AnimationPlayer = state.get("animator") as AnimationPlayer
 		if not animator:
@@ -658,17 +649,11 @@ func _pause_managed_animators() -> void:
 	for animator: AnimationPlayer in playedAnimators:
 		if animator:
 			animator.pause()
-	for timeline: AnimationPlayer in playedTimelines:
-		if timeline:
-			timeline.pause()
 
 func _resume_managed_animators() -> void:
 	for animator: AnimationPlayer in playedAnimators:
 		if animator and not animator.current_animation.is_empty():
 			animator.play()
-	for timeline: AnimationPlayer in playedTimelines:
-		if timeline and not timeline.current_animation.is_empty():
-			timeline.play()
 
 func _resume_fake_players() -> void:
 	for fakeNode: Node in get_tree().get_nodes_in_group("fake_players"):
@@ -696,14 +681,13 @@ func Turn() -> void:
 		animationNode.seek(LevelManager.animTime)
 
 	if gameStarts:
-		# 常规转向
-		emit_signal("OnTurn")
-		emitGameEvent(2)
 		_currentDirection = 1 - _currentDirection
 		rotation_degrees = currentDirection
 		_sync_henshin_rotation()
 		velocity = to_global(Vector3(0, 0, 1) * Speed) - position
-		new_line()
+		CreateTail()
+		emit_signal("OnTurn")
+		emitGameEvent(2)
 		_play_music_from_level_data()
 	else:
 		# —— 首次转向（游戏启动）——
@@ -717,20 +701,21 @@ func Turn() -> void:
 		rotation_degrees = currentDirection
 		_sync_henshin_rotation()
 		_resume_managed_animators()
+		Timeline.Play()
 
 		if delayApplied:
 			_play_music_from_level_data()
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			_resume_fake_players()
 			velocity = to_global(Vector3(0, 0, 1) * Speed) - position
-			new_line()
+			CreateTail()
 		elif musicDelay > 0:
 			delayApplied = true
 			# 正值：线立即移动，音乐延后播放（对齐 Unity delay > 0 分支）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			_resume_fake_players()
 			velocity = to_global(Vector3(0, 0, 1) * Speed) - position
-			new_line()
+			CreateTail()
 			get_tree().create_timer(musicDelay).timeout.connect(_play_music_from_level_data)
 		elif musicDelay < 0:
 			delayApplied = true
@@ -743,7 +728,7 @@ func Turn() -> void:
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			_resume_fake_players()
 			velocity = to_global(Vector3(0, 0, 1) * Speed) - position
-			new_line()
+			CreateTail()
 			_play_music_from_level_data()
 
 ## 从 levelData 启动音乐播放（处理 stream_paused / not playing 两种情况）
@@ -777,7 +762,7 @@ func _start_game_after_delay() -> void:
 	_resume_fake_players()
 	velocity = to_global(Vector3(0, 0, 1) * Speed) - position
 
-	new_line()
+	CreateTail()
 
 func _on_Area_body_entered(_body: Node) -> void:
 	if not isLive or noDeath:
@@ -785,14 +770,19 @@ func _on_Area_body_entered(_body: Node) -> void:
 
 	# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab，不爆方块不播音效
 	PlayerDeath(showLineBody)
+func RevivePlayer(checkpoint: Node) -> void:
+	if checkpoint and checkpoint.has_method("revive"):
+		checkpoint.revive()
+
 func PlayerDeath(spawn_particles: bool = true, death_state: LevelManager.GameStatus = LevelManager.GameStatus.Died, hasCollision: bool = true) -> void:
-	if !noclip:
+	if not noclip:
 		isLive = false
 		LevelManager.GameState = death_state
 		emitGameEvent(5)
 		if death_state == LevelManager.GameStatus.Died:
 			velocity = Vector3.ZERO
 		if animationNode: animationNode.pause()
+		Timeline.Pause()
 		if is_instance_valid(LevelManager.currentCheckpoint):
 			LevelManager.GameOverRevive()
 		else:

@@ -9,7 +9,7 @@ extends Node
 ##   1. 在关卡中放置一个 AnimationPlayer，内含两条等长动画 Track_Default / Track_Target；
 ##   2. 在其子级挂载本组件（animationPlayer 留空时自动取父节点）；
 ##   3. 组件会自动把自己的 AnimationPlayer 注册到 Player.playedTimelines，
-##      由现有的启动暂停/恢复与检查点位置捕获机制统一同步。
+##      由 Timeline.GetTimelineProgresses / SetTimelineProgresses 统一同步。
 
 @export_group("Main Player")
 ## 目标 AnimationPlayer；留空时使用父节点
