@@ -97,8 +97,6 @@ func SetHolder(active: bool) -> void:
 					trigger.call("set_active", active)
 				trigger.set_deferred("monitoring", active)
 				trigger.set_deferred("monitorable", active)
-				if active and trigger.has_method("refresh_tracking"):
-					trigger.call_deferred("refresh_tracking")
 
 func get_requested_active() -> bool:
 	return requestedActive
