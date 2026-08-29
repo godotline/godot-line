@@ -6,26 +6,51 @@ cd "$repo_root"
 
 plugin_cfg="addons/template/plugin.cfg"
 
-# pre-commit runs before the new commit exists, so use the next reachable
-# commit count for a normal commit. The count is independent of file content.
-if current_count="$(git rev-list --count HEAD 2>/dev/null)"; then
-
-    commit_count=$((current_count + 1))
-else
-    commit_count=1
-fi
-
-version="2.3.${commit_count}"
-
 if [[ ! -f "$plugin_cfg" ]]; then
     printf 'pre-commit: required plugin file is missing\n' >&2
     exit 1
 fi
 
-if ! grep -qE '^version="[^"]*"$' "$plugin_cfg"; then
+current_version="$(sed -nE 's/^version="([^"]+)"$/\1/p' "$plugin_cfg" | head -n 1)"
+if [[ -z "$current_version" ]]; then
     printf 'pre-commit: could not find plugin version in %s\n' "$plugin_cfg" >&2
     exit 1
 fi
+
+# Use an explicit prefix when a branch targets a new version line. The
+# environment variable is useful for one commit; the Git config is useful for
+# keeping a version line for this repository. Otherwise, follow the latest
+# reachable release tag and fall back to the current config.
+version_prefix="${TEMPLATE_VERSION_PREFIX:-}"
+if [[ -z "$version_prefix" ]]; then
+    version_prefix="$(git config --local --get template.versionPrefix 2>/dev/null || true)"
+fi
+if [[ -z "$version_prefix" ]]; then
+    release_tag="$(git describe --tags --match='v[0-9]*' --abbrev=0 2>/dev/null || true)"
+    if [[ "$release_tag" =~ ^v([0-9]+)\.([0-9]+) ]]; then
+        version_prefix="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+    fi
+fi
+if [[ -z "$version_prefix" && "$current_version" =~ ^([0-9]+)\.([0-9]+) ]]; then
+    version_prefix="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+fi
+if [[ "$version_prefix" =~ ^v?([0-9]+)\.([0-9]+)$ ]]; then
+    version_prefix="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+else
+    printf 'pre-commit: invalid version prefix "%s"\n' "$version_prefix" >&2
+    printf 'pre-commit: use TEMPLATE_VERSION_PREFIX or template.versionPrefix (for example, 3.1)\n' >&2
+    exit 1
+fi
+
+# pre-commit runs before the new commit exists, so use the next reachable
+# commit count for a normal commit. The count is independent of file content.
+if current_count="$(git rev-list --count HEAD 2>/dev/null)"; then
+    commit_count=$((current_count + 1))
+else
+    commit_count=1
+fi
+
+version="${version_prefix}.${commit_count}"
 
 sed -i -E "s/^version=\"[^\"]*\"$/version=\"${version}\"/" "$plugin_cfg"
 
