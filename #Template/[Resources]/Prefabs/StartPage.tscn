@@ -155,7 +155,7 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -125.0
+offset_top = -140.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("4")
@@ -165,20 +165,22 @@ layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = 34.0
+offset_top = 26.0
 offset_right = -20.0
-offset_bottom = -30.0
-theme_override_constants/separation = 12
+offset_bottom = -14.0
+theme_override_constants/separation = 16
+alignment = 1
 
 [node name="AntiAliasingItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=87616723]
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
-size_flags_horizontal = 6
+size_flags_horizontal = 0
 size_flags_vertical = 4
 
 [node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/AntiAliasingItem" unique_id=666338461]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 26
 text = "抗锯齿"
 horizontal_alignment = 1
 
@@ -188,7 +190,7 @@ alignment = 1
 
 [node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1102256506]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
@@ -196,29 +198,29 @@ expand_icon = true
 
 [node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=141123282]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
 expand_icon = true
 
 [node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1671055612]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
 expand_icon = true
 
 [node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1021863229]
-custom_minimum_size = Vector2(60, 0)
+custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "Off"
 horizontal_alignment = 1
 
 [node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=1830302213]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
@@ -226,7 +228,7 @@ expand_icon = true
 
 [node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=2005454214]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
@@ -234,21 +236,22 @@ expand_icon = true
 
 [node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/AntiAliasingItem/Controls" unique_id=731316818]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
 expand_icon = true
 
 [node name="QualityItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=2077653218]
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 0
 size_flags_vertical = 4
 
 [node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/QualityItem" unique_id=1216785956]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 26
 text = "画质等级"
 horizontal_alignment = 1
 
@@ -258,7 +261,7 @@ alignment = 1
 
 [node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=374645834]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
@@ -266,29 +269,29 @@ expand_icon = true
 
 [node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=726645966]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
 expand_icon = true
 
 [node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1253007165]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
 expand_icon = true
 
 [node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1811727225]
-custom_minimum_size = Vector2(60, 0)
+custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "中"
 horizontal_alignment = 1
 
 [node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=240866013]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
@@ -296,7 +299,7 @@ expand_icon = true
 
 [node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=484715634]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
@@ -304,21 +307,22 @@ expand_icon = true
 
 [node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/QualityItem/Controls" unique_id=1341994536]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
 expand_icon = true
 
 [node name="LatencyItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1619395701]
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 0
 size_flags_vertical = 4
 
 [node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/LatencyItem" unique_id=1986991335]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 26
 text = "音画延迟"
 horizontal_alignment = 1
 
@@ -327,14 +331,14 @@ layout_mode = 2
 alignment = 1
 
 [node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1834214201]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
 expand_icon = true
 
 [node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1113184714]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
@@ -342,51 +346,52 @@ expand_icon = true
 
 [node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1747806464]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
 expand_icon = true
 
 [node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=719853010]
-custom_minimum_size = Vector2(60, 0)
+custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 23
 text = "0.0ms"
 horizontal_alignment = 1
 
 [node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=1256156666]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
 expand_icon = true
 
 [node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=732235424]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
 expand_icon = true
 
 [node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/LatencyItem/Controls" unique_id=204037458]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
 expand_icon = true
 
 [node name="VolumeItem" type="VBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=814000201]
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 0
 size_flags_vertical = 4
 
 [node name="TitleLabel" type="Label" parent="UIContainer/BottomBar/HBox/VolumeItem" unique_id=1454086533]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 26
 text = "音量大小"
 horizontal_alignment = 1
 
@@ -396,7 +401,7 @@ alignment = 1
 
 [node name="ArrowCoarseLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1691003379]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
@@ -404,29 +409,29 @@ expand_icon = true
 
 [node name="ArrowFineLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1958315036]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
 expand_icon = true
 
 [node name="ArrowLeft" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1425491818]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("4_left")
 flat = true
 expand_icon = true
 
 [node name="ValueLabel" type="Label" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1695563518]
-custom_minimum_size = Vector2(60, 0)
+custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "100.0%"
 horizontal_alignment = 1
 
 [node name="ArrowRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1931182474]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
@@ -434,7 +439,7 @@ expand_icon = true
 
 [node name="ArrowFineRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=603818232]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
@@ -442,7 +447,7 @@ expand_icon = true
 
 [node name="ArrowCoarseRight" type="Button" parent="UIContainer/BottomBar/HBox/VolumeItem/Controls" unique_id=1011048075]
 visible = false
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 icon = ExtResource("5_right")
 flat = true
@@ -461,7 +466,7 @@ flat = true
 
 [node name="ItemLabel" type="Label" parent="UIContainer/BottomBar/HBox/ShadowToggle" unique_id=851565371]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "阴影"
 
 [node name="PostToggle" type="HBoxContainer" parent="UIContainer/BottomBar/HBox" unique_id=1124031244]
@@ -473,7 +478,7 @@ flat = true
 
 [node name="ItemLabel" type="Label" parent="UIContainer/BottomBar/HBox/PostToggle" unique_id=2081490737]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "后处理"
 
 [node name="GuidanceToggle" type="HBoxContainer" parent="UIContainer/BottomBar/HBox"]
