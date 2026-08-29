@@ -37,7 +37,6 @@ signal on_revive
 var used: bool = false
 var usedRevive: bool = false
 
-var trackProgress: float = 0.0
 var sceneGravity: Vector3 = Vector3.ZERO
 var gravityCaptured: bool = false
 var playerFirstDirection: Vector3 = Vector3.ZERO
@@ -105,15 +104,14 @@ func _enter_trigger(body: Node3D) -> void:
 	# Save player state
 	playerFirstDirection = body.firstDirection
 	playerSecondDirection = body.secondDirection
+	if AutoRecord:
+		GameTime = AudioManager.time
 	# AutoRecord 关闭时按检查点授权的音乐时间记录时间轴进度（对齐 Unity GetTimelineProgresses(AutoRecord, GameTime)）
 	body.GetAnimatorProgresses()
 	Timeline.GetTimelineProgresses(AutoRecord, GameTime)
-	trackProgress = body.animationNode.get_current_animation_position() if body.animationNode and body.animationNode.is_playing() else 0.0
 	sceneGravity = body.get_current_gravity()
 	gravityCaptured = true
 
-	if AutoRecord:
-		GameTime = AudioManager.time
 	playerSpeed = body.Speed
 	if AutoRecord:
 		direction = Direction.First if body._currentDirection == 0 else Direction.Second
@@ -310,23 +308,26 @@ func revive() -> void:
 			REVIVE_FADE_DURATION,
 			func() -> void: _reset_scene(mainLine),
 			func() -> void:
+				mainLine.freeze = false
+				mainLine.isLive = true
 				mainLine.allowTurn = true
 				ui.visible = false
 		)
 	else:
 		_reset_scene(mainLine)
+		mainLine.freeze = false
+		mainLine.isLive = true
 		mainLine.allowTurn = true
 
 func _reset_scene(mainLine: Player) -> void:
-	# Restore player state
+	mainLine.freeze = true
+	mainLine.linear_velocity = Vector3.ZERO
 	LevelManager.load_checkpoint_to_main_line(mainLine)
 	if revivePosition:
 		mainLine.global_position = revivePosition.global_position
 	mainLine.Speed = playerSpeed
 	_restore_gravity(mainLine)
-	mainLine.isLive = true
 	mainLine.isEnd = false
-	mainLine.velocity = Vector3.ZERO
 	mainLine.gameStarts = false
 	mainLine.delayApplied = false
 	mainLine.scale = Vector3.ONE
@@ -369,6 +370,7 @@ func _reset_scene(mainLine: Player) -> void:
 	_restore_light()
 	_restore_ambient()
 	_restore_player_collider(mainLine)
+	mainLine._configureGroundRays()
 	mainLine.SetAnimatorProgresses()
 	Timeline.SetTimelineProgresses()
 
@@ -406,29 +408,18 @@ func _reset_scene(mainLine: Player) -> void:
 			fake.set_reset_data(fakePlayersData[i])
 
 	# Restore music to checkpoint position (paused, waiting for player to start)
-	var musicPlayer: AudioStreamPlayer = mainLine.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-	if musicPlayer:
-		musicPlayer.stop()
-		musicPlayer.volume_db = 0.0
-		musicPlayer.pitch_scale = 1.0
-		# Set music to checkpoint position but don't play yet
-		var musicTime: float = LevelManager.musicCheckpointTime
-		if musicTime > 0.0 and mainLine.levelData and mainLine.levelData.levelAudioClip:
-			musicPlayer.stream = mainLine.levelData.levelAudioClip
-			# Play then immediately pause to set the position
-			musicPlayer.play(musicTime)
-			musicPlayer.stream_paused = true
+	AudioManager.Stop()
+	AudioManager.time = GameTime
+	AudioManager.Volume = 1.0
+	AudioManager.Pitch = 1.0
 
 	# Restore animation to checkpoint position (paused, waiting for player to start)
 	if mainLine.animationNode and mainLine.animationNode.has_animation("level"):
-		if trackProgress > 0.0:
-			mainLine.animationNode.play("level")
-			mainLine.animationNode.seek(trackProgress, true)
-			mainLine.animationNode.pause()
-			LevelManager.animTime = trackProgress
-		else:
-			mainLine.animationNode.stop()
-			LevelManager.animTime = 0.0
+		var restoreTime: float = GameTime + mainLine.musicDelay
+		mainLine.animationNode.play("level")
+		mainLine.animationNode.seek(restoreTime, true)
+		mainLine.animationNode.pause()
+		LevelManager.animTime = restoreTime
 
 	_restore_play_animators()
 	on_revive.emit()

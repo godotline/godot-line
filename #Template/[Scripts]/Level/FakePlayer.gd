@@ -2,7 +2,7 @@
 class_name FakePlayer
 extends Node
 
-## 假线系统组件 — 挂载在 CharacterBody3D 下，沿预设方向自动移动。
+## 假线系统组件 — 挂载在 RigidBody3D 下，沿预设方向自动移动。
 
 enum State {
 	Moving,
@@ -39,7 +39,8 @@ var state: State = State.Stopped
 var playing: bool = false
 
 ## ========== Internals ==========
-var body: CharacterBody3D
+var body: RigidBody3D
+var groundRays: Array[RayCast3D] = []
 var tail: MeshInstance3D
 var tailPosition: Vector3
 var tailHolder: Node3D
@@ -55,8 +56,14 @@ var lastKeyState: bool = false
 func _ready() -> void:
 	body = _resolve_body()
 	if not body:
-		push_error("FakePlayer.gd must be attached below a CharacterBody3D")
+		push_error("FakePlayer.gd must be attached below a RigidBody3D")
 		return
+	groundRays = [
+		body.get_node_or_null("GroundRayFrontLeft") as RayCast3D,
+		body.get_node_or_null("GroundRayFrontRight") as RayCast3D,
+		body.get_node_or_null("GroundRayBackLeft") as RayCast3D,
+		body.get_node_or_null("GroundRayBackRight") as RayCast3D
+	]
 	body.add_to_group("FakePlayer")
 	if Engine.is_editor_hint():
 		return
@@ -95,17 +102,17 @@ func _ready() -> void:
 	_setup_collision_layers()
 	call_deferred("_create_tail")
 
-func _resolve_body() -> CharacterBody3D:
-	var parentBody: CharacterBody3D = get_parent() as CharacterBody3D
-	if parentBody:
-		return parentBody
-	var attachedNode: Node = self
-	if attachedNode is CharacterBody3D:
-		return attachedNode as CharacterBody3D
-	return null
+func _resolve_body() -> RigidBody3D:
+	return get_parent() as RigidBody3D
 
 ## 根据 isWall 配置宿主碰撞层。
 ## 本体不设置障碍物层，由 _setup_tail_collision 在 tail 上设置。
+func _isFalling() -> bool:
+	for groundRay: RayCast3D in groundRays:
+		if groundRay and groundRay.is_colliding():
+			return false
+	return true
+
 func _setup_collision_layers() -> void:
 	if not body:
 		return
@@ -129,29 +136,27 @@ func _setup_tail_collision(tail: MeshInstance3D) -> void:
 		body.add_child(col)
 		tail.add_child(body)
 
-func _physics_process(delta: float) -> void:
+func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or not body:
 		return
 
 	match state:
 		State.Moving:
-			var forward: Vector3 = body.global_transform.basis * Vector3.BACK
-			body.velocity.x = forward.x * speed
-			body.velocity.z = forward.z * speed
-			if not body.is_on_floor():
-				body.velocity.y -= 9.8 * delta
-			body.move_and_slide()
+			var forward: Vector3 = body.basis * Vector3.BACK
+			body.position += forward * speed * delta
+			_syncPhysicsXZ()
 
-			if tail and body.is_on_floor():
+			var isGroundedNow: bool = not _isFalling()
+			if tail and isGroundedNow:
 				var worldPosition: Vector3 = _get_world_position()
 				var midpoint: Vector3 = (tailPosition + worldPosition) * 0.5
+				midpoint.y = worldPosition.y
 				tail.global_position = midpoint
-				var distance: float = tailPosition.distance_to(worldPosition)
+				var distance: float = Vector2(tailPosition.x - worldPosition.x, tailPosition.z - worldPosition.z).length()
 				tail.scale = Vector3(1, 1, distance)
 				if distance > 0.001:
 					tail.look_at(worldPosition, Vector3.UP)
 
-			var isGroundedNow: bool = body.is_on_floor()
 			if previousFrameIsGrounded != isGroundedNow:
 				previousFrameIsGrounded = isGroundedNow
 				if isGroundedNow:
@@ -162,12 +167,6 @@ func _physics_process(delta: float) -> void:
 			if LevelManager.GameState == LevelManager.GameStatus.Moving or LevelManager.GameState == LevelManager.GameStatus.Died:
 				state = State.Stopped
 
-func _process(_delta: float) -> void:
-	if Engine.is_editor_hint() or not body:
-		return
-
-	match state:
-		State.Moving:
 			if not synchronismWithPlayer:
 				var keyPressed: bool = Input.is_key_pressed(createKey)
 				if keyPressed and not lastKeyState:
@@ -270,6 +269,15 @@ func set_reset_data(data: Dictionary) -> void:
 	ClearPool()
 	_create_tail()
 
+func _syncPhysicsXZ() -> void:
+	if not body:
+		return
+	var physicsTransform: Transform3D = PhysicsServer3D.body_get_state(body.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM)
+	var synced: Transform3D = body.global_transform
+	synced.origin.y = physicsTransform.origin.y
+	PhysicsServer3D.body_set_state(body.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, synced)
+	body.global_transform = synced
+
 func _get_world_position() -> Vector3:
 	if body:
 		return body.global_position
@@ -278,6 +286,7 @@ func _get_world_position() -> Vector3:
 func _set_world_position(value: Vector3) -> void:
 	if body:
 		body.global_position = value
+		PhysicsServer3D.body_set_state(body.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, body.global_transform)
 
 func set_world_position(value: Vector3) -> void:
 	_set_world_position(value)
@@ -290,6 +299,7 @@ func _get_world_rotation() -> Vector3:
 func _set_world_rotation(value: Vector3) -> void:
 	if body:
 		body.rotation_degrees = value
+		PhysicsServer3D.body_set_state(body.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, body.global_transform)
 
 func _create_turn_trigger() -> void:
 	if not triggerHolder:

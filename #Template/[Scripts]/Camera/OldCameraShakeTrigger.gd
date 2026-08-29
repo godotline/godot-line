@@ -10,7 +10,7 @@ extends Node
 
 
 func trigger(body: Node3D) -> void:
-	if body is CharacterBody3D:
+	if body is PhysicsBody3D:
 		var follower: OldCameraFollower = OldCameraFollower.instance
 		if follower:
 			follower.DoShake(power, duration)

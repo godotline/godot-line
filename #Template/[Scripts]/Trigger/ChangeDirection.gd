@@ -13,7 +13,7 @@ enum ChangeType {
 @export var secondDirection: Vector3 = Vector3.ZERO
 
 func trigger(body: Node3D) -> bool:
-	if not body is CharacterBody3D:
+	if not body is PhysicsBody3D:
 		return false
 	match type:
 		ChangeType.Direction:

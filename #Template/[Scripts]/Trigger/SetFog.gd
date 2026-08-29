@@ -12,7 +12,7 @@ signal on_animation_end
 
 ## 由父节点 BaseTrigger 调用的入口方法
 func trigger(body: Node3D) -> bool:
-	if not body is CharacterBody3D:
+	if not body is PhysicsBody3D:
 		return false
 	apply_fog()
 	return true

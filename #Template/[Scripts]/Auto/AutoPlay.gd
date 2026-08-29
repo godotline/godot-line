@@ -30,19 +30,8 @@ func _physics_process(_delta: float) -> void:
 		set_physics_process(false)
 		return
 
-	# Unity uses OnTriggerStay, so do not depend on a one-time body_entered
-	# signal. This also catches enabling autoplay while the player is already
-	# inside the trigger volume.
+	# Unity uses OnTriggerStay, so do not depend on a one-time body_entered signal.
 	var player: Player = playerRef as Player
-	if not is_instance_valid(player):
-		if not monitoring:
-			return
-		player = null
-		for body: Node3D in get_overlapping_bodies():
-			if body is Player:
-				player = body as Player
-				break
-		playerRef = player
 	if not is_instance_valid(player):
 		return
 
@@ -58,14 +47,4 @@ func set_active(active: bool) -> void:
 		playerRef = null
 		set_physics_process(false)
 		return
-	set_physics_process(true)
-
-func refresh_tracking() -> void:
-	if not _active or not monitoring:
-		return
-	playerRef = null
-	for body: Node3D in get_overlapping_bodies():
-		if body is Player:
-			playerRef = body
-			break
 	set_physics_process(true)

@@ -54,11 +54,11 @@ func _onImguiLayout() -> void:
 		ImGui.text("FPS: %d" % Engine.get_frames_per_second())
 
 		if p.levelData:
-			var musicPlayer: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-			if musicPlayer and musicPlayer.stream:
-				var progress: float = musicPlayer.get_playback_position() / musicPlayer.stream.get_length() if musicPlayer.stream.get_length() > 0 else 0.0
-				var currentSec: float = musicPlayer.get_playback_position()
-				var totalSec: float = p.levelData.levelTotalTime if p.levelData.useCustomLevelTime else musicPlayer.stream.get_length()
+			var soundTrack: AudioStreamPlayer = p.SoundTrack
+			if soundTrack and soundTrack.stream:
+				var progress: float = AudioManager.Progress
+				var currentSec: float = AudioManager.time
+				var totalSec: float = p.levelData.levelTotalTime if p.levelData.useCustomLevelTime else soundTrack.stream.get_length()
 				ImGui.text("Progress: %d%% (%ds/%ds)" % [int(progress * 100), int(currentSec), int(totalSec)])
 
 		ImGui.text("Game Status: %s" % LevelManager.GameStatus.keys()[LevelManager.GameState])
@@ -89,7 +89,7 @@ func _onImguiLayout() -> void:
 			p.reload()
 		# Match the K-key gate: only allow killing the player while Playing.
 		if ImGui.small_button("Kill (K)") and LevelManager.GameState == LevelManager.GameStatus.Playing:
-			p.PlayerDeath(true, LevelManager.GameStatus.Died, false)
+			p.PlayerDeath(LevelManager.DieReason.Hit, false, true, false)
 	ImGui.end()
 
 	# While Playing, show the cursor only over the expanded panel; LevelUI handles other states.

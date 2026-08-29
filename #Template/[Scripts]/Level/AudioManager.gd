@@ -4,27 +4,37 @@ extends RefCounted
 ## 音效播放、音乐控制、音量管理、淡入淡出
 ## 所有方法和属性均为静态，可直接 AudioManager.xxx() 调用
 
-## 播放一次性音效（自动创建 AudioStreamPlayer，播放完后自动销毁）
+## 播放一次性音效（自动创建 AudioStreamPlayer，按音频时长销毁）
 ##  Unity 等效: AudioManager.PlayClip(clip, volume)
 static func PlayClip(clip: AudioStream, volume: float = 1.0) -> void:
-	if not clip or not Player.instance:
+	if not clip or not Player.instance or not is_instance_valid(Player.instance):
+		return
+	var sceneRoot: Node = Player.instance.get_tree().current_scene
+	if not sceneRoot:
 		return
 	var player: AudioStreamPlayer = AudioStreamPlayer.new()
 	player.stream = clip
 	player.volume_db = linear_to_db(max(volume, 0.001))
-	Player.instance.add_child(player)
+	sceneRoot.add_child(player)
 	player.play()
-	player.finished.connect(player.queue_free)
+	var clipLength: float = clip.get_length()
+	if clipLength > 0.0:
+		sceneRoot.get_tree().create_timer(clipLength).timeout.connect(player.queue_free)
+	else:
+		player.finished.connect(player.queue_free)
 
 ## 播放背景音乐，返回 AudioStreamPlayer 以便后续控制
 ##  Unity 等效: AudioManager.PlayTrack(clip, volume) → AudioSource
 static func PlayTrack(clip: AudioStream, volume: float = 1.0) -> AudioStreamPlayer:
-	if not clip or not Player.instance:
+	if not clip or not Player.instance or not is_instance_valid(Player.instance):
+		return null
+	var sceneRoot: Node = Player.instance.get_tree().current_scene
+	if not sceneRoot:
 		return null
 	var player: AudioStreamPlayer = AudioStreamPlayer.new()
 	player.stream = clip
 	player.volume_db = linear_to_db(max(volume, 0.001))
-	Player.instance.add_child(player)
+	sceneRoot.add_child(player)
 	player.play()
 	return player
 
@@ -36,7 +46,10 @@ static var time: float:
 	set(value):
 		var p: AudioStreamPlayer = _get_music_player()
 		if p:
+			var wasPlaying: bool = p.playing
+			var wasPaused: bool = p.stream_paused
 			p.play(value)
+			p.stream_paused = wasPaused or not wasPlaying
 
 ## 音乐播放速度（音高偏移，1.0 = 正常）
 static var Pitch: float:
@@ -81,19 +94,23 @@ static func Stop() -> void:
 static func Play() -> void:
 	var p: AudioStreamPlayer = _get_music_player()
 	if p:
-		p.play()
+		if p.stream_paused:
+			p.stream_paused = false
+		else:
+			p.play()
 
 ## 淡出音乐到目标音量后停止
 ##  Unity 等效: AudioManager.FadeOut(volume, duration)
-static func FadeOut(targetVolume: float = 0.0, duration: float = 10.0) -> void:
+static func FadeOut(targetVolume: float = 0.0, duration: float = 10.0) -> Tween:
 	var p: AudioStreamPlayer = _get_music_player()
 	if not p:
-		return
+		return null
 	var tween: Tween = p.create_tween()
-	tween.tween_property(p, "volume_db", linear_to_db(max(targetVolume, 0.001)), duration)
+	tween.tween_property(p, "volume_db", linear_to_db(max(targetVolume, 0.001)), duration).set_trans(Tween.TRANS_LINEAR)
 	tween.finished.connect(func(): Stop())
+	return tween
 
 static func _get_music_player() -> AudioStreamPlayer:
-	if not Player.instance:
+	if not Player.instance or not is_instance_valid(Player.instance):
 		return null
-	return Player.instance.get_node_or_null("MusicPlayer") as AudioStreamPlayer
+	return Player.instance.SoundTrack

@@ -23,7 +23,7 @@ var isPlaying: bool = false
 var _initialized: bool = false
 var _finished: bool = false
 var triggerIndex: int = -1
-var cachedMusicPlayer: AudioStreamPlayer = null
+var cachedSoundTrack: AudioStreamPlayer = null
 
 signal on_animation_start
 signal on_animation_end
@@ -118,11 +118,11 @@ func _process(_delta: float) -> void:
 		return
 	if LevelManager.GameState != LevelManager.GameStatus.Playing:
 		return
-	if not cachedMusicPlayer:
+	if not cachedSoundTrack:
 		var player: Player = Player.instance
 		if player:
-			cachedMusicPlayer = player.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-	if cachedMusicPlayer and cachedMusicPlayer.playing and cachedMusicPlayer.get_playback_position() > _effectiveTriggerTime():
+			cachedSoundTrack = player.SoundTrack
+	if cachedSoundTrack and cachedSoundTrack.playing and cachedSoundTrack.get_playback_position() > _effectiveTriggerTime():
 		Trigger()
 
 ## Unity InitTime(): offsetTime 时提前 duration 触发

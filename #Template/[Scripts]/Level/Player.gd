@@ -1,15 +1,21 @@
 @tool
-extends CharacterBody3D
+extends RigidBody3D
 class_name Player
 
 static var instance: Player
 static var sceneReloadInProgress: bool = false
+
+const HIT_CLIP: AudioStream = preload("res://#Template/[Resources]/Hit.wav")
+const DROWNED_CLIP: AudioStream = preload("res://#Template/[Resources]/WaterDie.wav")
+const GROUNDED_RAY_START_OFFSET: float = 0.1
+const GROUNDED_RAY_DISTANCE: float = 0.05
 
 ## ========== 事件信号 ==========
 signal OnTurn		## 玩家转向（对齐 Unity Player.OnTurn）
 
 @onready var y: float = $".".position.y
 var Speed: float
+var SoundTrack: AudioStreamPlayer = null
 
 ## ========== Data ==========
 @export_group("Data")
@@ -74,6 +80,8 @@ var tailHolder: Node3D
 @onready var mesh: Mesh = $MeshInstance3D.mesh
 @onready var tailPosition: Vector3 = position
 @onready var material: StandardMaterial3D = $MeshInstance3D.get_surface_override_material(0)
+@onready var collisionShape: CollisionShape3D = $CollisionShape3D
+var groundRays: Array[RayCast3D] = []
 @onready var tree: SceneTree = get_tree()
 @onready var animationNode: AnimationPlayer = get_node(animation) if animation else null
 
@@ -97,7 +105,6 @@ var previousFrameIsGrounded: bool = false
 var pastIsOnFloorEffect: bool = false
 
 var gameStarts: bool = false
-var tailScale: int = 1
 
 var startTransform: Transform3D = transform
 var loading: bool = false
@@ -113,9 +120,7 @@ var didCreateTail: bool = false
 ## ========== Tail 对象池 ==========
 const TAIL_COLLISION_LAYER: int = 1 << 3
 const TAIL_COLLISION_MASK: int = (1 << 1) | (1 << 2)
-const TAIL_JOIN_OVERLAP: float = 0.025
 const TAIL_COLLISION_MARGIN: float = 0.001
-const TAIL_INITIAL_LENGTH: float = 1.0
 const TAIL_MASS: float = 1000.0
 const TAIL_LINEAR_DAMP: float = 1.0
 const TAIL_ANGULAR_DAMP: float = 2.0
@@ -140,6 +145,16 @@ func emitGameEvent(index: int) -> void:
 func _ready() -> void:
 	add_to_group("Player")
 	instance = self
+	var frontLeft: RayCast3D = $GroundRayFrontLeft
+	var frontRight: RayCast3D = $GroundRayFrontRight
+	var backLeft: RayCast3D = $GroundRayBackLeft
+	var backRight: RayCast3D = $GroundRayBackRight
+	groundRays = [
+		frontLeft,
+		frontRight,
+		backLeft,
+		backRight
+	]
 	tailPool.size = poolSize
 	tailBodyPool.size = poolSize
 	if characterMaterial:
@@ -170,6 +185,7 @@ func _ready() -> void:
 	if is_inside_tree():
 		if levelData:
 			levelData.apply_to(self, get_world_3d().space)
+		_configureGroundRays()
 
 	# 实例化 DebugOverlay（调试面板）。对齐 Unity #if UNITY_EDITOR：仅运行时/调试构建生效，编辑器内不挂载
 	var debugOverlayScene: PackedScene = load("res://#Template/[Resources]/DebugOverlay.tscn") as PackedScene
@@ -208,22 +224,15 @@ func _clear_scene_reload_guard() -> void:
 func _on_start_from_startpage() -> void:
 	Turn()
 
-func _physics_process(delta: float) -> void:
-	if not Engine.is_editor_hint() and (isLive or LevelManager.GameState == LevelManager.GameStatus.Moving):
-		# Unity 版在 Update() 中推进水平位移；物理帧只处理垂直运动和碰撞状态。
-		var horizontalVelocity: Vector3 = Vector3(velocity.x, 0.0, velocity.z)
-		velocity.x = 0.0
-		velocity.z = 0.0
-		if not is_on_floor():
-			velocity += get_current_gravity() * delta
-		move_and_slide()
-		velocity.x = horizontalVelocity.x
-		velocity.z = horizontalVelocity.z
-		if isLive and is_on_wall() and not noDeath and LevelManager.GameState == LevelManager.GameStatus.Playing:
-			# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab
-			PlayerDeath(showLineBody)
-		if fly:
-			$".".position.y = y
+func _physics_process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+	if fly:
+		axis_lock_linear_y = true
+		linear_velocity.y = 0.0
+		position.y = y
+	else:
+		axis_lock_linear_y = false
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or (not isLive and LevelManager.GameState != LevelManager.GameStatus.Moving) or LevelManager.GameState == LevelManager.GameStatus.Waiting:
@@ -232,7 +241,7 @@ func _process(delta: float) -> void:
 	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
 		_move_head(delta)
 
-	var isOnFloorNow: bool = is_on_floor() or fly
+	var isOnFloorNow: bool = checkGrounded() or fly
 	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
 		if isOnFloorNow and not pastIsOnFloorEffect:
 			_play_land_effect()
@@ -274,9 +283,42 @@ func _process(delta: float) -> void:
 				$MeshInstance3D.visible = true
 			didCreateTail = true
 
+func _syncPhysicsXZ() -> void:
+	var physicsTransform: Transform3D = PhysicsServer3D.body_get_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM)
+	var synced: Transform3D = global_transform
+	synced.origin.y = physicsTransform.origin.y
+	PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, synced)
+	global_transform = synced
+
 func _move_head(delta: float) -> void:
 	var forward: Vector3 = basis * Vector3.BACK
 	position += forward * Speed * delta
+	_syncPhysicsXZ()
+
+func checkGrounded() -> bool:
+	# RayCast3D 的碰撞结果由物理帧更新；普通帧/输入回调只读取缓存，避免访问 Jolt 空间。
+	for groundRay: RayCast3D in groundRays:
+		if groundRay and groundRay.is_colliding():
+			return true
+	return false
+
+func _configureGroundRays() -> void:
+	if not collisionShape or not collisionShape.shape is BoxShape3D:
+		return
+
+	var box: BoxShape3D = collisionShape.shape as BoxShape3D
+	var halfSize: Vector3 = box.size * 0.5
+	var rayPositions: Array[Vector3] = [
+		collisionShape.position + Vector3(-halfSize.x, -halfSize.y + GROUNDED_RAY_START_OFFSET, -halfSize.z),
+		collisionShape.position + Vector3(halfSize.x, -halfSize.y + GROUNDED_RAY_START_OFFSET, -halfSize.z),
+		collisionShape.position + Vector3(-halfSize.x, -halfSize.y + GROUNDED_RAY_START_OFFSET, halfSize.z),
+		collisionShape.position + Vector3(halfSize.x, -halfSize.y + GROUNDED_RAY_START_OFFSET, halfSize.z)
+	]
+	for index: int in range(groundRays.size()):
+		var groundRay: RayCast3D = groundRays[index]
+		if groundRay:
+			groundRay.position = rayPositions[index]
+			groundRay.target_position = Vector3(0.0, -(GROUNDED_RAY_DISTANCE + GROUNDED_RAY_START_OFFSET), 0.0)
 
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
@@ -299,13 +341,13 @@ func _input(event: InputEvent) -> void:
 					reload()
 			KEY_K:
 				if not Engine.is_editor_hint() and LevelManager.GameState == LevelManager.GameStatus.Playing:
-					PlayerDeath(true, LevelManager.GameStatus.Died, false)
+					PlayerDeath(LevelManager.DieReason.Hit, false, true, false)
 			KEY_D:
 				if OS.is_debug_build():
 					debug = not debug
 			KEY_C:
-				if Engine.is_editor_hint() and $MusicPlayer.playing:
-					print("Music time: %.3f" % $MusicPlayer.get_playback_position())
+				if Engine.is_editor_hint() and SoundTrack and SoundTrack.playing:
+					print("Music time: %.3f" % SoundTrack.get_playback_position())
 
 func reload() -> void:
 	if reloadQueued or sceneReloadInProgress:
@@ -412,59 +454,46 @@ func CreateTail() -> void:
 	var tailHolder: Node3D = _get_or_create_player_tail_holder()
 	if not tailHolder:
 		return
-	_finish_tail_join(line)
-	_spawn_corner_tail(position, rotation)
+
+	var nowForward: Vector3 = basis * Vector3.BACK
+	nowForward.y = 0.0
+	if nowForward.length_squared() > 0.0:
+		nowForward = nowForward.normalized()
+	var joinOffset: float = 0.5
+	if is_instance_valid(line):
+		var previousBody: RigidBody3D = line.get_parent() as RigidBody3D
+		if previousBody:
+			var previousForward: Vector3 = previousBody.basis * Vector3.BACK
+			previousForward.y = 0.0
+			if previousForward.length_squared() > 0.0:
+				previousForward = previousForward.normalized()
+			var directionDot: float = clampf(previousForward.dot(nowForward), -1.0, 1.0)
+			var angle: float = rad_to_deg(acos(directionDot))
+			if angle <= 90.0:
+				joinOffset = 0.5 * tan(deg_to_rad(angle * 0.5))
+			else:
+				joinOffset = -0.5 * tan(deg_to_rad((180.0 - angle) * 0.5))
+			var horizontalOffset: Vector3 = position - tailPosition
+			horizontalOffset.y = 0.0
+			var end: Vector3 = tailPosition + previousForward * (horizontalOffset.length() + joinOffset)
+			_update_tail_body(line, Vector3.ZERO, tailPosition.distance_to(end))
+
+	tailPosition = position - nowForward * absf(joinOffset)
 	line = _get_from_pool()
 	line.name = "TailMesh"
 	line.mesh = mesh
 	line.position = Vector3.ZERO
 	line.rotation = Vector3.ZERO
-	var initialScale: Vector3 = Vector3.ONE
-	line.scale = initialScale
+	line.scale = Vector3.ONE
 	line.set_surface_override_material(0, material)
 	line.visible = showLineTail or not henShin
 
 	var body: RigidBody3D = _create_tail_body()
-	tailPosition = position
-	body.position = position
+	body.position = tailPosition
 	body.rotation = rotation
 	tailHolder.add_child(body)
 	body.add_child(line)
-	_update_tail_collision(line, initialScale)
-
-func _finish_tail_join(tail: MeshInstance3D) -> void:
-	var halfWidth: float = float(tailScale) * 0.5
-	if not is_instance_valid(tail):
-		return
-
-	var body: RigidBody3D = tail.get_parent() as RigidBody3D
-	if not body:
-		return
-
-	var previousForward: Vector3 = body.basis * Vector3.BACK
-	previousForward.y = 0.0
-	previousForward = previousForward.normalized()
-	var currentForward: Vector3 = basis * Vector3.BACK
-	currentForward.y = 0.0
-	currentForward = currentForward.normalized()
-
-	var directionDot: float = clampf(previousForward.dot(currentForward), -1.0, 1.0)
-	var angle: float = rad_to_deg(acos(directionDot))
-	var joinOffset: float
-	if angle <= 90.0:
-		joinOffset = halfWidth * tan(deg_to_rad(angle * 0.5))
-	else:
-		joinOffset = -halfWidth * tan(deg_to_rad((180.0 - angle) * 0.5))
-
-	var horizontalOffset: Vector3 = position - tailPosition
-	horizontalOffset.y = 0.0
-	if horizontalOffset.length() < TAIL_INITIAL_LENGTH:
-		_update_tail_body(tail, tailPosition, TAIL_INITIAL_LENGTH)
-		return
-	var end: Vector3 = tailPosition + previousForward * (horizontalOffset.length() + joinOffset + TAIL_JOIN_OVERLAP)
-	end.y = tailPosition.y
-	var joinLength: float = maxf(tailPosition.distance_to(end), TAIL_INITIAL_LENGTH)
-	_update_tail_body(tail, (tailPosition + end) / 2, joinLength)
+	_update_tail_body(line, Vector3.ZERO, position.distance_to(tailPosition))
 
 func _create_tail_body() -> RigidBody3D:
 	if not tailBodyPool.full:
@@ -543,27 +572,6 @@ func _update_tail_collision(tail: MeshInstance3D, tailScale: Vector3) -> void:
 	box.size = meshAabb.size * tailScale.abs()
 	collision.position = tail.position + meshAabb.get_center() * tailScale
 
-func _spawn_corner_tail(atPosition: Vector3, atRotation: Vector3) -> void:
-	# 拐角只保留一个可模拟刚体，避免无碰撞网格盖住真正的物理尾。
-	var body: RigidBody3D = _create_tail_body()
-	body.name = "CornerTail"
-	body.position = atPosition
-	body.rotation = atRotation
-
-	var tailMesh: MeshInstance3D = _get_from_pool()
-	tailMesh.name = "TailMesh"
-	tailMesh.mesh = mesh
-	tailMesh.position = Vector3.ZERO
-	tailMesh.rotation = Vector3.ZERO
-	tailMesh.scale = Vector3.ONE
-	tailMesh.set_surface_override_material(0, material)
-	tailMesh.visible = showLineTail or not henShin
-
-	var tailHolder: Node3D = _get_or_create_player_tail_holder()
-	tailHolder.add_child(body)
-	body.add_child(tailMesh)
-	_update_tail_collision(tailMesh, Vector3.ONE)
-
 func get_current_gravity() -> Vector3:
 	if hasGravityOverride:
 		return gravityOverride
@@ -572,10 +580,14 @@ func get_current_gravity() -> Vector3:
 func set_gravity_override(value: Vector3) -> void:
 	gravityOverride = value
 	hasGravityOverride = true
+	gravity_scale = 0.0
+	constant_force = value * mass
 
 func clear_gravity_override() -> void:
 	gravityOverride = Vector3.ZERO
 	hasGravityOverride = false
+	gravity_scale = 1.0
+	constant_force = Vector3.ZERO
 
 func get_scene_camera() -> Camera3D:
 	if not is_instance_valid(sceneCamera):
@@ -670,12 +682,12 @@ func _play_land_effect() -> void:
 	dust.get_tree().create_timer(2.0).timeout.connect(dust.queue_free)
 
 func Turn() -> void:
-	if not (is_on_floor() or fly):
+	if not (checkGrounded() or fly):
 		return
 
 	# 动画设置 — 所有路径都立即执行
 	if animationNode and not animationNode.is_playing():
-		if LevelManager.lineCrossingCrown == 0 and not $MusicPlayer.stream_paused:
+		if LevelManager.lineCrossingCrown == 0 and (not SoundTrack or not SoundTrack.stream_paused):
 			LevelManager.animTime = 0
 		animationNode.play("level")
 		animationNode.seek(LevelManager.animTime)
@@ -683,8 +695,9 @@ func Turn() -> void:
 	if gameStarts:
 		_currentDirection = 1 - _currentDirection
 		rotation_degrees = currentDirection
+		PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, global_transform)
 		_sync_henshin_rotation()
-		velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+		linear_velocity = Vector3.ZERO
 		CreateTail()
 		emit_signal("OnTurn")
 		emitGameEvent(2)
@@ -699,6 +712,7 @@ func Turn() -> void:
 		# 对齐 Unity Player.cs：开局隐藏鼠标（死亡 / 结算时由 LevelUI 恢复显示）
 		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 		rotation_degrees = currentDirection
+		PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, global_transform)
 		_sync_henshin_rotation()
 		_resume_managed_animators()
 		Timeline.Play()
@@ -707,14 +721,14 @@ func Turn() -> void:
 			_play_music_from_level_data()
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			_resume_fake_players()
-			velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+			linear_velocity = Vector3.ZERO
 			CreateTail()
 		elif musicDelay > 0:
 			delayApplied = true
 			# 正值：线立即移动，音乐延后播放（对齐 Unity delay > 0 分支）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			_resume_fake_players()
-			velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+			linear_velocity = Vector3.ZERO
 			CreateTail()
 			get_tree().create_timer(musicDelay).timeout.connect(_play_music_from_level_data)
 		elif musicDelay < 0:
@@ -727,7 +741,7 @@ func Turn() -> void:
 			# 零值：音画同步启动（原行为）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			_resume_fake_players()
-			velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+			linear_velocity = Vector3.ZERO
 			CreateTail()
 			_play_music_from_level_data()
 
@@ -735,11 +749,17 @@ func Turn() -> void:
 func _play_music_from_level_data() -> void:
 	if not levelData or not levelData.levelAudioClip:
 		return
-	if $MusicPlayer.stream_paused:
-		$MusicPlayer.stream_paused = false
-		$MusicPlayer.volume_db = linear_to_db(max(musicVolume, 0.001))
-	elif not $MusicPlayer.playing:
-		$MusicPlayer.stream = levelData.levelAudioClip
+	if not SoundTrack:
+		SoundTrack = AudioManager.PlayTrack(levelData.levelAudioClip, musicVolume)
+		if not SoundTrack:
+			return
+		AudioManager.Stop()
+	SoundTrack.pitch_scale = levelData.timeScale
+	if SoundTrack.stream_paused:
+		SoundTrack.stream_paused = false
+		SoundTrack.volume_db = linear_to_db(max(musicVolume, 0.001))
+	elif not SoundTrack.playing:
+		SoundTrack.stream = levelData.levelAudioClip
 		var startTime: float = levelData.get_audio_start_time()
 		_play_music(startTime)
 
@@ -747,65 +767,77 @@ func _play_music_from_level_data() -> void:
 ## latency: AudioServer.get_output_latency() — 系统硬件延迟自动补偿
 ## musicVolume: 用户手动调节的音量
 func _play_music(startTime: float) -> void:
-	$MusicPlayer.volume_db = linear_to_db(max(musicVolume, 0.001))
+	if not SoundTrack:
+		return
+	SoundTrack.volume_db = linear_to_db(max(musicVolume, 0.001))
 	var latency: float = AudioServer.get_output_latency()
 	if latency > 0.0:
 		var adjustedTime: float = max(startTime - latency, 0.0)
-		$MusicPlayer.play(adjustedTime)
+		SoundTrack.play(adjustedTime)
 	else:
-		$MusicPlayer.play(startTime)
+		SoundTrack.play(startTime)
 
 
 ## musicDelay < 0 时：timer 回调，启动游戏移动（对齐 Unity delay < 0 分支的 yield 之后逻辑）
 func _start_game_after_delay() -> void:
 	LevelManager.GameState = LevelManager.GameStatus.Playing
 	_resume_fake_players()
-	velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+	linear_velocity = Vector3.ZERO
 
 	CreateTail()
 
 func _on_Area_body_entered(_body: Node) -> void:
-	if not isLive or noDeath:
+	if not isLive or noDeath or LevelManager.GameState != LevelManager.GameStatus.Playing:
 		return
 
-	# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab，不爆方块不播音效
-	PlayerDeath(showLineBody)
+	# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab，仅不生成碎片。
+	var revive: bool = LevelManager.checkpointCount > 0 or LevelManager.crown > 0
+	PlayerDeath(LevelManager.DieReason.Hit, revive, showLineBody, true)
+
 func RevivePlayer(checkpoint: Node) -> void:
 	if checkpoint and checkpoint.has_method("revive"):
 		checkpoint.revive()
 
-func PlayerDeath(spawn_particles: bool = true, death_state: LevelManager.GameStatus = LevelManager.GameStatus.Died, hasCollision: bool = true) -> void:
-	if not noclip:
-		isLive = false
-		LevelManager.GameState = death_state
-		emitGameEvent(5)
-		if death_state == LevelManager.GameStatus.Died:
-			velocity = Vector3.ZERO
-		if animationNode: animationNode.pause()
-		Timeline.Pause()
-		if is_instance_valid(LevelManager.currentCheckpoint):
-			LevelManager.GameOverRevive()
-		else:
-			LevelManager.GameOverNormal(false)
-		AudioManager.FadeOut()
-		if spawn_particles:
-			$AudioStreamPlayer.play()
+func PlayerDeath(reason: LevelManager.DieReason = LevelManager.DieReason.Hit, revive: bool = false, spawnCubes: bool = true, hasCollision: bool = true) -> void:
+	if noclip:
+		return
 
-		if not spawn_particles or not deathParticle or not hasCollision:
-			return
+	isLive = false
+	match reason:
+		LevelManager.DieReason.Hit:
+			LevelManager.GameState = LevelManager.GameStatus.Died
+			linear_velocity = Vector3.ZERO
+			AudioManager.PlayClip(HIT_CLIP, 1.0)
+		LevelManager.DieReason.Drowned:
+			LevelManager.GameState = LevelManager.GameStatus.Moving
+			AudioManager.PlayClip(DROWNED_CLIP, 1.0)
+		LevelManager.DieReason.Border:
+			LevelManager.GameState = LevelManager.GameStatus.Moving
 
+	emitGameEvent(5)
+	if animationNode:
+		animationNode.pause()
+	Timeline.Pause()
+	AudioManager.FadeOut()
+
+	if reason == LevelManager.DieReason.Hit and spawnCubes and deathParticle and hasCollision:
 		var deathParticleInstance: Node3D = deathParticle.instantiate() as Node3D
 		deathParticleInstance.add_to_group("death_particles")
 		var parent: Node = get_parent()
 		if not parent:
 			push_error("Player.gd: 不在场景树中，无法生成死亡粒子")
-			return
-		parent.add_child(deathParticleInstance)
-		deathParticleInstance.global_position = global_position
-		deathParticleInstance.rotation = rotation
-		var playerCubes: PlayerCubes = deathParticleInstance as PlayerCubes
-		if playerCubes:
-			playerCubes.play()
+		else:
+			parent.add_child(deathParticleInstance)
+			deathParticleInstance.global_position = global_position
+			deathParticleInstance.rotation = rotation
+			var playerCubes: PlayerCubes = deathParticleInstance as PlayerCubes
+			if playerCubes:
+				playerCubes.play()
+
+	if not revive:
+		LevelManager.GameOverNormal(false)
+	else:
+		LevelManager.GameOverRevive()
 
 ## StartPage 设置变化回调：更新 Player 字段 + 立即持久化 + 实时应用音量
 ## 对齐 Unity SetLatency.cs 的 AddLatency/SubtractLatency/AddVolume/SubtractVolume + SetText + PlayerPrefs.SetFloat
@@ -816,8 +848,8 @@ func _on_setting_changed(key: String, value: Variant) -> void:
 			SetLatency.save_settings(musicDelay, musicVolume)
 		"volume":
 			musicVolume = float(value)
-			if $MusicPlayer.playing:
-				$MusicPlayer.volume_db = linear_to_db(max(musicVolume, 0.001))
+			if SoundTrack and SoundTrack.playing:
+				SoundTrack.volume_db = linear_to_db(max(musicVolume, 0.001))
 			SetLatency.save_settings(musicDelay, musicVolume)
 		"quality":
 			var qualityLevel: int = GraphicsQuality.quality_level_from_value(value)

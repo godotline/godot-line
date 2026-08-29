@@ -15,7 +15,7 @@ enum TeleportType {
 @export var targetDirection: LevelManager.Direction = LevelManager.Direction.First
 
 func trigger(body: Node3D) -> bool:
-	if not body is CharacterBody3D:
+	if not body is Player:
 		return false
 	var finalPosition: Vector3
 	match type:
