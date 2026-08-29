@@ -62,7 +62,7 @@ func _on_body_entered(other: Node3D) -> void:
 
 ## 新增：离开区域处理
 func _on_body_exited(other: Node3D) -> void:
-	if not other is CharacterBody3D:
+	if not other is PhysicsBody3D:
 		return
 	if debugMode:
 		print("[BaseTrigger] ", name, " 玩家离开")

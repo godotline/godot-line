@@ -64,7 +64,7 @@ func StopPlayer() -> void:
 		get_tree().create_timer(1.0).timeout.connect(_complete)
 		LevelManager.GameState = LevelManager.GameStatus.Completed
 		if Player.instance:
-			Player.instance.velocity = Vector3.ZERO
+			Player.instance.linear_velocity = Vector3.ZERO
 
 func _reset_door() -> void:
 	LevelManager.remove_revive_listener(_reset_door)

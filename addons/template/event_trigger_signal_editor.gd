@@ -160,6 +160,8 @@ func _get_connected_method(target: Node) -> StringName:
 func _get_scene_tree_path(target: Node) -> String:
 	if not is_instance_valid(target):
 		return ""
+	if not target.is_inside_tree():
+		return "已删除的节点"
 	var sceneRoot: Node = EditorInterface.get_edited_scene_root()
 	if is_instance_valid(sceneRoot) and (target == sceneRoot or sceneRoot.is_ancestor_of(target)):
 		var relativePath: String = str(sceneRoot.get_path_to(target))

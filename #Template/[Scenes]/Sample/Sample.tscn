@@ -8,7 +8,6 @@
 [ext_resource type="Script" uid="uid://cgl1gfqlue3jc" path="res://#Template/[Scripts]/Auto/AutoPlayController.gd" id="7_fmbnj"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="8_lthrg"]
 [ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="9_0v7qw"]
-[ext_resource type="Script" uid="uid://cq3coymowo07g" path="res://#Template/[Scripts]/Animator/LocalScaleAnimator.gd" id="10_7en4s"]
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="11_mq52h"]
 [ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/FakePlayerTrigger.gd" id="12_1fvat"]
 [ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="13_hkwba"]
@@ -273,29 +272,11 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 33.8
 [node name="Scene_001" type="Node3D" parent="Scene_Group" unique_id=514366687]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.034236908, -0.761029, 4.2663374)
 
-[node name="Crystal2" parent="Scene_Group/Scene_001" unique_id=2099437324 instance=ExtResource("19_6gt33")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8049364, 0.50000024, 2.6116118)
-
 [node name="Ground" parent="Scene_Group/Scene_001" unique_id=755968428 instance=ExtResource("8_lthrg")]
 transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 300, 0, -1, 0)
 
-[node name="Ground2" parent="Scene_Group/Scene_001" unique_id=1080893231 instance=ExtResource("8_lthrg")]
-transform = Transform3D(2.1093316, 0, 0, 0, 1, 0, 0, 0, 10.958137, -0.005569935, -0.97786236, 18.44947)
-
-[node name="Node3D" type="Node" parent="Scene_Group/Scene_001/Ground2" unique_id=795488879]
-script = ExtResource("9_0v7qw")
-startValue = Vector3(0.028666973, -1.7388914, 22.715809)
-endOffset = Vector3(0, 5, 0)
-triggeredByTime = false
-
-[node name="Node3D2" type="Node" parent="Scene_Group/Scene_001/Ground2" unique_id=431550219]
-script = ExtResource("10_7en4s")
-startValue = Vector3(1, 1, 1)
-endOffset = Vector3(1, 5, 3)
-triggeredByTime = false
-
 [node name="Trigger" parent="Scene_Group/Scene_001" unique_id=608483111 instance=ExtResource("11_mq52h")]
-transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, 2.9202428, -0.5, 2.7034845)
+transform = Transform3D(3.1409428, 0, 1.767767, 0, 2.5, 0, -3.1409428, 0, 1.767767, -0.43624187, -0.5, 2.7034845)
 
 [node name="FakePlayerTrigger" type="Node" parent="Scene_Group/Scene_001/Trigger" unique_id=589288902 node_paths=PackedStringArray("targetPlayer")]
 script = ExtResource("12_1fvat")
@@ -325,20 +306,28 @@ targetPlayer = NodePath("../../FakePlayer/FakePlayerComponent")
 
 [node name="FakePlayer" parent="Scene_Group/Scene_001" unique_id=226051297 instance=ExtResource("15_fmoim")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5376909, 0, 10.573014)
-floor_constant_speed = true
-floor_block_on_wall = false
-floor_max_angle = 1.5707964
-floor_snap_length = 1.0
 
 [node name="FakePlayerComponent" parent="Scene_Group/Scene_001/FakePlayer" index="0"]
 startPosition = Vector3(-2.503454, -0.761029, 14.839352)
 isWall = true
 
+[node name="GroundRayFrontLeft" parent="Scene_Group/Scene_001/FakePlayer" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, -0.4, -0.15)
+
+[node name="GroundRayFrontRight" parent="Scene_Group/Scene_001/FakePlayer" index="4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, -0.4, -0.15)
+
+[node name="GroundRayBackLeft" parent="Scene_Group/Scene_001/FakePlayer" index="5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, -0.4, 0.15)
+
+[node name="GroundRayBackRight" parent="Scene_Group/Scene_001/FakePlayer" index="6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, -0.4, 0.15)
+
 [node name="Crown" parent="Scene_Group/Scene_001" unique_id=1805653336 instance=ExtResource("13_hkwba")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.168884, -9.536743e-07, 16.516552)
 
 [node name="Area3D" parent="Scene_Group/Scene_001/Crown" index="0" unique_id=220972321]
-transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, -11.51933, 0, -11.51933)
+transform = Transform3D(0.70710677, 0, -5.656854, 0, 8, 0, 0.70710677, 0, 5.656854, 0, 0, 0)
 
 [node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" index="0" unique_id=1220123700]
 GameTime = 2.4613333
@@ -409,13 +398,6 @@ script = ExtResource("22_77abe")
 direction = 0
 drawPreview = true
 
-[node name="Trigger4" parent="Scene_Group/Scene_001" unique_id=712157509 instance=ExtResource("11_mq52h")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.1550957, 0.084308505, 15.951833)
-
-[node name="event" type="Node" parent="Scene_Group/Scene_001/Trigger4" unique_id=1520750393 node_paths=PackedStringArray("targetNode")]
-script = ExtResource("23_77abe")
-targetNode = NodePath("../../Obstacle3/LocalRotAnimator")
-
 [node name="Trigger8" parent="Scene_Group/Scene_001" unique_id=593467814 instance=ExtResource("11_mq52h")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 10.16557, 0.084308505, 10.899901)
 
@@ -431,7 +413,7 @@ script = ExtResource("30_skrbu")
 actives = Array[ExtResource("31_d7stf")]([SubResource("Resource_e7kbm")])
 
 [node name="Gem" parent="Scene_Group/Scene_001" unique_id=149611988 instance=ExtResource("28_s0ncg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13407886, 0.15721011, 11.375734)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7634534, 0.15721011, 11.375734)
 
 [node name="Gem" parent="Scene_Group/Scene_001/Gem/Area3D" parent_id_path=PackedInt32Array(149611988, 1594876525) index="0" unique_id=1613085479]
 fake = true
@@ -441,12 +423,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 visible = false
 
 [node name="Ground3" parent="Scene_Group/Scene_001" unique_id=26900690 instance=ExtResource("8_lthrg")]
-transform = Transform3D(12.57843, -1.2079841, 0, 8.029628, 1.89231, 0, 0, 0, 6.3337374, 9.9375305, 1.3641901, 3.9525747)
+transform = Transform3D(6.885938, -1.5569686, 0, 4.395741, 2.4389951, 0, 0, 0, 6.3337374, 9.9375305, 0.35569382, 3.9525747)
+
+[node name="Ground4" parent="Scene_Group/Scene_001" unique_id=541440101 instance=ExtResource("8_lthrg")]
+transform = Transform3D(6.885938, -1.5569686, 0, 4.395741, 2.4389951, 0, 0, 0, 6.3337374, 6.13631, -3.6681836, 16.724697)
 
 [connection signal="onPlayerJump" from="BasicOBJ_Group/Player/GameEvents" to="BasicOBJ_Group/Player" method="ClearPool"]
-[connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]
-[connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D2" method="Trigger"]
-[connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Obstacle3/LocalRotAnimator" method="Trigger"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger8/event" to="Scene_Group/Scene_001/Obstacle3/localpos" method="Trigger"]
 
 [editable path="BasicOBJ_Group/Player"]

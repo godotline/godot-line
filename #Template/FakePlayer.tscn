@@ -9,8 +9,14 @@ material = ExtResource("2_htf3w")
 [sub_resource type="BoxShape3D" id="BoxShape3D_47x6u"]
 size = Vector3(0.3, 1, 0.3)
 
-[node name="FakePlayer" type="CharacterBody3D" unique_id=226051297]
+[node name="FakePlayer" type="RigidBody3D" unique_id=226051297]
+mass = 100.0
 collision_mask = 2
+axis_lock_linear_x = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
 
 [node name="FakePlayerComponent" type="Node3D" parent="."]
 script = ExtResource("1_xljse")
@@ -23,3 +29,23 @@ mesh = SubResource("BoxMesh_igvb5")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1225336789]
 shape = SubResource("BoxShape3D_47x6u")
+
+[node name="GroundRayFrontLeft" type="RayCast3D" parent="."]
+position = Vector3(-0.15, -0.4, -0.15)
+target_position = Vector3(0, -0.15, 0)
+collision_mask = 2
+
+[node name="GroundRayFrontRight" type="RayCast3D" parent="."]
+position = Vector3(0.15, -0.4, -0.15)
+target_position = Vector3(0, -0.15, 0)
+collision_mask = 2
+
+[node name="GroundRayBackLeft" type="RayCast3D" parent="."]
+position = Vector3(-0.15, -0.4, 0.15)
+target_position = Vector3(0, -0.15, 0)
+collision_mask = 2
+
+[node name="GroundRayBackRight" type="RayCast3D" parent="."]
+position = Vector3(0.15, -0.4, 0.15)
+target_position = Vector3(0, -0.15, 0)
+collision_mask = 2

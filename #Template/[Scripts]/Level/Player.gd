@@ -1,5 +1,5 @@
 @tool
-extends CharacterBody3D
+extends RigidBody3D
 class_name Player
 
 static var instance: Player
@@ -9,9 +9,6 @@ const HIT_CLIP: AudioStream = preload("res://#Template/[Resources]/Hit.wav")
 const DROWNED_CLIP: AudioStream = preload("res://#Template/[Resources]/WaterDie.wav")
 const GROUNDED_RAY_START_OFFSET: float = 0.1
 const GROUNDED_RAY_DISTANCE: float = 0.05
-const GROUND_HEIGHT_RAY_START_OFFSET: float = 0.1
-const GROUND_HEIGHT_RAY_DISTANCE: float = 2.0
-const GROUND_SURFACE_NORMAL_MIN_Y: float = 0.01
 
 ## ========== 事件信号 ==========
 signal OnTurn		## 玩家转向（对齐 Unity Player.OnTurn）
@@ -84,7 +81,6 @@ var tailHolder: Node3D
 @onready var tailPosition: Vector3 = position
 @onready var material: StandardMaterial3D = $MeshInstance3D.get_surface_override_material(0)
 @onready var collisionShape: CollisionShape3D = $CollisionShape3D
-@onready var groundHeightRay: RayCast3D = $GroundHeightRay
 var groundRays: Array[RayCast3D] = []
 @onready var tree: SceneTree = get_tree()
 @onready var animationNode: AnimationPlayer = get_node(animation) if animation else null
@@ -228,11 +224,15 @@ func _clear_scene_reload_guard() -> void:
 func _on_start_from_startpage() -> void:
 	Turn()
 
-func _physics_process(delta: float) -> void:
-	if not Engine.is_editor_hint() and (isLive or LevelManager.GameState == LevelManager.GameStatus.Moving):
-		# X/Z 由 _move_head 直接推进，Ground 只通过射线参与 Y 方向落地。
-		# Waiting+isLive：对齐 Unity Rigidbody 重力（开局悬空先落地才能点开始）。
-		applyVerticalMotion(delta)
+func _physics_process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+	if fly:
+		axis_lock_linear_y = true
+		linear_velocity.y = 0.0
+		position.y = y
+	else:
+		axis_lock_linear_y = false
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or (not isLive and LevelManager.GameState != LevelManager.GameStatus.Moving) or LevelManager.GameState == LevelManager.GameStatus.Waiting:
@@ -283,9 +283,17 @@ func _process(delta: float) -> void:
 				$MeshInstance3D.visible = true
 			didCreateTail = true
 
+func _syncPhysicsXZ() -> void:
+	var physicsTransform: Transform3D = PhysicsServer3D.body_get_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM)
+	var synced: Transform3D = global_transform
+	synced.origin.y = physicsTransform.origin.y
+	PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, synced)
+	global_transform = synced
+
 func _move_head(delta: float) -> void:
 	var forward: Vector3 = basis * Vector3.BACK
 	position += forward * Speed * delta
+	_syncPhysicsXZ()
 
 func checkGrounded() -> bool:
 	# RayCast3D 的碰撞结果由物理帧更新；普通帧/输入回调只读取缓存，避免访问 Jolt 空间。
@@ -293,48 +301,6 @@ func checkGrounded() -> bool:
 		if groundRay and groundRay.is_colliding():
 			return true
 	return false
-
-func applyVerticalMotion(delta: float) -> void:
-	if fly:
-		position.y = y
-		velocity.y = 0.0
-		return
-
-	velocity.y += get_current_gravity().y * delta
-	var verticalDistance: float = velocity.y * delta
-	if verticalDistance > 0.0:
-		position.y += verticalDistance
-		return
-
-	var groundPoint: Vector3 = Vector3.ZERO
-	var grounded: bool = false
-	if groundHeightRay and groundHeightRay.is_colliding() and _isGroundSurface(groundHeightRay):
-		groundPoint = groundHeightRay.get_collision_point()
-		grounded = true
-	else:
-		for groundRay: RayCast3D in groundRays:
-			if groundRay and groundRay.is_colliding():
-				groundPoint = groundRay.get_collision_point()
-				grounded = true
-				break
-
-	if not grounded:
-		position.y += verticalDistance
-		return
-
-	var nextGlobalY: float = global_position.y + verticalDistance
-	var box: BoxShape3D = collisionShape.shape as BoxShape3D
-	var halfHeight: float = box.size.y * 0.5
-	var collisionOffsetY: float = collisionShape.position.y
-	var floorGlobalY: float = groundPoint.y + halfHeight - collisionOffsetY
-	if nextGlobalY <= floorGlobalY:
-		global_position.y = floorGlobalY
-		velocity.y = 0.0
-	else:
-		position.y += verticalDistance
-
-func _isGroundSurface(ray: RayCast3D) -> bool:
-	return ray.get_collision_normal().y >= GROUND_SURFACE_NORMAL_MIN_Y
 
 func _configureGroundRays() -> void:
 	if not collisionShape or not collisionShape.shape is BoxShape3D:
@@ -353,9 +319,6 @@ func _configureGroundRays() -> void:
 		if groundRay:
 			groundRay.position = rayPositions[index]
 			groundRay.target_position = Vector3(0.0, -(GROUNDED_RAY_DISTANCE + GROUNDED_RAY_START_OFFSET), 0.0)
-	if groundHeightRay:
-		groundHeightRay.position = collisionShape.position + Vector3(0.0, halfSize.y + GROUND_HEIGHT_RAY_START_OFFSET, 0.0)
-		groundHeightRay.target_position = Vector3(0.0, -(halfSize.y + GROUND_HEIGHT_RAY_DISTANCE), 0.0)
 
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
@@ -617,10 +580,14 @@ func get_current_gravity() -> Vector3:
 func set_gravity_override(value: Vector3) -> void:
 	gravityOverride = value
 	hasGravityOverride = true
+	gravity_scale = 0.0
+	constant_force = value * mass
 
 func clear_gravity_override() -> void:
 	gravityOverride = Vector3.ZERO
 	hasGravityOverride = false
+	gravity_scale = 1.0
+	constant_force = Vector3.ZERO
 
 func get_scene_camera() -> Camera3D:
 	if not is_instance_valid(sceneCamera):
@@ -728,8 +695,9 @@ func Turn() -> void:
 	if gameStarts:
 		_currentDirection = 1 - _currentDirection
 		rotation_degrees = currentDirection
+		PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, global_transform)
 		_sync_henshin_rotation()
-		velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+		linear_velocity = Vector3.ZERO
 		CreateTail()
 		emit_signal("OnTurn")
 		emitGameEvent(2)
@@ -744,6 +712,7 @@ func Turn() -> void:
 		# 对齐 Unity Player.cs：开局隐藏鼠标（死亡 / 结算时由 LevelUI 恢复显示）
 		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 		rotation_degrees = currentDirection
+		PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, global_transform)
 		_sync_henshin_rotation()
 		_resume_managed_animators()
 		Timeline.Play()
@@ -752,14 +721,14 @@ func Turn() -> void:
 			_play_music_from_level_data()
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			_resume_fake_players()
-			velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+			linear_velocity = Vector3.ZERO
 			CreateTail()
 		elif musicDelay > 0:
 			delayApplied = true
 			# 正值：线立即移动，音乐延后播放（对齐 Unity delay > 0 分支）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			_resume_fake_players()
-			velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+			linear_velocity = Vector3.ZERO
 			CreateTail()
 			get_tree().create_timer(musicDelay).timeout.connect(_play_music_from_level_data)
 		elif musicDelay < 0:
@@ -772,7 +741,7 @@ func Turn() -> void:
 			# 零值：音画同步启动（原行为）
 			LevelManager.GameState = LevelManager.GameStatus.Playing
 			_resume_fake_players()
-			velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+			linear_velocity = Vector3.ZERO
 			CreateTail()
 			_play_music_from_level_data()
 
@@ -813,7 +782,7 @@ func _play_music(startTime: float) -> void:
 func _start_game_after_delay() -> void:
 	LevelManager.GameState = LevelManager.GameStatus.Playing
 	_resume_fake_players()
-	velocity = to_global(Vector3(0, 0, 1) * Speed) - position
+	linear_velocity = Vector3.ZERO
 
 	CreateTail()
 
@@ -837,7 +806,7 @@ func PlayerDeath(reason: LevelManager.DieReason = LevelManager.DieReason.Hit, re
 	match reason:
 		LevelManager.DieReason.Hit:
 			LevelManager.GameState = LevelManager.GameStatus.Died
-			velocity = Vector3.ZERO
+			linear_velocity = Vector3.ZERO
 			AudioManager.PlayClip(HIT_CLIP, 1.0)
 		LevelManager.DieReason.Drowned:
 			LevelManager.GameState = LevelManager.GameStatus.Moving

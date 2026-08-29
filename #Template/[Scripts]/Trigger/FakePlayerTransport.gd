@@ -18,7 +18,7 @@ enum TransportType {
 @export var transport_position: Vector3 = Vector3.ZERO
 
 func trigger(body: Node3D) -> bool:
-	if not fakePlayer or not body is CharacterBody3D:
+	if not fakePlayer or not body is PhysicsBody3D:
 		return false
 	if tpToPlayer:
 		_set_fake_player_position(body.global_position + offset)

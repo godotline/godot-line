@@ -91,7 +91,7 @@ addons/
 - **`LevelManager`** (`class_name LevelManager`)：游戏状态机（`GameStatus` 枚举）、检查点数据、复活监听器分发（`add_revive_listener` / `emit_revive`）。
 - **`AudioManager`** (`class_name AudioManager`)：音频管理（`PlayClip`, `PlayTrack`, `FadeOut`, `Stop` 等）。统一通过 `Player.SoundTrack` 获取音乐播放器；`SoundTrack` 为运行时由 `AudioManager.PlayTrack` 创建的属性，按 Unity 命名保留大写。注意：时间属性名为 `time`（小写，避免遮蔽 Godot 内置 `Time` 类）。
 - **`SetLatency`** (`class_name SetLatency`)：延迟与音量配置，持久化至 `user://settings.cfg`。
-- **`Player.instance`**：Player（`CharacterBody3D`）上的静态单例引用，在 `Player._ready()` 中注册，在编辑器环境中为 `null`（使用前必须判空）。
+- **`Player.instance`**：Player（`RigidBody3D`）上的静态单例引用，在 `Player._ready()` 中注册，在编辑器环境中为 `null`（使用前必须判空）。
 
 ## 检查点与皇冠 (Checkpoint / Crown)
 

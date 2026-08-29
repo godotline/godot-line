@@ -2,9 +2,6 @@
 extends Node
 signal power_changed(new_power: float)
 
-# Unity Player rigidbody 质量 (Player.prefab m_Mass: 100)；Impulse 力 -> 初速度 = power / mass
-const PLAYER_MASS: float = 100.0
-
 @export var power: float = 500.0:
 	set(value):
 		power = value
@@ -20,19 +17,14 @@ func _ready() -> void:
 
 ## 由父节点 BaseTrigger 调用的入口方法
 func trigger(other: Node3D) -> bool:
-	if not (other is Player or other.is_in_group("Player")):
+	var player: Player = other as Player
+	if not player:
 		return false
-	var character: CharacterBody3D = other as CharacterBody3D
-	if character:
-		if changeDirection and Player.instance:
-			Player.instance.Turn()
-		# Unity: Rigidbody.AddForce(0, power, 0, Impulse)，mass=100 -> 初速度 = power / mass
-		var jumpSpeed: float = power / PLAYER_MASS
-		character.velocity += Vector3(0, jumpSpeed, 0)
-		if Player.instance:
-			Player.instance.emitGameEvent(7)
-		return true
-	return false
+	if changeDirection:
+		player.Turn()
+	player.apply_impulse(Vector3(0.0, power, 0.0))
+	player.emitGameEvent(7)
+	return true
 
 ## 通知子 JumpPredictor/FallPredictor 刷新预览
 func _update_predictor() -> void:

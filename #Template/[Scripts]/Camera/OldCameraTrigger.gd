@@ -44,7 +44,7 @@ func _process(_delta: float) -> void:
 func trigger(body: Node3D) -> void:
 	if useTime or not canBeTriggered:
 		return
-	if body is CharacterBody3D:
+	if body is PhysicsBody3D:
 		_apply_camera()
 
 

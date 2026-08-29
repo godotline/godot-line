@@ -15,12 +15,14 @@ size = Vector3(0.3, 1, 0.3)
 [sub_resource type="BoxMesh" id="2"]
 material = ExtResource("4_osvj6")
 
-[node name="Player" type="CharacterBody3D" unique_id=1905697100]
-collision_mask = 0
+[node name="Player" type="RigidBody3D" unique_id=1905697100]
+mass = 100.0
+collision_mask = 2
+axis_lock_linear_x = true
+axis_lock_linear_z = true
 axis_lock_angular_x = true
 axis_lock_angular_y = true
 axis_lock_angular_z = true
-floor_max_angle = 1.553343
 script = ExtResource("1")
 deathParticle = ExtResource("2_jntxg")
 metadata/_edit_group_ = true
@@ -46,11 +48,6 @@ collision_mask = 2
 [node name="GroundRayBackRight" type="RayCast3D" parent="." unique_id=1608317724]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, -0.4, 0.15)
 target_position = Vector3(0, -0.15, 0)
-collision_mask = 2
-
-[node name="GroundHeightRay" type="RayCast3D" parent="." unique_id=1553427118]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
-target_position = Vector3(0, -2.5, 0)
 collision_mask = 2
 
 [node name="Area3D" type="Area3D" parent="." unique_id=1215796459]

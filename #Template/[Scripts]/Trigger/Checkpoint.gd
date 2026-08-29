@@ -308,24 +308,26 @@ func revive() -> void:
 			REVIVE_FADE_DURATION,
 			func() -> void: _reset_scene(mainLine),
 			func() -> void:
+				mainLine.freeze = false
 				mainLine.isLive = true
 				mainLine.allowTurn = true
 				ui.visible = false
 		)
 	else:
 		_reset_scene(mainLine)
+		mainLine.freeze = false
 		mainLine.isLive = true
 		mainLine.allowTurn = true
 
 func _reset_scene(mainLine: Player) -> void:
-	# Restore player state
+	mainLine.freeze = true
+	mainLine.linear_velocity = Vector3.ZERO
 	LevelManager.load_checkpoint_to_main_line(mainLine)
 	if revivePosition:
 		mainLine.global_position = revivePosition.global_position
 	mainLine.Speed = playerSpeed
 	_restore_gravity(mainLine)
 	mainLine.isEnd = false
-	mainLine.velocity = Vector3.ZERO
 	mainLine.gameStarts = false
 	mainLine.delayApplied = false
 	mainLine.scale = Vector3.ONE

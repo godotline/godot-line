@@ -171,7 +171,7 @@ static func save_checkpoint(mainLine: PhysicsBody3D, cameraFollower: Node3D, rev
 ## 加载检查点到游戏对象
 ## ============================================================
 
-static func load_checkpoint_to_main_line(mainLine: CharacterBody3D) -> void:
+static func load_checkpoint_to_main_line(mainLine: Player) -> void:
 	if mainLineTransform:
 		mainLine.transform = mainLineTransform
 		if revivePosition != Vector3.ZERO:
@@ -280,15 +280,15 @@ static func GameOverRevive() -> void:
 ## ============================================================
 
 ## 传送：设置玩家位置、强制相机跟随、改变朝向
-static func InitPlayerPosition(player: CharacterBody3D, position: Vector3, forceCamera: bool = false, doTurn: bool = false, targetDir: Direction = Direction.First) -> void:
+static func InitPlayerPosition(player: Player, position: Vector3, forceCamera: bool = false, doTurn: bool = false, targetDir: Direction = Direction.First) -> void:
 	player.global_position = position
 
 	if doTurn:
 		var dirIndex: int = 0 if targetDir == Direction.First else 1
 		player._currentDirection = dirIndex
 		player.rotation_degrees = player.currentDirection
-		# 转向后重新计算速度方向
-		player.velocity = player.to_global(Vector3(0, 0, 1) * player.Speed) - player.global_position
+		PhysicsServer3D.body_set_state(player.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, player.global_transform)
+		player.linear_velocity = Vector3.ZERO
 
 	if forceCamera:
 		var cf: CameraFollower = CameraFollower.instance

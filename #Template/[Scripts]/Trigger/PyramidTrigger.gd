@@ -8,7 +8,7 @@ extends Node
 @export var finalDirection: Vector3 = Vector3.ZERO
 
 func trigger(body: Node3D) -> bool:
-	# FakePlayer 也使用 CharacterBody3D 宿主，不能把它当作真实玩家触发金字塔。
+	# FakePlayer 也使用 RigidBody3D 宿主，不能把它当作真实玩家触发金字塔。
 	if body != Player.instance:
 		return false
 
