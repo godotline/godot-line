@@ -395,7 +395,7 @@ script = ExtResource("17_j2eg4")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.198456, 0.50000095, 12.258225)
 
 [node name="Trigger3" parent="Scene_Group/Scene_001" unique_id=1323296306 instance=ExtResource("11_mq52h")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 3.5433593, -0.5, 10.8759365)
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 3.5433593, -0.5, 13.088349)
 
 [node name="Jump" type="Node" parent="Scene_Group/Scene_001/Trigger3" unique_id=2084784200]
 script = ExtResource("21_tdro7")
@@ -428,7 +428,7 @@ script = ExtResource("30_skrbu")
 actives = Array[ExtResource("31_d7stf")]([SubResource("Resource_e7kbm")])
 
 [node name="Gem" parent="Scene_Group/Scene_001" unique_id=149611988 instance=ExtResource("28_s0ncg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9676895, 0.15721011, 7.980546)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13407886, 0.15721011, 11.375734)
 
 [node name="Gem" parent="Scene_Group/Scene_001/Gem/Area3D" parent_id_path=PackedInt32Array(149611988, 1594876525) index="0" unique_id=1613085479]
 fake = true

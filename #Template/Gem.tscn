@@ -48,6 +48,7 @@ offsets = PackedFloat32Array(0, 0.0662089, 0.334493, 1)
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 
 [node name="Gem" type="Node3D" unique_id=149611988]
+metadata/_edit_group_ = true
 
 [node name="Area3D" type="Area3D" parent="." unique_id=1594876525]
 collision_layer = 0

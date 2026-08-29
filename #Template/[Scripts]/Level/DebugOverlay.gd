@@ -10,6 +10,7 @@ var shown: bool = false
 var panelHovered: bool = false
 var lastAppliedShown: bool = true
 var pollTimer: Timer
+const DEBUG_FONT_SCALE: float = 1.5
 
 func _ready() -> void:
 	shown = false
@@ -42,8 +43,11 @@ func _onImguiLayout() -> void:
 	# Only intervene while Playing; LevelUI owns the cursor during death and results screens.
 	# Android touch-to-mouse events can carry the previous mouse position, which makes
 	# an outside tap look like a window drag. Keep the debug window fixed on Android.
-	var windowFlags: int = ImGui.WINDOW_NO_MOVE if OS.get_name() == "Android" else 0
+	var windowFlags: int = ImGui.WINDOW_NO_BACKGROUND | ImGui.WINDOW_NO_SCROLLBAR | ImGui.WINDOW_NO_RESIZE | ImGui.WINDOW_ALWAYS_AUTO_RESIZE
+	if OS.get_name() == "Android":
+		windowFlags |= ImGui.WINDOW_NO_MOVE
 	var expanded: bool = ImGui.begin_ex("DebugOverlay", windowFlags)
+	ImGui.set_window_font_scale(DEBUG_FONT_SCALE)
 	# begin returns false when collapsed, leaving the title bar available for reopening.
 	panelHovered = ImGui.is_window_hovered(0)
 	if expanded:

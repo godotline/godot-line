@@ -2,11 +2,10 @@
 
 [ext_resource type="ArrayMesh" uid="uid://bapgfhj4dq6kj" path="res://#Template/[Resources]/Models/Crown.obj" id="1"]
 [ext_resource type="Script" uid="uid://cf702gx6voc2l" path="res://#Template/[Scripts]/Trigger/Crown.gd" id="2"]
-[ext_resource type="Texture2D" uid="uid://bvwwwofsragrp" path="res://#Template/[Textures]/CrownInside.png" id="3_ctg82"]
 [ext_resource type="Texture2D" uid="uid://bvwwwofsragrp" path="res://#Template/[Textures]/CrownInside.png" id="5_inside"]
 [ext_resource type="Texture2D" uid="uid://ibq6myi7ifde" path="res://#Template/[Textures]/CrownOutline.png" id="6_outline"]
 [ext_resource type="Texture2D" uid="uid://mj12gw3q1d3w" path="res://#Template/[Textures]/FX_CrownCircle.png" id="7_circle"]
-[ext_resource type="Texture2D" path="res://#Template/[Textures]/Spirit.png" id="8_spirit"]
+[ext_resource type="Texture2D" uid="uid://d02vqqlhrs4an" path="res://#Template/[Textures]/Spirit.png" id="8_spirit"]
 [ext_resource type="Script" uid="uid://bb5lh2cc1yfy4" path="res://#Template/[Scripts]/Trigger/BaseTrigger.gd" id="10_base"]
 [ext_resource type="Script" uid="uid://dqs5yftnojwpe" path="res://#Template/[Scripts]/Level/DisableInPlayMode.gd" id="10_dipm"]
 
@@ -15,7 +14,7 @@ size = Vector3(1, 5, 10)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qoafd"]
 albedo_color = Color(1, 1, 0, 1)
-albedo_texture = ExtResource("3_ctg82")
+albedo_texture = ExtResource("5_inside")
 
 [sub_resource type="BoxMesh" id="BoxMesh_t50w7"]
 
@@ -66,6 +65,7 @@ offsets = PackedFloat32Array(0, 0.110887095, 1)
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.5411765, 1, 1, 1, 0)
 
 [node name="Crown" type="Node3D" unique_id=1805653336]
+metadata/_edit_group_ = true
 
 [node name="Area3D" type="Area3D" parent="." unique_id=220972321]
 transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0, 0, 0)
@@ -91,7 +91,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_qoafd")
 [node name="RevivePosition" type="MeshInstance3D" parent="." unique_id=1500499588]
 mesh = SubResource("BoxMesh_t50w7")
 
-[node name="DisableInPlayMode" type="Node" parent="RevivePosition"]
+[node name="DisableInPlayMode" type="Node" parent="RevivePosition" unique_id=1107854061]
 script = ExtResource("10_dipm")
 
 [node name="CrownSprite" type="Node3D" parent="." unique_id=1095474833]
