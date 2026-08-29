@@ -4,7 +4,7 @@
 [ext_resource type="AudioStream" uid="uid://84k3myx63ukq" path="res://#Template/[Resources]/Hit.wav" id="2"]
 [ext_resource type="PackedScene" uid="uid://bvchtbimvb182" path="res://#Template/[Resources]/DeathParticle.tscn" id="2_jntxg"]
 [ext_resource type="Material" uid="uid://jitnvfywue03" path="res://#Template/[Materials]/MainPlayer.tres" id="4_osvj6"]
-[ext_resource type="Script" path="res://#Template/[Scripts]/Level/GameEvents.gd" id="6_gevts"]
+[ext_resource type="Script" uid="uid://brl2j1eoevbdp" path="res://#Template/[Scripts]/Level/GameEvents.gd" id="6_gevts"]
 
 [sub_resource type="BoxShape3D" id="PlayerBoxShape3D"]
 size = Vector3(0.3, 1, 0.3)
@@ -23,32 +23,33 @@ axis_lock_angular_z = true
 floor_max_angle = 1.553343
 script = ExtResource("1")
 deathParticle = ExtResource("2_jntxg")
+metadata/_edit_group_ = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=157464276]
 shape = SubResource("PlayerBoxShape3D")
 
-[node name="GroundRayFrontLeft" type="RayCast3D" parent="."]
-position = Vector3(-0.15, -0.4, -0.15)
+[node name="GroundRayFrontLeft" type="RayCast3D" parent="." unique_id=1040103988]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, -0.4, -0.15)
 target_position = Vector3(0, -0.15, 0)
 collision_mask = 2
 
-[node name="GroundRayFrontRight" type="RayCast3D" parent="."]
-position = Vector3(0.15, -0.4, -0.15)
+[node name="GroundRayFrontRight" type="RayCast3D" parent="." unique_id=1744155976]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, -0.4, -0.15)
 target_position = Vector3(0, -0.15, 0)
 collision_mask = 2
 
-[node name="GroundRayBackLeft" type="RayCast3D" parent="."]
-position = Vector3(-0.15, -0.4, 0.15)
+[node name="GroundRayBackLeft" type="RayCast3D" parent="." unique_id=1689115400]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, -0.4, 0.15)
 target_position = Vector3(0, -0.15, 0)
 collision_mask = 2
 
-[node name="GroundRayBackRight" type="RayCast3D" parent="."]
-position = Vector3(0.15, -0.4, 0.15)
+[node name="GroundRayBackRight" type="RayCast3D" parent="." unique_id=1608317724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, -0.4, 0.15)
 target_position = Vector3(0, -0.15, 0)
 collision_mask = 2
 
-[node name="GroundHeightRay" type="RayCast3D" parent="."]
-position = Vector3(0, 0.6, 0)
+[node name="GroundHeightRay" type="RayCast3D" parent="." unique_id=1553427118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 target_position = Vector3(0, -2.5, 0)
 collision_mask = 2
 
@@ -56,7 +57,7 @@ collision_mask = 2
 collision_layer = 0
 collision_mask = 4
 
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="Area3D" unique_id=269967029]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=269967029]
 shape = SubResource("4")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=2129407488]
@@ -65,7 +66,7 @@ stream = ExtResource("2")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1827097049]
 mesh = SubResource("2")
 
-[node name="GameEvents" type="Node" parent="."]
+[node name="GameEvents" type="Node" parent="." unique_id=2142647973]
 script = ExtResource("6_gevts")
 
 [connection signal="body_entered" from="Area3D" to="." method="_on_Area_body_entered"]

@@ -109,7 +109,6 @@ var previousFrameIsGrounded: bool = false
 var pastIsOnFloorEffect: bool = false
 
 var gameStarts: bool = false
-var tailScale: int = 1
 
 var startTransform: Transform3D = transform
 var loading: bool = false
@@ -125,9 +124,7 @@ var didCreateTail: bool = false
 ## ========== Tail 对象池 ==========
 const TAIL_COLLISION_LAYER: int = 1 << 3
 const TAIL_COLLISION_MASK: int = (1 << 1) | (1 << 2)
-const TAIL_JOIN_OVERLAP: float = 0.025
 const TAIL_COLLISION_MARGIN: float = 0.001
-const TAIL_INITIAL_LENGTH: float = 1.0
 const TAIL_MASS: float = 1000.0
 const TAIL_LINEAR_DAMP: float = 1.0
 const TAIL_ANGULAR_DAMP: float = 2.0
@@ -494,59 +491,46 @@ func CreateTail() -> void:
 	var tailHolder: Node3D = _get_or_create_player_tail_holder()
 	if not tailHolder:
 		return
-	_finish_tail_join(line)
-	_spawn_corner_tail(position, rotation)
+
+	var nowForward: Vector3 = basis * Vector3.BACK
+	nowForward.y = 0.0
+	if nowForward.length_squared() > 0.0:
+		nowForward = nowForward.normalized()
+	var joinOffset: float = 0.5
+	if is_instance_valid(line):
+		var previousBody: RigidBody3D = line.get_parent() as RigidBody3D
+		if previousBody:
+			var previousForward: Vector3 = previousBody.basis * Vector3.BACK
+			previousForward.y = 0.0
+			if previousForward.length_squared() > 0.0:
+				previousForward = previousForward.normalized()
+			var directionDot: float = clampf(previousForward.dot(nowForward), -1.0, 1.0)
+			var angle: float = rad_to_deg(acos(directionDot))
+			if angle <= 90.0:
+				joinOffset = 0.5 * tan(deg_to_rad(angle * 0.5))
+			else:
+				joinOffset = -0.5 * tan(deg_to_rad((180.0 - angle) * 0.5))
+			var horizontalOffset: Vector3 = position - tailPosition
+			horizontalOffset.y = 0.0
+			var end: Vector3 = tailPosition + previousForward * (horizontalOffset.length() + joinOffset)
+			_update_tail_body(line, Vector3.ZERO, tailPosition.distance_to(end))
+
+	tailPosition = position - nowForward * absf(joinOffset)
 	line = _get_from_pool()
 	line.name = "TailMesh"
 	line.mesh = mesh
 	line.position = Vector3.ZERO
 	line.rotation = Vector3.ZERO
-	var initialScale: Vector3 = Vector3.ONE
-	line.scale = initialScale
+	line.scale = Vector3.ONE
 	line.set_surface_override_material(0, material)
 	line.visible = showLineTail or not henShin
 
 	var body: RigidBody3D = _create_tail_body()
-	tailPosition = position
-	body.position = position
+	body.position = tailPosition
 	body.rotation = rotation
 	tailHolder.add_child(body)
 	body.add_child(line)
-	_update_tail_collision(line, initialScale)
-
-func _finish_tail_join(tail: MeshInstance3D) -> void:
-	var halfWidth: float = float(tailScale) * 0.5
-	if not is_instance_valid(tail):
-		return
-
-	var body: RigidBody3D = tail.get_parent() as RigidBody3D
-	if not body:
-		return
-
-	var previousForward: Vector3 = body.basis * Vector3.BACK
-	previousForward.y = 0.0
-	previousForward = previousForward.normalized()
-	var currentForward: Vector3 = basis * Vector3.BACK
-	currentForward.y = 0.0
-	currentForward = currentForward.normalized()
-
-	var directionDot: float = clampf(previousForward.dot(currentForward), -1.0, 1.0)
-	var angle: float = rad_to_deg(acos(directionDot))
-	var joinOffset: float
-	if angle <= 90.0:
-		joinOffset = halfWidth * tan(deg_to_rad(angle * 0.5))
-	else:
-		joinOffset = -halfWidth * tan(deg_to_rad((180.0 - angle) * 0.5))
-
-	var horizontalOffset: Vector3 = position - tailPosition
-	horizontalOffset.y = 0.0
-	if horizontalOffset.length() < TAIL_INITIAL_LENGTH:
-		_update_tail_body(tail, tailPosition, TAIL_INITIAL_LENGTH)
-		return
-	var end: Vector3 = tailPosition + previousForward * (horizontalOffset.length() + joinOffset + TAIL_JOIN_OVERLAP)
-	end.y = tailPosition.y
-	var joinLength: float = maxf(tailPosition.distance_to(end), TAIL_INITIAL_LENGTH)
-	_update_tail_body(tail, (tailPosition + end) / 2, joinLength)
+	_update_tail_body(line, Vector3.ZERO, position.distance_to(tailPosition))
 
 func _create_tail_body() -> RigidBody3D:
 	if not tailBodyPool.full:
@@ -624,27 +608,6 @@ func _update_tail_collision(tail: MeshInstance3D, tailScale: Vector3) -> void:
 	var box: BoxShape3D = collision.shape as BoxShape3D
 	box.size = meshAabb.size * tailScale.abs()
 	collision.position = tail.position + meshAabb.get_center() * tailScale
-
-func _spawn_corner_tail(atPosition: Vector3, atRotation: Vector3) -> void:
-	# 拐角只保留一个可模拟刚体，避免无碰撞网格盖住真正的物理尾。
-	var body: RigidBody3D = _create_tail_body()
-	body.name = "CornerTail"
-	body.position = atPosition
-	body.rotation = atRotation
-
-	var tailMesh: MeshInstance3D = _get_from_pool()
-	tailMesh.name = "TailMesh"
-	tailMesh.mesh = mesh
-	tailMesh.position = Vector3.ZERO
-	tailMesh.rotation = Vector3.ZERO
-	tailMesh.scale = Vector3.ONE
-	tailMesh.set_surface_override_material(0, material)
-	tailMesh.visible = showLineTail or not henShin
-
-	var tailHolder: Node3D = _get_or_create_player_tail_holder()
-	tailHolder.add_child(body)
-	body.add_child(tailMesh)
-	_update_tail_collision(tailMesh, Vector3.ONE)
 
 func get_current_gravity() -> Vector3:
 	if hasGravityOverride:
