@@ -11,6 +11,12 @@ enum GameStatus {
 	Completed
 }
 
+enum DieReason {
+	Hit,
+	Drowned,
+	Border
+}
+
 enum Direction {
 	First,
 	Second

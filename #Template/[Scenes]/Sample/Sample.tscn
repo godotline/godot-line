@@ -337,7 +337,10 @@ isWall = true
 [node name="Crown" parent="Scene_Group/Scene_001" unique_id=1805653336 instance=ExtResource("13_hkwba")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.168884, -9.536743e-07, 16.516552)
 
-[node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" parent_id_path=PackedInt32Array(1805653336, 220972321) index="0" unique_id=1220123700]
+[node name="Area3D" parent="Scene_Group/Scene_001/Crown" index="0" unique_id=220972321]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, -11.51933, 0, -11.51933)
+
+[node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" index="0" unique_id=1220123700]
 GameTime = 2.4613333
 direction = 1
 cameraNew = SubResource("Resource_skrbu")
@@ -436,6 +439,9 @@ fake = true
 [node name="Obstacle" parent="Scene_Group/Scene_001/Gem" unique_id=369395415 instance=ExtResource("15_6gt33")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 visible = false
+
+[node name="Ground3" parent="Scene_Group/Scene_001" unique_id=26900690 instance=ExtResource("8_lthrg")]
+transform = Transform3D(12.57843, -1.2079841, 0, 8.029628, 1.89231, 0, 0, 0, 6.3337374, 9.9375305, 1.3641901, 3.9525747)
 
 [connection signal="onPlayerJump" from="BasicOBJ_Group/Player/GameEvents" to="BasicOBJ_Group/Player" method="ClearPool"]
 [connection signal="triggered" from="Scene_Group/Scene_001/Trigger4/event" to="Scene_Group/Scene_001/Ground2/Node3D" method="Trigger"]

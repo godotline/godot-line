@@ -6,9 +6,8 @@
 [ext_resource type="Material" uid="uid://jitnvfywue03" path="res://#Template/[Materials]/MainPlayer.tres" id="4_osvj6"]
 [ext_resource type="Script" path="res://#Template/[Scripts]/Level/GameEvents.gd" id="6_gevts"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tmau4"]
-height = 1.0
-radius = 0.15
+[sub_resource type="BoxShape3D" id="PlayerBoxShape3D"]
+size = Vector3(0.3, 1, 0.3)
 
 [sub_resource type="BoxShape3D" id="4"]
 size = Vector3(0.3, 1, 0.3)
@@ -17,7 +16,7 @@ size = Vector3(0.3, 1, 0.3)
 material = ExtResource("4_osvj6")
 
 [node name="Player" type="CharacterBody3D" unique_id=1905697100]
-collision_mask = 2
+collision_mask = 0
 axis_lock_angular_x = true
 axis_lock_angular_y = true
 axis_lock_angular_z = true
@@ -26,7 +25,32 @@ script = ExtResource("1")
 deathParticle = ExtResource("2_jntxg")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=157464276]
-shape = SubResource("CapsuleShape3D_tmau4")
+shape = SubResource("PlayerBoxShape3D")
+
+[node name="GroundRayFrontLeft" type="RayCast3D" parent="."]
+position = Vector3(-0.15, -0.4, -0.15)
+target_position = Vector3(0, -0.15, 0)
+collision_mask = 2
+
+[node name="GroundRayFrontRight" type="RayCast3D" parent="."]
+position = Vector3(0.15, -0.4, -0.15)
+target_position = Vector3(0, -0.15, 0)
+collision_mask = 2
+
+[node name="GroundRayBackLeft" type="RayCast3D" parent="."]
+position = Vector3(-0.15, -0.4, 0.15)
+target_position = Vector3(0, -0.15, 0)
+collision_mask = 2
+
+[node name="GroundRayBackRight" type="RayCast3D" parent="."]
+position = Vector3(0.15, -0.4, 0.15)
+target_position = Vector3(0, -0.15, 0)
+collision_mask = 2
+
+[node name="GroundHeightRay" type="RayCast3D" parent="."]
+position = Vector3(0, 0.6, 0)
+target_position = Vector3(0, -2.5, 0)
+collision_mask = 2
 
 [node name="Area3D" type="Area3D" parent="." unique_id=1215796459]
 collision_layer = 0

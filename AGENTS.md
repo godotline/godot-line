@@ -5,6 +5,10 @@
 - **引擎版本**：Godot 4.7（Dancing Line / 跳舞的线 游戏模板，GDScript）。`project.godot` 为准。
 - **物理与渲染**：Jolt Physics（独立线程运行）；渲染器为 Mobile。
 
+## 代理工作准则
+
+- **不要自作聪明**：默认严格遵循项目既有约定与 Unity 源码，不要自行"优化"、重构或添加源码中没有的逻辑 / 抽象 / 防御层。唯一允许的自主改动：能带来**更好性能或更简洁实现**的替代方案（须明确优于现状，且不影响与 Unity 的对齐）。拿不准时按现状实现，不要替用户做设计决策。
+
 ## 调研与开发工具规则
 
 - **网络搜索**：使用 Tavily 工具查询 Godot API 与已知问题。**严禁通过 curl/下载引擎源码文件**，优先使用文档与搜索结果。
@@ -49,6 +53,7 @@ addons/
 - **写插件（`addons/plugin_arphros_importer`）时严禁往 `#Template` 塞导入器专用 / Arphros 适配逻辑**：仅数据解析、关卡构建，以及 Arphros 特有格式组件（如 `animatable.gd`，对应 `objects[].animatable` JSON）才放插件目录。
 - **判定先例**：`animatable.gd`、`sequence_trigger.gd` 为导入器专用 → 插件；`SetMaterialColor.gd` 为 `SetMaterialColor.cs` 的 Godot 移植 → `#Template`。
 - **命名保真（Unity 移植）**：移植组件时**类名 / 文件名沿用 Unity 源码原名**（如 Unity `SetMaterialColor` → Godot `SetMaterialColor.gd` + `class_name SetMaterialColor`），不得自行改名（如不得叫 `SetColor3D`）。字段 / 方法**优先对齐 Unity 源码命名**（如 Unity `duration` / `material` / `hasEmission` / `SetColor` 直接沿用，不另起 GDScript 风格名）；snake_case 仅用于 Godot 引擎 API 与 `_ready`/`_process`/`trigger` 等虚函数或约定方法，如模式 1 的 `trigger(body)`）。
+- **对齐 Unity 时可修正老旧命名**：移植 / 对齐 Unity 过程中，遇到旧代码中**不符合 Unity 命名、使用 `snake_case` 的标识符**（字段、方法、变量、信号），可直接改名为 Unity 对应命名（如 `set_auto_play` → `SetAuto`、`_triggered` → `triggered` 视 Unity 字段而定），无需保留旧名，并同步所有引用点。此权限仅适用于"向 Unity 对齐"时；纯 Godot 侧新增代码仍须遵守下方「GDScript 编码规范」的 `lowerCamelCase` / `PascalCase` 规则。
 - **注释 / 标注克制（Unity 移植）**：DLMTP 的 `SetMaterialColor.cs` 等源文本就几乎无注释、无分组标注。移植时**不要添加原版没有的文字说明、`@export_group` 解释性标签、冗余注释**，只保留与源码对应的必要结构与 Godot 端口必需的少量约束（如 `material_override` 保护共享模板材质可一行点出）。严禁画蛇添足。
 - **Unity 源码基准（DLMTP）**：移植保真度（命名、字段默认值、行为、Inspector 分组）一律以 Unity 模板源码为准，位于 `../../DLMTP-Template/Assets/#Template`（相对本仓库根目录；绝对即 `/home/meny/Code/DLMTP-Template/Assets/#Template` 下的 `Assets/#Template`）。任何"是否与 Unity 一致"的判断都回到该目录的对应 `.cs`。
 - **`@export_group` 必须与 Unity `[Title]` 对齐**：Godot 端口的 Inspector 分组标签**只能保留与 Unity 源码 `[Title("...")]` 完全一致者**（如 `TrackSwitchTrigger` 的 `Timeline Track Switch Control`、`Checkpoint`/`TTFCheckPoint` 的 `Player`/`Colors`/`Event`）；Unity 无对应 `[Title]` 的标签一律删除（如 `设置`、`预测设置`、`激活设置`、`传送设置`、`转向设置`、`TTF Visuals`、`Final设置`，以及 `Checkpoint` 的 `Config`/`Camera`/`Fog`/`Light`/`Ambient`）。禁止为 Godot 端口便利自行添加分组名。
@@ -70,6 +75,8 @@ addons/
 - 作为 `BaseTrigger`（或 `Trigger.tscn` 实例）的子节点放置。
 - `BaseTrigger` 采用鸭子类型（`has_method("trigger")`）自动遍历并调用子节点。
 - `BaseTrigger` 参数：`one_shot`（单次触发）、`require_playing`（需游戏运行中）、`track_exit`、`debug_mode`。
+- `KillPlayer.gd` 为模式 1 组件，仅在 `GameState == Playing` 且 `!Player.noDeath` 时调用 `Player.PlayerDeath`；死亡原因统一使用 `LevelManager.DieReason`。
+- Player 的 Obstacle 探测区域负责撞障碍死亡；不要在 `_physics_process` 中用 `is_on_wall()` 作为死亡路径，以保持 Ground 与 Obstacle 的语义区分。
 
 ## 通用添加组件面板 (Inspector 插件)
 

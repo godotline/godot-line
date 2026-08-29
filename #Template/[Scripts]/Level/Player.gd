@@ -5,6 +5,14 @@ class_name Player
 static var instance: Player
 static var sceneReloadInProgress: bool = false
 
+const HIT_CLIP: AudioStream = preload("res://#Template/[Resources]/Hit.wav")
+const DROWNED_CLIP: AudioStream = preload("res://#Template/[Resources]/WaterDie.wav")
+const GROUNDED_RAY_START_OFFSET: float = 0.1
+const GROUNDED_RAY_DISTANCE: float = 0.05
+const GROUND_HEIGHT_RAY_START_OFFSET: float = 0.1
+const GROUND_HEIGHT_RAY_DISTANCE: float = 2.0
+const GROUND_SURFACE_NORMAL_MIN_Y: float = 0.01
+
 ## ========== 事件信号 ==========
 signal OnTurn		## 玩家转向（对齐 Unity Player.OnTurn）
 
@@ -75,6 +83,9 @@ var tailHolder: Node3D
 @onready var mesh: Mesh = $MeshInstance3D.mesh
 @onready var tailPosition: Vector3 = position
 @onready var material: StandardMaterial3D = $MeshInstance3D.get_surface_override_material(0)
+@onready var collisionShape: CollisionShape3D = $CollisionShape3D
+@onready var groundHeightRay: RayCast3D = $GroundHeightRay
+var groundRays: Array[RayCast3D] = []
 @onready var tree: SceneTree = get_tree()
 @onready var animationNode: AnimationPlayer = get_node(animation) if animation else null
 
@@ -141,6 +152,16 @@ func emitGameEvent(index: int) -> void:
 func _ready() -> void:
 	add_to_group("Player")
 	instance = self
+	var frontLeft: RayCast3D = $GroundRayFrontLeft
+	var frontRight: RayCast3D = $GroundRayFrontRight
+	var backLeft: RayCast3D = $GroundRayBackLeft
+	var backRight: RayCast3D = $GroundRayBackRight
+	groundRays = [
+		frontLeft,
+		frontRight,
+		backLeft,
+		backRight
+	]
 	tailPool.size = poolSize
 	tailBodyPool.size = poolSize
 	if characterMaterial:
@@ -171,6 +192,7 @@ func _ready() -> void:
 	if is_inside_tree():
 		if levelData:
 			levelData.apply_to(self, get_world_3d().space)
+		_configureGroundRays()
 
 	# 实例化 DebugOverlay（调试面板）。对齐 Unity #if UNITY_EDITOR：仅运行时/调试构建生效，编辑器内不挂载
 	var debugOverlayScene: PackedScene = load("res://#Template/[Resources]/DebugOverlay.tscn") as PackedScene
@@ -211,20 +233,9 @@ func _on_start_from_startpage() -> void:
 
 func _physics_process(delta: float) -> void:
 	if not Engine.is_editor_hint() and (isLive or LevelManager.GameState == LevelManager.GameStatus.Moving):
-		# Unity 版在 Update() 中推进水平位移；物理帧只处理垂直运动和碰撞状态。
-		var horizontalVelocity: Vector3 = Vector3(velocity.x, 0.0, velocity.z)
-		velocity.x = 0.0
-		velocity.z = 0.0
-		if not is_on_floor():
-			velocity += get_current_gravity() * delta
-		move_and_slide()
-		velocity.x = horizontalVelocity.x
-		velocity.z = horizontalVelocity.z
-		if isLive and is_on_wall() and not noDeath and LevelManager.GameState == LevelManager.GameStatus.Playing:
-			# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab
-			PlayerDeath(showLineBody)
-		if fly:
-			$".".position.y = y
+		# X/Z 由 _move_head 直接推进，Ground 只通过射线参与 Y 方向落地。
+		# Waiting+isLive：对齐 Unity Rigidbody 重力（开局悬空先落地才能点开始）。
+		applyVerticalMotion(delta)
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or (not isLive and LevelManager.GameState != LevelManager.GameStatus.Moving) or LevelManager.GameState == LevelManager.GameStatus.Waiting:
@@ -233,7 +244,7 @@ func _process(delta: float) -> void:
 	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
 		_move_head(delta)
 
-	var isOnFloorNow: bool = is_on_floor() or fly
+	var isOnFloorNow: bool = checkGrounded() or fly
 	if LevelManager.GameState == LevelManager.GameStatus.Playing or LevelManager.GameState == LevelManager.GameStatus.Moving:
 		if isOnFloorNow and not pastIsOnFloorEffect:
 			_play_land_effect()
@@ -279,6 +290,76 @@ func _move_head(delta: float) -> void:
 	var forward: Vector3 = basis * Vector3.BACK
 	position += forward * Speed * delta
 
+func checkGrounded() -> bool:
+	# RayCast3D 的碰撞结果由物理帧更新；普通帧/输入回调只读取缓存，避免访问 Jolt 空间。
+	for groundRay: RayCast3D in groundRays:
+		if groundRay and groundRay.is_colliding():
+			return true
+	return false
+
+func applyVerticalMotion(delta: float) -> void:
+	if fly:
+		position.y = y
+		velocity.y = 0.0
+		return
+
+	velocity.y += get_current_gravity().y * delta
+	var verticalDistance: float = velocity.y * delta
+	if verticalDistance > 0.0:
+		position.y += verticalDistance
+		return
+
+	var groundPoint: Vector3 = Vector3.ZERO
+	var grounded: bool = false
+	if groundHeightRay and groundHeightRay.is_colliding() and _isGroundSurface(groundHeightRay):
+		groundPoint = groundHeightRay.get_collision_point()
+		grounded = true
+	else:
+		for groundRay: RayCast3D in groundRays:
+			if groundRay and groundRay.is_colliding():
+				groundPoint = groundRay.get_collision_point()
+				grounded = true
+				break
+
+	if not grounded:
+		position.y += verticalDistance
+		return
+
+	var nextGlobalY: float = global_position.y + verticalDistance
+	var box: BoxShape3D = collisionShape.shape as BoxShape3D
+	var halfHeight: float = box.size.y * 0.5
+	var collisionOffsetY: float = collisionShape.position.y
+	var floorGlobalY: float = groundPoint.y + halfHeight - collisionOffsetY
+	if nextGlobalY <= floorGlobalY:
+		global_position.y = floorGlobalY
+		velocity.y = 0.0
+	else:
+		position.y += verticalDistance
+
+func _isGroundSurface(ray: RayCast3D) -> bool:
+	return ray.get_collision_normal().y >= GROUND_SURFACE_NORMAL_MIN_Y
+
+func _configureGroundRays() -> void:
+	if not collisionShape or not collisionShape.shape is BoxShape3D:
+		return
+
+	var box: BoxShape3D = collisionShape.shape as BoxShape3D
+	var halfSize: Vector3 = box.size * 0.5
+	var rayPositions: Array[Vector3] = [
+		collisionShape.position + Vector3(-halfSize.x, -halfSize.y + GROUNDED_RAY_START_OFFSET, -halfSize.z),
+		collisionShape.position + Vector3(halfSize.x, -halfSize.y + GROUNDED_RAY_START_OFFSET, -halfSize.z),
+		collisionShape.position + Vector3(-halfSize.x, -halfSize.y + GROUNDED_RAY_START_OFFSET, halfSize.z),
+		collisionShape.position + Vector3(halfSize.x, -halfSize.y + GROUNDED_RAY_START_OFFSET, halfSize.z)
+	]
+	for index: int in range(groundRays.size()):
+		var groundRay: RayCast3D = groundRays[index]
+		if groundRay:
+			groundRay.position = rayPositions[index]
+			groundRay.target_position = Vector3(0.0, -(GROUNDED_RAY_DISTANCE + GROUNDED_RAY_START_OFFSET), 0.0)
+	if groundHeightRay:
+		groundHeightRay.position = collisionShape.position + Vector3(0.0, halfSize.y + GROUND_HEIGHT_RAY_START_OFFSET, 0.0)
+		groundHeightRay.target_position = Vector3(0.0, -(halfSize.y + GROUND_HEIGHT_RAY_DISTANCE), 0.0)
+
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
 		# StartPage 显示时，鼠标点击由 StartPage 的信号处理
@@ -300,7 +381,7 @@ func _input(event: InputEvent) -> void:
 					reload()
 			KEY_K:
 				if not Engine.is_editor_hint() and LevelManager.GameState == LevelManager.GameStatus.Playing:
-					PlayerDeath(true, LevelManager.GameStatus.Died, false)
+					PlayerDeath(LevelManager.DieReason.Hit, false, true, false)
 			KEY_D:
 				if OS.is_debug_build():
 					debug = not debug
@@ -671,7 +752,7 @@ func _play_land_effect() -> void:
 	dust.get_tree().create_timer(2.0).timeout.connect(dust.queue_free)
 
 func Turn() -> void:
-	if not (is_on_floor() or fly):
+	if not (checkGrounded() or fly):
 		return
 
 	# 动画设置 — 所有路径都立即执行
@@ -774,47 +855,57 @@ func _start_game_after_delay() -> void:
 	CreateTail()
 
 func _on_Area_body_entered(_body: Node) -> void:
-	if not isLive or noDeath:
+	if not isLive or noDeath or LevelManager.GameState != LevelManager.GameStatus.Playing:
 		return
 
-	# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab，不爆方块不播音效
-	PlayerDeath(showLineBody)
+	# 对齐 Unity Player.cs：!showLineBody 时传 null cubesPrefab，仅不生成碎片。
+	var revive: bool = LevelManager.checkpointCount > 0 or LevelManager.crown > 0
+	PlayerDeath(LevelManager.DieReason.Hit, revive, showLineBody, true)
+
 func RevivePlayer(checkpoint: Node) -> void:
 	if checkpoint and checkpoint.has_method("revive"):
 		checkpoint.revive()
 
-func PlayerDeath(spawn_particles: bool = true, death_state: LevelManager.GameStatus = LevelManager.GameStatus.Died, hasCollision: bool = true) -> void:
-	if not noclip:
-		isLive = false
-		LevelManager.GameState = death_state
-		emitGameEvent(5)
-		if death_state == LevelManager.GameStatus.Died:
+func PlayerDeath(reason: LevelManager.DieReason = LevelManager.DieReason.Hit, revive: bool = false, spawnCubes: bool = true, hasCollision: bool = true) -> void:
+	if noclip:
+		return
+
+	isLive = false
+	match reason:
+		LevelManager.DieReason.Hit:
+			LevelManager.GameState = LevelManager.GameStatus.Died
 			velocity = Vector3.ZERO
-		if animationNode: animationNode.pause()
-		Timeline.Pause()
-		if is_instance_valid(LevelManager.currentCheckpoint):
-			LevelManager.GameOverRevive()
-		else:
-			LevelManager.GameOverNormal(false)
-		AudioManager.FadeOut()
-		if spawn_particles:
-			$AudioStreamPlayer.play()
+			AudioManager.PlayClip(HIT_CLIP, 1.0)
+		LevelManager.DieReason.Drowned:
+			LevelManager.GameState = LevelManager.GameStatus.Moving
+			AudioManager.PlayClip(DROWNED_CLIP, 1.0)
+		LevelManager.DieReason.Border:
+			LevelManager.GameState = LevelManager.GameStatus.Moving
 
-		if not spawn_particles or not deathParticle or not hasCollision:
-			return
+	emitGameEvent(5)
+	if animationNode:
+		animationNode.pause()
+	Timeline.Pause()
+	AudioManager.FadeOut()
 
+	if reason == LevelManager.DieReason.Hit and spawnCubes and deathParticle and hasCollision:
 		var deathParticleInstance: Node3D = deathParticle.instantiate() as Node3D
 		deathParticleInstance.add_to_group("death_particles")
 		var parent: Node = get_parent()
 		if not parent:
 			push_error("Player.gd: 不在场景树中，无法生成死亡粒子")
-			return
-		parent.add_child(deathParticleInstance)
-		deathParticleInstance.global_position = global_position
-		deathParticleInstance.rotation = rotation
-		var playerCubes: PlayerCubes = deathParticleInstance as PlayerCubes
-		if playerCubes:
-			playerCubes.play()
+		else:
+			parent.add_child(deathParticleInstance)
+			deathParticleInstance.global_position = global_position
+			deathParticleInstance.rotation = rotation
+			var playerCubes: PlayerCubes = deathParticleInstance as PlayerCubes
+			if playerCubes:
+				playerCubes.play()
+
+	if not revive:
+		LevelManager.GameOverNormal(false)
+	else:
+		LevelManager.GameOverRevive()
 
 ## StartPage 设置变化回调：更新 Player 字段 + 立即持久化 + 实时应用音量
 ## 对齐 Unity SetLatency.cs 的 AddLatency/SubtractLatency/AddVolume/SubtractVolume + SetText + PlayerPrefs.SetFloat

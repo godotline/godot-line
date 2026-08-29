@@ -89,7 +89,7 @@ func _onImguiLayout() -> void:
 			p.reload()
 		# Match the K-key gate: only allow killing the player while Playing.
 		if ImGui.small_button("Kill (K)") and LevelManager.GameState == LevelManager.GameStatus.Playing:
-			p.PlayerDeath(true, LevelManager.GameStatus.Died, false)
+			p.PlayerDeath(LevelManager.DieReason.Hit, false, true, false)
 	ImGui.end()
 
 	# While Playing, show the cursor only over the expanded panel; LevelUI handles other states.

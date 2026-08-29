@@ -308,11 +308,13 @@ func revive() -> void:
 			REVIVE_FADE_DURATION,
 			func() -> void: _reset_scene(mainLine),
 			func() -> void:
+				mainLine.isLive = true
 				mainLine.allowTurn = true
 				ui.visible = false
 		)
 	else:
 		_reset_scene(mainLine)
+		mainLine.isLive = true
 		mainLine.allowTurn = true
 
 func _reset_scene(mainLine: Player) -> void:
@@ -322,7 +324,6 @@ func _reset_scene(mainLine: Player) -> void:
 		mainLine.global_position = revivePosition.global_position
 	mainLine.Speed = playerSpeed
 	_restore_gravity(mainLine)
-	mainLine.isLive = true
 	mainLine.isEnd = false
 	mainLine.velocity = Vector3.ZERO
 	mainLine.gameStarts = false
@@ -367,6 +368,7 @@ func _reset_scene(mainLine: Player) -> void:
 	_restore_light()
 	_restore_ambient()
 	_restore_player_collider(mainLine)
+	mainLine._configureGroundRays()
 	mainLine.SetAnimatorProgresses()
 	Timeline.SetTimelineProgresses()
 
