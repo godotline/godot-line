@@ -52,6 +52,7 @@ var id: int = 0
 
 var previousFrameIsGrounded: bool = true
 var lastKeyState: bool = false
+var _currentDirection: int = 0
 
 func _ready() -> void:
 	body = _resolve_body()
@@ -189,8 +190,8 @@ func _on_player_turn() -> void:
 		_create_turn_trigger()
 
 func Turn() -> void:
-	var currentRotation: Vector3 = _get_world_rotation()
-	_set_world_rotation(secondDirection if currentRotation.is_equal_approx(firstDirection) else firstDirection)
+	_currentDirection = 1 - _currentDirection
+	_set_world_rotation(secondDirection if _currentDirection == 1 else firstDirection)
 	_create_tail()
 
 func _create_tail() -> void:
@@ -251,7 +252,8 @@ func get_reset_data() -> Dictionary:
 		"playing": playing,
 		"speed": speed,
 		"position": _get_world_position(),
-		"rotation": _get_world_rotation()
+		"rotation": _get_world_rotation(),
+		"direction": _currentDirection
 	}
 
 func set_reset_data(data: Dictionary) -> void:
@@ -265,6 +267,7 @@ func set_reset_data(data: Dictionary) -> void:
 	var savedRotation: Variant = data.get("rotation", firstDirection)
 	if savedRotation is Vector3:
 		_set_world_rotation(savedRotation)
+	_currentDirection = int(data.get("direction", 0))
 	state = State.Stopped  # 复活后强制停止，等待玩家启动
 	ClearPool()
 	_create_tail()
