@@ -310,7 +310,7 @@ script = ExtResource("14_wh4l1")
 reason = 2
 
 [node name="Trigger6" parent="Scene_Group/Scene_001" unique_id=1064396633 instance=ExtResource("11_mq52h")]
-transform = Transform3D(-34.590443, 0, -1.0927846e-07, 0, 2.4999998, 0, 1.5119963e-06, 0, -2.4999998, 11.27798, -0.4999962, 48.810863)
+transform = Transform3D(-34.590443, 0, -1.0927846e-07, 0, 2.4999998, 0, 1.5119963e-06, 0, -2.4999998, 11.27798, -0.4999962, 31.597683)
 
 [node name="KillPlayer" type="Node" parent="Scene_Group/Scene_001/Trigger6" unique_id=1460223864]
 script = ExtResource("14_wh4l1")

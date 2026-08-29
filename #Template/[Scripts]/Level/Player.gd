@@ -10,6 +10,7 @@ signal OnTurn		## 玩家转向（对齐 Unity Player.OnTurn）
 
 @onready var y: float = $".".position.y
 var Speed: float
+var SoundTrack: AudioStreamPlayer = null
 
 ## ========== Data ==========
 @export_group("Data")
@@ -304,8 +305,8 @@ func _input(event: InputEvent) -> void:
 				if OS.is_debug_build():
 					debug = not debug
 			KEY_C:
-				if Engine.is_editor_hint() and $MusicPlayer.playing:
-					print("Music time: %.3f" % $MusicPlayer.get_playback_position())
+				if Engine.is_editor_hint() and SoundTrack and SoundTrack.playing:
+					print("Music time: %.3f" % SoundTrack.get_playback_position())
 
 func reload() -> void:
 	if reloadQueued or sceneReloadInProgress:
@@ -675,7 +676,7 @@ func Turn() -> void:
 
 	# 动画设置 — 所有路径都立即执行
 	if animationNode and not animationNode.is_playing():
-		if LevelManager.lineCrossingCrown == 0 and not $MusicPlayer.stream_paused:
+		if LevelManager.lineCrossingCrown == 0 and (not SoundTrack or not SoundTrack.stream_paused):
 			LevelManager.animTime = 0
 		animationNode.play("level")
 		animationNode.seek(LevelManager.animTime)
@@ -735,11 +736,17 @@ func Turn() -> void:
 func _play_music_from_level_data() -> void:
 	if not levelData or not levelData.levelAudioClip:
 		return
-	if $MusicPlayer.stream_paused:
-		$MusicPlayer.stream_paused = false
-		$MusicPlayer.volume_db = linear_to_db(max(musicVolume, 0.001))
-	elif not $MusicPlayer.playing:
-		$MusicPlayer.stream = levelData.levelAudioClip
+	if not SoundTrack:
+		SoundTrack = AudioManager.PlayTrack(levelData.levelAudioClip, musicVolume)
+		if not SoundTrack:
+			return
+		AudioManager.Stop()
+	SoundTrack.pitch_scale = levelData.timeScale
+	if SoundTrack.stream_paused:
+		SoundTrack.stream_paused = false
+		SoundTrack.volume_db = linear_to_db(max(musicVolume, 0.001))
+	elif not SoundTrack.playing:
+		SoundTrack.stream = levelData.levelAudioClip
 		var startTime: float = levelData.get_audio_start_time()
 		_play_music(startTime)
 
@@ -747,13 +754,15 @@ func _play_music_from_level_data() -> void:
 ## latency: AudioServer.get_output_latency() — 系统硬件延迟自动补偿
 ## musicVolume: 用户手动调节的音量
 func _play_music(startTime: float) -> void:
-	$MusicPlayer.volume_db = linear_to_db(max(musicVolume, 0.001))
+	if not SoundTrack:
+		return
+	SoundTrack.volume_db = linear_to_db(max(musicVolume, 0.001))
 	var latency: float = AudioServer.get_output_latency()
 	if latency > 0.0:
 		var adjustedTime: float = max(startTime - latency, 0.0)
-		$MusicPlayer.play(adjustedTime)
+		SoundTrack.play(adjustedTime)
 	else:
-		$MusicPlayer.play(startTime)
+		SoundTrack.play(startTime)
 
 
 ## musicDelay < 0 时：timer 回调，启动游戏移动（对齐 Unity delay < 0 分支的 yield 之后逻辑）
@@ -816,8 +825,8 @@ func _on_setting_changed(key: String, value: Variant) -> void:
 			SetLatency.save_settings(musicDelay, musicVolume)
 		"volume":
 			musicVolume = float(value)
-			if $MusicPlayer.playing:
-				$MusicPlayer.volume_db = linear_to_db(max(musicVolume, 0.001))
+			if SoundTrack and SoundTrack.playing:
+				SoundTrack.volume_db = linear_to_db(max(musicVolume, 0.001))
 			SetLatency.save_settings(musicDelay, musicVolume)
 		"quality":
 			var qualityLevel: int = GraphicsQuality.quality_level_from_value(value)

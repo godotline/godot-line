@@ -157,11 +157,9 @@ static func save_checkpoint(mainLine: PhysicsBody3D, cameraFollower: Node3D, rev
 		cameraCheckpoint.has_checkpoint = true
 		print("LevelManager: save_checkpoint offset=", cameraCheckpoint.offset, " rot=", cameraCheckpoint.rotation_degrees, " rot_offset=", cameraCheckpoint.rotation_offset, " target_add_pos=", cameraCheckpoint.target_add_position, " target_rot=", cameraCheckpoint.target_rotation, " mode=", cameraCheckpoint.rotate_mode, " base_rot=", cameraCheckpoint.base_rotation)
 
-	var musicPlayer: AudioStreamPlayer = mainLine.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-	if not musicPlayer:
-		push_error("LevelManager.gd: MusicPlayer 节点未找到，无法保存音乐检查点时间")
-	elif musicPlayer.playing:
-		musicCheckpointTime = musicPlayer.get_playback_position()
+	var soundTrack: AudioStreamPlayer = mainLine.SoundTrack
+	if soundTrack and soundTrack.playing:
+		musicCheckpointTime = AudioManager.time
 
 ## ============================================================
 ## 加载检查点到游戏对象
@@ -252,12 +250,7 @@ static func GameOverNormal(complete: bool) -> void:
 	if complete:
 		percent = 100
 	elif Player.instance:
-		var p: Player = Player.instance
-		var musicPlayer: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-		if musicPlayer and musicPlayer.stream:
-			var totalSec: float = p.levelData.levelTotalTime if p.levelData and p.levelData.useCustomLevelTime else musicPlayer.stream.get_length()
-			var currentSec: float = musicPlayer.get_playback_position()
-			percent = int((currentSec / totalSec) * 100) if totalSec > 0 else 0
+		percent = int(AudioManager.Progress * 100.0)
 
 	if GameState == GameStatus.Died or GameState == GameStatus.Completed or GameState == GameStatus.Moving:
 		# 对齐 Unity LevelManager.GameOverNormal：直接调用 LevelUI.Instance.NormalPage
@@ -269,12 +262,7 @@ static func GameOverNormal(complete: bool) -> void:
 static func GameOverRevive() -> void:
 	if GameState == GameStatus.Died or GameState == GameStatus.Moving:
 		if Player.instance:
-			var p: Player = Player.instance
-			var musicPlayer: AudioStreamPlayer = p.get_node_or_null("MusicPlayer") as AudioStreamPlayer
-			if musicPlayer and musicPlayer.stream:
-				var totalSec: float = p.levelData.levelTotalTime if p.levelData and p.levelData.useCustomLevelTime else musicPlayer.stream.get_length()
-				var currentSec: float = musicPlayer.get_playback_position()
-				percent = int((currentSec / totalSec) * 100) if totalSec > 0 else 0
+			percent = int(AudioManager.Progress * 100.0)
 		isEnd = true
 		# 对齐 Unity LevelManager.GameOverRevive：直接调用 LevelUI.Instance.RevivePage
 		var ui: LevelUI = LevelUI.instance

@@ -53,12 +53,8 @@ func get_audio_start_time() -> float:
 
 ## 应用时间缩放到音乐播放器
 func _apply_time_scale_to_music(main_line: Player) -> void:
-	if main_line and main_line.has_node("MusicPlayer"):
-		var musicPlayer: AudioStreamPlayer = main_line.get_node_or_null("MusicPlayer")
-		if not musicPlayer:
-			push_error("LevelData.gd: MusicPlayer 节点未找到，无法应用时间缩放")
-			return
-		musicPlayer.pitch_scale = timeScale
+	if main_line and main_line.SoundTrack:
+		main_line.SoundTrack.pitch_scale = timeScale
 
 
 ## 获取时间缩放

@@ -82,14 +82,14 @@ addons/
 所有核心管理器均为 **`RefCounted` 静态类**（非 Node，不可使用传统生命周期 `_process` 或节点信号）：
 
 - **`LevelManager`** (`class_name LevelManager`)：游戏状态机（`GameStatus` 枚举）、检查点数据、复活监听器分发（`add_revive_listener` / `emit_revive`）。
-- **`AudioManager`** (`class_name AudioManager`)：音频管理（`PlayClip`, `PlayTrack`, `FadeOut`, `Stop` 等）。从 `Player.instance.get_node("MusicPlayer")` 获取播放器。注意：时间属性名为 `time`（小写，避免遮蔽 Godot 内置 `Time` 类）。
+- **`AudioManager`** (`class_name AudioManager`)：音频管理（`PlayClip`, `PlayTrack`, `FadeOut`, `Stop` 等）。统一通过 `Player.SoundTrack` 获取音乐播放器；`SoundTrack` 为运行时由 `AudioManager.PlayTrack` 创建的属性，按 Unity 命名保留大写。注意：时间属性名为 `time`（小写，避免遮蔽 Godot 内置 `Time` 类）。
 - **`SetLatency`** (`class_name SetLatency`)：延迟与音量配置，持久化至 `user://settings.cfg`。
 - **`Player.instance`**：Player（`CharacterBody3D`）上的静态单例引用，在 `Player._ready()` 中注册，在编辑器环境中为 `null`（使用前必须判空）。
 
 ## 检查点与皇冠 (Checkpoint / Crown)
 
 与 Unity 原版逻辑保持一致，保留两处符合 Godot 特性的有意设计（请勿修改）：
-1. **`trackProgress` 按秒存储**：Godot 中以 `AnimationPlayer` 的秒数记录时间轴进度（Unity 为百分比）。
+1. **复活进度由 `GameTime` 恢复**：音乐恢复到 `GameTime`，主时间轴动画恢复到 `GameTime + musicDelay`（对齐 Unity）；不再保存独立的 `trackProgress`。
 2. **`LevelManager.checkpointCount` 计入皇冠**：皇冠与检查点统一推进计数，钻石收集状态与检查点索引对齐恢复。
 3. **复活屏幕淡入淡出**：`Checkpoint.revive()` 在复活重置场景时调用 `LevelUI.HideScreen(...)` 进行雾色全屏遮罩过渡，并在渐隐完成后恢复 `allowTurn = true`。
 
