@@ -20,3 +20,5 @@ android.debug.arm64 = "res://addons/dear-imgui-godot/target/android/debug/arm64/
 android.release.arm64 = "res://addons/dear-imgui-godot/target/android/release/arm64/libdear_imgui_godot.so"
 android.debug.x86_64 = "res://addons/dear-imgui-godot/target/android/debug/x86_64/libdear_imgui_godot.so"
 android.release.x86_64 = "res://addons/dear-imgui-godot/target/android/release/x86_64/libdear_imgui_godot.so"
+ios.debug.arm64 = "res://addons/dear-imgui-godot/target/ios/debug/arm64/libdear_imgui_godot.dylib"
+ios.release.arm64 = "res://addons/dear-imgui-godot/target/ios/release/arm64/libdear_imgui_godot.dylib"
