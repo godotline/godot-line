@@ -34,7 +34,8 @@ jobs:
           UPSTREAM_REF: ${{ inputs.upstream_ref }}
         run: |
           set -euo pipefail
-          git clone --depth=1 --branch "$UPSTREAM_REF" \
+          upstream_ref="${UPSTREAM_REF:-main}"
+          git clone --depth=1 --branch "$upstream_ref" \
             https://github.com/meny2333/dear-imgui-godot.git upstream-imgui
 
       - name: Setup Rust
