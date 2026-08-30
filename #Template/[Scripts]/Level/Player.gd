@@ -49,15 +49,17 @@ var getStartPositionButton: Callable = GetStartPosition
 
 func GetStartPosition() -> void:
 	if Engine.is_editor_hint():
-		var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
-		if undoRedo:
-			undoRedo.create_action("Get Start Position")
-			undoRedo.add_do_property(self, "startPosition", position)
-			undoRedo.add_undo_property(self, "startPosition", startPosition)
-			undoRedo.add_do_method(self, "notify_property_list_changed")
-			undoRedo.add_undo_method(self, "notify_property_list_changed")
-			undoRedo.commit_action()
-			return
+		var editorInterface: Object = Engine.get_singleton("EditorInterface")
+		if editorInterface:
+			var undoRedo: Object = editorInterface.call("get_editor_undo_redo")
+			if undoRedo:
+				undoRedo.call("create_action", "Get Start Position")
+				undoRedo.call("add_do_property", self, "startPosition", position)
+				undoRedo.call("add_undo_property", self, "startPosition", startPosition)
+				undoRedo.call("add_do_method", self, "notify_property_list_changed")
+				undoRedo.call("add_undo_method", self, "notify_property_list_changed")
+				undoRedo.call("commit_action")
+				return
 	startPosition = position
 	notify_property_list_changed()
 
