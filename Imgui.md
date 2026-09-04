@@ -148,9 +148,7 @@ ios.debug.arm64   -> target/ios/debug/arm64/libdear_imgui_godot.dylib
 ios.release.arm64 -> target/ios/release/arm64/libdear_imgui_godot.dylib
 ```
 
-当前仓库不在 Linux 工作区编译 iOS 库。根目录的 `Build ImGui iOS GDExtension` GitHub Actions workflow 会在 `macos-14` runner 上从 `meny2333/dear-imgui-godot` 的 `main` 分支编译 `aarch64-apple-ios`，并上传上述 `target/ios` 目录。执行方式为 GitHub 仓库的 **Actions** -> **Build ImGui iOS GDExtension** -> **Run workflow**。
-
-iOS 导出必须在 macOS + Xcode 环境完成；Actions 产物下载后，解压到插件目录，使两个 `.dylib` 路径与 `.gdextension` 配置一致。当前只覆盖 arm64 真机，不包含 iOS Simulator 架构。
+当前仓库直接提交了编译好的 `target/ios` 两个 `.dylib`，iOS 导出即可直接使用（只覆盖 arm64 真机，不包含 iOS Simulator 架构）。
 
 ## C# 支持
 
@@ -161,14 +159,14 @@ using Godot;
 
 public partial class ImGuiExample : Node
 {
-    public override void _Ready() => ImGui.OnLayout(OnLayout);
+	public override void _Ready() => ImGui.OnLayout(OnLayout);
 
-    private void OnLayout()
-    {
-        if (ImGui.Begin("Example"))
-            ImGui.Text("Hello from C#");
-        ImGui.End();
-    }
+	private void OnLayout()
+	{
+		if (ImGui.Begin("Example"))
+			ImGui.Text("Hello from C#");
+		ImGui.End();
+	}
 }
 ```
 

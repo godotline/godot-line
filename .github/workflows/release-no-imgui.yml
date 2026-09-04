@@ -1,0 +1,41 @@
+name: Release Source (No ImGui)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  no-imgui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Strip ImGui from package
+        shell: bash
+        run: |
+          set -euo pipefail
+          # 删除 ImGui 插件与相关文件
+          rm -rf addons/dear-imgui-godot
+          rm -f Imgui.md
+
+          # project.godot: 去掉 ImGui autoload 与 editor_plugins 项
+          sed -i '/^ImGui=/d' project.godot
+          sed -i 's#, "res://addons/dear-imgui-godot/plugin.cfg"##' project.godot
+
+      - name: Create archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          archive="godot-line-${tag}-no-imgui.zip"
+          zip -r "$archive" . -x '.git/*'
+          echo "archive=${archive}" >> "$GITHUB_ENV"
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release upload "$GITHUB_REF_NAME" "${{ env.archive }}" --clobber --repo "${{ github.repository }}"
