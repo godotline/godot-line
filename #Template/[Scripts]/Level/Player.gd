@@ -188,7 +188,8 @@ func _ready() -> void:
 		Timeline.Reset()
 		emitGameEvent(0)
 	if is_inside_tree():
-		if levelData:
+		# 编辑器内不应用 LevelData：避免 SingleColor.apply() 改写共享材质 .tres，保存场景时被无提示刷盘
+		if levelData and not Engine.is_editor_hint():
 			levelData.apply_to(self, get_world_3d().space)
 		_configureGroundRays()
 
