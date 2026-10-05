@@ -8,8 +8,11 @@
 [ext_resource type="Script" uid="uid://cgl1gfqlue3jc" path="res://#Template/[Scripts]/Auto/AutoPlayController.gd" id="7_fmbnj"]
 [ext_resource type="PackedScene" uid="uid://cmson0cneufxo" path="res://#Template/Ground.tscn" id="8_lthrg"]
 [ext_resource type="Script" uid="uid://bhmnocupnsd06" path="res://#Template/[Scripts]/Animator/LocalPosAnimator.gd" id="9_0v7qw"]
+[ext_resource type="Script" uid="uid://ck24n5fpaj8k6" path="res://#Template/[Scripts]/Trigger/SetMaterialColor.gd" id="11_k6bba"]
 [ext_resource type="PackedScene" uid="uid://b5hb8j8w782ki" path="res://#Template/Trigger.tscn" id="11_mq52h"]
 [ext_resource type="Script" uid="uid://yedc65al2cqo" path="res://#Template/[Scripts]/Trigger/FakePlayerTrigger.gd" id="12_1fvat"]
+[ext_resource type="Script" uid="uid://cpejwvo4pns1" path="res://#Template/[Scripts]/Settings/SingleColor.gd" id="12_e7kbm"]
+[ext_resource type="Material" uid="uid://jitnvfywue03" path="res://#Template/[Materials]/MainPlayer.tres" id="13_guxfo"]
 [ext_resource type="PackedScene" uid="uid://dqvgfuneewf1j" path="res://#Template/CrownCheckPoint.tscn" id="13_hkwba"]
 [ext_resource type="Script" uid="uid://b51jai1eoi3p6" path="res://#Template/[Scripts]/Settings/CameraSettings.gd" id="14_2sj2s"]
 [ext_resource type="Script" uid="uid://c0whny0gf5gyj" path="res://#Template/[Scripts]/Trigger/KillPlayer.gd" id="14_wh4l1"]
@@ -148,30 +151,36 @@ _data = {
 &"level": SubResource("3")
 }
 
-[sub_resource type="Resource" id="Resource_skrbu"]
+[sub_resource type="Resource" id="Resource_ylt5h"]
+script = ExtResource("12_e7kbm")
+material = ExtResource("13_guxfo")
+color = Color(1, 0, 0.42352942, 1)
+metadata/_custom_type_script = "uid://cpejwvo4pns1"
+
+[sub_resource type="Resource" id="Resource_k6bba"]
 resource_local_to_scene = true
 script = ExtResource("14_2sj2s")
 rotation = Vector3(0.942478, 0.785398, 0)
 fov = 75.0
 
-[sub_resource type="Resource" id="Resource_d7stf"]
+[sub_resource type="Resource" id="Resource_guxfo"]
 resource_local_to_scene = true
 script = ExtResource("15_qvrir")
 
-[sub_resource type="Resource" id="Resource_k6bba"]
+[sub_resource type="Resource" id="Resource_pufe6"]
 resource_local_to_scene = true
 script = ExtResource("16_n0hkk")
 fogColor = Color(0.518, 0.553, 0.608, 1)
 start = 10.0
 end = 100.0
 
-[sub_resource type="Resource" id="Resource_guxfo"]
+[sub_resource type="Resource" id="Resource_5uv2e"]
 resource_local_to_scene = true
 script = ExtResource("17_w5hru")
 rotation = Vector3(-1.0472, 2.61799, 0)
 shadowStrength = 1.0
 
-[sub_resource type="Resource" id="Resource_pufe6"]
+[sub_resource type="Resource" id="Resource_2fkeo"]
 resource_local_to_scene = true
 script = ExtResource("18_44jhc")
 lightingType = 0
@@ -193,6 +202,9 @@ sceneLight = NodePath("../DirectionalLight3D")
 firstDirection = Vector3(0, 0, 0)
 secondDirection = Vector3(0, 90, 0)
 animation = NodePath("../AnimationPlayer")
+
+[node name="MeshInstance3D" parent="BasicOBJ_Group/Player" index="7" unique_id=1827097049]
+surface_material_override/0 = ExtResource("13_guxfo")
 
 [node name="CameraRoot" parent="BasicOBJ_Group" unique_id=1925825702 instance=ExtResource("3_sm0oj")]
 target = NodePath("../Player")
@@ -283,6 +295,10 @@ script = ExtResource("12_1fvat")
 targetPlayer = NodePath("../../FakePlayer/FakePlayerComponent")
 type = 2
 
+[node name="SetMaterialColor" type="Node" parent="Scene_Group/Scene_001/Trigger" unique_id=1910915038]
+script = ExtResource("11_k6bba")
+colors = Array[ExtResource("12_e7kbm")]([SubResource("Resource_ylt5h")])
+
 [node name="Trigger5" parent="Scene_Group/Scene_001" unique_id=857283891 instance=ExtResource("11_mq52h")]
 transform = Transform3D(0, 0, 2.5, 0, 2.5, 0, -34.590446, 0, 0, 39.784286, -0.5, 7.923168)
 
@@ -332,11 +348,11 @@ transform = Transform3D(0.70710677, 0, -5.656854, 0, 8, 0, 0.70710677, 0, 5.6568
 [node name="CrownCheckpoint" parent="Scene_Group/Scene_001/Crown/Area3D" index="0" unique_id=1220123700]
 GameTime = 2.4613333
 direction = 1
-cameraNew = SubResource("Resource_skrbu")
-cameraOld = SubResource("Resource_d7stf")
-fog = SubResource("Resource_k6bba")
-light = SubResource("Resource_guxfo")
-ambient = SubResource("Resource_pufe6")
+cameraNew = SubResource("Resource_k6bba")
+cameraOld = SubResource("Resource_guxfo")
+fog = SubResource("Resource_pufe6")
+light = SubResource("Resource_5uv2e")
+ambient = SubResource("Resource_2fkeo")
 
 [node name="CrownOutline" parent="Scene_Group/Scene_001/Crown/CrownSprite" parent_id_path=PackedInt32Array(1805653336, 1095474833) index="0" unique_id=1273809823]
 render_priority = 0

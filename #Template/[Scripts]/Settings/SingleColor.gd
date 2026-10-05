@@ -11,7 +11,7 @@ extends Resource
 
 func capture_state() -> Dictionary:
 	var state: Dictionary = {}
-	var baseMaterial: BaseMaterial3D = material as BaseMaterial3D
+	var baseMaterial: BaseMaterial3D = _shared_material()
 	if not baseMaterial:
 		return state
 	state["setting"] = self
@@ -43,24 +43,36 @@ func restore_state(state: Dictionary) -> void:
 		baseMaterial.emission_energy_multiplier = float(emissionEnergy)
 
 func apply() -> void:
-	if material:
-		material.albedo_color = color
-		if material is StandardMaterial3D:
-			material.emission_enabled = hasEmission
-			if hasEmission:
-				material.emission = color
-				material.emission_energy_multiplier = intensity
+	var target: BaseMaterial3D = _shared_material()
+	if not target:
+		return
+	target.albedo_color = color
+	target.emission_enabled = hasEmission
+	if hasEmission:
+		target.emission = color
+		target.emission_energy_multiplier = intensity
 
 
 func apply_tweened(node: Node, duration: float, trans_type: int = 0, ease_type: int = 0) -> void:
-	if not material:
+	var target: BaseMaterial3D = _shared_material()
+	if not target:
 		return
 	var tween: Tween = node.create_tween()
 	tween.set_ease(ease_type)
 	tween.set_trans(trans_type)
-	tween.tween_property(material, "albedo_color", color, duration)
-	if material is StandardMaterial3D:
-		material.emission_enabled = hasEmission
-		if hasEmission:
-			material.emission = color
-			material.emission_energy_multiplier = intensity
+	tween.tween_property(target, "albedo_color", color, duration)
+	target.emission_enabled = hasEmission
+	if hasEmission:
+		target.emission = color
+		target.emission_energy_multiplier = intensity
+
+
+func _shared_material() -> BaseMaterial3D:
+	if not material:
+		return null
+	var path: String = material.resource_path
+	if path.begins_with("res://"):
+		var shared: Material = load(path) as Material
+		if shared is BaseMaterial3D:
+			return shared as BaseMaterial3D
+	return material as BaseMaterial3D

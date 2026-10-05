@@ -36,11 +36,14 @@ var getStartAction: Callable = func() -> void:
 		return
 	var oldValue: Vector3 = startValue
 	startValue = _get_value(target)
-	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
-	undoRedo.create_action("Get Original Value")
-	undoRedo.add_do_property(self, "startValue", startValue)
-	undoRedo.add_undo_property(self, "startValue", oldValue)
-	undoRedo.commit_action(false)
+	var editorInterface: Object = Engine.get_singleton("EditorInterface")
+	if editorInterface:
+		var undoRedo: Object = editorInterface.call("get_editor_undo_redo")
+		if undoRedo:
+			undoRedo.call("create_action", "Get Original Value")
+			undoRedo.call("add_do_property", self, "startValue", startValue)
+			undoRedo.call("add_undo_property", self, "startValue", oldValue)
+			undoRedo.call("commit_action", false)
 	notify_property_list_changed()
 
 @export_tool_button("Set Original Value")
@@ -49,11 +52,14 @@ var setStartAction: Callable = func() -> void:
 	if not target:
 		return
 	var oldValue: Vector3 = _get_value(target)
-	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
-	undoRedo.create_action("Set Original Value")
-	undoRedo.add_do_method(self, "_set_value", target, startValue)
-	undoRedo.add_undo_method(self, "_set_value", target, oldValue)
-	undoRedo.commit_action(false)
+	var editorInterface: Object = Engine.get_singleton("EditorInterface")
+	if editorInterface:
+		var undoRedo: Object = editorInterface.call("get_editor_undo_redo")
+		if undoRedo:
+			undoRedo.call("create_action", "Set Original Value")
+			undoRedo.call("add_do_method", self, "_set_value", target, startValue)
+			undoRedo.call("add_undo_method", self, "_set_value", target, oldValue)
+			undoRedo.call("commit_action", false)
 	notify_property_list_changed()
 
 @export_tool_button("Get New Value")
@@ -67,11 +73,14 @@ var getEndAction: Callable = func() -> void:
 			endOffset = _get_value(target)
 		TransformType.Add:
 			endOffset = _get_value(target) - startValue
-	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
-	undoRedo.create_action("Get New Value")
-	undoRedo.add_do_property(self, "endOffset", endOffset)
-	undoRedo.add_undo_property(self, "endOffset", oldValue)
-	undoRedo.commit_action(false)
+	var editorInterface: Object = Engine.get_singleton("EditorInterface")
+	if editorInterface:
+		var undoRedo: Object = editorInterface.call("get_editor_undo_redo")
+		if undoRedo:
+			undoRedo.call("create_action", "Get New Value")
+			undoRedo.call("add_do_property", self, "endOffset", endOffset)
+			undoRedo.call("add_undo_property", self, "endOffset", oldValue)
+			undoRedo.call("commit_action", false)
 	notify_property_list_changed()
 
 @export_tool_button("Set New Value")
@@ -88,11 +97,14 @@ var setEndAction: Callable = func() -> void:
 		TransformType.Add:
 			targetValue = startValue + endOffset
 			_set_value(target, startValue + endOffset)
-	var undoRedo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
-	undoRedo.create_action("Set New Value")
-	undoRedo.add_do_method(self, "_set_value", target, targetValue)
-	undoRedo.add_undo_method(self, "_set_value", target, oldValue)
-	undoRedo.commit_action(false)
+	var editorInterface: Object = Engine.get_singleton("EditorInterface")
+	if editorInterface:
+		var undoRedo: Object = editorInterface.call("get_editor_undo_redo")
+		if undoRedo:
+			undoRedo.call("create_action", "Set New Value")
+			undoRedo.call("add_do_method", self, "_set_value", target, targetValue)
+			undoRedo.call("add_undo_method", self, "_set_value", target, oldValue)
+			undoRedo.call("commit_action", false)
 	notify_property_list_changed()
 
 @export_tool_button("Play")
