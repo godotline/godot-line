@@ -11,7 +11,10 @@ var shown: bool = false
 var panelHovered: bool = false
 var lastAppliedShown: bool = true
 var pollTimer: Timer
-const DEBUG_FONT_SCALE: float = 1.5
+const DEBUG_FONT_SCALE: float = 2.0
+# 仅放大底部按钮：宽度固定像素，高度 = ImGui 帧高 × 系数。
+const DEBUG_BUTTON_HEIGHT_SCALE: float = 2.0
+const DEBUG_BUTTON_WIDTH: float = 280.0
 
 func _ready() -> void:
 	shown = false
@@ -92,10 +95,12 @@ func _onImguiLayout() -> void:
 				imgui.text("FOV: %.1f" % cam3d.fov)
 
 		imgui.text("")
-		if imgui.small_button("Reload (R)"):
+		var buttonHeight: float = imgui.get_frame_height() * DEBUG_BUTTON_HEIGHT_SCALE
+		if imgui.button("Reload (R)", DEBUG_BUTTON_WIDTH, buttonHeight):
 			p.reload()
+		imgui.same_line()
 		# Match the K-key gate: only allow killing the player while Playing.
-		if imgui.small_button("Kill (K)") and LevelManager.GameState == LevelManager.GameStatus.Playing:
+		if imgui.button("Kill (K)", DEBUG_BUTTON_WIDTH, buttonHeight) and LevelManager.GameState == LevelManager.GameStatus.Playing:
 			p.PlayerDeath(LevelManager.DieReason.Hit, false, true, false)
 	imgui.end()
 

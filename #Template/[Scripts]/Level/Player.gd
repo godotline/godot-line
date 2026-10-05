@@ -81,7 +81,7 @@ var tailHolder: Node3D
 
 @onready var mesh: Mesh = $MeshInstance3D.mesh
 @onready var tailPosition: Vector3 = position
-@onready var material: StandardMaterial3D = $MeshInstance3D.get_surface_override_material(0)
+@onready var material: Material = $MeshInstance3D.get_surface_override_material(0)
 @onready var collisionShape: CollisionShape3D = $CollisionShape3D
 var groundRays: Array[RayCast3D] = []
 @onready var tree: SceneTree = get_tree()
@@ -159,12 +159,15 @@ func _ready() -> void:
 	]
 	tailPool.size = poolSize
 	tailBodyPool.size = poolSize
+	var meshInstance: MeshInstance3D = $MeshInstance3D
 	if characterMaterial:
 		material = characterMaterial
-		if $MeshInstance3D:
-			$MeshInstance3D.set_surface_override_material(0, characterMaterial)
-	elif not material and $MeshInstance3D:
-		material = $MeshInstance3D.get_surface_override_material(0)
+	elif meshInstance and meshInstance.mesh:
+		material = meshInstance.mesh.surface_get_material(0)
+	elif meshInstance:
+		material = meshInstance.get_surface_override_material(0)
+	if meshInstance and material:
+		meshInstance.set_surface_override_material(0, material)
 	if not Engine.is_editor_hint():
 		if not LevelManager.cameraCheckpoint.has_checkpoint:
 			LevelManager.reset_to_defaults()
